@@ -21,9 +21,17 @@ export default function CaptureForm() {
     importance: 0,
   };
 
+  const existingItems = localStorage.getItem("savewise-items");
+
+  const items = existingItems
+  ? JSON.parse(existingItems)
+  : [];
+
+  items.push(item);
+
   localStorage.setItem(
-    "savewise-items",
-    JSON.stringify([item])
+  "savewise-items",
+  JSON.stringify(items)
   );
 
   setSaved(true);

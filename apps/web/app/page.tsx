@@ -1,4 +1,5 @@
 import CaptureForm from "@/components/CaptureForm";
+import MemoryList from "@/components/MemoryList";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ and find them when you need them.
       </p>
 
       <CaptureForm />
+      <MemoryList />
     </main>
   );
 }
