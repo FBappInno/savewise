@@ -32,6 +32,17 @@ const handleImportance = () => {
   });
 };
 
+const handleSave = () => {
+  onUpdate({
+    ...item,
+    title,
+    url,
+    notes,
+  });
+
+  setEditing(false);
+};
+
     return (
     <div className="rounded-2xl border bg-white p-6 shadow-sm">
       
@@ -61,13 +72,15 @@ const handleImportance = () => {
 </div>
 
       <div className="mt-3 text-sm text-gray-500">
-        <span className="font-medium">
-          {item.source}
-        </span>
-
-        <span className="mx-2">·</span>
-
-        <span>{item.url}</span>
+  {editing ? (
+    <input
+      value={url}
+      onChange={(e) => setUrl(e.target.value)}
+      className="w-full rounded-lg border px-3 py-2"
+    />
+  ) : (
+    <span>{item.url}</span>
+  )}
       </div>
 
       {item.summary && (
@@ -76,11 +89,20 @@ const handleImportance = () => {
         </p>
       )}
 
-      {item.notes && (
-        <p className="mt-4 text-gray-700">
-          {item.notes}
-        </p>
-      )}
+    {editing ? (
+  <textarea
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+    className="mt-4 w-full rounded-lg border px-3 py-2 text-gray-700"
+    rows={4}
+  />
+) : (
+  item.notes && (
+    <p className="mt-4 text-gray-700">
+      {item.notes}
+    </p>
+  )
+)}
 
       {item.tags.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
@@ -108,21 +130,40 @@ const handleImportance = () => {
       </div>
 
      <div className="mt-4 flex gap-4">
-  <button
-    onClick={() => setEditing(true)}
-    className="text-sm text-blue-500 hover:text-blue-700"
-  >
-    Edit
-  </button>
+  {editing ? (
+    <>
+      <button
+        onClick={handleSave}
+        className="text-sm text-green-600 hover:text-green-800"
+      >
+        Save
+      </button>
 
-  <button
-    onClick={() => onDelete(item.id)}
-    className="text-sm text-red-500 hover:text-red-700"
-  >
-    Delete
-  </button>
+      <button
+        onClick={() => setEditing(false)}
+        className="text-sm text-gray-500 hover:text-gray-700"
+      >
+        Cancel
+      </button>
+    </>
+  ) : (
+    <>
+      <button
+        onClick={() => setEditing(true)}
+        className="text-sm text-blue-500 hover:text-blue-700"
+      >
+        Edit
+      </button>
+
+      <button
+        onClick={() => onDelete(item.id)}
+        className="text-sm text-red-500 hover:text-red-700"
+      >
+        Delete
+      </button>
+    </>
+  )}
 </div>
-
     </div>
   );
 }
