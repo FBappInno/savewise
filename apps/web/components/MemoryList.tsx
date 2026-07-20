@@ -34,6 +34,19 @@ export default function MemoryList({
     );
   };
 
+const handleUpdate = (updatedItem: KnowledgeItem) => {
+  const updatedItems = items.map((item) =>
+    item.id === updatedItem.id ? updatedItem : item
+  );
+
+  setItems(updatedItems);
+
+  localStorage.setItem(
+    "savewise-items",
+    JSON.stringify(updatedItems)
+  );
+};
+
   const filteredItems = items.filter((item) => {
     const query = search.toLowerCase();
 
@@ -74,6 +87,7 @@ export default function MemoryList({
             key={item.id}
             item={item}
             onDelete={handleDelete}
+            onUpdate={handleUpdate}
           />
         ))}
       </div>

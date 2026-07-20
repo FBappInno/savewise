@@ -5,17 +5,43 @@ import type { KnowledgeItem } from "@savewise/shared";
 interface MemoryCardProps {
   item: KnowledgeItem;
   onDelete: (id: string) => void;
+  onUpdate: (item: KnowledgeItem) => void;
 }
 
 export default function MemoryCard({
   item,
   onDelete,
+  onUpdate,
 }: MemoryCardProps) {
-  return (
+  
+  const handleImportance = () => {
+  const nextImportance =
+    item.importance >= 3 ? 0 : item.importance + 1;
+
+  onUpdate({
+    ...item,
+    importance: nextImportance,
+  });
+};
+
+    return (
     <div className="rounded-2xl border bg-white p-6 shadow-sm">
-      <h3 className="text-lg font-medium">
-        {item.title || "Untitled discovery"}
-      </h3>
+      
+      <div className="flex items-center justify-between">
+  <h3 className="text-lg font-medium">
+    {item.title || "Untitled discovery"}
+  </h3>
+
+ <button
+  onClick={handleImportance}
+  className="text-yellow-500 hover:scale-110 transition"
+>
+  {item.importance > 0
+    ? "⭐".repeat(item.importance)
+    : "☆"}
+</button>
+
+</div>
 
       <div className="mt-3 text-sm text-gray-500">
         <span className="font-medium">
