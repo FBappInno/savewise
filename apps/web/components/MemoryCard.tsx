@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { KnowledgeItem } from "@savewise/shared";
 
 interface MemoryCardProps {
@@ -14,9 +15,16 @@ export default function MemoryCard({
   onUpdate,
 }: MemoryCardProps) {
   
-  const handleImportance = () => {
+const [editing, setEditing] = useState(false);
+const [title, setTitle] = useState(item.title);
+const [url, setUrl] = useState(item.url);
+const [notes, setNotes] = useState(item.notes ?? "");
+
+const handleImportance = () => {
   const nextImportance =
-    item.importance >= 3 ? 0 : item.importance + 1;
+    (item.importance ?? 0) >= 3
+      ? 0
+      : (item.importance ?? 0) + 1;
 
   onUpdate({
     ...item,
@@ -28,9 +36,18 @@ export default function MemoryCard({
     <div className="rounded-2xl border bg-white p-6 shadow-sm">
       
       <div className="flex items-center justify-between">
-  <h3 className="text-lg font-medium">
-    {item.title || "Untitled discovery"}
-  </h3>
+
+ {editing ? (
+    <input
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      className="w-full rounded-lg border px-3 py-2 text-lg"
+    />
+  ) : (
+    <h3 className="text-lg font-medium">
+      {item.title || "Untitled discovery"}
+    </h3>
+  )}
 
  <button
   onClick={handleImportance}
@@ -90,12 +107,22 @@ export default function MemoryCard({
         )}
       </div>
 
-      <button
-        onClick={() => onDelete(item.id)}
-        className="mt-4 rounded-lg px-3 py-1 text-sm text-gray-500 hover:bg-red-50 hover:text-red-600"
-      >
-        Delete
-      </button>
+     <div className="mt-4 flex gap-4">
+  <button
+    onClick={() => setEditing(true)}
+    className="text-sm text-blue-500 hover:text-blue-700"
+  >
+    Edit
+  </button>
+
+  <button
+    onClick={() => onDelete(item.id)}
+    className="text-sm text-red-500 hover:text-red-700"
+  >
+    Delete
+  </button>
+</div>
+
     </div>
   );
 }
