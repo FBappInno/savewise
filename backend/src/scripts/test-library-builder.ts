@@ -1,5 +1,6 @@
 import type { Discovery } from "@savewise/shared";
 
+import { InMemoryDiscoveryRepository } from "../repositories/in-memory-discovery-repository";
 import { buildKnowledgeLibrary } from "../services/library/library-builder";
 
 const discoveries: Discovery[] = [
@@ -7,7 +8,8 @@ const discoveries: Discovery[] = [
     id: "discovery-1",
     url: "https://example.com/tesla-optimus",
     title: "Tesla Optimus",
-    improvedTitle: "Tesla entwickelt humanoiden Roboter Optimus",
+    improvedTitle:
+      "Tesla entwickelt humanoiden Roboter Optimus",
     summary:
       "Tesla entwickelt einen humanoiden Roboter für Industrie und Alltag.",
     primaryCategory: "Technology",
@@ -70,11 +72,11 @@ const discoveries: Discovery[] = [
       "Data Centers",
     ],
     keywords: [
-  "NVIDIA",
-  "AI",
-  "GPU",
-  "Semiconductors",
-  "Robotics",
+      "NVIDIA",
+      "AI",
+      "GPU",
+      "Semiconductors",
+      "Robotics",
     ],
     language: "en",
     confidence: 0.91,
@@ -83,8 +85,30 @@ const discoveries: Discovery[] = [
   },
 ];
 
-const library = buildKnowledgeLibrary(discoveries);
+async function main(): Promise<void> {
+  const repository =
+    new InMemoryDiscoveryRepository(
+      discoveries,
+    );
 
-console.log(
-  JSON.stringify(library, null, 2),
-);
+  const storedDiscoveries =
+    await repository.getAll();
+
+  const library =
+    buildKnowledgeLibrary(
+      storedDiscoveries,
+    );
+
+  console.log(
+    JSON.stringify(library, null, 2),
+  );
+}
+
+main().catch((error: unknown) => {
+  console.error(
+    "Library builder test failed:",
+    error,
+  );
+
+  process.exitCode = 1;
+});
