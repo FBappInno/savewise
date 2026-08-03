@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   useRef,
-  useState,
 } from "react";
 
 import {
@@ -16,31 +15,21 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 
+import { KnowledgeTree } from "@/components/library/knowledge-tree";
+import { LibraryOverview } from "@/components/library/library-overview";
 import { useKnowledgeLibrary } from "@/hooks/use-knowledge-library";
 import { theme } from "@/theme";
-import type {
-  Interest,
-  Topic,
-} from "@savewise/shared";
-
-type SectionPositions = {
-  interests: number;
-  topics: number;
-  connections: number;
-};
+import type { Discovery } from "@/types/discovery";
 
 export default function LibraryScreen() {
   const scrollViewRef =
     useRef<ScrollView>(null);
 
-  const [
-    sectionPositions,
-    setSectionPositions,
-  ] = useState<SectionPositions>({
-    interests: 0,
-    topics: 0,
-    connections: 0,
-  });
+  const treePosition =
+    useRef(0);
+
+  const connectionsPosition =
+    useRef(0);
 
   const {
     library,
@@ -50,49 +39,55 @@ export default function LibraryScreen() {
     refresh,
   } = useKnowledgeLibrary();
 
-  function openTopic(topicId: string) {
-    router.push(`/topic/${topicId}`);
-  }
-
   function openDiscoveries() {
     router.push("/");
   }
 
-  function scrollToSection(
-    section:
-      | "interests"
-      | "topics"
-      | "connections",
+  function openDiscovery(
+    discovery: Discovery,
   ) {
+    router.push(
+      `/discovery/${discovery.id}`,
+    );
+  }
+
+  function scrollToTree() {
     scrollViewRef.current?.scrollTo({
+      animated: true,
       y: Math.max(
         0,
-        sectionPositions[section] - 24,
+        treePosition.current - 24,
       ),
-      animated: true,
     });
   }
 
-  function saveSectionPosition(
-    section:
-      | "interests"
-      | "topics"
-      | "connections",
-  ) {
-    return (
-      event: LayoutChangeEvent,
-    ) => {
-      const y =
-        event.nativeEvent.layout.y;
-
-      setSectionPositions(
-        (currentPositions) => ({
-          ...currentPositions,
-          [section]: y,
-        }),
-      );
-    };
+  function scrollToConnections() {
+    scrollViewRef.current?.scrollTo({
+      animated: true,
+      y: Math.max(
+        0,
+        connectionsPosition.current -
+          24,
+      ),
+    });
   }
+
+  function saveTreePosition(
+    event: LayoutChangeEvent,
+  ) {
+    treePosition.current =
+      event.nativeEvent.layout.y;
+  }
+
+  function saveConnectionsPosition(
+    event: LayoutChangeEvent,
+  ) {
+    connectionsPosition.current =
+      event.nativeEvent.layout.y;
+  }
+
+  const graph =
+    library?.graph ?? null;
 
   return (
     <ScrollView
@@ -123,8 +118,8 @@ export default function LibraryScreen() {
         </Text>
 
         <Text style={styles.subtitle}>
-          Explore your saved knowledge by
-          topics and interests.
+          Your knowledge is organized
+          automatically by SaveWise AI.
         </Text>
       </View>
 
@@ -133,7 +128,8 @@ export default function LibraryScreen() {
           <ActivityIndicator />
 
           <Text style={styles.loadingText}>
-            Building your library...
+            Building your personal
+            knowledge graph...
           </Text>
         </View>
       ) : null}
@@ -154,157 +150,269 @@ export default function LibraryScreen() {
       library &&
       !error ? (
         <>
-          <View style={styles.overview}>
-            <OverviewItem
-              icon="documents-outline"
-              label="Discoveries"
-              onPress={openDiscoveries}
-              value={
-                library.discoveries.length
+          <LibraryOverview
+            connections={
+              graph?.relations.length ??
+              library.relations.length
+            }
+            discoveries={
+              library.discoveries.length
+            }
+            domains={
+              graph?.rootNodeIds.length ??
+              0
+            }
+            knowledgeNodes={
+              graph?.nodes.length ?? 0
+            }
+            onOpenConnections={
+              scrollToConnections
+            }
+            onOpenDiscoveries={
+              openDiscoveries
+            }
+            onOpenTree={scrollToTree}
+          />
+
+          {graph ? (
+            <View
+              style={
+                styles.graphSummary
               }
-            />
+            >
+              <View
+                style={
+                  styles.graphSummaryHeader
+                }
+              >
+                <View
+                  style={
+                    styles.aiIcon
+                  }
+                >
+                  <Ionicons
+                    color={
+                      theme.colors.primary
+                    }
+                    name="sparkles-outline"
+                    size={19}
+                  />
+                </View>
 
-            <OverviewItem
-              icon="folder-open-outline"
-              label="Topics"
-              onPress={() => {
-                scrollToSection("topics");
-              }}
-              value={library.topics.length}
-            />
+                <View
+                  style={
+                    styles.graphSummaryTitleContainer
+                  }
+                >
+                  <Text
+                    style={
+                      styles.graphSummaryLabel
+                    }
+                  >
+                    AI KNOWLEDGE MAP
+                  </Text>
 
-            <OverviewItem
-              icon="git-network-outline"
-              label="Connections"
-              onPress={() => {
-                scrollToSection(
-                  "connections",
-                );
-              }}
-              value={
-                library.relations.length
+                  <Text
+                    style={
+                      styles.graphLanguage
+                    }
+                  >
+                    {graph.language.toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+
+              <Text
+                style={
+                  styles.graphSummaryText
+                }
+              >
+                {graph.summary}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.messageCard}>
+              <Text
+                style={
+                  styles.messageTitle
+                }
+              >
+                AI graph unavailable
+              </Text>
+
+              <Text
+                style={
+                  styles.messageText
+                }
+              >
+                Pull down to retry
+                building your personal
+                knowledge graph.
+              </Text>
+            </View>
+          )}
+
+          <View
+            onLayout={
+              saveTreePosition
+            }
+            style={styles.section}
+          >
+            <View
+              style={
+                styles.sectionHeader
               }
-            />
-          </View>
+            >
+              <View>
+                <Text
+                  style={
+                    styles.sectionEyebrow
+                  }
+                >
+                  KNOWLEDGE TREE
+                </Text>
 
-          <View
-            onLayout={saveSectionPosition(
-              "interests",
-            )}
-            style={styles.section}
-          >
-            <Text style={styles.sectionTitle}>
-              Strongest interests
-            </Text>
-
-            {library.interests.length >
-            0 ? (
-              <View style={styles.interestList}>
-                {library.interests
-                  .slice(0, 6)
-                  .map((interest) => (
-                    <InterestRow
-                      interest={interest}
-                      key={interest.id}
-                      onPress={() => {
-                        openTopic(
-                          interest.id,
-                        );
-                      }}
-                    />
-                  ))}
+                <Text
+                  style={
+                    styles.sectionTitle
+                  }
+                >
+                  Your knowledge
+                </Text>
               </View>
+
+              {graph ? (
+                <Text
+                  style={
+                    styles.sectionCount
+                  }
+                >
+                  {graph.nodes.length}{" "}
+                  nodes
+                </Text>
+              ) : null}
+            </View>
+
+            {graph ? (
+              <KnowledgeTree
+                discoveries={
+                  library.discoveries
+                }
+                graph={graph}
+                onOpenDiscovery={
+                  openDiscovery
+                }
+              />
             ) : (
-              <EmptyLibraryMessage />
-            )}
-          </View>
+              <View
+                style={
+                  styles.messageCard
+                }
+              >
+                <Text
+                  style={
+                    styles.messageTitle
+                  }
+                >
+                  No knowledge tree
+                </Text>
 
-          <View
-            onLayout={saveSectionPosition(
-              "topics",
-            )}
-            style={styles.section}
-          >
-            <Text style={styles.sectionTitle}>
-              Topics
-            </Text>
-
-            {library.topics.length > 0 ? (
-              <View style={styles.topicGrid}>
-                {library.topics.map(
-                  (topic) => (
-                    <TopicCard
-                      key={topic.id}
-                      onPress={() => {
-                        openTopic(topic.id);
-                      }}
-                      topic={topic}
-                    />
-                  ),
-                )}
+                <Text
+                  style={
+                    styles.messageText
+                  }
+                >
+                  Add discoveries and
+                  rebuild the AI graph.
+                </Text>
               </View>
-            ) : (
-              <EmptyLibraryMessage />
             )}
           </View>
 
           <View
-            onLayout={saveSectionPosition(
-              "connections",
-            )}
+            onLayout={
+              saveConnectionsPosition
+            }
             style={styles.section}
           >
-            <Text style={styles.sectionTitle}>
-              Topic connections
-            </Text>
+            <View
+              style={
+                styles.sectionHeader
+              }
+            >
+              <View>
+                <Text
+                  style={
+                    styles.sectionEyebrow
+                  }
+                >
+                  SEMANTIC NETWORK
+                </Text>
 
-            {library.relations.length >
-            0 ? (
+                <Text
+                  style={
+                    styles.sectionTitle
+                  }
+                >
+                  Connections
+                </Text>
+              </View>
+
+              <Text
+                style={
+                  styles.sectionCount
+                }
+              >
+                {
+                  graph?.relations
+                    .length ?? 0
+                }
+              </Text>
+            </View>
+
+            {graph &&
+            graph.relations.length >
+              0 ? (
               <View
                 style={
                   styles.connectionList
                 }
               >
-                {library.relations
-                  .slice(0, 8)
+                {graph.relations
+                  .filter(
+                    (relation) =>
+                      relation.kind !==
+                      "part-of",
+                  )
+                  .slice(0, 10)
                   .map((relation) => {
-                    const sourceTopic =
-                      library.topics.find(
-                        (topic) =>
-                          topic.id ===
+                    const sourceNode =
+                      graph.nodes.find(
+                        (node) =>
+                          node.id ===
                           relation.sourceId,
                       );
 
-                    const targetTopic =
-                      library.topics.find(
-                        (topic) =>
-                          topic.id ===
+                    const targetNode =
+                      graph.nodes.find(
+                        (node) =>
+                          node.id ===
                           relation.targetId,
                       );
 
                     if (
-                      !sourceTopic ||
-                      !targetTopic
+                      !sourceNode ||
+                      !targetNode
                     ) {
                       return null;
                     }
 
                     return (
-                      <Pressable
-                        accessibilityRole="button"
-                        key={`${relation.sourceId}-${relation.targetId}`}
-                        onPress={() => {
-                          openTopic(
-                            sourceTopic.id,
-                          );
-                        }}
-                        style={({
-                          pressed,
-                        }) => [
-                          styles.connectionCard,
-                          pressed &&
-                            styles.pressed,
-                        ]}
+                      <View
+                        key={relation.id}
+                        style={
+                          styles.connectionCard
+                        }
                       >
                         <View
                           style={
@@ -312,32 +420,52 @@ export default function LibraryScreen() {
                           }
                         >
                           <Text
-                            numberOfLines={1}
+                            numberOfLines={2}
                             style={
-                              styles.connectionTopic
+                              styles.connectionNode
                             }
                           >
-                            {sourceTopic.name}
+                            {
+                              sourceNode.title
+                            }
                           </Text>
 
                           <Ionicons
                             color={
                               theme.colors
-                                .textSecondary
+                                .primary
                             }
                             name="git-compare-outline"
                             size={18}
                           />
 
                           <Text
-                            numberOfLines={1}
+                            numberOfLines={2}
                             style={
-                              styles.connectionTopic
+                              styles.connectionNode
                             }
                           >
-                            {targetTopic.name}
+                            {
+                              targetNode.title
+                            }
                           </Text>
                         </View>
+
+                        <Text
+                          style={
+                            styles.connectionKind
+                          }
+                        >
+                          {formatRelationKind(
+                            relation.kind,
+                          )}
+                          {" · "}
+                          {Math.round(
+                            relation.strength *
+                              100,
+                          )}
+                          %
+                        </Text>
 
                         <Text
                           style={
@@ -346,19 +474,7 @@ export default function LibraryScreen() {
                         >
                           {relation.reason}
                         </Text>
-
-                        <Text
-                          style={
-                            styles.connectionScore
-                          }
-                        >
-                          {Math.round(
-                            relation.strength *
-                              100,
-                          )}
-                          % connection
-                        </Text>
-                      </Pressable>
+                      </View>
                     );
                   })}
               </View>
@@ -373,7 +489,8 @@ export default function LibraryScreen() {
                     styles.messageTitle
                   }
                 >
-                  No connections yet
+                  No cross-topic
+                  connections yet
                 </Text>
 
                 <Text
@@ -381,187 +498,84 @@ export default function LibraryScreen() {
                     styles.messageText
                   }
                 >
-                  Add discoveries with
-                  related topics and
-                  keywords to create
-                  connections.
+                  Hierarchical
+                  relationships already
+                  exist in the knowledge
+                  tree. Additional
+                  semantic connections
+                  will appear as the
+                  library grows.
                 </Text>
               </View>
             )}
           </View>
+
+          {graph ? (
+            <View
+              style={
+                styles.generatedCard
+              }
+            >
+              <Ionicons
+                color={
+                  theme.colors
+                    .textSecondary
+                }
+                name="time-outline"
+                size={16}
+              />
+
+              <Text
+                style={
+                  styles.generatedText
+                }
+              >
+                Knowledge graph updated{" "}
+                {formatDate(
+                  graph.generatedAt,
+                )}
+              </Text>
+            </View>
+          ) : null}
         </>
       ) : null}
     </ScrollView>
   );
 }
 
-type OverviewItemProps = {
-  icon:
-    keyof typeof Ionicons.glyphMap;
-
-  label: string;
-
-  value: number;
-
-  onPress: () => void;
-};
-
-function OverviewItem({
-  icon,
-  label,
-  value,
-  onPress,
-}: OverviewItemProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.overviewItem,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Ionicons
-        color={theme.colors.primary}
-        name={icon}
-        size={20}
-      />
-
-      <Text style={styles.overviewValue}>
-        {value}
-      </Text>
-
-      <Text style={styles.overviewLabel}>
-        {label}
-      </Text>
-    </Pressable>
-  );
+function formatRelationKind(
+  value: string,
+): string {
+  return value
+    .split("-")
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1),
+    )
+    .join(" ");
 }
 
-type InterestRowProps = {
-  interest: Interest;
-  onPress: () => void;
-};
+function formatDate(
+  value: string,
+): string {
+  const date = new Date(value);
 
-function InterestRow({
-  interest,
-  onPress,
-}: InterestRowProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.interestRow,
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.interestContent}>
-        <View style={styles.interestHeader}>
-          <Text
-            numberOfLines={1}
-            style={styles.interestName}
-          >
-            {interest.name}
-          </Text>
+  if (
+    Number.isNaN(date.getTime())
+  ) {
+    return value;
+  }
 
-          <Text style={styles.interestCount}>
-            {interest.discoveries}
-          </Text>
-        </View>
-
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${Math.round(
-                  interest.score * 100,
-                )}%`,
-              },
-            ]}
-          />
-        </View>
-      </View>
-
-      <Ionicons
-        color={
-          theme.colors.textSecondary
-        }
-        name="chevron-forward"
-        size={18}
-      />
-    </Pressable>
-  );
-}
-
-type TopicCardProps = {
-  topic: Topic;
-  onPress: () => void;
-};
-
-function TopicCard({
-  topic,
-  onPress,
-}: TopicCardProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.topicCard,
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.topicIcon}>
-        <Ionicons
-          color={theme.colors.primary}
-          name="folder-open-outline"
-          size={20}
-        />
-      </View>
-
-      <Text
-        numberOfLines={2}
-        style={styles.topicName}
-      >
-        {topic.name}
-      </Text>
-
-      <Text style={styles.topicCount}>
-        {topic.discoveries}{" "}
-        {topic.discoveries === 1
-          ? "discovery"
-          : "discoveries"}
-      </Text>
-
-      {topic.keywords.length > 0 ? (
-        <Text
-          numberOfLines={2}
-          style={styles.topicKeywords}
-        >
-          {topic.keywords
-            .slice(0, 4)
-            .join(" · ")}
-        </Text>
-      ) : null}
-    </Pressable>
-  );
-}
-
-function EmptyLibraryMessage() {
-  return (
-    <View style={styles.messageCard}>
-      <Text style={styles.messageTitle}>
-        No topics yet
-      </Text>
-
-      <Text style={styles.messageText}>
-        Add more discoveries to build
-        your personal knowledge library.
-      </Text>
-    </View>
-  );
+  return new Intl.DateTimeFormat(
+    "en",
+    {
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      month: "short",
+    },
+  ).format(date);
 }
 
 const styles = StyleSheet.create({
@@ -632,77 +646,11 @@ const styles = StyleSheet.create({
 
     marginTop:
       theme.spacing.md,
-  },
-
-  overview: {
-    flexDirection: "row",
-
-    gap:
-      theme.spacing.md,
-  },
-
-  overviewItem: {
-    alignItems: "center",
-
-    backgroundColor:
-      theme.colors.surface,
-
-    borderColor:
-      theme.colors.border,
-
-    borderRadius:
-      theme.radius.lg,
-
-    borderWidth: 1,
-
-    flex: 1,
-
-    gap:
-      theme.spacing.xs,
-
-    minHeight: 112,
-
-    justifyContent: "center",
-
-    paddingHorizontal:
-      theme.spacing.sm,
-
-    paddingVertical:
-      theme.spacing.md,
-  },
-
-  overviewValue: {
-    ...theme.typography.sectionTitle,
-
-    color:
-      theme.colors.text,
-  },
-
-  overviewLabel: {
-    ...theme.typography.caption,
-
-    color:
-      theme.colors.textSecondary,
 
     textAlign: "center",
   },
 
-  section: {
-    marginTop:
-      theme.spacing.xxxl,
-  },
-
-  sectionTitle: {
-    ...theme.typography.sectionTitle,
-
-    color:
-      theme.colors.text,
-
-    marginBottom:
-      theme.spacing.lg,
-  },
-
-  interestList: {
+  graphSummary: {
     backgroundColor:
       theme.colors.surface,
 
@@ -714,109 +662,20 @@ const styles = StyleSheet.create({
 
     borderWidth: 1,
 
-    overflow: "hidden",
+    marginTop:
+      theme.spacing.xxl,
+
+    padding:
+      theme.spacing.lg,
   },
 
-  interestRow: {
+  graphSummaryHeader: {
     alignItems: "center",
 
-    borderBottomColor:
-      theme.colors.border,
-
-    borderBottomWidth: 1,
-
     flexDirection: "row",
-
-    gap:
-      theme.spacing.md,
-
-    padding:
-      theme.spacing.lg,
   },
 
-  interestContent: {
-    flex: 1,
-  },
-
-  interestHeader: {
-    flexDirection: "row",
-
-    justifyContent:
-      "space-between",
-  },
-
-  interestName: {
-    ...theme.typography.bodyStrong,
-
-    color:
-      theme.colors.text,
-
-    flex: 1,
-  },
-
-  interestCount: {
-    ...theme.typography.caption,
-
-    color:
-      theme.colors.textSecondary,
-
-    marginLeft:
-      theme.spacing.sm,
-  },
-
-  progressTrack: {
-    backgroundColor:
-      theme.colors.background,
-
-    borderRadius: 999,
-
-    height: 6,
-
-    marginTop:
-      theme.spacing.sm,
-
-    overflow: "hidden",
-  },
-
-  progressFill: {
-    backgroundColor:
-      theme.colors.primary,
-
-    borderRadius: 999,
-
-    height: "100%",
-  },
-
-  topicGrid: {
-    flexDirection: "row",
-
-    flexWrap: "wrap",
-
-    gap:
-      theme.spacing.md,
-  },
-
-  topicCard: {
-    backgroundColor:
-      theme.colors.surface,
-
-    borderColor:
-      theme.colors.border,
-
-    borderRadius:
-      theme.radius.lg,
-
-    borderWidth: 1,
-
-    minHeight: 160,
-
-    padding:
-      theme.spacing.lg,
-
-    width: "47%",
-  },
-
-  topicIcon: {
+  aiIcon: {
     alignItems: "center",
 
     backgroundColor:
@@ -828,39 +687,92 @@ const styles = StyleSheet.create({
 
     justifyContent: "center",
 
+    marginRight:
+      theme.spacing.md,
+
     width: 38,
   },
 
-  topicName: {
-    ...theme.typography.bodyStrong,
+  graphSummaryTitleContainer: {
+    alignItems: "center",
 
-    color:
-      theme.colors.text,
+    flex: 1,
 
-    marginTop:
-      theme.spacing.md,
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
   },
 
-  topicCount: {
+  graphSummaryLabel: {
     ...theme.typography.caption,
 
     color:
       theme.colors.primary,
 
-    marginTop:
-      theme.spacing.sm,
+    letterSpacing: 1,
   },
 
-  topicKeywords: {
+  graphLanguage: {
     ...theme.typography.caption,
 
     color:
       theme.colors.textSecondary,
+  },
 
-    lineHeight: 17,
+  graphSummaryText: {
+    ...theme.typography.body,
+
+    color:
+      theme.colors.text,
+
+    lineHeight: 22,
 
     marginTop:
-      theme.spacing.sm,
+      theme.spacing.md,
+  },
+
+  section: {
+    marginTop:
+      theme.spacing.xxxl,
+  },
+
+  sectionHeader: {
+    alignItems: "flex-end",
+
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
+
+    marginBottom:
+      theme.spacing.lg,
+  },
+
+  sectionEyebrow: {
+    ...theme.typography.caption,
+
+    color:
+      theme.colors.primary,
+
+    letterSpacing: 1,
+  },
+
+  sectionTitle: {
+    ...theme.typography.sectionTitle,
+
+    color:
+      theme.colors.text,
+
+    marginTop:
+      theme.spacing.xs,
+  },
+
+  sectionCount: {
+    ...theme.typography.caption,
+
+    color:
+      theme.colors.textSecondary,
   },
 
   connectionList: {
@@ -893,7 +805,7 @@ const styles = StyleSheet.create({
       theme.spacing.sm,
   },
 
-  connectionTopic: {
+  connectionNode: {
     ...theme.typography.bodyStrong,
 
     color:
@@ -902,21 +814,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  connectionKind: {
+    ...theme.typography.caption,
+
+    color:
+      theme.colors.primary,
+
+    marginTop:
+      theme.spacing.md,
+  },
+
   connectionReason: {
     ...theme.typography.body,
 
     color:
       theme.colors.textSecondary,
 
-    marginTop:
-      theme.spacing.md,
-  },
-
-  connectionScore: {
-    ...theme.typography.caption,
-
-    color:
-      theme.colors.primary,
+    lineHeight: 20,
 
     marginTop:
       theme.spacing.sm,
@@ -951,11 +865,33 @@ const styles = StyleSheet.create({
     color:
       theme.colors.textSecondary,
 
+    lineHeight: 21,
+
     marginTop:
       theme.spacing.sm,
   },
 
-  pressed: {
-    opacity: 0.7,
+  generatedCard: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    gap:
+      theme.spacing.sm,
+
+    justifyContent: "center",
+
+    marginTop:
+      theme.spacing.xxxl,
+
+    padding:
+      theme.spacing.md,
+  },
+
+  generatedText: {
+    ...theme.typography.caption,
+
+    color:
+      theme.colors.textSecondary,
   },
 });
