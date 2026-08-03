@@ -1,3 +1,7 @@
+import type {
+  KnowledgeGraphNodeKind,
+} from "./KnowledgeGraph";
+
 export interface KnowledgeNode {
   id: string;
 
@@ -5,7 +9,19 @@ export interface KnowledgeNode {
 
   category: string;
 
+  kind?: KnowledgeGraphNodeKind;
+
+  description?: string;
+
+  parentId?: string | null;
+
   discoveries: string[];
 
   children: string[];
+
+  aliases?: string[];
+
+  keywords?: string[];
+
+  confidence?: number;
 }

@@ -1,3 +1,7 @@
+import type {
+  KnowledgeGraphRelationKind,
+} from "./KnowledgeGraph";
+
 export interface Relation {
   sourceId: string;
 
@@ -6,4 +10,8 @@ export interface Relation {
   strength: number;
 
   reason: string;
+
+  kind?: KnowledgeGraphRelationKind;
+
+  evidenceDiscoveryIds?: string[];
 }

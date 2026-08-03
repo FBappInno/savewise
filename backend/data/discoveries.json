@@ -1,1 +1,253 @@
-[]
+[
+  {
+    "id": "de797c05-5dea-47ae-a48d-6ef5559e526e",
+    "source": "web",
+    "url": "https://www.blick.ch",
+    "title": "Blick: Nachrichten und Schlagzeilen aus der Schweiz und aller Welt",
+    "improvedTitle": "Blick - Aktuelle Nachrichten und Schlagzeilen aus der Schweiz und der Welt",
+    "description": "Aktuelle Nachrichten, News und Kommentare aus Wirtschaft, Politik, Sport, Kultur, Gesellschaft, Wissen & Lifestyle auf Blick.ch. Jetzt App downloaden.",
+    "summary": "Blick bietet aktuelle Nachrichten, Kommentare und Berichte aus verschiedenen Bereichen wie Wirtschaft, Politik, Sport, Kultur, Gesellschaft, Wissen und Lifestyle. Die Plattform hält Leser über wichtige Ereignisse in der Schweiz und international auf dem Laufenden.",
+    "classification": {
+      "primaryCategory": "news",
+      "secondaryCategory": "general news",
+      "topic": "current events",
+      "subtopics": [
+        "politics",
+        "economy",
+        "sports",
+        "culture",
+        "society",
+        "science and knowledge"
+      ]
+    },
+    "keywords": [
+      "Nachrichten",
+      "Schweiz",
+      "Welt",
+      "Wirtschaft",
+      "Politik",
+      "Sport",
+      "Kultur",
+      "Gesellschaft",
+      "Wissen",
+      "Lifestyle"
+    ],
+    "language": "de",
+    "confidence": 0.9,
+    "topics": [
+      "current events",
+      "politics",
+      "economy",
+      "sports",
+      "culture",
+      "society",
+      "science and knowledge"
+    ],
+    "createdAt": "2026-08-03T15:01:08.695Z",
+    "updatedAt": "2026-08-03T15:20:00.107Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "489f404d-a8f4-495c-b09a-7fcf2221312e",
+    "source": "web",
+    "url": "https://www.watson.ch",
+    "title": "watson - News, aber deep",
+    "improvedTitle": "watson – Deine Schweizer News-Plattform für Aktuelle Nachrichten und Hintergründe",
+    "description": "watson – deine News-Plattform für die Schweiz. Aktuelle Nachrichten, spannende Hintergründe und unterhaltsame Storys. Bleib informiert mit den neuesten News und Trends.",
+    "summary": "watson ist eine Nachrichtenplattform für die Schweiz, die aktuelle Nachrichten, spannende Hintergründe und unterhaltsame Storys bietet. Nutzer erhalten hier die neuesten News und Trends, um stets informiert zu bleiben.",
+    "thumbnailUrl": "https://www.watson.ch/_watsui/static/img/logos/logo_watson_w_black_ch.png",
+    "classification": {
+      "primaryCategory": "news",
+      "secondaryCategory": "news media",
+      "topic": "regional news",
+      "subtopics": [
+        "Switzerland",
+        "current events",
+        "storytelling"
+      ]
+    },
+    "keywords": [
+      "News",
+      "Schweiz",
+      "Nachrichten",
+      "Hintergründe",
+      "Storys",
+      "Trends"
+    ],
+    "language": "de",
+    "confidence": 0.9,
+    "topics": [
+      "regional news",
+      "Switzerland",
+      "current events",
+      "storytelling"
+    ],
+    "createdAt": "2026-08-03T15:21:20.093Z",
+    "updatedAt": "2026-08-03T15:21:20.093Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+    "source": "web",
+    "url": "https://www.bild.de",
+    "title": "Aktuelle Nachrichten | BILD.de",
+    "improvedTitle": "Aktuelle Nachrichten und Themenübersicht",
+    "description": "BILD.de: Die Seite 1 für aktuelle Nachrichten und Themen, Bilder und Videos aus den Bereichen News, Wirtschaft, Politik, Show, Sport, und Promis.",
+    "summary": "BILD.de bietet die neuesten Nachrichten, Bilder und Videos aus verschiedenen Bereichen wie Nachrichten, Wirtschaft, Politik, Unterhaltung, Sport und Prominente.",
+    "thumbnailUrl": "https://a.bildstatic.de/assets/social-fallback-xwOAZY_4.jpg",
+    "publishedAt": "2026-08-03T15:10:21.862Z",
+    "classification": {
+      "primaryCategory": "news",
+      "secondaryCategory": "general news",
+      "topic": "current events",
+      "subtopics": [
+        "economy",
+        "politics",
+        "entertainment",
+        "sports",
+        "celebrity news"
+      ]
+    },
+    "keywords": [
+      "Nachrichten",
+      "Wirtschaft",
+      "Politik",
+      "Show",
+      "Sport",
+      "Promis"
+    ],
+    "language": "de",
+    "confidence": 0.95,
+    "topics": [
+      "current events",
+      "economy",
+      "politics",
+      "entertainment",
+      "sports",
+      "celebrity news"
+    ],
+    "createdAt": "2026-08-03T15:23:19.087Z",
+    "updatedAt": "2026-08-03T15:23:19.087Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "a56b02d3-e199-4393-8fcb-c6f5596f8122",
+    "source": "web",
+    "url": "https://www.bio-suisse.ch/de/blog/proteinreiche-lebensmittel-so-decken-sie-ihren-bedarf-im-alltag.html",
+    "title": "Proteinreiche Lebensmittel: So decken Sie Ihren Bedarf",
+    "improvedTitle": "Proteinreiche Lebensmittel und Empfehlungen zur Eiweißzufuhr im Alltag",
+    "description": "Proteinreiche Lebensmittel lassen sich einfach in den Alltag integrieren. Erfahren Sie, wie viel Eiweiss sinnvoll ist.",
+    "summary": "Der Artikel beschreibt, wie proteinreiche Lebensmittel leicht in den Alltag integriert werden können und gibt Empfehlungen, wie viel Eiweiß sinnvollerweise konsumiert werden sollte, um den Bedarf zu decken.",
+    "thumbnailUrl": "https://www.bio-suisse.ch/.imaging/mte/biosuisse-theme/large/dam/konsumenten/blog/bilder/essen-trinken/2026-Omega-3/Hummus.jpg/jcr:content/Hummus.jpg",
+    "classification": {
+      "primaryCategory": "health",
+      "secondaryCategory": "nutrition",
+      "topic": "protein intake",
+      "subtopics": [
+        "protein-rich foods",
+        "daily protein needs"
+      ]
+    },
+    "keywords": [
+      "Protein",
+      "Eiweiß",
+      "proteinreiche Lebensmittel",
+      "Ernährung",
+      "Alltag",
+      "Bedarf decken"
+    ],
+    "language": "de",
+    "confidence": 0.95,
+    "topics": [
+      "protein intake",
+      "protein-rich foods",
+      "daily protein needs"
+    ],
+    "createdAt": "2026-08-03T15:38:49.861Z",
+    "updatedAt": "2026-08-03T15:38:49.861Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "0b87718a-19c3-4f08-9712-5adc9913a5f4",
+    "source": "web",
+    "url": "https://www.ndr.de/ratgeber/gesundheit/Kohlenhydrate-Welche-sind-gesund-welche-lieber-meiden,kohlenhydrate114.html",
+    "title": "Gesünder essen: So unterscheiden sich gute Kohlenhydrate von ungesunden Dickmachern",
+    "improvedTitle": "Gesunde Kohlenhydrate erkennen: Worauf es bei der Ernährung ankommt",
+    "description": "Kohlenhydrate liefern Energie, gelten aber auch als Dickmacher - viele setzen beim Abnehmen auf \"Low Carb\". Kartoffeln sind ein Beispiel für gesunde, komplexe Kohlenhydrate. Welche lassen den Blutzuckerspiegel stark steigen?",
+    "summary": "Der Artikel erklärt, dass Kohlenhydrate zwar Energie liefern, aber auch als Dickmacher gelten können. Es wird erläutert, wie man gesunde, komplexe Kohlenhydrate wie Kartoffeln von ungesunden unterscheidet, die den Blutzuckerspiegel stark ansteigen lassen und beim Abnehmen problematisch sind. \"Low Carb\"-Diäten sind eine verbreitete Strategie, um Gewicht zu reduzieren, wobei die richtige Auswahl der Kohlenhydrate entscheidend ist.",
+    "thumbnailUrl": "https://images.ndr.de/image/56f92750-a99c-42b8-a854-29e27e788894/AAABkXCEa7Q/AAABnSSvrFg/16x9-big/kohlenhydrate116.webp?width=1920",
+    "author": "ndr.de",
+    "classification": {
+      "primaryCategory": "health",
+      "secondaryCategory": "nutrition",
+      "topic": "carbohydrates",
+      "subtopics": [
+        "complex carbohydrates",
+        "blood sugar impact",
+        "weight management"
+      ]
+    },
+    "keywords": [
+      "Kohlenhydrate",
+      "gesunde Kohlenhydrate",
+      "ungesunde Kohlenhydrate",
+      "Blutzuckerspiegel",
+      "Low Carb",
+      "Kartoffeln",
+      "Diät",
+      "Energieversorgung"
+    ],
+    "language": "de",
+    "confidence": 0.95,
+    "topics": [
+      "carbohydrates",
+      "complex carbohydrates",
+      "blood sugar impact",
+      "weight management"
+    ],
+    "createdAt": "2026-08-03T15:45:12.885Z",
+    "updatedAt": "2026-08-03T15:45:12.885Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea",
+    "source": "web",
+    "url": "https://www.flugrevue.de/militaer/jak-130m-soll-kampfdrohnen-zu-wasser-jagen-russlands-neuer-leichter-kampfjet/",
+    "title": "Jak-130M soll Kampfdrohnen zu Wasser jagen: Russlands neuer leichter Kampfjet",
+    "improvedTitle": "Russlands leichter Kampfjet Jak-130M: Modernisierte Avionik und erweiterte Waffen gegen Kampfdrohnen",
+    "description": "Moskau arbeitet derzeit an der modernisierten Variante ihres bewährten Jettrainers. Die Jak-130M hat modernisierte Avionik, neue Zielsysteme und ein erweitertes Waffenarsenal. Doch die Fähigkeiten der Maschine reichen der Regierung wohl noch nicht aus.",
+    "summary": "Die Jak-130M ist eine modernisierte Variante des bewährten Jettrainers aus Moskau mit moderner Avionik, neuen Zielsystemen und erweitertem Waffenarsenal. Sie soll insbesondere zur Bekämpfung von Kampfdrohnen eingesetzt werden, doch die Regierung hält die Fähigkeiten der Maschine offenbar noch für unzureichend.",
+    "thumbnailUrl": "https://img.flugrevue.de/_/bg:FFFFFF/f:best/h:1238/rt:fill/w:2200/plain/2252321.jpg",
+    "author": "Mirjam Alama",
+    "classification": {
+      "primaryCategory": "technology",
+      "secondaryCategory": "aerospace",
+      "topic": "military aviation",
+      "subtopics": [
+        "light attack jets",
+        "drone countermeasures",
+        "avionics"
+      ]
+    },
+    "keywords": [
+      "Jak-130M",
+      "Kampfjet",
+      "Avionik",
+      "Kampfdrohnen",
+      "Russland",
+      "Waffenarsenal",
+      "Jettrainer"
+    ],
+    "language": "de",
+    "confidence": 0.95,
+    "topics": [
+      "military aviation",
+      "light attack jets",
+      "drone countermeasures",
+      "avionics"
+    ],
+    "createdAt": "2026-08-03T16:57:35.689Z",
+    "updatedAt": "2026-08-03T16:57:35.689Z",
+    "savedAtLabel": "Just now"
+  }
+]

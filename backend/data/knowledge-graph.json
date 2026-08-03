@@ -1,0 +1,526 @@
+{
+  "generatedAt": "2026-08-03T16:46:15.666Z",
+  "sourceFingerprint": "6b3f503596a5c0109338b27612719934af41e6cde6e102f71f271d876eb9cbb0",
+  "language": "de",
+  "summary": "Das Nutzerwissen umfasst zwei Hauptbereiche: Ernährung mit Fokus auf Makronährstoffe wie Kohlenhydrate und Proteine, sowie aktuelle Nachrichten mit Schwerpunkt auf allgemeine Berichterstattung und schweizerische Regionalnachrichten. Im Ernährungsbereich sind Themen zu gesunden Kohlenhydraten, Blutzuckerwirkung, Low-Carb-Diäten, proteinreichen Lebensmitteln und täglichem Eiweißbedarf enthalten. Im Nachrichtenbereich befinden sich Überblicksinhalte zu Wirtschaft, Politik, Sport, Kultur, Gesellschaft und Unterhaltung, mit besonderem Bezug auf die Schweiz.",
+  "rootNodeIds": [
+    "node-nutrition",
+    "node-news"
+  ],
+  "nodes": [
+    {
+      "id": "node-nutrition",
+      "title": "Ernährung",
+      "kind": "domain",
+      "description": "Wissen rund um Ernährung, Makronährstoffe und gesundheitsbezogene Ernährungsempfehlungen.",
+      "parentId": null,
+      "childIds": [
+        "node-carbohydrates",
+        "node-protein-intake"
+      ],
+      "discoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4",
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ],
+      "aliases": [
+        "Ernährungswissenschaft"
+      ],
+      "keywords": [
+        "Ernährung",
+        "Makronährstoffe",
+        "Gesundheit"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-carbohydrates",
+      "title": "Kohlenhydrate",
+      "kind": "topic",
+      "description": "Untersuchung von Kohlenhydraten, deren Wirkung auf den Blutzuckerspiegel und deren Rolle bei der Gewichtskontrolle.",
+      "parentId": "node-nutrition",
+      "childIds": [
+        "node-complex-carbohydrates",
+        "node-blood-sugar-impact",
+        "node-weight-management"
+      ],
+      "discoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ],
+      "aliases": [
+        "Carbohydrates"
+      ],
+      "keywords": [
+        "Kohlenhydrate",
+        "Low Carb",
+        "Blutzuckerspiegel",
+        "Dickmacher",
+        "Kartoffeln"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-complex-carbohydrates",
+      "title": "Komplexe Kohlenhydrate",
+      "kind": "subtopic",
+      "description": "Gesunde, komplexe Kohlenhydrate wie Kartoffeln, die eine stabile Energieversorgung ermöglichen.",
+      "parentId": "node-carbohydrates",
+      "childIds": [],
+      "discoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ],
+      "aliases": [
+        "Komplexe Zucker"
+      ],
+      "keywords": [
+        "Kartoffeln",
+        "Komplexe Kohlenhydrate",
+        "Energieversorgung"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-blood-sugar-impact",
+      "title": "Auswirkungen auf den Blutzuckerspiegel",
+      "kind": "subtopic",
+      "description": "Wie unterschiedliche Kohlenhydrate den Blutzuckerspiegel beeinflussen und ihre Bedeutung für die Ernährung.",
+      "parentId": "node-carbohydrates",
+      "childIds": [],
+      "discoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ],
+      "aliases": [
+        "Blutzuckerwirkung"
+      ],
+      "keywords": [
+        "Blutzuckerspiegel",
+        "Kohlenhydrate",
+        "Diät"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-weight-management",
+      "title": "Gewichtsmanagement",
+      "kind": "subtopic",
+      "description": "Strategien und Bedeutung der Kohlenhydratauswahl für die Gewichtskontrolle, einschließlich Low-Carb-Diäten.",
+      "parentId": "node-carbohydrates",
+      "childIds": [],
+      "discoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ],
+      "aliases": [
+        "Gewichtsreduktion"
+      ],
+      "keywords": [
+        "Low Carb",
+        "Abnehmen",
+        "Kohlenhydrate"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "node-protein-intake",
+      "title": "Proteinzufuhr",
+      "kind": "topic",
+      "description": "Empfehlungen zur Aufnahme von Protein im Alltag und die Vorteile proteinreicher Lebensmittel.",
+      "parentId": "node-nutrition",
+      "childIds": [
+        "node-protein-rich-foods",
+        "node-daily-protein-needs"
+      ],
+      "discoveryIds": [
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ],
+      "aliases": [
+        "Eiweißzufuhr"
+      ],
+      "keywords": [
+        "Protein",
+        "Eiweiß",
+        "proteinreiche Lebensmittel",
+        "Bedarf"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-protein-rich-foods",
+      "title": "Proteinreiche Lebensmittel",
+      "kind": "subtopic",
+      "description": "Lebensmittel mit hohem Proteingehalt und deren Integration in die tägliche Ernährung.",
+      "parentId": "node-protein-intake",
+      "childIds": [],
+      "discoveryIds": [
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ],
+      "aliases": [
+        "Eiweißquellen"
+      ],
+      "keywords": [
+        "proteinreiche Lebensmittel",
+        "Ernährung"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-daily-protein-needs",
+      "title": "Täglicher Proteinbedarf",
+      "kind": "subtopic",
+      "description": "Empfohlene tägliche Eiweißmengen zur Deckung des Bedarfs.",
+      "parentId": "node-protein-intake",
+      "childIds": [],
+      "discoveryIds": [
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ],
+      "aliases": [
+        "Proteinbedarf"
+      ],
+      "keywords": [
+        "Protein",
+        "Eiweiß",
+        "täglicher Bedarf"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-news",
+      "title": "Nachrichten",
+      "kind": "domain",
+      "description": "Aktuelle Berichterstattung und Nachrichteninhalte zu vielfältigen Themenbereichen, inklusive regionaler und internationaler Perspektiven.",
+      "parentId": null,
+      "childIds": [
+        "node-current-events"
+      ],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "489f404d-a8f4-495c-b09a-7fcf2221312e",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "News",
+        "Aktuelle Nachrichten"
+      ],
+      "keywords": [
+        "Nachrichten",
+        "News",
+        "Aktuell"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-current-events",
+      "title": "Aktuelle Ereignisse",
+      "kind": "topic",
+      "description": "Berichterstattung über aktuelle Themen und Ereignisse in verschiedenen Lebensbereichen.",
+      "parentId": "node-news",
+      "childIds": [
+        "node-regional-news-switzerland",
+        "node-politics",
+        "node-economy",
+        "node-entertainment",
+        "node-sports",
+        "node-culture-society-science"
+      ],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "489f404d-a8f4-495c-b09a-7fcf2221312e",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "Nachrichtenereignisse"
+      ],
+      "keywords": [
+        "Nachrichten",
+        "Politik",
+        "Wirtschaft",
+        "Sport",
+        "Kultur"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-regional-news-switzerland",
+      "title": "Regionale Nachrichten Schweiz",
+      "kind": "subtopic",
+      "description": "Nachrichten und Hintergründe mit Schwerpunkt auf der Schweiz und deren gesellschaftlichen Begebenheiten.",
+      "parentId": "node-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "489f404d-a8f4-495c-b09a-7fcf2221312e",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "Schweizer Nachrichten"
+      ],
+      "keywords": [
+        "Schweiz",
+        "Nachrichten",
+        "Hintergründe"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-politics",
+      "title": "Politik",
+      "kind": "subtopic",
+      "description": "Politische Entwicklungen und Berichte in nationalen und internationalen Kontexten.",
+      "parentId": "node-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "Politische Nachrichten"
+      ],
+      "keywords": [
+        "Politik"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-economy",
+      "title": "Wirtschaft",
+      "kind": "subtopic",
+      "description": "Wirtschaftliche Nachrichten und deren Auswirkungen auf Gesellschaft und Politik.",
+      "parentId": "node-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "Wirtschaftsnachrichten"
+      ],
+      "keywords": [
+        "Wirtschaft"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-entertainment",
+      "title": "Unterhaltung",
+      "kind": "subtopic",
+      "description": "Berichterstattung über Unterhaltung, Prominente und kulturelle Ereignisse.",
+      "parentId": "node-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3"
+      ],
+      "aliases": [
+        "Show",
+        "Prominente"
+      ],
+      "keywords": [
+        "Show",
+        "Promis",
+        "Unterhaltung"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "node-sports",
+      "title": "Sport",
+      "kind": "subtopic",
+      "description": "Sportnachrichten aus verschiedenen Disziplinen und Berichterstattung über Events und Gesellschaft.",
+      "parentId": "node-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "Sportnachrichten"
+      ],
+      "keywords": [
+        "Sport"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "node-culture-society-science",
+      "title": "Kultur, Gesellschaft & Wissenschaft",
+      "kind": "subtopic",
+      "description": "Nachrichten und Beiträge aus den Bereichen Kultur, Gesellschaft sowie Wissenschaft und Wissen.",
+      "parentId": "node-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [
+        "Kultur",
+        "Gesellschaft",
+        "Wissen"
+      ],
+      "keywords": [
+        "Kultur",
+        "Gesellschaft",
+        "Wissenschaft",
+        "Wissen",
+        "Lifestyle"
+      ],
+      "confidence": 0.85
+    }
+  ],
+  "relations": [
+    {
+      "id": "relation-node-carbohydrates-node-nutrition-part-of",
+      "sourceId": "node-carbohydrates",
+      "targetId": "node-nutrition",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Kohlenhydrate sind ein wichtiger Teilbereich der Ernährung.",
+      "evidenceDiscoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ]
+    },
+    {
+      "id": "relation-node-protein-intake-node-nutrition-part-of",
+      "sourceId": "node-protein-intake",
+      "targetId": "node-nutrition",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Proteinzufuhr gehört zum Ernährungswissen.",
+      "evidenceDiscoveryIds": [
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ]
+    },
+    {
+      "id": "relation-node-current-events-node-news-part-of",
+      "sourceId": "node-current-events",
+      "targetId": "node-news",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Aktuelle Ereignisse sind der Kernbereich der Nachrichten.",
+      "evidenceDiscoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "489f404d-a8f4-495c-b09a-7fcf2221312e",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ]
+    },
+    {
+      "id": "relation-node-complex-carbohydrates-node-carbohydrates-part-of",
+      "sourceId": "node-complex-carbohydrates",
+      "targetId": "node-carbohydrates",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Komplexe Kohlenhydrate sind ein Unterthema der Kohlenhydrate.",
+      "evidenceDiscoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ]
+    },
+    {
+      "id": "relation-node-blood-sugar-impact-node-carbohydrates-part-of",
+      "sourceId": "node-blood-sugar-impact",
+      "targetId": "node-carbohydrates",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Blutzuckereffekte sind eng mit Kohlenhydraten verbunden.",
+      "evidenceDiscoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ]
+    },
+    {
+      "id": "relation-node-protein-rich-foods-node-protein-intake-part-of",
+      "sourceId": "node-protein-rich-foods",
+      "targetId": "node-protein-intake",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Proteinreiche Lebensmittel sind Teil der Proteinzufuhroptimierung.",
+      "evidenceDiscoveryIds": [
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ]
+    },
+    {
+      "id": "relation-node-daily-protein-needs-node-protein-intake-part-of",
+      "sourceId": "node-daily-protein-needs",
+      "targetId": "node-protein-intake",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Täglicher Proteinbedarf ist eine essentielle Komponente der Proteinzufuhr.",
+      "evidenceDiscoveryIds": [
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ]
+    },
+    {
+      "id": "relation-node-regional-news-switzerland-node-current-events-part-of",
+      "sourceId": "node-regional-news-switzerland",
+      "targetId": "node-current-events",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Regionale Schweizer Nachrichten sind spezifische lokale Ereignisse.",
+      "evidenceDiscoveryIds": [
+        "489f404d-a8f4-495c-b09a-7fcf2221312e",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ]
+    },
+    {
+      "id": "relation-node-politics-node-current-events-part-of",
+      "sourceId": "node-politics",
+      "targetId": "node-current-events",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Politik ist ein zentrales Nachrichtenthema.",
+      "evidenceDiscoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ]
+    },
+    {
+      "id": "relation-node-economy-node-current-events-part-of",
+      "sourceId": "node-economy",
+      "targetId": "node-current-events",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Wirtschaftliche Nachrichten sind Teil der aktuellen Ereignisse.",
+      "evidenceDiscoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ]
+    },
+    {
+      "id": "relation-node-sports-node-current-events-part-of",
+      "sourceId": "node-sports",
+      "targetId": "node-current-events",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Sportnachrichten gehören zu den aktuellen Ereignissen.",
+      "evidenceDiscoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ]
+    },
+    {
+      "id": "relation-node-culture-society-science-node-current-events-part-of",
+      "sourceId": "node-culture-society-science",
+      "targetId": "node-current-events",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Kultur, Gesellschaft und Wissenschaft sind relevante Nachrichtenthemen.",
+      "evidenceDiscoveryIds": [
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ]
+    },
+    {
+      "id": "relation-node-weight-management-node-carbohydrates-part-of",
+      "sourceId": "node-weight-management",
+      "targetId": "node-carbohydrates",
+      "kind": "part-of",
+      "strength": 0.85,
+      "reason": "Gewichtsmanagement ist ein wichtiger Aspekt beim Thema Kohlenhydrate.",
+      "evidenceDiscoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+      ]
+    },
+    {
+      "id": "relation-node-entertainment-node-current-events-part-of",
+      "sourceId": "node-entertainment",
+      "targetId": "node-current-events",
+      "kind": "part-of",
+      "strength": 0.85,
+      "reason": "Unterhaltung ist ein Teilbereich des Nachrichtengeschehens.",
+      "evidenceDiscoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3"
+      ]
+    }
+  ]
+}

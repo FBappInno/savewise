@@ -1,6 +1,7 @@
 export * from "./models/Discovery";
 export * from "./models/Insight";
 export * from "./models/Interest";
+export * from "./models/KnowledgeGraph";
 export * from "./models/KnowledgeItem";
 export * from "./models/KnowledgeLibrary";
 export * from "./models/KnowledgeNode";

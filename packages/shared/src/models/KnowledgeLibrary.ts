@@ -4,6 +4,9 @@ import type {
   KnowledgeActivity,
 } from "./Insight";
 import type { Interest } from "./Interest";
+import type {
+  KnowledgeGraph,
+} from "./KnowledgeGraph";
 import type { KnowledgeNode } from "./KnowledgeNode";
 import type { Relation } from "./Relation";
 import type { Topic } from "./Topic";
@@ -24,4 +27,6 @@ export interface KnowledgeLibrary {
   insights: Insight[];
 
   activity: KnowledgeActivity;
+
+  graph: KnowledgeGraph | null;
 }

@@ -3,9 +3,12 @@ import path from "node:path";
 
 import type { Discovery } from "@savewise/shared";
 
-const DATA_DIRECTORY = path.resolve(
+const BACKEND_DIRECTORY = path.resolve(
   process.cwd(),
-  "backend",
+);
+
+const DATA_DIRECTORY = path.join(
+  BACKEND_DIRECTORY,
   "data",
 );
 
@@ -14,11 +17,22 @@ const DISCOVERIES_FILE = path.join(
   "discoveries.json",
 );
 
+function isStringArray(
+  value: unknown,
+): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) => typeof item === "string",
+    )
+  );
+}
+
 function isDiscovery(
   value: unknown,
 ): value is Discovery {
   if (
-    !value ||
+    value === null ||
     typeof value !== "object"
   ) {
     return false;
@@ -31,8 +45,8 @@ function isDiscovery(
     typeof discovery.id === "string" &&
     typeof discovery.source === "string" &&
     typeof discovery.title === "string" &&
-    Array.isArray(discovery.keywords) &&
-    Array.isArray(discovery.topics) &&
+    isStringArray(discovery.keywords) &&
+    isStringArray(discovery.topics) &&
     typeof discovery.createdAt === "string" &&
     typeof discovery.updatedAt === "string" &&
     typeof discovery.savedAtLabel === "string"
@@ -45,11 +59,13 @@ async function ensureDiscoveriesFile(): Promise<void> {
   });
 
   try {
-    await fs.access(DISCOVERIES_FILE);
+    await fs.access(
+      DISCOVERIES_FILE,
+    );
   } catch {
     await fs.writeFile(
       DISCOVERIES_FILE,
-      "[]",
+      "[]\n",
       "utf8",
     );
   }
@@ -75,6 +91,10 @@ export async function loadDiscoveries(): Promise<
       JSON.parse(fileContent);
 
     if (!Array.isArray(parsedValue)) {
+      console.error(
+        "The discoveries file does not contain an array.",
+      );
+
       return [];
     }
 

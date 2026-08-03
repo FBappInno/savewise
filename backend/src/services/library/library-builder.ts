@@ -14,7 +14,6 @@ import {
 
 type TopicAccumulator = {
   topic: Topic;
-
   discoveryIds: string[];
 };
 
@@ -63,20 +62,15 @@ export function buildKnowledgeLibrary(
 
   return {
     generatedAt,
-
     discoveries,
-
     topics,
-
     interests,
-
     nodes,
-
     relations,
-
     insights,
-
     activity,
+
+    graph: null,
   };
 }
 
@@ -105,11 +99,8 @@ function buildTopicAccumulators(
       accumulator = {
         topic: {
           id: topicId,
-
           name: topicName,
-
           discoveries: 0,
-
           keywords: [],
         },
 
@@ -164,9 +155,7 @@ function buildInterests(
   return topics.map(
     (topic) => ({
       id: topic.id,
-
       name: topic.name,
-
       discoveries:
         topic.discoveries,
 
@@ -192,16 +181,17 @@ function buildKnowledgeNodes(
       discoveryIds,
     }) => ({
       id: topic.id,
-
       title: topic.name,
-
       category: "topic",
-
+      kind: "topic",
+      parentId: null,
       discoveries: [
         ...discoveryIds,
       ],
-
       children: [],
+      keywords: [
+        ...topic.keywords,
+      ],
     }),
   );
 }
@@ -267,6 +257,8 @@ function buildRelations(
         targetId:
           secondTopic.id,
 
+        kind: "related",
+
         strength: Number(
           strength.toFixed(4),
         ),
@@ -275,6 +267,8 @@ function buildRelations(
           `Shared keywords: ${sharedKeywords.join(
             ", ",
           )}`,
+
+        evidenceDiscoveryIds: [],
       });
     }
   }
@@ -372,9 +366,7 @@ function createSlug(
       "",
     );
 
-  return (
-    slug || "uncategorized"
-  );
+  return slug || "uncategorized";
 }
 
 function normalizeText(

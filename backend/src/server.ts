@@ -16,6 +16,7 @@ import {
   getDiscoveriesForInterest,
   getDiscoveryById,
   getRelatedDiscoveries,
+  rebuildCurrentKnowledgeLibrary,
   saveDiscovery,
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
@@ -24,22 +25,19 @@ function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
 ): Promise<T> {
-  let timeoutId:
-    | NodeJS.Timeout
-    | undefined;
+  let timeoutId: NodeJS.Timeout | undefined;
 
-  const timeoutPromise =
-    new Promise<T>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(
-          new Error(
-            `Import timed out after ${
-              timeoutMs / 1000
-            } seconds.`,
-          ),
-        );
-      }, timeoutMs);
-    });
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(
+        new Error(
+          `Import timed out after ${
+            timeoutMs / 1000
+          } seconds.`,
+        ),
+      );
+    }, timeoutMs);
+  });
 
   return Promise.race([
     promise,
@@ -178,6 +176,18 @@ app.post(
 
           totalRelations:
             library.relations.length,
+
+          graphGeneratedAt:
+            library.graph?.generatedAt ??
+            null,
+
+          totalGraphNodes:
+            library.graph?.nodes.length ??
+            0,
+
+          totalGraphRelations:
+            library.graph?.relations
+              .length ?? 0,
         },
       });
     } catch (error) {
@@ -352,8 +362,8 @@ app.get(
   },
 );
 
-app.post(
-  "/api/knowledge/rebuild",
+app.get(
+  "/api/knowledge/graph",
   async (_request, response) => {
     try {
       const library =
@@ -361,9 +371,46 @@ app.post(
           discoveryRepository,
         );
 
+      if (!library.graph) {
+        response.status(503).json({
+          error:
+            "The AI knowledge graph is currently unavailable.",
+        });
+
+        return;
+      }
+
+      response.json({
+        graph: library.graph,
+      });
+    } catch (error) {
+      console.error(
+        "Knowledge graph could not be loaded:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Knowledge graph could not be loaded.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/knowledge/rebuild",
+  async (_request, response) => {
+    try {
+      const library =
+        await rebuildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
+
       response.json({
         message:
-          "Knowledge library rebuilt successfully.",
+          "Knowledge library and AI knowledge graph rebuilt successfully.",
 
         library,
       });
@@ -378,6 +425,46 @@ app.post(
           error instanceof Error
             ? error.message
             : "Knowledge library rebuild failed.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/knowledge/graph/rebuild",
+  async (_request, response) => {
+    try {
+      const library =
+        await rebuildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
+
+      if (!library.graph) {
+        response.status(503).json({
+          error:
+            "The AI knowledge graph could not be generated.",
+        });
+
+        return;
+      }
+
+      response.json({
+        message:
+          "AI knowledge graph rebuilt successfully.",
+
+        graph: library.graph,
+      });
+    } catch (error) {
+      console.error(
+        "Knowledge graph rebuild failed:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Knowledge graph rebuild failed.",
       });
     }
   },
@@ -467,16 +554,28 @@ app.get(
           discoveryRepository,
         );
 
+      const graphNode =
+        library.graph?.nodes.find(
+          (node) =>
+            node.id === interestId ||
+            node.title
+              .trim()
+              .toLocaleLowerCase() ===
+              interestId
+                .trim()
+                .toLocaleLowerCase(),
+        );
+
       const interest =
         library.interests.find(
           (item) =>
             item.id === interestId,
         );
 
-      if (!interest) {
+      if (!interest && !graphNode) {
         response.status(404).json({
           error:
-            "Interest not found.",
+            "Interest or graph node not found.",
         });
 
         return;
@@ -490,7 +589,12 @@ app.get(
         );
 
       response.json({
-        interest,
+        interest:
+          interest ?? null,
+
+        graphNode:
+          graphNode ?? null,
+
         discoveries,
       });
     } catch (error) {
@@ -581,6 +685,9 @@ app.get(
           library.generatedAt,
 
         topics: library.topics,
+
+        graphNodes:
+          library.graph?.nodes ?? [],
       });
     } catch (error) {
       console.error(
@@ -655,6 +762,10 @@ app.listen(
 
     console.log(
       `Knowledge library: http://localhost:${port}/api/knowledge`,
+    );
+
+    console.log(
+      `AI knowledge graph: http://localhost:${port}/api/knowledge/graph`,
     );
   },
 );
