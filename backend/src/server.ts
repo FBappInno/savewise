@@ -8,13 +8,13 @@ import express, {
 } from "express";
 import { z } from "zod";
 
-import { importContent } from "./services/content-import-service";
+import { importContent } from "./services/import/content-import-service";
 import {
   rebuildKnowledgeLibrary,
   readKnowledgeLibrary,
   getRelatedDiscoveries,
   getDiscoveriesForInterest,
-} from "./services/knowledge-engine";
+} from "./services/knowledge/knowledge-engine";
 
 function withTimeout<T>(
   promise: Promise<T>,

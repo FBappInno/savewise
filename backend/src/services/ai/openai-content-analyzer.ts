@@ -5,8 +5,9 @@ import { z } from "zod/v3";
 import type {
   ContentAnalysis,
   ContentCategory,
-} from "../types/content-analysis";
-import type { PageMetadata } from "../types/page-metadata";
+} from "../../types/content-analysis";
+
+import type { PageMetadata } from "../../types/page-metadata";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

@@ -1,5 +1,5 @@
-import { analyzeContent } from "./openai-content-analyzer";
-import { fetchPageMetadata } from "./metadata-fetcher";
+import { analyzeContent } from "../ai/openai-content-analyzer";
+import { fetchPageMetadata } from "../../utils/metadata-fetcher";
 
 export async function importContent(
   url: string,
