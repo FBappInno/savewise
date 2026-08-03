@@ -26,7 +26,13 @@ import { ContentFetchError } from "./types/content-fetch-error";
 import {
   analyzeSecondBrain,
   answerKnowledgeQuestion,
+  generateKnowledgeDocument,
 } from "./services/ai/openai-second-brain";
+import {
+  loadPersonalAssistantProfile,
+  rememberKnowledgeQuestion,
+  savePersonalAssistantProfile,
+} from "./persistence/knowledge/personal-assistant-profile-store";
 import {
   getResearchState,
   runPersonalResearch,
@@ -110,6 +116,18 @@ const KnowledgeQuestionSchema = z.object({
     .trim()
     .min(3)
     .max(500),
+  history: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string().trim().min(1).max(5000),
+  })).max(12).default([]),
+});
+
+const KnowledgeDocumentRequestSchema = z.object({
+  type: z.enum([
+    "summary", "learning-plan", "presentation", "blog-article",
+    "checklist", "project-overview",
+  ]),
+  instruction: z.string().trim().min(3).max(500),
 });
 
 const ResearchCandidateStatusSchema = z.object({
@@ -898,9 +916,13 @@ app.post(
           parsedRequest.data.question,
           library.discoveries,
           library.graph,
+          parsedRequest.data.history,
+          await loadPersonalAssistantProfile(),
         ),
         100_000,
       );
+
+      await rememberKnowledgeQuestion(parsedRequest.data.question);
 
       response.json(answer);
     } catch (error) {
@@ -941,9 +963,12 @@ app.get(
         analyzeSecondBrain(
           library.discoveries,
           library.graph,
+          await loadPersonalAssistantProfile(),
         ),
         100_000,
       );
+
+      await savePersonalAssistantProfile(overview.profile);
 
       response.json(overview);
     } catch (error) {
@@ -957,6 +982,41 @@ app.get(
           error instanceof Error
             ? error.message
             : "The Second Brain analysis could not be generated.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/knowledge/documents",
+  async (request, response) => {
+    const parsedRequest = KnowledgeDocumentRequestSchema.safeParse(request.body);
+    if (!parsedRequest.success) {
+      response.status(400).json({ error: "A valid document type and instruction are required." });
+      return;
+    }
+
+    try {
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (!library.graph) {
+        response.status(503).json({ error: "The AI knowledge graph is currently unavailable." });
+        return;
+      }
+
+      const document = await withTimeout(
+        generateKnowledgeDocument(
+          parsedRequest.data.type,
+          parsedRequest.data.instruction,
+          library.discoveries,
+          library.graph,
+          await loadPersonalAssistantProfile(),
+        ),
+        110_000,
+      );
+      response.status(201).json(document);
+    } catch (error) {
+      response.status(500).json({
+        error: error instanceof Error ? error.message : "Knowledge document could not be generated.",
       });
     }
   },

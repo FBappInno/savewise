@@ -4,6 +4,9 @@ import type {
   DiscoveryUpdate,
   DiscoverySource,
   KnowledgeAnswer,
+  KnowledgeConversationMessage,
+  KnowledgeDocument,
+  KnowledgeDocumentType,
   KnowledgeLibrary,
   KnowledgeGraph,
   ResearchCandidateStatus,
@@ -349,6 +352,7 @@ export function updateKnowledgeTopic(
 
 export function askKnowledgeQuestion(
   question: string,
+  history: KnowledgeConversationMessage[] = [],
 ): Promise<KnowledgeAnswer> {
   return apiRequest<KnowledgeAnswer>(
     "/api/knowledge/ask",
@@ -356,9 +360,24 @@ export function askKnowledgeQuestion(
       method: "POST",
       body: JSON.stringify({
         question: question.trim(),
+        history: history.slice(-12),
       }),
     },
     105_000,
+  );
+}
+
+export function generateKnowledgeDocument(
+  type: KnowledgeDocumentType,
+  instruction: string,
+): Promise<KnowledgeDocument> {
+  return apiRequest<KnowledgeDocument>(
+    "/api/knowledge/documents",
+    {
+      method: "POST",
+      body: JSON.stringify({ type, instruction: instruction.trim() }),
+    },
+    115_000,
   );
 }
 

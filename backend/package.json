@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test:library": "tsx src/scripts/test-library-builder.ts",
     "test:content-fetcher": "tsx --test src/scripts/test-content-fetcher.ts",
-    "test:knowledge-overrides": "tsx --test src/scripts/test-knowledge-graph-overrides.ts"
+    "test:knowledge-overrides": "tsx --test src/scripts/test-knowledge-graph-overrides.ts",
+    "test:personal-assistant": "tsx --test src/scripts/test-personal-knowledge-assistant.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
