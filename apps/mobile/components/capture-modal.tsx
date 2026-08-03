@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
 import {
   KeyboardAvoidingView,
   Modal,
@@ -11,6 +12,10 @@ import {
 } from "react-native";
 
 import { SaveWiseButton } from "@/components/savewise-button";
+import {
+  isValidDiscoveryUrl,
+  normalizeDiscoveryUrl,
+} from "@/services/content-import-client";
 import { resolveMetadata } from "@/services/metadata-resolver";
 import { theme } from "@/theme";
 import type { CapturedItem } from "@/types/captured-item";
@@ -18,7 +23,9 @@ import type { CapturedItem } from "@/types/captured-item";
 type CaptureModalProps = {
   visible: boolean;
   onClose: () => void;
-  onSave: (capturedItem: CapturedItem) => void;
+  onSave: (
+    capturedItem: CapturedItem,
+  ) => void;
 };
 
 export function CaptureModal({
@@ -28,32 +35,54 @@ export function CaptureModal({
 }: CaptureModalProps) {
   const [url, setUrl] = useState("");
 
-  const normalizedUrl = url.trim();
+  const normalizedUrl = useMemo(
+    () => normalizeDiscoveryUrl(url),
+    [url],
+  );
 
-  const metadata = normalizedUrl
-    ? resolveMetadata(normalizedUrl)
-    : null;
+  const isValidUrl = useMemo(
+    () => isValidDiscoveryUrl(url),
+    [url],
+  );
+
+  const metadata = useMemo(
+    () =>
+      isValidUrl
+        ? resolveMetadata(normalizedUrl)
+        : null,
+    [
+      isValidUrl,
+      normalizedUrl,
+    ],
+  );
 
   function resetForm() {
     setUrl("");
   }
 
   function handleSave() {
-    if (!normalizedUrl || !metadata) {
+    if (
+      !isValidUrl ||
+      !metadata
+    ) {
       return;
     }
 
     const capturedItem: CapturedItem = {
       id: Date.now().toString(),
+
       title: metadata.title,
+
       url: normalizedUrl,
+
       source: metadata.source,
-      capturedAt: new Date().toISOString(),
+
+      capturedAt:
+        new Date().toISOString(),
     };
 
     onSave(capturedItem);
     resetForm();
-    onClose();
   }
 
   function handleClose() {
@@ -69,7 +98,11 @@ export function CaptureModal({
       visible={visible}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : undefined
+        }
         style={styles.screen}
       >
         <View style={styles.header}>
@@ -77,16 +110,28 @@ export function CaptureModal({
             accessibilityRole="button"
             onPress={handleClose}
           >
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text
+              style={styles.cancelText}
+            >
+              Cancel
+            </Text>
           </Pressable>
 
-          <Text style={styles.headerTitle}>New discovery</Text>
+          <Text
+            style={styles.headerTitle}
+          >
+            New discovery
+          </Text>
 
-          <View style={styles.headerSpacer} />
+          <View
+            style={styles.headerSpacer}
+          />
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.label}>Link</Text>
+          <Text style={styles.label}>
+            Link
+          </Text>
 
           <TextInput
             autoCapitalize="none"
@@ -94,33 +139,72 @@ export function CaptureModal({
             autoFocus
             keyboardType="url"
             onChangeText={setUrl}
-            onSubmitEditing={handleSave}
-            placeholder="https://..."
-            placeholderTextColor={theme.colors.placeholder}
+            onSubmitEditing={
+              handleSave
+            }
+            placeholder="example.com/article"
+            placeholderTextColor={
+              theme.colors.placeholder
+            }
             returnKeyType="done"
             style={styles.input}
             value={url}
           />
 
-          {metadata && (
+          {url.trim().length > 0 &&
+          !isValidUrl ? (
+            <Text
+              style={styles.validationText}
+            >
+              Please enter a valid web
+              address.
+            </Text>
+          ) : null}
+
+          {metadata ? (
             <View style={styles.preview}>
-              <Text style={styles.previewLabel}>
+              <Text
+                style={
+                  styles.previewLabel
+                }
+              >
                 SaveWise detected
               </Text>
 
-              <Text style={styles.previewTitle}>
+              <Text
+                style={
+                  styles.previewTitle
+                }
+              >
                 {metadata.title}
               </Text>
 
-              <Text style={styles.previewSource}>
-                {formatSource(metadata.source)}
+              <Text
+                style={
+                  styles.previewSource
+                }
+              >
+                {formatSource(
+                  metadata.source,
+                )}
+              </Text>
+
+              <Text
+                numberOfLines={2}
+                style={styles.previewUrl}
+              >
+                {normalizedUrl}
               </Text>
             </View>
-          )}
+          ) : null}
 
-          <View style={styles.buttonContainer}>
+          <View
+            style={
+              styles.buttonContainer
+            }
+          >
             <SaveWiseButton
-              disabled={!normalizedUrl}
+              disabled={!isValidUrl}
               label="Save discovery"
               onPress={handleSave}
             />
@@ -131,8 +215,13 @@ export function CaptureModal({
   );
 }
 
-function formatSource(source: CapturedItem["source"]) {
-  const labels: Record<CapturedItem["source"], string> = {
+function formatSource(
+  source: CapturedItem["source"],
+): string {
+  const labels: Record<
+    CapturedItem["source"],
+    string
+  > = {
     youtube: "YouTube",
     instagram: "Instagram",
     tiktok: "TikTok",
@@ -145,16 +234,20 @@ function formatSource(source: CapturedItem["source"]) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor:
+      theme.colors.background,
   },
 
   header: {
     minHeight: 64,
     alignItems: "center",
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.lg,
+    justifyContent:
+      "space-between",
+    paddingHorizontal:
+      theme.spacing.xl,
+    paddingTop:
+      theme.spacing.lg,
   },
 
   headerSpacer: {
@@ -163,63 +256,101 @@ const styles = StyleSheet.create({
 
   cancelText: {
     ...theme.typography.body,
-    color: theme.colors.primary,
+    color:
+      theme.colors.primary,
   },
 
   headerTitle: {
     ...theme.typography.bodyStrong,
-    color: theme.colors.text,
+    color:
+      theme.colors.text,
   },
 
   content: {
     flex: 1,
-    padding: theme.spacing.xl,
+    padding:
+      theme.spacing.xl,
   },
 
   label: {
     ...theme.typography.bodyStrong,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
+    color:
+      theme.colors.text,
+    marginBottom:
+      theme.spacing.sm,
   },
 
   input: {
     ...theme.typography.body,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
+    backgroundColor:
+      theme.colors.surface,
+    borderColor:
+      theme.colors.border,
+    borderRadius:
+      theme.radius.md,
     borderWidth: 1,
-    color: theme.colors.text,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.lg,
+    color:
+      theme.colors.text,
+    paddingHorizontal:
+      theme.spacing.lg,
+    paddingVertical:
+      theme.spacing.lg,
+  },
+
+  validationText: {
+    ...theme.typography.caption,
+    color:
+      theme.colors.textSecondary,
+    marginTop:
+      theme.spacing.sm,
   },
 
   preview: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
+    backgroundColor:
+      theme.colors.surface,
+    borderColor:
+      theme.colors.border,
+    borderRadius:
+      theme.radius.lg,
     borderWidth: 1,
-    marginTop: theme.spacing.xl,
-    padding: theme.spacing.lg,
+    marginTop:
+      theme.spacing.xl,
+    padding:
+      theme.spacing.lg,
   },
 
   previewLabel: {
     ...theme.typography.caption,
-    color: theme.colors.textSecondary,
+    color:
+      theme.colors.textSecondary,
   },
 
   previewTitle: {
     ...theme.typography.sectionTitle,
-    color: theme.colors.text,
-    marginTop: theme.spacing.sm,
+    color:
+      theme.colors.text,
+    marginTop:
+      theme.spacing.sm,
   },
 
   previewSource: {
     ...theme.typography.body,
-    color: theme.colors.primary,
-    marginTop: theme.spacing.xs,
+    color:
+      theme.colors.primary,
+    marginTop:
+      theme.spacing.xs,
+  },
+
+  previewUrl: {
+    ...theme.typography.caption,
+    color:
+      theme.colors.textSecondary,
+    marginTop:
+      theme.spacing.sm,
   },
 
   buttonContainer: {
-    marginTop: theme.spacing.xl,
+    marginTop:
+      theme.spacing.xl,
   },
 });

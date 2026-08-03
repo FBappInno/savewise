@@ -71,7 +71,8 @@ export type RelatedDiscoveriesResponse = {
 };
 
 function getApiUrl(): string {
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  const apiUrl =
+    process.env.EXPO_PUBLIC_API_URL;
 
   if (!apiUrl) {
     throw new Error(
@@ -98,11 +99,13 @@ async function apiRequest<T>(
       `${getApiUrl()}${path}`,
       {
         ...options,
+
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
           ...options.headers,
         },
+
         signal: controller.signal,
       },
     );
@@ -152,13 +155,67 @@ async function apiRequest<T>(
   }
 }
 
+export function normalizeDiscoveryUrl(
+  rawUrl: string,
+): string {
+  const trimmedUrl = rawUrl.trim();
+
+  if (!trimmedUrl) {
+    return "";
+  }
+
+  if (
+    /^https?:\/\//i.test(trimmedUrl)
+  ) {
+    return trimmedUrl;
+  }
+
+  return `https://${trimmedUrl}`;
+}
+
+export function isValidDiscoveryUrl(
+  rawUrl: string,
+): boolean {
+  const normalizedUrl =
+    normalizeDiscoveryUrl(rawUrl);
+
+  if (!normalizedUrl) {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(
+      normalizedUrl,
+    );
+
+    return (
+      parsedUrl.protocol === "http:" ||
+      parsedUrl.protocol === "https:"
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function importContent(
-  url: string,
+  rawUrl: string,
 ): Promise<ImportResponse> {
+  const url =
+    normalizeDiscoveryUrl(rawUrl);
+
+  if (!isValidDiscoveryUrl(url)) {
+    return Promise.reject(
+      new Error(
+        "Bitte gib eine gültige Internetadresse ein.",
+      ),
+    );
+  }
+
   return apiRequest<ImportResponse>(
     "/api/import",
     {
       method: "POST",
+
       body: JSON.stringify({
         url,
       }),
@@ -229,8 +286,11 @@ export function getRelatedDiscoveries(
 }
 
 export function detectDiscoverySource(
-  url: string,
+  rawUrl: string,
 ): DiscoverySource {
+  const url =
+    normalizeDiscoveryUrl(rawUrl);
+
   try {
     const hostname = new URL(url)
       .hostname
@@ -239,7 +299,9 @@ export function detectDiscoverySource(
 
     if (
       hostname === "youtube.com" ||
-      hostname.endsWith(".youtube.com") ||
+      hostname.endsWith(
+        ".youtube.com",
+      ) ||
       hostname === "youtu.be"
     ) {
       return "youtube";
@@ -247,14 +309,18 @@ export function detectDiscoverySource(
 
     if (
       hostname === "instagram.com" ||
-      hostname.endsWith(".instagram.com")
+      hostname.endsWith(
+        ".instagram.com",
+      )
     ) {
       return "instagram";
     }
 
     if (
       hostname === "tiktok.com" ||
-      hostname.endsWith(".tiktok.com")
+      hostname.endsWith(
+        ".tiktok.com",
+      )
     ) {
       return "tiktok";
     }
