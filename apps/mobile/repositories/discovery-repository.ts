@@ -1,13 +1,15 @@
 import type { Discovery } from "@/types/discovery";
 
-export type DiscoveryRepository = {
+export interface DiscoveryRepository {
   getAll(): Promise<Discovery[]>;
 
-  saveAll(
-    discoveries: Discovery[],
-  ): Promise<void>;
+  refresh(): Promise<Discovery[]>;
 
-  update(
-    discovery: Discovery,
+  importFromUrl(
+    url: string,
+  ): Promise<Discovery>;
+
+  delete(
+    discoveryId: string,
   ): Promise<void>;
-};
+}

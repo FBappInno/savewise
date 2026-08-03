@@ -1,13 +1,22 @@
 import type {
+  Discovery,
   DiscoveryCategory,
   DiscoverySource,
-} from "@/types/discovery";
+  KnowledgeLibrary,
+} from "@savewise/shared";
+
+export type KnowledgeUpdate = {
+  generatedAt: string;
+  totalDiscoveries: number;
+  totalTopics: number;
+  totalInterests: number;
+  totalRelations: number;
+};
 
 export type ImportResponse = {
   metadata: {
     url: string;
     title: string;
-
     description?: string;
     author?: string;
     thumbnailUrl?: string;
@@ -17,42 +26,52 @@ export type ImportResponse = {
 
   analysis: {
     improvedTitle: string;
-
     summary: string;
 
     classification: {
-      primaryCategory:
-        DiscoveryCategory;
-
+      primaryCategory: DiscoveryCategory;
       secondaryCategory: string;
-
       topic: string;
-
       subtopics: string[];
     };
 
     keywords: string[];
-
     language: string;
-
     confidence: number;
   };
 
   organization: {
-    primaryCategory:
-      DiscoveryCategory;
-
+    primaryCategory: DiscoveryCategory;
     secondaryCategory: string;
-
     topic: string;
-
     subtopics: string[];
   };
+
+  discovery: Discovery;
+  knowledgeUpdate: KnowledgeUpdate;
+};
+
+export type DiscoveriesResponse = {
+  discoveries: Discovery[];
+};
+
+export type DiscoveryResponse = {
+  discovery: Discovery;
+};
+
+export type RelatedDiscovery = {
+  discovery: Discovery;
+  score: number;
+  reasons: string[];
+};
+
+export type RelatedDiscoveriesResponse = {
+  discoveryId: string;
+  related: RelatedDiscovery[];
 };
 
 function getApiUrl(): string {
-  const apiUrl =
-    process.env.EXPO_PUBLIC_API_URL;
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
   if (!apiUrl) {
     throw new Error(
@@ -63,34 +82,34 @@ function getApiUrl(): string {
   return apiUrl.replace(/\/$/, "");
 }
 
-export async function importContent(
-  url: string,
-): Promise<ImportResponse> {
-  const controller =
-    new AbortController();
+async function apiRequest<T>(
+  path: string,
+  options: RequestInit = {},
+  timeoutMs = 30_000,
+): Promise<T> {
+  const controller = new AbortController();
 
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, 90_000);
+  }, timeoutMs);
 
   try {
     const response = await fetch(
-      `${getApiUrl()}/api/import`,
+      `${getApiUrl()}${path}`,
       {
-        method: "POST",
-
+        ...options,
         headers: {
-          "Content-Type":
-            "application/json",
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...options.headers,
         },
-
-        body: JSON.stringify({
-          url,
-        }),
-
         signal: controller.signal,
       },
     );
+
+    if (response.status === 204) {
+      return undefined as T;
+    }
 
     let body: unknown;
 
@@ -109,19 +128,21 @@ export async function importContent(
         "error" in body &&
         typeof body.error === "string"
           ? body.error
-          : "Der Import ist fehlgeschlagen.";
+          : `Backend-Fehler ${response.status}.`;
 
       throw new Error(errorMessage);
     }
 
-    return body as ImportResponse;
+    return body as T;
   } catch (error) {
     if (
       error instanceof Error &&
       error.name === "AbortError"
     ) {
       throw new Error(
-        "Die Analyse hat länger als 90 Sekunden gedauert.",
+        `Die Anfrage hat länger als ${
+          timeoutMs / 1000
+        } Sekunden gedauert.`,
       );
     }
 
@@ -129,6 +150,82 @@ export async function importContent(
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+export function importContent(
+  url: string,
+): Promise<ImportResponse> {
+  return apiRequest<ImportResponse>(
+    "/api/import",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        url,
+      }),
+    },
+    90_000,
+  );
+}
+
+export function getDiscoveries(): Promise<DiscoveriesResponse> {
+  return apiRequest<DiscoveriesResponse>(
+    "/api/discoveries",
+  );
+}
+
+export function getDiscovery(
+  discoveryId: string,
+): Promise<DiscoveryResponse> {
+  return apiRequest<DiscoveryResponse>(
+    `/api/discoveries/${encodeURIComponent(
+      discoveryId,
+    )}`,
+  );
+}
+
+export function deleteDiscovery(
+  discoveryId: string,
+): Promise<void> {
+  return apiRequest<void>(
+    `/api/discoveries/${encodeURIComponent(
+      discoveryId,
+    )}`,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+export function getKnowledgeLibrary(): Promise<KnowledgeLibrary> {
+  return apiRequest<KnowledgeLibrary>(
+    "/api/knowledge",
+  );
+}
+
+export function rebuildKnowledgeLibrary(): Promise<{
+  message: string;
+  library: KnowledgeLibrary;
+}> {
+  return apiRequest<{
+    message: string;
+    library: KnowledgeLibrary;
+  }>(
+    "/api/knowledge/rebuild",
+    {
+      method: "POST",
+    },
+  );
+}
+
+export function getRelatedDiscoveries(
+  discoveryId: string,
+  limit = 5,
+): Promise<RelatedDiscoveriesResponse> {
+  return apiRequest<RelatedDiscoveriesResponse>(
+    `/api/knowledge/related/${encodeURIComponent(
+      discoveryId,
+    )}?limit=${limit}`,
+  );
 }
 
 export function detectDiscoverySource(
@@ -142,9 +239,7 @@ export function detectDiscoverySource(
 
     if (
       hostname === "youtube.com" ||
-      hostname.endsWith(
-        ".youtube.com",
-      ) ||
+      hostname.endsWith(".youtube.com") ||
       hostname === "youtu.be"
     ) {
       return "youtube";
@@ -152,18 +247,14 @@ export function detectDiscoverySource(
 
     if (
       hostname === "instagram.com" ||
-      hostname.endsWith(
-        ".instagram.com",
-      )
+      hostname.endsWith(".instagram.com")
     ) {
       return "instagram";
     }
 
     if (
       hostname === "tiktok.com" ||
-      hostname.endsWith(
-        ".tiktok.com",
-      )
+      hostname.endsWith(".tiktok.com")
     ) {
       return "tiktok";
     }

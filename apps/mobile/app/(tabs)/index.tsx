@@ -1,9 +1,12 @@
 import {
-  useEffect,
+  useMemo,
   useState,
 } from "react";
 
 import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,58 +17,77 @@ import { CaptureModal } from "@/components/capture-modal";
 import { DiscoveryCard } from "@/components/discovery-card";
 import { SaveWiseButton } from "@/components/savewise-button";
 import { SearchBar } from "@/components/search-bar";
-import { localDiscoveryRepository } from "@/repositories/local-discovery-repository";
-import {
-  detectDiscoverySource,
-  importContent,
-} from "@/services/content-import-client";
+import { useDiscoveries } from "@/hooks/use-discoveries";
 import { theme } from "@/theme";
 import type { CapturedItem } from "@/types/captured-item";
 import type { Discovery } from "@/types/discovery";
 
 export default function HomeScreen() {
   const [
-    discoveries,
-    setDiscoveries,
-  ] = useState<Discovery[]>([]);
-
-  const [
-    isRepositoryReady,
-    setRepositoryReady,
-  ] = useState(false);
-
-  const [
     isCaptureModalVisible,
     setCaptureModalVisible,
   ] = useState(false);
 
-  useEffect(() => {
-    async function initializeDiscoveries() {
-      const storedDiscoveries =
-        await localDiscoveryRepository.getAll();
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-      setDiscoveries(
-        storedDiscoveries,
-      );
-
-      setRepositoryReady(true);
-    }
-
-    void initializeDiscoveries();
-  }, []);
-
-  useEffect(() => {
-    if (!isRepositoryReady) {
-      return;
-    }
-
-    void localDiscoveryRepository.saveAll(
-      discoveries,
-    );
-  }, [
+  const {
     discoveries,
-    isRepositoryReady,
-  ]);
+    isLoading,
+    isRefreshing,
+    isImporting,
+    error,
+    refresh,
+    importDiscovery,
+  } = useDiscoveries();
+
+  const filteredDiscoveries =
+    useMemo(() => {
+      const normalizedSearch =
+        search
+          .trim()
+          .toLocaleLowerCase();
+
+      if (!normalizedSearch) {
+        return discoveries;
+      }
+
+      return discoveries.filter(
+        (discovery) => {
+          const searchableValues = [
+            discovery.title,
+            discovery.improvedTitle,
+            discovery.summary,
+            discovery.description,
+            discovery.author,
+            discovery.classification
+              ?.primaryCategory,
+            discovery.classification
+              ?.secondaryCategory,
+            discovery.classification
+              ?.topic,
+            ...discovery.topics,
+            ...discovery.keywords,
+          ];
+
+          return searchableValues.some(
+            (value) =>
+              typeof value ===
+                "string" &&
+              value
+                .toLocaleLowerCase()
+                .includes(
+                  normalizedSearch,
+                ),
+          );
+        },
+      );
+    }, [
+      discoveries,
+      search,
+    ]);
 
   function handleDiscoveryPress(
     discovery: Discovery,
@@ -76,143 +98,23 @@ export default function HomeScreen() {
     );
   }
 
-  function handleCapture() {
-    setCaptureModalVisible(true);
-  }
-
   async function handleSaveCapture(
     capturedItem: CapturedItem,
   ) {
-    const now = new Date().toISOString();
-
-    const temporaryDiscovery: Discovery = {
-      id: capturedItem.id,
-
-      title: "Analyzing content...",
-
-      source:
-        capturedItem.source,
-
-      url:
-        capturedItem.url,
-
-      topics: [],
-
-      keywords: [],
-createdAt: now,
-updatedAt: now,
-      savedAtLabel: "Just now",
-    };
-
-    setDiscoveries(
-      (currentDiscoveries) => [
-        temporaryDiscovery,
-        ...currentDiscoveries,
-      ],
-    );
-
     try {
-      const result =
-        await importContent(
-          capturedItem.url,
-        );
-
-      const classification =
-        result.analysis.classification;
-
-      const analyzedDiscovery: Discovery = {
-        id: capturedItem.id,
-
-        title:
-          result.analysis.improvedTitle,
-
-        source:
-          detectDiscoverySource(
-            result.metadata.url,
-          ),
-
-        url:
-          result.metadata.url,
-
-        description:
-          result.metadata.description,
-
-        summary:
-          result.analysis.summary,
-
-        thumbnailUrl:
-          result.metadata.thumbnailUrl,
-
-        author:
-          result.metadata.author,
-
-        publishedAt:
-          result.metadata.publishedAt,
-
-        classification,
-
-        topics: [
-          classification.topic,
-          ...classification.subtopics,
-        ],
-
-        keywords:
-          result.analysis.keywords,
-
-        language:
-          result.analysis.language,
-
-        confidence:
-          result.analysis.confidence,
-createdAt: temporaryDiscovery.createdAt,
-updatedAt: new Date().toISOString(),
-        savedAtLabel: "Just now",
-      };
-
-      setDiscoveries(
-        (currentDiscoveries) =>
-          currentDiscoveries.map(
-            (discovery) =>
-              discovery.id ===
-              analyzedDiscovery.id
-                ? analyzedDiscovery
-                : discovery,
-          ),
-      );
-    } catch (error) {
-      console.error(
-        "Content analysis failed:",
-        error,
+      await importDiscovery(
+        capturedItem.url,
       );
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Unknown error";
-
-      setDiscoveries(
-        (currentDiscoveries) =>
-          currentDiscoveries.map(
-            (discovery) =>
-              discovery.id ===
-              capturedItem.id
-                ? {
-                    ...discovery,
-
-                    title:
-                      capturedItem.title,
-
-                    description:
-                      errorMessage,
-
-                    topics: [
-                      "Analysis failed",
-                    ],
-
-                    keywords: [],
-                  }
-                : discovery,
-          ),
+      setCaptureModalVisible(
+        false,
+      );
+    } catch (importError) {
+      Alert.alert(
+        "Import fehlgeschlagen",
+        importError instanceof Error
+          ? importError.message
+          : "Der Inhalt konnte nicht importiert werden.",
       );
     }
   }
@@ -227,6 +129,16 @@ updatedAt: new Date().toISOString(),
         showsVerticalScrollIndicator={
           false
         }
+        refreshControl={
+          <RefreshControl
+            refreshing={
+              isRefreshing
+            }
+            onRefresh={() => {
+              void refresh();
+            }}
+          />
+        }
       >
         <View style={styles.header}>
           <Text style={styles.logo}>
@@ -240,26 +152,101 @@ updatedAt: new Date().toISOString(),
         </View>
 
         <SearchBar
-          placeholder={
-            "Search your discoveries..."
-          }
+          placeholder="Search your discoveries..."
+          value={search}
+          onChangeText={setSearch}
         />
 
+        {error ? (
+          <View style={styles.errorBox}>
+            <Text
+              style={
+                styles.errorText
+              }
+            >
+              {error}
+            </Text>
+          </View>
+        ) : null}
+
         <View style={styles.section}>
-          <Text
+          <View
             style={
-              styles.sectionTitle
+              styles.sectionHeader
             }
           >
-            Today&apos;s discoveries
-          </Text>
+            <Text
+              style={
+                styles.sectionTitle
+              }
+            >
+              Discoveries
+            </Text>
+
+            <Text
+              style={
+                styles.discoveryCount
+              }
+            >
+              {
+                filteredDiscoveries.length
+              }
+            </Text>
+          </View>
+
+          {isLoading ? (
+            <View
+              style={
+                styles.loadingContainer
+              }
+            >
+              <ActivityIndicator />
+
+              <Text
+                style={
+                  styles.loadingText
+                }
+              >
+                Loading discoveries...
+              </Text>
+            </View>
+          ) : null}
+
+          {!isLoading &&
+          filteredDiscoveries.length ===
+            0 ? (
+            <View
+              style={
+                styles.emptyState
+              }
+            >
+              <Text
+                style={
+                  styles.emptyTitle
+                }
+              >
+                No discoveries yet
+              </Text>
+
+              <Text
+                style={
+                  styles.emptyText
+                }
+              >
+                Capture your first URL
+                to start building your
+                personal knowledge
+                library.
+              </Text>
+            </View>
+          ) : null}
 
           <View
             style={
               styles.discoveryList
             }
           >
-            {discoveries.map(
+            {filteredDiscoveries.map(
               (discovery) => (
                 <DiscoveryCard
                   key={discovery.id}
@@ -278,8 +265,17 @@ updatedAt: new Date().toISOString(),
 
       <View style={styles.footer}>
         <SaveWiseButton
-          label="+ Capture"
-          onPress={handleCapture}
+          label={
+            isImporting
+              ? "Analyzing..."
+              : "+ Capture"
+          }
+          disabled={isImporting}
+          onPress={() => {
+            setCaptureModalVisible(
+              true,
+            );
+          }}
         />
       </View>
 
@@ -287,11 +283,13 @@ updatedAt: new Date().toISOString(),
         visible={
           isCaptureModalVisible
         }
-        onClose={() =>
-          setCaptureModalVisible(
-            false,
-          )
-        }
+        onClose={() => {
+          if (!isImporting) {
+            setCaptureModalVisible(
+              false,
+            );
+          }
+        }}
         onSave={
           handleSaveCapture
         }
@@ -303,7 +301,6 @@ updatedAt: new Date().toISOString(),
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-
     backgroundColor:
       theme.colors.background,
   },
@@ -311,38 +308,49 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal:
       theme.spacing.xl,
-
     paddingTop:
       theme.spacing.xxxl,
-
-    paddingBottom:
-      theme.spacing.xl,
+    paddingBottom: 120,
   },
 
   header: {
     alignItems: "center",
-
     marginBottom:
       theme.spacing.xxl,
   },
 
   logo: {
     ...theme.typography.screenTitle,
-
-    color:
-      theme.colors.text,
+    color: theme.colors.text,
   },
 
   subtitle: {
     ...theme.typography.body,
-
     color:
       theme.colors.textSecondary,
-
     marginTop:
       theme.spacing.sm,
-
     textAlign: "center",
+  },
+
+  errorBox: {
+    marginTop:
+      theme.spacing.lg,
+    padding:
+      theme.spacing.md,
+    borderRadius:
+      theme.radius.md,
+    backgroundColor:
+      theme.colors.surface,
+    borderColor:
+      theme.colors.border,
+    borderWidth: 1,
+  },
+
+  errorText: {
+    ...theme.typography.body,
+    color:
+      theme.colors.textSecondary,
   },
 
   section: {
@@ -350,32 +358,71 @@ const styles = StyleSheet.create({
       theme.spacing.xxl,
   },
 
-  sectionTitle: {
-    ...theme.typography.sectionTitle,
-
-    color:
-      theme.colors.text,
-
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent:
+      "space-between",
     marginBottom:
       theme.spacing.lg,
   },
 
+  sectionTitle: {
+    ...theme.typography.sectionTitle,
+    color: theme.colors.text,
+  },
+
+  discoveryCount: {
+    ...theme.typography.caption,
+    color:
+      theme.colors.textSecondary,
+  },
+
   discoveryList: {
-    gap:
-      theme.spacing.lg,
+    gap: theme.spacing.lg,
+  },
+
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical:
+      theme.spacing.xxxl,
+  },
+
+  loadingText: {
+    ...theme.typography.body,
+    color:
+      theme.colors.textSecondary,
+    marginTop:
+      theme.spacing.md,
+  },
+
+  emptyState: {
+    alignItems: "center",
+    paddingVertical:
+      theme.spacing.xxxl,
+    paddingHorizontal:
+      theme.spacing.xl,
+  },
+
+  emptyTitle: {
+    ...theme.typography.sectionTitle,
+    color: theme.colors.text,
+    textAlign: "center",
+  },
+
+  emptyText: {
+    ...theme.typography.body,
+    color:
+      theme.colors.textSecondary,
+    marginTop:
+      theme.spacing.sm,
+    textAlign: "center",
   },
 
   footer: {
-    backgroundColor:
-      theme.colors.background,
-
-    paddingHorizontal:
-      theme.spacing.xl,
-
-    paddingTop:
-      theme.spacing.sm,
-
-    paddingBottom:
-      theme.spacing.xl,
+    position: "absolute",
+    left: theme.spacing.xl,
+    right: theme.spacing.xl,
+    bottom: theme.spacing.xl,
   },
 });
