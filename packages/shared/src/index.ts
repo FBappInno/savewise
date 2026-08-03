@@ -1,12 +1,12 @@
 export * from "./models/Discovery";
+export * from "./models/Insight";
 export * from "./models/Interest";
+export * from "./models/KnowledgeItem";
+export * from "./models/KnowledgeLibrary";
 export * from "./models/KnowledgeNode";
+export * from "./models/KnowledgeSource";
 export * from "./models/Relation";
 export * from "./models/Topic";
 
-export * from "./models/KnowledgeItem";
-export * from "./models/KnowledgeSource";
-
-export * from "./models/KnowledgeLibrary";
 export * from "./services/AIService";
 export * from "./services/MockAIService";

@@ -7,36 +7,76 @@ import type {
   Topic,
 } from "@savewise/shared";
 
+import {
+  buildInsights,
+  buildKnowledgeActivity,
+} from "../insights/insight-engine";
+
 type TopicAccumulator = {
   topic: Topic;
+
   discoveryIds: string[];
 };
 
 export function buildKnowledgeLibrary(
   discoveries: Discovery[],
 ): KnowledgeLibrary {
+  const generatedAt =
+    new Date().toISOString();
+
   const topicAccumulators =
-    buildTopicAccumulators(discoveries);
+    buildTopicAccumulators(
+      discoveries,
+    );
 
-  const topics = topicAccumulators.map(
-    ({ topic }) => topic,
-  );
+  const topics =
+    topicAccumulators.map(
+      ({ topic }) => topic,
+    );
 
-  const interests = buildInterests(topics);
+  const interests =
+    buildInterests(topics);
 
-  const nodes = buildKnowledgeNodes(
-    topicAccumulators,
-  );
+  const nodes =
+    buildKnowledgeNodes(
+      topicAccumulators,
+    );
 
-  const relations = buildRelations(topics);
+  const relations =
+    buildRelations(topics);
+
+  const insights =
+    buildInsights({
+      discoveries,
+      topics,
+      interests,
+      relations,
+      generatedAt,
+    });
+
+  const activity =
+    buildKnowledgeActivity(
+      discoveries,
+      topics,
+      generatedAt,
+    );
 
   return {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
+
     discoveries,
+
     topics,
+
     interests,
+
     nodes,
+
     relations,
+
+    insights,
+
+    activity,
   };
 }
 
@@ -50,29 +90,40 @@ function buildTopicAccumulators(
 
   for (const discovery of discoveries) {
     const topicName =
-      discovery.classification?.topic.trim() ||
+      discovery.classification
+        ?.topic.trim() ||
       discovery.topics[0]?.trim() ||
       "Uncategorized";
 
-    const topicId = createSlug(topicName);
+    const topicId =
+      createSlug(topicName);
 
-    let accumulator = map.get(topicId);
+    let accumulator =
+      map.get(topicId);
 
     if (!accumulator) {
       accumulator = {
         topic: {
           id: topicId,
+
           name: topicName,
+
           discoveries: 0,
+
           keywords: [],
         },
+
         discoveryIds: [],
       };
 
-      map.set(topicId, accumulator);
+      map.set(
+        topicId,
+        accumulator,
+      );
     }
 
-    accumulator.topic.discoveries += 1;
+    accumulator.topic.discoveries +=
+      1;
 
     if (
       !accumulator.discoveryIds.includes(
@@ -84,7 +135,10 @@ function buildTopicAccumulators(
       );
     }
 
-    for (const keyword of discovery.keywords) {
+    for (
+      const keyword of
+        discovery.keywords
+    ) {
       addUniqueKeyword(
         accumulator.topic.keywords,
         keyword,
@@ -92,7 +146,9 @@ function buildTopicAccumulators(
     }
   }
 
-  return [...map.values()].sort(
+  return [
+    ...map.values(),
+  ].sort(
     (first, second) =>
       second.topic.discoveries -
       first.topic.discoveries,
@@ -105,31 +161,46 @@ function buildInterests(
   const highestDiscoveryCount =
     topics[0]?.discoveries ?? 0;
 
-  return topics.map((topic) => ({
-    id: topic.id,
-    name: topic.name,
-    discoveries: topic.discoveries,
-    score:
-      highestDiscoveryCount === 0
-        ? 0
-        : Number(
-            (
-              topic.discoveries /
-              highestDiscoveryCount
-            ).toFixed(4),
-          ),
-  }));
+  return topics.map(
+    (topic) => ({
+      id: topic.id,
+
+      name: topic.name,
+
+      discoveries:
+        topic.discoveries,
+
+      score:
+        highestDiscoveryCount === 0
+          ? 0
+          : Number(
+              (
+                topic.discoveries /
+                highestDiscoveryCount
+              ).toFixed(4),
+            ),
+    }),
+  );
 }
 
 function buildKnowledgeNodes(
   topics: TopicAccumulator[],
 ): KnowledgeNode[] {
   return topics.map(
-    ({ topic, discoveryIds }) => ({
+    ({
+      topic,
+      discoveryIds,
+    }) => ({
       id: topic.id,
+
       title: topic.name,
+
       category: "topic",
-      discoveries: [...discoveryIds],
+
+      discoveries: [
+        ...discoveryIds,
+      ],
+
       children: [],
     }),
   );
@@ -138,20 +209,27 @@ function buildKnowledgeNodes(
 function buildRelations(
   topics: Topic[],
 ): Relation[] {
-  const relations: Relation[] = [];
+  const relations: Relation[] =
+    [];
 
   for (
     let firstIndex = 0;
-    firstIndex < topics.length;
+    firstIndex <
+    topics.length;
     firstIndex += 1
   ) {
     for (
-      let secondIndex = firstIndex + 1;
-      secondIndex < topics.length;
+      let secondIndex =
+        firstIndex + 1;
+      secondIndex <
+      topics.length;
       secondIndex += 1
     ) {
-      const firstTopic = topics[firstIndex];
-      const secondTopic = topics[secondIndex];
+      const firstTopic =
+        topics[firstIndex];
+
+      const secondTopic =
+        topics[secondIndex];
 
       const sharedKeywords =
         findSharedKeywords(
@@ -159,18 +237,22 @@ function buildRelations(
           secondTopic.keywords,
         );
 
-      if (sharedKeywords.length === 0) {
+      if (
+        sharedKeywords.length === 0
+      ) {
         continue;
       }
 
-      const allKeywords = new Set([
-        ...firstTopic.keywords.map(
-          normalizeText,
-        ),
-        ...secondTopic.keywords.map(
-          normalizeText,
-        ),
-      ]);
+      const allKeywords =
+        new Set([
+          ...firstTopic.keywords.map(
+            normalizeText,
+          ),
+
+          ...secondTopic.keywords.map(
+            normalizeText,
+          ),
+        ]);
 
       const strength =
         allKeywords.size === 0
@@ -179,21 +261,28 @@ function buildRelations(
             allKeywords.size;
 
       relations.push({
-        sourceId: firstTopic.id,
-        targetId: secondTopic.id,
+        sourceId:
+          firstTopic.id,
+
+        targetId:
+          secondTopic.id,
+
         strength: Number(
           strength.toFixed(4),
         ),
-        reason: `Gemeinsame Keywords: ${sharedKeywords.join(
-          ", ",
-        )}`,
+
+        reason:
+          `Shared keywords: ${sharedKeywords.join(
+            ", ",
+          )}`,
       });
     }
   }
 
   return relations.sort(
     (first, second) =>
-      second.strength - first.strength,
+      second.strength -
+      first.strength,
   );
 }
 
@@ -201,16 +290,23 @@ function findSharedKeywords(
   firstKeywords: string[],
   secondKeywords: string[],
 ): string[] {
-  const secondKeywordMap = new Map(
-    secondKeywords.map((keyword) => [
-      normalizeText(keyword),
-      keyword,
-    ]),
-  );
+  const secondKeywordMap =
+    new Map(
+      secondKeywords.map(
+        (keyword) => [
+          normalizeText(keyword),
+          keyword,
+        ],
+      ),
+    );
 
-  const sharedKeywords: string[] = [];
+  const sharedKeywords:
+    string[] = [];
 
-  for (const keyword of firstKeywords) {
+  for (
+    const keyword of
+      firstKeywords
+  ) {
     const normalizedKeyword =
       normalizeText(keyword);
 
@@ -220,7 +316,9 @@ function findSharedKeywords(
         normalizedKeyword,
       )
     ) {
-      sharedKeywords.push(keyword);
+      sharedKeywords.push(
+        keyword,
+      );
     }
   }
 
@@ -231,7 +329,8 @@ function addUniqueKeyword(
   target: string[],
   rawKeyword: string,
 ): void {
-  const keyword = rawKeyword.trim();
+  const keyword =
+    rawKeyword.trim();
 
   if (!keyword) {
     return;
@@ -240,27 +339,42 @@ function addUniqueKeyword(
   const normalizedKeyword =
     normalizeText(keyword);
 
-  const alreadyExists = target.some(
-    (existingKeyword) =>
-      normalizeText(existingKeyword) ===
-      normalizedKeyword,
-  );
+  const alreadyExists =
+    target.some(
+      (existingKeyword) =>
+        normalizeText(
+          existingKeyword,
+        ) === normalizedKeyword,
+    );
 
   if (!alreadyExists) {
     target.push(keyword);
   }
 }
 
-function createSlug(value: string): string {
+function createSlug(
+  value: string,
+): string {
   const slug = value
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(
+      /[\u0300-\u036f]/g,
+      "",
+    )
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(
+      /[^a-z0-9]+/g,
+      "-",
+    )
+    .replace(
+      /^-+|-+$/g,
+      "",
+    );
 
-  return slug || "uncategorized";
+  return (
+    slug || "uncategorized"
+  );
 }
 
 function normalizeText(

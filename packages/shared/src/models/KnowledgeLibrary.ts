@@ -1,4 +1,8 @@
 import type { Discovery } from "./Discovery";
+import type {
+  Insight,
+  KnowledgeActivity,
+} from "./Insight";
 import type { Interest } from "./Interest";
 import type { KnowledgeNode } from "./KnowledgeNode";
 import type { Relation } from "./Relation";
@@ -16,4 +20,8 @@ export interface KnowledgeLibrary {
   nodes: KnowledgeNode[];
 
   relations: Relation[];
+
+  insights: Insight[];
+
+  activity: KnowledgeActivity;
 }
