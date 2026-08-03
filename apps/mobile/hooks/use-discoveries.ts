@@ -1,8 +1,9 @@
 import {
   useCallback,
-  useEffect,
   useState,
 } from "react";
+
+import { useFocusEffect } from "@react-navigation/native";
 
 import { apiDiscoveryRepository } from "@/repositories/api-discovery-repository";
 import type { Discovery } from "@/types/discovery";
@@ -79,6 +80,7 @@ export function useDiscoveries() {
         );
       } finally {
         setIsRefreshing(false);
+        setIsLoading(false);
       }
     }, []);
 
@@ -167,9 +169,11 @@ export function useDiscoveries() {
       [discoveries],
     );
 
-  useEffect(() => {
-    void loadDiscoveries();
-  }, [loadDiscoveries]);
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
 
   return {
     discoveries,
