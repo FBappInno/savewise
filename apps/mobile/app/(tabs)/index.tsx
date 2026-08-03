@@ -83,6 +83,8 @@ export default function HomeScreen() {
   async function handleSaveCapture(
     capturedItem: CapturedItem,
   ) {
+    const now = new Date().toISOString();
+
     const temporaryDiscovery: Discovery = {
       id: capturedItem.id,
 
@@ -97,7 +99,8 @@ export default function HomeScreen() {
       topics: [],
 
       keywords: [],
-
+createdAt: now,
+updatedAt: now,
       savedAtLabel: "Just now",
     };
 
@@ -161,7 +164,8 @@ export default function HomeScreen() {
 
         confidence:
           result.analysis.confidence,
-
+createdAt: temporaryDiscovery.createdAt,
+updatedAt: new Date().toISOString(),
         savedAtLabel: "Just now",
       };
 

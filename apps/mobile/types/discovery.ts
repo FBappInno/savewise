@@ -56,5 +56,9 @@ export type Discovery = {
 
   topics: string[];
 
+  createdAt: string;
+
+  updatedAt: string;
+
   savedAtLabel: string;
 };

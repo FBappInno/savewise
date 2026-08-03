@@ -5,8 +5,7 @@ import {
 import type { Discovery } from "@/types/discovery";
 import type { DiscoveryRepository } from "./discovery-repository";
 
-export const localDiscoveryRepository: DiscoveryRepository =
-{
+export const localDiscoveryRepository: DiscoveryRepository = {
   async getAll() {
     return loadDiscoveries();
   },
@@ -16,12 +15,14 @@ export const localDiscoveryRepository: DiscoveryRepository =
   },
 
   async update(updatedDiscovery: Discovery) {
-    const discoveries =
-      await loadDiscoveries();
+    const discoveries = await loadDiscoveries();
 
     const updated = discoveries.map((discovery) =>
       discovery.id === updatedDiscovery.id
-        ? updatedDiscovery
+        ? {
+            ...updatedDiscovery,
+            updatedAt: new Date().toISOString(),
+          }
         : discovery,
     );
 

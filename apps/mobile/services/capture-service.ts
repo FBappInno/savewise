@@ -4,6 +4,8 @@ import type { Discovery } from "@/types/discovery";
 export function createDiscoveryFromCapture(
   capturedItem: CapturedItem,
 ): Discovery {
+  const now = new Date().toISOString();
+
   return {
     id: capturedItem.id,
     title: capturedItem.title,
@@ -17,9 +19,16 @@ export function createDiscoveryFromCapture(
     author: undefined,
     publishedAt: undefined,
 
-    category: undefined,
-    topics: ["New"],
+    classification: undefined,
+
     keywords: [],
+    language: undefined,
+    confidence: undefined,
+
+    topics: ["New"],
+
+    createdAt: now,
+    updatedAt: now,
 
     savedAtLabel: "Just now",
   };
