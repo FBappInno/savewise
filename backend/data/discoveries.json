@@ -1035,5 +1035,102 @@
     "createdAt": "2026-08-03T19:25:37.239Z",
     "updatedAt": "2026-08-03T19:40:42.272Z",
     "savedAtLabel": "Just now"
+  },
+  {
+    "id": "3b471827-69b2-4d22-ad51-f4fa8888e991",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@dshkrka/video/7658295918382288148",
+    "title": "TikTok - Make Your Day",
+    "improvedTitle": "Short Entertaining Video Clip from TikTok",
+    "summary": "A brief video shared on TikTok aimed at entertainment and engagement for users.  The content is representative of TikTok's casual, user-generated multimedia format without specified details or context.",
+    "classification": {
+      "primaryCategory": "culture",
+      "secondaryCategory": "social media",
+      "topic": "video content",
+      "subtopics": [
+        "short-form video",
+        "user engagement"
+      ]
+    },
+    "keywords": [
+      "TikTok",
+      "video",
+      "entertainment",
+      "social media",
+      "short video"
+    ],
+    "language": "unknown",
+    "confidence": 0.6,
+    "topics": [
+      "video content",
+      "short-form video",
+      "user engagement"
+    ],
+    "createdAt": "2026-08-03T19:52:47.045Z",
+    "updatedAt": "2026-08-03T19:52:47.045Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@spezialagentt1/video/7647952007390694688?is_from_webapp=1&sender_device=pc",
+    "title": "TikTok - Make Your Day",
+    "improvedTitle": "Engaging Short-Form Video Content on TikTok",
+    "summary": "This TikTok video exemplifies the platform's dynamic short-form content designed to entertain and engage users quickly.  It showcases how TikTok fosters rapid creativity and social interaction through concise video clips.",
+    "classification": {
+      "primaryCategory": "culture",
+      "secondaryCategory": "social media",
+      "topic": "video content",
+      "subtopics": [
+        "short-form videos",
+        "digital engagement"
+      ]
+    },
+    "keywords": [
+      "TikTok",
+      "short-form video",
+      "social media",
+      "engagement",
+      "digital content"
+    ],
+    "language": "en",
+    "confidence": 0.7,
+    "topics": [
+      "video content",
+      "short-form videos",
+      "digital engagement"
+    ],
+    "createdAt": "2026-08-03T19:53:11.824Z",
+    "updatedAt": "2026-08-03T19:53:11.824Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@bratan.thebest/video/7663877193814019361?is_from_webapp=1&sender_device=pc",
+    "title": "TikTok - Make Your Day",
+    "improvedTitle": "Short Entertaining Video Clip from TikTok",
+    "summary": "This TikTok video provides brief entertainment content designed to make the viewer's day better.  It likely features engaging or amusing footage typical of the platform's style.",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "entertainment",
+      "topic": "short videos",
+      "subtopics": []
+    },
+    "keywords": [
+      "TikTok",
+      "video",
+      "entertainment",
+      "short clip",
+      "social media"
+    ],
+    "language": "en",
+    "confidence": 0.6,
+    "topics": [
+      "short videos"
+    ],
+    "createdAt": "2026-08-03T19:53:31.426Z",
+    "updatedAt": "2026-08-03T19:53:31.426Z",
+    "savedAtLabel": "Just now"
   }
 ]
