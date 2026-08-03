@@ -26,6 +26,8 @@ export type ImportResponse = {
     thumbnailUrl?: string;
     siteName?: string;
     publishedAt?: string;
+    contentType: "html" | "pdf";
+    fetchStrategy: "standard" | "browser-compatible";
   };
 
   analysis: {

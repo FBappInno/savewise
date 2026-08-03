@@ -17,6 +17,8 @@ export type ContentImportResult = {
     thumbnailUrl?: string;
     siteName?: string;
     publishedAt?: string;
+    contentType: "html" | "pdf";
+    fetchStrategy: "standard" | "browser-compatible";
   };
 
   analysis: {
@@ -58,22 +60,18 @@ export async function importContent(
 ): Promise<ContentImportResult> {
   console.log("[Import] Starting:", url);
 
-  console.time("[Import] Metadata");
-
+  const metadataStartedAt = Date.now();
   const metadata = await fetchPageMetadata(url);
-
-  console.timeEnd("[Import] Metadata");
+  console.log(`[Import] Metadata: ${Date.now() - metadataStartedAt}ms`);
 
   console.log(
     "[Import] Metadata loaded:",
     metadata.title,
   );
 
-  console.time("[Import] AI");
-
+  const aiStartedAt = Date.now();
   const analysis = await analyzeContent(metadata);
-
-  console.timeEnd("[Import] AI");
+  console.log(`[Import] AI: ${Date.now() - aiStartedAt}ms`);
 
   console.log(
     "[Import] AI analysis completed:",
@@ -90,19 +88,19 @@ export async function importContent(
   const discovery: Discovery = {
     id: randomUUID(),
 
-    source: detectDiscoverySource(url),
+    source: detectDiscoverySource(metadata.url),
 
-    url,
+    url: metadata.url,
 
     title:
       metadata.title.trim() ||
       analysis.improvedTitle.trim() ||
-      url,
+      metadata.url,
 
     improvedTitle:
       analysis.improvedTitle.trim() ||
       metadata.title.trim() ||
-      url,
+      metadata.url,
 
     description: normalizeOptionalText(
       metadata.description,
@@ -180,6 +178,10 @@ export async function importContent(
       publishedAt: normalizeOptionalText(
         metadata.publishedAt,
       ),
+
+      contentType: metadata.contentType,
+
+      fetchStrategy: metadata.fetchStrategy,
     },
 
     analysis,

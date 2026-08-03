@@ -92,7 +92,7 @@ export async function analyzeContent(
 
     instructions: [
       "You are the knowledge organization engine for SaveWise.",
-      "Analyze saved online content using only the provided metadata.",
+      "Analyze saved online content using only the provided metadata and extracted text.",
       "Do not invent information that is not supported by the metadata.",
       "Create a clear and factual improved title.",
       "Write the summary in the original language of the content.",
@@ -122,6 +122,9 @@ export async function analyzeContent(
           metadata.siteName ?? null,
         publishedAt:
           metadata.publishedAt ?? null,
+        contentType: metadata.contentType,
+        extractedText:
+          metadata.extractedText?.slice(0, 12_000) ?? null,
       },
     }),
 

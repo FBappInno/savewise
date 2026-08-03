@@ -6,4 +6,7 @@ export type PageMetadata = {
   thumbnailUrl?: string;
   siteName?: string;
   publishedAt?: string;
+  extractedText?: string;
+  contentType: "html" | "pdf";
+  fetchStrategy: "standard" | "browser-compatible";
 };

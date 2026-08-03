@@ -20,6 +20,7 @@ import {
   saveDiscovery,
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
+import { ContentFetchError } from "./types/content-fetch-error";
 import {
   analyzeSecondBrain,
   answerKnowledgeQuestion,
@@ -218,15 +219,42 @@ app.post(
         error,
       );
 
-      response.status(500).json({
+      response.status(contentImportStatus(error)).json({
         error:
           error instanceof Error
             ? error.message
             : "Content import failed.",
+        ...(
+          error instanceof ContentFetchError
+            ? { code: error.code }
+            : {}
+        ),
       });
     }
   },
 );
+
+function contentImportStatus(error: unknown): number {
+  if (!(error instanceof ContentFetchError)) return 500;
+  switch (error.code) {
+    case "invalid_url":
+      return 400;
+    case "authentication_required":
+    case "access_denied":
+      return 422;
+    case "rate_limited":
+      return 429;
+    case "content_too_large":
+      return 413;
+    case "unsupported_content":
+    case "empty_content":
+      return 422;
+    case "timeout":
+    case "network_error":
+    case "upstream_error":
+      return 502;
+  }
+}
 
 app.get(
   "/api/discoveries",
