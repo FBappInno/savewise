@@ -1,6 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
+  useRef,
+  useState,
+} from "react";
+
+import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
@@ -8,6 +13,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type LayoutChangeEvent,
 } from "react-native";
 
 import { useKnowledgeLibrary } from "@/hooks/use-knowledge-library";
@@ -17,7 +23,25 @@ import type {
   Topic,
 } from "@savewise/shared";
 
+type SectionPositions = {
+  interests: number;
+  topics: number;
+  connections: number;
+};
+
 export default function LibraryScreen() {
+  const scrollViewRef =
+    useRef<ScrollView>(null);
+
+  const [
+    sectionPositions,
+    setSectionPositions,
+  ] = useState<SectionPositions>({
+    interests: 0,
+    topics: 0,
+    connections: 0,
+  });
+
   const {
     library,
     isLoading,
@@ -30,9 +54,52 @@ export default function LibraryScreen() {
     router.push(`/topic/${topicId}`);
   }
 
+  function openDiscoveries() {
+    router.push("/");
+  }
+
+  function scrollToSection(
+    section:
+      | "interests"
+      | "topics"
+      | "connections",
+  ) {
+    scrollViewRef.current?.scrollTo({
+      y: Math.max(
+        0,
+        sectionPositions[section] - 24,
+      ),
+      animated: true,
+    });
+  }
+
+  function saveSectionPosition(
+    section:
+      | "interests"
+      | "topics"
+      | "connections",
+  ) {
+    return (
+      event: LayoutChangeEvent,
+    ) => {
+      const y =
+        event.nativeEvent.layout.y;
+
+      setSectionPositions(
+        (currentPositions) => ({
+          ...currentPositions,
+          [section]: y,
+        }),
+      );
+    };
+  }
+
   return (
     <ScrollView
-      contentContainerStyle={styles.content}
+      contentContainerStyle={
+        styles.content
+      }
+      ref={scrollViewRef}
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
@@ -41,7 +108,9 @@ export default function LibraryScreen() {
           }}
         />
       }
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={
+        false
+      }
       style={styles.screen}
     >
       <View style={styles.header}>
@@ -87,26 +156,43 @@ export default function LibraryScreen() {
         <>
           <View style={styles.overview}>
             <OverviewItem
+              icon="documents-outline"
               label="Discoveries"
+              onPress={openDiscoveries}
               value={
                 library.discoveries.length
               }
             />
 
             <OverviewItem
+              icon="folder-open-outline"
               label="Topics"
+              onPress={() => {
+                scrollToSection("topics");
+              }}
               value={library.topics.length}
             />
 
             <OverviewItem
+              icon="git-network-outline"
               label="Connections"
+              onPress={() => {
+                scrollToSection(
+                  "connections",
+                );
+              }}
               value={
                 library.relations.length
               }
             />
           </View>
 
-          <View style={styles.section}>
+          <View
+            onLayout={saveSectionPosition(
+              "interests",
+            )}
+            style={styles.section}
+          >
             <Text style={styles.sectionTitle}>
               Strongest interests
             </Text>
@@ -133,7 +219,12 @@ export default function LibraryScreen() {
             )}
           </View>
 
-          <View style={styles.section}>
+          <View
+            onLayout={saveSectionPosition(
+              "topics",
+            )}
+            style={styles.section}
+          >
             <Text style={styles.sectionTitle}>
               Topics
             </Text>
@@ -157,17 +248,22 @@ export default function LibraryScreen() {
             )}
           </View>
 
-          {library.relations.length >
-          0 ? (
-            <View style={styles.section}>
-              <Text
-                style={styles.sectionTitle}
-              >
-                Topic connections
-              </Text>
+          <View
+            onLayout={saveSectionPosition(
+              "connections",
+            )}
+            style={styles.section}
+          >
+            <Text style={styles.sectionTitle}>
+              Topic connections
+            </Text>
 
+            {library.relations.length >
+            0 ? (
               <View
-                style={styles.connectionList}
+                style={
+                  styles.connectionList
+                }
               >
                 {library.relations
                   .slice(0, 8)
@@ -195,6 +291,7 @@ export default function LibraryScreen() {
 
                     return (
                       <Pressable
+                        accessibilityRole="button"
                         key={`${relation.sourceId}-${relation.targetId}`}
                         onPress={() => {
                           openTopic(
@@ -265,8 +362,33 @@ export default function LibraryScreen() {
                     );
                   })}
               </View>
-            </View>
-          ) : null}
+            ) : (
+              <View
+                style={
+                  styles.messageCard
+                }
+              >
+                <Text
+                  style={
+                    styles.messageTitle
+                  }
+                >
+                  No connections yet
+                </Text>
+
+                <Text
+                  style={
+                    styles.messageText
+                  }
+                >
+                  Add discoveries with
+                  related topics and
+                  keywords to create
+                  connections.
+                </Text>
+              </View>
+            )}
+          </View>
         </>
       ) : null}
     </ScrollView>
@@ -274,16 +396,37 @@ export default function LibraryScreen() {
 }
 
 type OverviewItemProps = {
+  icon:
+    keyof typeof Ionicons.glyphMap;
+
   label: string;
+
   value: number;
+
+  onPress: () => void;
 };
 
 function OverviewItem({
+  icon,
   label,
   value,
+  onPress,
 }: OverviewItemProps) {
   return (
-    <View style={styles.overviewItem}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.overviewItem,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Ionicons
+        color={theme.colors.primary}
+        name={icon}
+        size={20}
+      />
+
       <Text style={styles.overviewValue}>
         {value}
       </Text>
@@ -291,7 +434,7 @@ function OverviewItem({
       <Text style={styles.overviewLabel}>
         {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -342,7 +485,9 @@ function InterestRow({
       </View>
 
       <Ionicons
-        color={theme.colors.textSecondary}
+        color={
+          theme.colors.textSecondary
+        }
         name="chevron-forward"
         size={18}
       />
@@ -512,11 +657,18 @@ const styles = StyleSheet.create({
 
     flex: 1,
 
+    gap:
+      theme.spacing.xs,
+
+    minHeight: 112,
+
+    justifyContent: "center",
+
     paddingHorizontal:
       theme.spacing.sm,
 
     paddingVertical:
-      theme.spacing.lg,
+      theme.spacing.md,
   },
 
   overviewValue: {
@@ -531,9 +683,6 @@ const styles = StyleSheet.create({
 
     color:
       theme.colors.textSecondary,
-
-    marginTop:
-      theme.spacing.xs,
 
     textAlign: "center",
   },
