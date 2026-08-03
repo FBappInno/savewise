@@ -8,31 +8,43 @@ import express, {
 } from "express";
 import { z } from "zod";
 
-import { importContent } from "./services/import/content-import-service";
+import { FileDiscoveryRepository } from "./repositories/file-discovery-repository";
 import {
-  rebuildKnowledgeLibrary,
-  readKnowledgeLibrary,
-  getRelatedDiscoveries,
+  buildCurrentKnowledgeLibrary,
+  deleteDiscovery,
+  getAllDiscoveries,
   getDiscoveriesForInterest,
-} from "./services/knowledge/knowledge-engine";
+  getDiscoveryById,
+  getRelatedDiscoveries,
+  saveDiscovery,
+} from "./services/discoveries/discovery-service";
+import { importContent } from "./services/import/content-import-service";
 
 function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
 ): Promise<T> {
-  let timeoutId: NodeJS.Timeout | undefined;
+  let timeoutId:
+    | NodeJS.Timeout
+    | undefined;
 
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(
-        new Error(
-          `Import timed out after ${timeoutMs / 1000} seconds.`,
-        ),
-      );
-    }, timeoutMs);
-  });
+  const timeoutPromise =
+    new Promise<T>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new Error(
+            `Import timed out after ${
+              timeoutMs / 1000
+            } seconds.`,
+          ),
+        );
+      }, timeoutMs);
+    });
 
-  return Promise.race([promise, timeoutPromise]).finally(() => {
+  return Promise.race([
+    promise,
+    timeoutPromise,
+  ]).finally(() => {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -40,23 +52,50 @@ function withTimeout<T>(
 }
 
 const app = express();
-const port = Number(process.env.PORT ?? 3001);
+
+const port = Number(
+  process.env.PORT ?? 3001,
+);
+
+const discoveryRepository =
+  new FileDiscoveryRepository();
 
 app.disable("x-powered-by");
 
 app.use(
   cors({
     origin: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
   }),
 );
 
-app.use(express.json({ limit: "20kb" }));
+app.use(
+  express.json({
+    limit: "20kb",
+  }),
+);
 
 const ImportRequestSchema = z.object({
   url: z.string().trim().url(),
 });
+
+const DiscoveryIdSchema = z
+  .string()
+  .trim()
+  .min(1);
 
 const LimitQuerySchema = z.coerce
   .number()
@@ -65,123 +104,267 @@ const LimitQuerySchema = z.coerce
   .max(100)
   .default(20);
 
-const DiscoveryIdSchema = z.string().trim().min(1);
+app.get(
+  "/health",
+  (_request, response) => {
+    response.json({
+      status: "ok",
 
-app.get("/health", (_request, response) => {
-  response.json({
-    status: "ok",
-    service: "savewise-backend",
-    timestamp: new Date().toISOString(),
-  });
-});
+      service: "savewise-backend",
 
-/**
- * URL importieren, Metadaten lesen und Inhalt analysieren.
- *
- * Falls importContent die Discovery bereits speichert,
- * wird anschließend automatisch die Wissensbibliothek neu aufgebaut.
- */
-app.post("/api/import", async (request, response) => {
-  const parsedRequest = ImportRequestSchema.safeParse(
-    request.body,
-  );
-
-  if (!parsedRequest.success) {
-    response.status(400).json({
-      error: "A valid URL is required.",
-      details: parsedRequest.error.flatten(),
+      timestamp:
+        new Date().toISOString(),
     });
+  },
+);
 
-    return;
-  }
-
-  try {
-    const result = await withTimeout(
-      importContent(parsedRequest.data.url),
-      45_000,
-    );
-
-    let knowledgeUpdate:
-      | {
-          generatedAt: string | null;
-          totalDiscoveries: number;
-          totalInterests: number;
-          totalRelations: number;
-        }
-      | null = null;
-
-    try {
-      const library = await rebuildKnowledgeLibrary();
-
-      knowledgeUpdate = {
-        generatedAt: library.generatedAt,
-        totalDiscoveries:
-          library.statistics.totalDiscoveries,
-        totalInterests: library.interests.length,
-        totalRelations:
-          library.statistics.totalRelations,
-      };
-    } catch (knowledgeError) {
-      /*
-       * Der eigentliche Import bleibt erfolgreich, auch wenn
-       * der Wissensindex einmal nicht aufgebaut werden kann.
-       */
-      console.error(
-        "Knowledge library rebuild failed:",
-        knowledgeError,
+app.post(
+  "/api/import",
+  async (request, response) => {
+    const parsedRequest =
+      ImportRequestSchema.safeParse(
+        request.body,
       );
+
+    if (!parsedRequest.success) {
+      response.status(400).json({
+        error:
+          "A valid URL is required.",
+
+        details:
+          parsedRequest.error.flatten(),
+      });
+
+      return;
     }
 
-    response.status(200).json({
-      ...result,
-      knowledgeUpdate,
-    });
-  } catch (error) {
-    console.error("Content import failed:", error);
+    try {
+      const importResult =
+        await withTimeout(
+          importContent(
+            parsedRequest.data.url,
+          ),
+          90_000,
+        );
 
-    response.status(500).json({
-      error:
-        error instanceof Error
-          ? error.message
-          : "Content import failed.",
-    });
-  }
-});
+      const storedDiscovery =
+        await saveDiscovery(
+          discoveryRepository,
+          importResult.discovery,
+        );
 
-/**
- * Vollständige persönliche Wissensbibliothek abrufen.
- */
-app.get("/api/knowledge", async (_request, response) => {
-  try {
-    const library = await readKnowledgeLibrary();
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
 
-    response.json(library);
-  } catch (error) {
-    console.error(
-      "Knowledge library could not be loaded:",
-      error,
-    );
+      response.status(201).json({
+        ...importResult,
 
-    response.status(500).json({
-      error:
-        error instanceof Error
-          ? error.message
-          : "Knowledge library could not be loaded.",
-    });
-  }
-});
+        discovery: storedDiscovery,
 
-/**
- * Wissensbibliothek manuell vollständig neu aufbauen.
- */
+        knowledgeUpdate: {
+          generatedAt:
+            library.generatedAt,
+
+          totalDiscoveries:
+            library.discoveries.length,
+
+          totalTopics:
+            library.topics.length,
+
+          totalInterests:
+            library.interests.length,
+
+          totalRelations:
+            library.relations.length,
+        },
+      });
+    } catch (error) {
+      console.error(
+        "Content import failed:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Content import failed.",
+      });
+    }
+  },
+);
+
+app.get(
+  "/api/discoveries",
+  async (_request, response) => {
+    try {
+      const discoveries =
+        await getAllDiscoveries(
+          discoveryRepository,
+        );
+
+      response.json({
+        discoveries,
+      });
+    } catch (error) {
+      console.error(
+        "Discoveries could not be loaded:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Discoveries could not be loaded.",
+      });
+    }
+  },
+);
+
+app.get(
+  "/api/discoveries/:discoveryId",
+  async (request, response) => {
+    const parsedDiscoveryId =
+      DiscoveryIdSchema.safeParse(
+        request.params.discoveryId,
+      );
+
+    if (!parsedDiscoveryId.success) {
+      response.status(400).json({
+        error:
+          "A valid discovery ID is required.",
+      });
+
+      return;
+    }
+
+    try {
+      const discovery =
+        await getDiscoveryById(
+          discoveryRepository,
+          parsedDiscoveryId.data,
+        );
+
+      if (!discovery) {
+        response.status(404).json({
+          error:
+            "Discovery not found.",
+        });
+
+        return;
+      }
+
+      response.json({
+        discovery,
+      });
+    } catch (error) {
+      console.error(
+        "Discovery could not be loaded:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Discovery could not be loaded.",
+      });
+    }
+  },
+);
+
+app.delete(
+  "/api/discoveries/:discoveryId",
+  async (request, response) => {
+    const parsedDiscoveryId =
+      DiscoveryIdSchema.safeParse(
+        request.params.discoveryId,
+      );
+
+    if (!parsedDiscoveryId.success) {
+      response.status(400).json({
+        error:
+          "A valid discovery ID is required.",
+      });
+
+      return;
+    }
+
+    try {
+      const deleted =
+        await deleteDiscovery(
+          discoveryRepository,
+          parsedDiscoveryId.data,
+        );
+
+      if (!deleted) {
+        response.status(404).json({
+          error:
+            "Discovery not found.",
+        });
+
+        return;
+      }
+
+      response.status(204).send();
+    } catch (error) {
+      console.error(
+        "Discovery could not be deleted:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Discovery could not be deleted.",
+      });
+    }
+  },
+);
+
+app.get(
+  "/api/knowledge",
+  async (_request, response) => {
+    try {
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
+
+      response.json(library);
+    } catch (error) {
+      console.error(
+        "Knowledge library could not be loaded:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Knowledge library could not be loaded.",
+      });
+    }
+  },
+);
+
 app.post(
   "/api/knowledge/rebuild",
   async (_request, response) => {
     try {
-      const library = await rebuildKnowledgeLibrary();
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
 
       response.json({
-        message: "Knowledge library rebuilt successfully.",
+        message:
+          "Knowledge library rebuilt successfully.",
+
         library,
       });
     } catch (error) {
@@ -200,18 +383,13 @@ app.post(
   },
 );
 
-/**
- * Erkannte Interessen abrufen.
- *
- * Beispiel:
- * GET /api/knowledge/interests?limit=10
- */
 app.get(
   "/api/knowledge/interests",
   async (request, response) => {
-    const parsedLimit = LimitQuerySchema.safeParse(
-      request.query.limit,
-    );
+    const parsedLimit =
+      LimitQuerySchema.safeParse(
+        request.query.limit,
+      );
 
     if (!parsedLimit.success) {
       response.status(400).json({
@@ -223,17 +401,26 @@ app.get(
     }
 
     try {
-      const library = await readKnowledgeLibrary();
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
 
       response.json({
-        generatedAt: library.generatedAt,
-        interests: library.interests.slice(
-          0,
-          parsedLimit.data,
-        ),
+        generatedAt:
+          library.generatedAt,
+
+        interests:
+          library.interests.slice(
+            0,
+            parsedLimit.data,
+          ),
       });
     } catch (error) {
-      console.error("Interests could not be loaded:", error);
+      console.error(
+        "Interests could not be loaded:",
+        error,
+      );
 
       response.status(500).json({
         error:
@@ -245,18 +432,13 @@ app.get(
   },
 );
 
-/**
- * Discoveries zu einem bestimmten Interesse abrufen.
- *
- * Beispiel:
- * GET /api/knowledge/interests/artificial%20intelligence/discoveries
- */
 app.get(
-  "/api/knowledge/interests/:interestKey/discoveries",
+  "/api/knowledge/interests/:interestId/discoveries",
   async (request, response) => {
-    const parsedLimit = LimitQuerySchema.safeParse(
-      request.query.limit,
-    );
+    const parsedLimit =
+      LimitQuerySchema.safeParse(
+        request.query.limit ?? 50,
+      );
 
     if (!parsedLimit.success) {
       response.status(400).json({
@@ -267,33 +449,50 @@ app.get(
       return;
     }
 
-    const interestKey = request.params.interestKey.trim();
+    const interestId =
+      request.params.interestId.trim();
 
-    if (!interestKey) {
+    if (!interestId) {
       response.status(400).json({
-        error: "An interest key is required.",
+        error:
+          "An interest ID is required.",
       });
 
       return;
     }
 
     try {
-      const result = await getDiscoveriesForInterest(
-        interestKey,
-        {
-          limit: parsedLimit.data,
-        },
-      );
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
 
-      if (!result.interest) {
+      const interest =
+        library.interests.find(
+          (item) =>
+            item.id === interestId,
+        );
+
+      if (!interest) {
         response.status(404).json({
-          error: "Interest not found.",
+          error:
+            "Interest not found.",
         });
 
         return;
       }
 
-      response.json(result);
+      const discoveries =
+        await getDiscoveriesForInterest(
+          discoveryRepository,
+          interestId,
+          parsedLimit.data,
+        );
+
+      response.json({
+        interest,
+        discoveries,
+      });
     } catch (error) {
       console.error(
         "Interest discoveries could not be loaded:",
@@ -310,50 +509,46 @@ app.get(
   },
 );
 
-/**
- * Verwandte Discoveries abrufen.
- *
- * Beispiel:
- * GET /api/knowledge/related/DISCOVERY_ID?limit=5
- */
 app.get(
   "/api/knowledge/related/:discoveryId",
   async (request, response) => {
-    const parsedDiscoveryId = DiscoveryIdSchema.safeParse(
-      request.params.discoveryId,
-    );
+    const parsedDiscoveryId =
+      DiscoveryIdSchema.safeParse(
+        request.params.discoveryId,
+      );
 
-    if (!parsedDiscoveryId.success) {
-      response.status(400).json({
-        error: "A valid discovery ID is required.",
-      });
+    const parsedLimit =
+      LimitQuerySchema.safeParse(
+        request.query.limit ?? 5,
+      );
 
-      return;
-    }
-
-    const parsedLimit = LimitQuerySchema.safeParse(
-      request.query.limit ?? 5,
-    );
-
-    if (!parsedLimit.success) {
+    if (
+      !parsedDiscoveryId.success ||
+      !parsedLimit.success
+    ) {
       response.status(400).json({
         error:
-          "The limit must be a number between 1 and 100.",
+          "A valid discovery ID and limit are required.",
       });
 
       return;
     }
 
     try {
-      const related = await getRelatedDiscoveries(
-        parsedDiscoveryId.data,
-        {
-          limit: Math.min(parsedLimit.data, 20),
-        },
-      );
+      const related =
+        await getRelatedDiscoveries(
+          discoveryRepository,
+          parsedDiscoveryId.data,
+          Math.min(
+            parsedLimit.data,
+            20,
+          ),
+        );
 
       response.json({
-        discoveryId: parsedDiscoveryId.data,
+        discoveryId:
+          parsedDiscoveryId.data,
+
         related,
       });
     } catch (error) {
@@ -372,73 +567,26 @@ app.get(
   },
 );
 
-/**
- * Persönliche Trends abrufen.
- */
-app.get(
-  "/api/knowledge/trends",
-  async (_request, response) => {
-    try {
-      const library = await readKnowledgeLibrary();
-
-      response.json({
-        generatedAt: library.generatedAt,
-        trends: library.trends,
-      });
-    } catch (error) {
-      console.error("Trends could not be loaded:", error);
-
-      response.status(500).json({
-        error:
-          error instanceof Error
-            ? error.message
-            : "Trends could not be loaded.",
-      });
-    }
-  },
-);
-
-/**
- * Kategorien abrufen.
- */
-app.get(
-  "/api/knowledge/categories",
-  async (_request, response) => {
-    try {
-      const library = await readKnowledgeLibrary();
-
-      response.json({
-        generatedAt: library.generatedAt,
-        categories: library.categories,
-      });
-    } catch (error) {
-      console.error("Categories could not be loaded:", error);
-
-      response.status(500).json({
-        error:
-          error instanceof Error
-            ? error.message
-            : "Categories could not be loaded.",
-      });
-    }
-  },
-);
-
-/**
- * Themen abrufen.
- */
 app.get(
   "/api/knowledge/topics",
   async (_request, response) => {
     try {
-      const library = await readKnowledgeLibrary();
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
 
       response.json({
-        generatedAt: library.generatedAt,
+        generatedAt:
+          library.generatedAt,
+
         topics: library.topics,
       });
     } catch (error) {
-      console.error("Topics could not be loaded:", error);
+      console.error(
+        "Topics could not be loaded:",
+        error,
+      );
 
       response.status(500).json({
         error:
@@ -450,20 +598,20 @@ app.get(
   },
 );
 
-/**
- * Nicht vorhandene API-Route.
- */
-app.use("/api", (request, response) => {
-  response.status(404).json({
-    error: "API route not found.",
-    method: request.method,
-    path: request.originalUrl,
-  });
-});
+app.use(
+  "/api",
+  (request, response) => {
+    response.status(404).json({
+      error:
+        "API route not found.",
 
-/**
- * Zentraler Express-Error-Handler.
- */
+      method: request.method,
+
+      path: request.originalUrl,
+    });
+  },
+);
+
 app.use(
   (
     error: unknown,
@@ -471,7 +619,10 @@ app.use(
     response: Response,
     _next: NextFunction,
   ) => {
-    console.error("Unhandled server error:", error);
+    console.error(
+      "Unhandled server error:",
+      error,
+    );
 
     if (response.headersSent) {
       return;
@@ -486,16 +637,24 @@ app.use(
   },
 );
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(
-    `SaveWise backend running on http://localhost:${port}`,
-  );
+app.listen(
+  port,
+  "0.0.0.0",
+  () => {
+    console.log(
+      `SaveWise backend running on http://localhost:${port}`,
+    );
 
-  console.log(
-    `Health check: http://localhost:${port}/health`,
-  );
+    console.log(
+      `Health check: http://localhost:${port}/health`,
+    );
 
-  console.log(
-    `Knowledge library: http://localhost:${port}/api/knowledge`,
-  );
-});
+    console.log(
+      `Discoveries: http://localhost:${port}/api/discoveries`,
+    );
+
+    console.log(
+      `Knowledge library: http://localhost:${port}/api/knowledge`,
+    );
+  },
+);
