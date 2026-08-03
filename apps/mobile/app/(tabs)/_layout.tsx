@@ -87,6 +87,20 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="research"
+        options={{
+          title: "Research",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              color={color}
+              name="telescope-outline"
+              size={size}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

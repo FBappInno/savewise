@@ -24,6 +24,12 @@ import {
   analyzeSecondBrain,
   answerKnowledgeQuestion,
 } from "./services/ai/openai-second-brain";
+import {
+  getResearchState,
+  runPersonalResearch,
+  startResearchScheduler,
+  updateResearchCandidateStatus,
+} from "./services/research/research-service";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -100,6 +106,10 @@ const KnowledgeQuestionSchema = z.object({
     .trim()
     .min(3)
     .max(500),
+});
+
+const ResearchCandidateStatusSchema = z.object({
+  status: z.enum(["suggested", "dismissed"]),
 });
 
 const DiscoveryIdSchema = z
@@ -820,6 +830,133 @@ app.get(
   },
 );
 
+app.get(
+  "/api/research",
+  async (_request, response) => {
+    try {
+      response.json(await getResearchState());
+    } catch (error) {
+      console.error("Research state could not be loaded:", error);
+      response.status(500).json({
+        error: error instanceof Error
+          ? error.message
+          : "Research state could not be loaded.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/research/run",
+  async (_request, response) => {
+    try {
+      const library = await buildCurrentKnowledgeLibrary(
+        discoveryRepository,
+      );
+
+      if (!library.graph) {
+        response.status(503).json({
+          error: "The AI knowledge graph is currently unavailable.",
+        });
+        return;
+      }
+
+      const research = await withTimeout(
+        runPersonalResearch(library.discoveries, library.graph),
+        140_000,
+      );
+
+      response.json(research);
+    } catch (error) {
+      console.error("Personal research failed:", error);
+      response.status(500).json({
+        error: error instanceof Error
+          ? error.message
+          : "Personal research could not be completed.",
+      });
+    }
+  },
+);
+
+app.patch(
+  "/api/research/candidates/:candidateId",
+  async (request, response) => {
+    const parsedRequest = ResearchCandidateStatusSchema.safeParse(
+      request.body,
+    );
+
+    if (!parsedRequest.success || !request.params.candidateId.trim()) {
+      response.status(400).json({
+        error: "A candidate ID and valid status are required.",
+      });
+      return;
+    }
+
+    try {
+      const research = await updateResearchCandidateStatus(
+        request.params.candidateId,
+        parsedRequest.data.status,
+      );
+
+      if (!research) {
+        response.status(404).json({ error: "Research candidate not found." });
+        return;
+      }
+
+      response.json(research);
+    } catch (error) {
+      console.error("Research candidate could not be updated:", error);
+      response.status(500).json({
+        error: error instanceof Error
+          ? error.message
+          : "Research candidate could not be updated.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/research/candidates/:candidateId/save",
+  async (request, response) => {
+    try {
+      const research = await getResearchState();
+      const candidate = research.candidates.find(
+        (item) => item.id === request.params.candidateId,
+      );
+
+      if (!candidate) {
+        response.status(404).json({ error: "Research candidate not found." });
+        return;
+      }
+
+      const imported = await withTimeout(
+        importContent(candidate.url),
+        90_000,
+      );
+      const discovery = await saveDiscovery(
+        discoveryRepository,
+        imported.discovery,
+      );
+      const updatedResearch = await updateResearchCandidateStatus(
+        candidate.id,
+        "saved",
+      );
+
+      response.status(201).json({
+        discovery,
+        research: updatedResearch,
+      });
+    } catch (error) {
+      console.error("Research candidate import failed:", error);
+      response.status(500).json({
+        error: error instanceof Error
+          ? error.message
+          : "Research candidate could not be saved.",
+      });
+    }
+  },
+);
+
 app.use(
   "/api",
   (request, response) => {
@@ -884,3 +1021,13 @@ app.listen(
     );
   },
 );
+
+startResearchScheduler(async () => {
+  const library = await buildCurrentKnowledgeLibrary(
+    discoveryRepository,
+  );
+
+  if (library.graph) {
+    await runPersonalResearch(library.discoveries, library.graph);
+  }
+});

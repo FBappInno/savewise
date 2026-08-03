@@ -1,0 +1,248 @@
+{
+  "lastRunAt": "2026-08-03T18:25:31.865Z",
+  "nextRecommendedRunAt": "2026-08-04T18:25:31.865Z",
+  "interests": [
+    {
+      "id": "node-nutrition",
+      "title": "Ernährung",
+      "description": "Wissen rund um Ernährung, Makronährstoffe und gesundheitsbezogene Ernährungsempfehlungen.",
+      "nodeIds": [
+        "node-carbohydrates",
+        "node-protein-intake"
+      ],
+      "discoveryCount": 2,
+      "strength": 0.95,
+      "knowledgeGaps": [
+        "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit"
+      ]
+    },
+    {
+      "id": "node-carbohydrates",
+      "title": "Kohlenhydrate",
+      "description": "Untersuchung von Kohlenhydraten, deren Wirkung auf den Blutzuckerspiegel und deren Rolle bei der Gewichtskontrolle.",
+      "nodeIds": [
+        "node-complex-carbohydrates",
+        "node-blood-sugar-impact",
+        "node-weight-management"
+      ],
+      "discoveryCount": 1,
+      "strength": 0.9,
+      "knowledgeGaps": [
+        "Genauere Bewertung der Auswirkungen unterschiedlicher Kohlenhydrattypen auf Stoffwechsel und Gesundheit"
+      ]
+    },
+    {
+      "id": "node-protein-intake",
+      "title": "Proteinzufuhr",
+      "description": "Empfehlungen zur Aufnahme von Protein im Alltag und die Vorteile proteinreicher Lebensmittel.",
+      "nodeIds": [
+        "node-protein-rich-foods",
+        "node-daily-protein-needs"
+      ],
+      "discoveryCount": 1,
+      "strength": 0.9,
+      "knowledgeGaps": [
+        "Optimale Proteinzufuhr bei verschiedenen Altersgruppen und Lebensstilen"
+      ]
+    },
+    {
+      "id": "node-news",
+      "title": "Nachrichten",
+      "description": "Aktuelle Berichterstattung und Nachrichteninhalte zu vielfältigen Themenbereichen, inklusive regionaler und internationaler Perspektiven.",
+      "nodeIds": [
+        "node-current-events"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.95,
+      "knowledgeGaps": [
+        "Vertiefte Analysen zu internationalen Konflikten und deren globalen Auswirkungen"
+      ]
+    },
+    {
+      "id": "node-current-events",
+      "title": "Aktuelle Ereignisse",
+      "description": "Berichterstattung über aktuelle Themen und Ereignisse in verschiedenen Lebensbereichen.",
+      "nodeIds": [
+        "node-regional-news-switzerland",
+        "node-politics",
+        "node-economy",
+        "node-sports",
+        "node-culture-society-science",
+        "node-entertainment"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.9,
+      "knowledgeGaps": [
+        "Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz"
+      ]
+    },
+    {
+      "id": "node-root-finance",
+      "title": "Finance",
+      "description": "Knowledge about Finance.",
+      "nodeIds": [
+        "node-node-root-finance-investing"
+      ],
+      "discoveryCount": 2,
+      "strength": 0.95,
+      "knowledgeGaps": [
+        "Vertiefte Kenntnis zu nachhaltigen Investmentstrategien"
+      ]
+    },
+    {
+      "id": "node-node-root-finance-investing",
+      "title": "Investing",
+      "description": "Knowledge about Investing.",
+      "nodeIds": [
+        "node-node-node-root-finance-investing-funds-and-investment-vehicles",
+        "node-node-node-root-finance-investing-stocks"
+      ],
+      "discoveryCount": 2,
+      "strength": 0.95,
+      "knowledgeGaps": [
+        "Analyse der Risiken und Chancen neuer Anlagemodelle wie ETFs im volatilen Markt"
+      ]
+    },
+    {
+      "id": "node-root-lifestyle",
+      "title": "Lifestyle",
+      "description": "Knowledge about Lifestyle.",
+      "nodeIds": [
+        "node-node-root-lifestyle-travel"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.9,
+      "knowledgeGaps": [
+        "Nachhaltiges Reisen und ökologischer Tourismus in beliebten Destinationen"
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "title": "Langfristige Auswirkungen verschiedener Diäten auf die Gesundheit",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/32728757/",
+      "sourceName": "Nutritional Reviews",
+      "sourceType": "study",
+      "publishedAt": "2020-08-01",
+      "summary": "Diese Übersichtsarbeit untersucht die Auswirkungen kohlenhydratarmer Diäten auf die kardiometabolische Gesundheit und betont die Bedeutung der Qualität der Kohlenhydrate über deren Quantität.",
+      "interestId": "node-nutrition",
+      "scores": {
+        "relevance": 0.95,
+        "quality": 0.9,
+        "recency": 0.8,
+        "trustworthiness": 0.95,
+        "knowledgeValue": 0.9,
+        "gapCoverage": 0.85,
+        "overall": 0.9
+      },
+      "decisionReason": "Diese Studie bietet eine umfassende Analyse der langfristigen Auswirkungen kohlenhydratarmer Diäten auf die Gesundheit und betont die Bedeutung der Kohlenhydratqualität, was eine wertvolle Ergänzung zu den bestehenden Kenntnissen darstellt.",
+      "impact": "extends",
+      "impactExplanation": "Die Studie erweitert das Verständnis über die Auswirkungen kohlenhydratarmer Diäten auf die Gesundheit und unterstreicht die Bedeutung der Kohlenhydratqualität.",
+      "relatedDiscoveryIds": [],
+      "id": "research-b624527abd3d7284",
+      "status": "suggested",
+      "foundAt": "2026-08-03T18:25:31.864Z"
+    },
+    {
+      "title": "Auswirkungen unterschiedlicher Kohlenhydrattypen auf Stoffwechsel und Gesundheit",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34099926/",
+      "sourceName": "Nature Metabolism",
+      "sourceType": "study",
+      "publishedAt": "2021-06-08",
+      "summary": "Diese Forschung analysiert die Auswirkungen verschiedener Kohlenhydrattypen und deren Wechselwirkungen mit Proteinen auf die metabolische Gesundheit.",
+      "interestId": "node-carbohydrates",
+      "scores": {
+        "relevance": 0.95,
+        "quality": 0.9,
+        "recency": 0.8,
+        "trustworthiness": 0.95,
+        "knowledgeValue": 0.9,
+        "gapCoverage": 0.85,
+        "overall": 0.9
+      },
+      "decisionReason": "Diese Studie liefert detaillierte Einblicke in die Auswirkungen verschiedener Kohlenhydrattypen auf den Stoffwechsel und die Gesundheit, was eine wertvolle Erweiterung des bestehenden Wissens darstellt.",
+      "impact": "extends",
+      "impactExplanation": "Die Forschung erweitert das Verständnis über die Auswirkungen unterschiedlicher Kohlenhydrattypen auf den Stoffwechsel und die Gesundheit.",
+      "relatedDiscoveryIds": [],
+      "id": "research-3a91c8dc0f5ab597",
+      "status": "suggested",
+      "foundAt": "2026-08-03T18:25:31.864Z"
+    },
+    {
+      "title": "Schweizerischer Verein für ausgewogene Berichterstattung (SVFAB)",
+      "url": "https://svfab.ch/",
+      "sourceName": "SVFAB",
+      "sourceType": "company",
+      "summary": "Der SVFAB ist eine gemeinnützige Organisation, die sich für Fairness und Meinungsvielfalt in den Schweizer Medien einsetzt. Sie betreibt den weltweit größten systematischen Corpus KI-gestützter normativer Medienanalyse und misst die Ausgewogenheit öffentlich-rechtlicher Sendungen.",
+      "interestId": "node-current-events",
+      "scores": {
+        "relevance": 0.95,
+        "quality": 0.95,
+        "recency": 0.95,
+        "trustworthiness": 0.95,
+        "knowledgeValue": 0.95,
+        "gapCoverage": 0.95,
+        "overall": 0.95
+      },
+      "decisionReason": "Der SVFAB bietet eine umfassende Analyse der Medienausgewogenheit in der Schweiz und kann zur ausgewogeneren Berichterstattung beitragen.",
+      "impact": "extends",
+      "impactExplanation": "Durch die Bereitstellung von Messungen zur Medienausgewogenheit unterstützt der SVFAB die Verbesserung der Berichterstattung.",
+      "relatedDiscoveryIds": [],
+      "id": "research-90cd9f159b5e6a6b",
+      "status": "suggested",
+      "foundAt": "2026-08-03T18:25:31.864Z"
+    },
+    {
+      "title": "IUX veröffentlicht Analyse der ETF-Risikofaktoren in Zeiten von Marktvolatilität",
+      "url": "https://www.financialcommission.org/de/2026/06/11/IUX-ver%C3%B6ffentlicht-eine-Analyse-der-ETF-Risikofaktoren-w%C3%A4hrend-Marktschwankungen./",
+      "sourceName": "Financial Commission",
+      "sourceType": "article",
+      "publishedAt": "2026-06-11",
+      "summary": "IUX hat einen Lehrartikel veröffentlicht, der fünf ETF-Risiken in volatilen Märkten untersucht, darunter Marktrisiko, Liquiditätsrisiko und Kontrahentenrisiko.",
+      "interestId": "node-node-root-finance-investing",
+      "scores": {
+        "relevance": 0.9,
+        "quality": 0.85,
+        "recency": 0.8,
+        "trustworthiness": 0.9,
+        "knowledgeValue": 0.85,
+        "gapCoverage": 0.9,
+        "overall": 0.88
+      },
+      "decisionReason": "Diese Quelle bietet eine detaillierte Analyse der Risiken von ETFs in volatilen Märkten und deckt somit die Wissenslücke ab.",
+      "impact": "new-perspective",
+      "impactExplanation": "Die Analyse beleuchtet spezifische Risiken von ETFs in volatilen Märkten und erweitert das Verständnis über die Chancen und Risiken neuer Anlagemodelle.",
+      "relatedDiscoveryIds": [
+        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91"
+      ],
+      "id": "research-3ccebeead9914716",
+      "status": "suggested",
+      "foundAt": "2026-08-03T18:25:31.864Z"
+    },
+    {
+      "title": "Sanfter Tourismus: nachhaltig reisen",
+      "url": "https://www.swd-ag.de/magazin/freizeit/sanfter-tourismus/",
+      "sourceName": "Stadtwerke Düsseldorf",
+      "sourceType": "article",
+      "publishedAt": "2025-11-03",
+      "summary": "Der Artikel erläutert Konzepte des sanften Tourismus, der auf Nachhaltigkeit und ökologische Verantwortung setzt, und gibt Empfehlungen für nachhaltige Reiseziele.",
+      "interestId": "node-root-lifestyle",
+      "scores": {
+        "relevance": 0.85,
+        "quality": 0.8,
+        "recency": 0.75,
+        "trustworthiness": 0.85,
+        "knowledgeValue": 0.8,
+        "gapCoverage": 0.85,
+        "overall": 0.82
+      },
+      "decisionReason": "Diese Quelle bietet praktische Tipps und Informationen zu nachhaltigem Reisen und ökologischer Verantwortung, was die bestehende Wissenslücke adressiert.",
+      "impact": "new-perspective",
+      "impactExplanation": "Der Artikel erweitert das Verständnis von nachhaltigem Reisen und ökologischer Verantwortung in beliebten Reisezielen.",
+      "relatedDiscoveryIds": [],
+      "id": "research-4a60c173eb0ea182",
+      "status": "suggested",
+      "foundAt": "2026-08-03T18:25:31.864Z"
+    }
+  ]
+}

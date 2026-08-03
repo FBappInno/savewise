@@ -4,6 +4,8 @@ import type {
   DiscoverySource,
   KnowledgeAnswer,
   KnowledgeLibrary,
+  ResearchCandidateStatus,
+  ResearchState,
   SecondBrainOverview,
 } from "@savewise/shared";
 
@@ -281,6 +283,44 @@ export function getSecondBrainOverview(): Promise<SecondBrainOverview> {
     "/api/knowledge/second-brain",
     {},
     105_000,
+  );
+}
+
+export function getResearchState(): Promise<ResearchState> {
+  return apiRequest<ResearchState>("/api/research");
+}
+
+export function runPersonalResearch(): Promise<ResearchState> {
+  return apiRequest<ResearchState>(
+    "/api/research/run",
+    { method: "POST" },
+    145_000,
+  );
+}
+
+export function updateResearchCandidate(
+  candidateId: string,
+  status: Extract<ResearchCandidateStatus, "suggested" | "dismissed">,
+): Promise<ResearchState> {
+  return apiRequest<ResearchState>(
+    `/api/research/candidates/${encodeURIComponent(candidateId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    },
+  );
+}
+
+export function saveResearchCandidate(
+  candidateId: string,
+): Promise<{
+  discovery: Discovery;
+  research: ResearchState | null;
+}> {
+  return apiRequest(
+    `/api/research/candidates/${encodeURIComponent(candidateId)}/save`,
+    { method: "POST" },
+    100_000,
   );
 }
 
