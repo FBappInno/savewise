@@ -8,3 +8,5 @@ export * from "./models/KnowledgeItem";
 export * from "./models/KnowledgeSource";
 
 export * from "./models/KnowledgeLibrary";
+export * from "./services/AIService";
+export * from "./services/MockAIService";

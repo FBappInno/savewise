@@ -1,21 +1,25 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
     "lib": [
       "ES2022"
     ],
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "noEmit": true,
     "types": [
       "node"
-    ]
+    ],
+    "baseUrl": "..",
+    "paths": {
+      "@savewise/shared": [
+        "packages/shared/src/index.ts"
+      ],
+      "@savewise/shared/*": [
+        "packages/shared/src/*"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts"

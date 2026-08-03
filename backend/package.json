@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
-    "typecheck": "tsc --noEmit"
+  "start": "tsx src/server.ts",
+  "typecheck": "tsc --noEmit",
+  "test:library": "tsx src/scripts/test-library-builder.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
