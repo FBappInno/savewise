@@ -6,3 +6,5 @@ export * from "./models/Topic";
 
 export * from "./models/KnowledgeItem";
 export * from "./models/KnowledgeSource";
+
+export * from "./models/KnowledgeLibrary";
