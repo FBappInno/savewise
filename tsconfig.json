@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@savewise/shared": [
+        "packages/shared/src"
+      ],
+      "@savewise/storage": [
+        "packages/storage/src"
+      ],
+      "@savewise/knowledge": [
+        "packages/knowledge/src"
+      ],
+      "@savewise/intelligence": [
+        "packages/intelligence/src"
+      ]
+    }
+  },
+  "extends": "expo/tsconfig.base"
+}

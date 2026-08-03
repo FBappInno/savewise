@@ -18,4 +18,16 @@ export interface KnowledgeItem {
 
   createdAt: Date;
   updatedAt: Date;
+
+aiSummary?: string;
+
+aiKeywords?: string[];
+
+aiCategory?: string;
+
+relatedIds?: string[];
+
+lastAnalyzedAt?: Date;
+analysisVersion?: number;
+
 }
