@@ -1,33 +1,415 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
+import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
+import type {
+  DisplayLanguage,
+  InputLanguage,
+} from "@/types/app-settings";
 
 export default function SettingsScreen() {
+  const { settings, t, updateSettings, saveAccount } = useAppSettings();
+  const [username, setUsername] = useState(settings.account.username);
+  const [email, setEmail] = useState(settings.account.email);
+  const [password, setPassword] = useState("");
+  const [isSaving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setUsername(settings.account.username);
+    setEmail(settings.account.email);
+  }, [settings.account.email, settings.account.username]);
+
+  async function handleSaveAccount() {
+    setSaving(true);
+    try {
+      await saveAccount({ username, email, password });
+      setPassword("");
+      Alert.alert(t("settings.saved"), t("settings.accountSaved"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      <Text style={styles.subtitle}>Coming soon</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.screen}
+    >
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>{t("settings.eyebrow")}</Text>
+          <Text style={styles.title}>{t("settings.title")}</Text>
+          <Text style={styles.subtitle}>{t("settings.subtitle")}</Text>
+        </View>
+
+        <SettingsSection
+          description={t("settings.accountDescription")}
+          icon="person-circle-outline"
+          title={t("settings.account")}
+        >
+          <Field
+            autoCapitalize="words"
+            label={t("settings.username")}
+            onChangeText={setUsername}
+            value={username}
+          />
+          <Field
+            autoCapitalize="none"
+            keyboardType="email-address"
+            label={t("settings.email")}
+            onChangeText={setEmail}
+            value={email}
+          />
+          <Field
+            autoCapitalize="none"
+            label={t("settings.password")}
+            onChangeText={setPassword}
+            placeholder={settings.account.hasPassword
+              ? t("settings.passwordSaved")
+              : t("settings.passwordPlaceholder")}
+            secureTextEntry
+            value={password}
+          />
+          <Pressable
+            disabled={isSaving}
+            onPress={() => void handleSaveAccount()}
+            style={({ pressed }) => [
+              styles.saveButton,
+              pressed && styles.pressed,
+              isSaving && styles.disabled,
+            ]}
+          >
+            <Ionicons color="#ffffff" name="save-outline" size={18} />
+            <Text style={styles.saveButtonText}>{t("settings.saveAccount")}</Text>
+          </Pressable>
+        </SettingsSection>
+
+        <SettingsSection
+          description={t("settings.languageDescription")}
+          icon="language-outline"
+          title={t("settings.language")}
+        >
+          <DropdownSelect<DisplayLanguage>
+            label={t("settings.displayLanguage")}
+            onChange={(display) => void updateSettings((current) => ({
+              ...current,
+              language: { ...current.language, display },
+            }))}
+            options={[
+              { label: t("settings.system"), value: "system" },
+              { label: t("settings.german"), value: "de" },
+              { label: t("settings.english"), value: "en" },
+              { label: t("settings.french"), value: "fr" },
+              { label: t("settings.italian"), value: "it" },
+              { label: t("settings.spanish"), value: "es" },
+            ]}
+            value={settings.language.display}
+          />
+          <DropdownSelect<InputLanguage>
+            label={t("settings.inputLanguage")}
+            onChange={(input) => void updateSettings((current) => ({
+              ...current,
+              language: { ...current.language, input },
+            }))}
+            options={[
+              { label: t("settings.automatic"), value: "auto" },
+              { label: t("settings.german"), value: "de" },
+              { label: t("settings.english"), value: "en" },
+              { label: t("settings.french"), value: "fr" },
+              { label: t("settings.italian"), value: "it" },
+              { label: t("settings.spanish"), value: "es" },
+            ]}
+            value={settings.language.input}
+          />
+        </SettingsSection>
+
+        <SettingsSection
+          description={t("settings.storageDescription")}
+          icon="server-outline"
+          title={t("settings.storage")}
+        >
+          <ChoiceRow
+            onChange={() => undefined}
+            options={[
+              { label: t("settings.local"), value: "local" },
+              { label: `${t("settings.cloud")} · ${t("settings.comingLater")}`, value: "cloud", disabled: true },
+            ]}
+            value={settings.storage.location}
+          />
+        </SettingsSection>
+
+        <SettingsSection icon="shield-checkmark-outline" title={t("settings.privacy")}>
+          <ToggleRow
+            description={t("settings.analyticsDescription")}
+            label={t("settings.analytics")}
+            onValueChange={(usageAnalytics) => void updateSettings((current) => ({
+              ...current,
+              privacy: { ...current.privacy, usageAnalytics },
+            }))}
+            value={settings.privacy.usageAnalytics}
+          />
+          <ToggleRow
+            description={t("settings.externalProcessingDescription")}
+            label={t("settings.externalProcessing")}
+            onValueChange={(externalContentProcessing) => void updateSettings((current) => ({
+              ...current,
+              privacy: { ...current.privacy, externalContentProcessing },
+            }))}
+            value={settings.privacy.externalContentProcessing}
+          />
+        </SettingsSection>
+
+        <SettingsSection
+          description={t("settings.aiDescription")}
+          icon="sparkles-outline"
+          title={t("settings.ai")}
+        >
+          <ToggleRow
+            label={t("settings.contentAnalysis")}
+            onValueChange={(contentAnalysis) => void updateSettings((current) => ({
+              ...current,
+              ai: { ...current.ai, contentAnalysis },
+            }))}
+            value={settings.ai.contentAnalysis}
+          />
+          <ToggleRow
+            label={t("settings.knowledgeGraph")}
+            onValueChange={(knowledgeGraph) => void updateSettings((current) => ({
+              ...current,
+              ai: { ...current.ai, knowledgeGraph },
+            }))}
+            value={settings.ai.knowledgeGraph}
+          />
+          <ToggleRow
+            label={t("settings.autonomousResearch")}
+            onValueChange={(autonomousResearch) => void updateSettings((current) => ({
+              ...current,
+              ai: { ...current.ai, autonomousResearch },
+            }))}
+            value={settings.ai.autonomousResearch}
+          />
+        </SettingsSection>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+function SettingsSection({ children, description, icon, title }: {
+  children: ReactNode;
+  description?: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+}) {
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionTitleRow}>
+        <View style={styles.sectionIcon}>
+          <Ionicons color={theme.colors.primary} name={icon} size={20} />
+        </View>
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      {description ? <Text style={styles.sectionDescription}>{description}</Text> : null}
+      <View style={styles.sectionBody}>{children}</View>
+    </View>
+  );
+}
+
+function Field(props: React.ComponentProps<typeof TextInput> & { label: string }) {
+  const { label, ...inputProps } = props;
+  return (
+    <View style={styles.field}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput
+        placeholderTextColor={theme.colors.placeholder}
+        style={styles.input}
+        {...inputProps}
+      />
+    </View>
+  );
+}
+
+function ChoiceRow<T extends string>({ onChange, options, value }: {
+  onChange: (value: T) => void;
+  options: { label: string; value: T; disabled?: boolean }[];
+  value: T;
+}) {
+  return (
+    <View style={styles.choiceRow}>
+      {options.map((option) => {
+        const selected = option.value === value;
+        return (
+          <Pressable
+            disabled={option.disabled}
+            key={option.value}
+            onPress={() => onChange(option.value)}
+            style={({ pressed }) => [
+              styles.choice,
+              selected && styles.choiceSelected,
+              option.disabled && styles.disabled,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[styles.choiceText, selected && styles.choiceTextSelected]}>
+              {option.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function DropdownSelect<T extends string>({ label, onChange, options, value }: {
+  label: string;
+  onChange: (value: T) => void;
+  options: { label: string; value: T }[];
+  value: T;
+}) {
+  const [isOpen, setOpen] = useState(false);
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? value;
+
+  return (
+    <View style={styles.dropdownGroup}>
+      <Text style={styles.controlLabel}>{label}</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => setOpen(true)}
+        style={({ pressed }) => [styles.dropdown, pressed && styles.pressed]}
+      >
+        <Text style={styles.dropdownValue}>{selectedLabel}</Text>
+        <Ionicons color={theme.colors.textSecondary} name="chevron-down" size={20} />
+      </Pressable>
+
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+        transparent
+        visible={isOpen}
+      >
+        <Pressable onPress={() => setOpen(false)} style={styles.modalBackdrop}>
+          <Pressable onPress={() => undefined} style={styles.optionSheet}>
+            <View style={styles.optionSheetHeader}>
+              <Text style={styles.optionSheetTitle}>{label}</Text>
+              <Pressable
+                accessibilityRole="button"
+                hitSlop={12}
+                onPress={() => setOpen(false)}
+              >
+                <Ionicons color={theme.colors.textSecondary} name="close" size={24} />
+              </Pressable>
+            </View>
+            {options.map((option) => {
+              const selected = option.value === value;
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  style={({ pressed }) => [
+                    styles.dropdownOption,
+                    selected && styles.dropdownOptionSelected,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={[
+                    styles.dropdownOptionText,
+                    selected && styles.dropdownOptionTextSelected,
+                  ]}>
+                    {option.label}
+                  </Text>
+                  {selected ? (
+                    <Ionicons color={theme.colors.primary} name="checkmark-circle" size={22} />
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+}
+
+function ToggleRow({ description, label, onValueChange, value }: {
+  description?: string;
+  label: string;
+  onValueChange: (value: boolean) => void;
+  value: boolean;
+}) {
+  return (
+    <View style={styles.toggleRow}>
+      <View style={styles.toggleText}>
+        <Text style={styles.toggleLabel}>{label}</Text>
+        {description ? <Text style={styles.toggleDescription}>{description}</Text> : null}
+      </View>
+      <Switch
+        onValueChange={onValueChange}
+        trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+        value={value}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.background,
-    padding: theme.spacing.xl,
-  },
-
-  title: {
-    ...theme.typography.screenTitle,
-    color: theme.colors.text,
-  },
-
-  subtitle: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.sm,
-  },
+  screen: { flex: 1, backgroundColor: theme.colors.background },
+  content: { paddingBottom: 110, paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.xxxl },
+  header: { marginBottom: theme.spacing.xxl },
+  eyebrow: { ...theme.typography.caption, color: theme.colors.primary, letterSpacing: 1.1 },
+  title: { ...theme.typography.screenTitle, color: theme.colors.text, marginTop: theme.spacing.sm },
+  subtitle: { ...theme.typography.body, color: theme.colors.textSecondary, marginTop: theme.spacing.sm },
+  section: { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.lg, borderWidth: 1, marginBottom: theme.spacing.lg, padding: theme.spacing.lg },
+  sectionTitleRow: { alignItems: "center", flexDirection: "row", gap: theme.spacing.md },
+  sectionIcon: { alignItems: "center", backgroundColor: "#EFF6FF", borderRadius: theme.radius.md, height: 38, justifyContent: "center", width: 38 },
+  sectionTitle: { ...theme.typography.sectionTitle, color: theme.colors.text, flex: 1 },
+  sectionDescription: { ...theme.typography.caption, color: theme.colors.textSecondary, marginTop: theme.spacing.md },
+  sectionBody: { marginTop: theme.spacing.lg },
+  field: { marginBottom: theme.spacing.md },
+  fieldLabel: { ...theme.typography.caption, color: theme.colors.textSecondary, marginBottom: theme.spacing.xs },
+  input: { ...theme.typography.body, backgroundColor: theme.colors.background, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, color: theme.colors.text, minHeight: 48, paddingHorizontal: theme.spacing.md },
+  saveButton: { alignItems: "center", backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, flexDirection: "row", gap: theme.spacing.sm, justifyContent: "center", minHeight: 50, marginTop: theme.spacing.xs },
+  saveButtonText: { ...theme.typography.button, color: "#ffffff" },
+  controlLabel: { ...theme.typography.bodyStrong, color: theme.colors.text },
+  dropdownGroup: { marginBottom: theme.spacing.lg },
+  dropdown: { alignItems: "center", backgroundColor: theme.colors.background, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, flexDirection: "row", justifyContent: "space-between", marginTop: theme.spacing.sm, minHeight: 50, paddingHorizontal: theme.spacing.md },
+  dropdownValue: { ...theme.typography.body, color: theme.colors.text, flex: 1 },
+  modalBackdrop: { backgroundColor: "rgba(17, 24, 39, 0.42)", flex: 1, justifyContent: "flex-end", padding: theme.spacing.lg },
+  optionSheet: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.lg, padding: theme.spacing.lg },
+  optionSheetHeader: { alignItems: "center", borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", justifyContent: "space-between", paddingBottom: theme.spacing.md },
+  optionSheetTitle: { ...theme.typography.sectionTitle, color: theme.colors.text, flex: 1 },
+  dropdownOption: { alignItems: "center", borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", justifyContent: "space-between", minHeight: 52, paddingHorizontal: theme.spacing.sm },
+  dropdownOptionSelected: { backgroundColor: "#EFF6FF" },
+  dropdownOptionText: { ...theme.typography.body, color: theme.colors.text },
+  dropdownOptionTextSelected: { color: theme.colors.primary, fontWeight: "600" },
+  choiceRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm, marginTop: theme.spacing.sm },
+  choice: { backgroundColor: theme.colors.background, borderColor: theme.colors.border, borderRadius: theme.radius.pill, borderWidth: 1, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm },
+  choiceSelected: { backgroundColor: "#EFF6FF", borderColor: theme.colors.primary },
+  choiceText: { ...theme.typography.caption, color: theme.colors.textSecondary },
+  choiceTextSelected: { color: theme.colors.primary, fontWeight: "600" },
+  toggleRow: { alignItems: "center", borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", gap: theme.spacing.md, minHeight: 62, paddingVertical: theme.spacing.sm },
+  toggleText: { flex: 1 },
+  toggleLabel: { ...theme.typography.bodyStrong, color: theme.colors.text },
+  toggleDescription: { ...theme.typography.caption, color: theme.colors.textSecondary, marginTop: 2 },
+  disabled: { opacity: 0.42 },
+  pressed: { opacity: 0.7 },
 });

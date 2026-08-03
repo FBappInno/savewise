@@ -57,6 +57,9 @@ export type ContentImportResult = {
 
 export async function importContent(
   url: string,
+  options: {
+    preferredLanguage?: "de" | "en" | "fr" | "it" | "es";
+  } = {},
 ): Promise<ContentImportResult> {
   console.log("[Import] Starting:", url);
 
@@ -70,7 +73,10 @@ export async function importContent(
   );
 
   const aiStartedAt = Date.now();
-  const analysis = await analyzeContent(metadata);
+  const analysis = await analyzeContent(
+    metadata,
+    options.preferredLanguage,
+  );
   console.log(`[Import] AI: ${Date.now() - aiStartedAt}ms`);
 
   console.log(

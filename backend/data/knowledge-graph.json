@@ -1,22 +1,265 @@
 {
-  "generatedAt": "2026-08-03T16:46:15.666Z",
-  "sourceFingerprint": "6b3f503596a5c0109338b27612719934af41e6cde6e102f71f271d876eb9cbb0",
+  "generatedAt": "2026-08-03T19:01:23.849Z",
+  "sourceFingerprint": "b44481582e4af99d0fb5f31abd6d86de6205140ec36b9b5f8461d9564a6e4a0b",
   "language": "de",
-  "summary": "Das Nutzerwissen umfasst zwei Hauptbereiche: Ernährung mit Fokus auf Makronährstoffe wie Kohlenhydrate und Proteine, sowie aktuelle Nachrichten mit Schwerpunkt auf allgemeine Berichterstattung und schweizerische Regionalnachrichten. Im Ernährungsbereich sind Themen zu gesunden Kohlenhydraten, Blutzuckerwirkung, Low-Carb-Diäten, proteinreichen Lebensmitteln und täglichem Eiweißbedarf enthalten. Im Nachrichtenbereich befinden sich Überblicksinhalte zu Wirtschaft, Politik, Sport, Kultur, Gesellschaft und Unterhaltung, mit besonderem Bezug auf die Schweiz.",
+  "summary": "Das Nutzerwissen ist in sechs Hauptdomänen organisiert: Ernährung mit den Schwerpunkten Kohlenhydrate und Proteinzufuhr, Arbeitssicherheit mit zentralem Aspekt des menschlichen Versagens und organisatorischen Fehlern, Cybersicherheit fokussiert auf den menschlichen Faktor und dessen Verhaltensrisiken, Umweltwissenschaften mit Schwerpunkten auf Klimawandel, Sicherheitsmanagement und Risikoprävention, Technologie insbesondere Luftfahrt und Verteidigung mit Details zu modernen Kampfjets, sowie Business mit internationaler Politik und EU-Unterstützung für Ukraine. Zudem enthält die Wissensbasis Nachrichten mit Schwerpunkt auf Schweizer Regionalnachrichten und internationalen Konflikten sowie Lifestyle-Themen rund um Reisen und Tourismus, einschließlich mediterraner Destinationen. Die Erkenntn!",
   "rootNodeIds": [
+    "node-safety-and-risk-management",
+    "node-finance-and-investment",
+    "node-lifestyle-travel-tourism",
     "node-nutrition",
-    "node-news"
+    "node-science-environmental-and-earth",
+    "node-technology-and-defense",
+    "node-business-and-international-relations",
+    "node-news-and-media"
   ],
   "nodes": [
+    {
+      "id": "node-safety-and-risk-management",
+      "title": "Sicherheits- und Risikomanagement",
+      "kind": "domain",
+      "description": "Wissen zu Sicherheitsmanagement, Risikoanalyse und der Rolle menschlichen Versagens in verschiedenen Lebensbereichen.",
+      "parentId": null,
+      "childIds": [
+        "node-human-error",
+        "node-statistics-and-risk-analysis"
+      ],
+      "discoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
+        "1f4e8525-9de2-432d-a284-06faaa910206",
+        "09b41da5-33f3-4826-9f99-af9aa429b36c",
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d",
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+      ],
+      "aliases": [
+        "Risikomanagement",
+        "Arbeits- und Industriesicherheit"
+      ],
+      "keywords": [
+        "menschliches Versagen",
+        "Unfälle",
+        "Sicherheitsverhalten",
+        "Risikoanalyse",
+        "Arbeitsunfälle"
+      ],
+      "confidence": 0.96
+    },
+    {
+      "id": "node-human-error",
+      "title": "Menschliches Versagen",
+      "kind": "topic",
+      "description": "Der menschliche Faktor als Hauptursache für Unfälle, Störfälle und Sicherheitsprobleme in Arbeit, Industrie und Cybersicherheit.",
+      "parentId": "node-safety-and-risk-management",
+      "childIds": [
+        "node-industrial-and-occupational-safety",
+        "node-cybersecurity-human-factors"
+      ],
+      "discoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
+        "1f4e8525-9de2-432d-a284-06faaa910206",
+        "09b41da5-33f3-4826-9f99-af9aa429b36c",
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf",
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+      ],
+      "aliases": [
+        "Human Factors"
+      ],
+      "keywords": [
+        "Fehlerprävention",
+        "Verhaltensrisiken",
+        "Sicherheitsorganisation",
+        "Cybersicherheit"
+      ],
+      "confidence": 0.98
+    },
+    {
+      "id": "node-industrial-and-occupational-safety",
+      "title": "Industrie- und Arbeitssicherheit",
+      "kind": "subtopic",
+      "description": "Untersuchung von Unfallursachen, organisatorischen Fehlern und Präventionsmaßnahmen in Industrie und Arbeitswelt.",
+      "parentId": "node-human-error",
+      "childIds": [],
+      "discoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
+        "1f4e8525-9de2-432d-a284-06faaa910206",
+        "09b41da5-33f3-4826-9f99-af9aa429b36c"
+      ],
+      "aliases": [
+        "Arbeitsschutz",
+        "Safety at Work"
+      ],
+      "keywords": [
+        "Unfallstatistik",
+        "organisatorische Fehler",
+        "Sicherheitsverhalten",
+        "Arbeitsunfälle"
+      ],
+      "confidence": 0.97
+    },
+    {
+      "id": "node-cybersecurity-human-factors",
+      "title": "Menschliche Faktoren in der Cybersicherheit",
+      "kind": "subtopic",
+      "description": "Der Einfluss menschlichen Verhaltens in der Cybersicherheit, Awareness und Prävention von Sicherheitsvorfällen.",
+      "parentId": "node-human-error",
+      "childIds": [],
+      "discoveryIds": [
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Cybersicherheit",
+        "Verhaltensrisiken",
+        "Awareness",
+        "Incident Prevention"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-statistics-and-risk-analysis",
+      "title": "Statistik und Risikoanalyse",
+      "kind": "topic",
+      "description": "Statistische Betrachtungen zur Wahrscheinlichkeit und zum Risiko menschlichen Versagens.",
+      "parentId": "node-safety-and-risk-management",
+      "childIds": [],
+      "discoveryIds": [
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Statistik",
+        "Risikoanalyse",
+        "Wahrscheinlichkeit",
+        "Vorfall"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-finance-and-investment",
+      "title": "Finanzen und Investitionen",
+      "kind": "domain",
+      "description": "Grundlagen zu Finanzmärkten, Aktien, Investmentfonds und handelbaren Anlageprodukten.",
+      "parentId": null,
+      "childIds": [
+        "node-investment-funds-and-markets"
+      ],
+      "discoveryIds": [
+        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+        "0a407377-28d6-416d-8cb6-4b469ce78782"
+      ],
+      "aliases": [
+        "Finanzwesen"
+      ],
+      "keywords": [
+        "ETF",
+        "Aktien",
+        "Börse",
+        "Investmentfonds",
+        "Equity Securities"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-investment-funds-and-markets",
+      "title": "Investmentfonds und Märkte",
+      "kind": "topic",
+      "description": "Details zu Exchange-Traded Funds, Aktienarten, Börsenhandel und Wertentwicklung.",
+      "parentId": "node-finance-and-investment",
+      "childIds": [],
+      "discoveryIds": [
+        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+        "0a407377-28d6-416d-8cb6-4b469ce78782"
+      ],
+      "aliases": [
+        "Investment Vehicles"
+      ],
+      "keywords": [
+        "ETF",
+        "Stock Markets",
+        "Stock Issuance"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-lifestyle-travel-tourism",
+      "title": "Lifestyle: Reisen und Tourismus",
+      "kind": "domain",
+      "description": "Informationen zu Reisezielen, Tourismuserlebnissen und Aktivitäten in Mittelmeerregionen und weiteren attraktiven Destinationen.",
+      "parentId": null,
+      "childIds": [
+        "node-mediterranean-destinations",
+        "node-adventure-and-cultural-tourism"
+      ],
+      "discoveryIds": [
+        "c6267e81-aee0-48bd-95b9-851227b31ea5",
+        "b3878eac-8bfc-429d-8eec-906e5f8ba150",
+        "cceb57b1-9115-4966-9086-d3c2e405482e",
+        "a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+      ],
+      "aliases": [
+        "Reisen",
+        "Tourismus"
+      ],
+      "keywords": [
+        "Italien",
+        "Kroatien",
+        "Balearische Inseln",
+        "Kykladen",
+        "Aktivitäten",
+        "Abenteuerreisen"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-mediterranean-destinations",
+      "title": "Mittelmeerziele",
+      "kind": "topic",
+      "description": "Reiseziele und Empfehlungen für die Balearischen Inseln und Griechenland (Kykladen).",
+      "parentId": "node-lifestyle-travel-tourism",
+      "childIds": [],
+      "discoveryIds": [
+        "cceb57b1-9115-4966-9086-d3c2e405482e",
+        "a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Balearische Inseln",
+        "Kykladen",
+        "Greece",
+        "Majorca",
+        "Ibiza"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-adventure-and-cultural-tourism",
+      "title": "Abenteuer- und Kulturtourismus",
+      "kind": "topic",
+      "description": "Erlebnisse in Kroatien mit Fokus auf Natur, Abenteuer und kulturelles Erbe.",
+      "parentId": "node-lifestyle-travel-tourism",
+      "childIds": [],
+      "discoveryIds": [
+        "b3878eac-8bfc-429d-8eec-906e5f8ba150"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Kroatien",
+        "Adriatisches Meer",
+        "Abenteuer",
+        "Natur",
+        "kulturelles Erbe"
+      ],
+      "confidence": 0.9
+    },
     {
       "id": "node-nutrition",
       "title": "Ernährung",
       "kind": "domain",
-      "description": "Wissen rund um Ernährung, Makronährstoffe und gesundheitsbezogene Ernährungsempfehlungen.",
+      "description": "Wissen über Ernährung, insbesondere Makronährstoffe wie Kohlenhydrate und Proteine, inklusive deren Wirkung und Bedeutung für Gesundheit und Gewichtskontrolle.",
       "parentId": null,
       "childIds": [
         "node-carbohydrates",
-        "node-protein-intake"
+        "node-proteins"
       ],
       "discoveryIds": [
         "0b87718a-19c3-4f08-9712-5adc9913a5f4",
@@ -26,9 +269,11 @@
         "Ernährungswissenschaft"
       ],
       "keywords": [
-        "Ernährung",
-        "Makronährstoffe",
-        "Gesundheit"
+        "Kohlenhydrate",
+        "Proteine",
+        "Low Carb",
+        "Blutzucker",
+        "Eiweißzufuhr"
       ],
       "confidence": 0.95
     },
@@ -36,490 +281,334 @@
       "id": "node-carbohydrates",
       "title": "Kohlenhydrate",
       "kind": "topic",
-      "description": "Untersuchung von Kohlenhydraten, deren Wirkung auf den Blutzuckerspiegel und deren Rolle bei der Gewichtskontrolle.",
+      "description": "Untersuchung gesunder und ungesunder Kohlenhydrate, deren Einfluss auf Blutzuckerspiegel und Rolle beim Abnehmen.",
       "parentId": "node-nutrition",
-      "childIds": [
-        "node-complex-carbohydrates",
-        "node-blood-sugar-impact",
-        "node-weight-management"
-      ],
-      "discoveryIds": [
-        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
-      ],
-      "aliases": [
-        "Carbohydrates"
-      ],
-      "keywords": [
-        "Kohlenhydrate",
-        "Low Carb",
-        "Blutzuckerspiegel",
-        "Dickmacher",
-        "Kartoffeln"
-      ],
-      "confidence": 0.9
-    },
-    {
-      "id": "node-complex-carbohydrates",
-      "title": "Komplexe Kohlenhydrate",
-      "kind": "subtopic",
-      "description": "Gesunde, komplexe Kohlenhydrate wie Kartoffeln, die eine stabile Energieversorgung ermöglichen.",
-      "parentId": "node-carbohydrates",
       "childIds": [],
       "discoveryIds": [
         "0b87718a-19c3-4f08-9712-5adc9913a5f4"
       ],
-      "aliases": [
-        "Komplexe Zucker"
-      ],
+      "aliases": [],
       "keywords": [
+        "Low Carb",
+        "Blutzuckerspiegel",
         "Kartoffeln",
-        "Komplexe Kohlenhydrate",
-        "Energieversorgung"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-blood-sugar-impact",
-      "title": "Auswirkungen auf den Blutzuckerspiegel",
-      "kind": "subtopic",
-      "description": "Wie unterschiedliche Kohlenhydrate den Blutzuckerspiegel beeinflussen und ihre Bedeutung für die Ernährung.",
-      "parentId": "node-carbohydrates",
-      "childIds": [],
-      "discoveryIds": [
-        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
-      ],
-      "aliases": [
-        "Blutzuckerwirkung"
-      ],
-      "keywords": [
-        "Blutzuckerspiegel",
-        "Kohlenhydrate",
-        "Diät"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-weight-management",
-      "title": "Gewichtsmanagement",
-      "kind": "subtopic",
-      "description": "Strategien und Bedeutung der Kohlenhydratauswahl für die Gewichtskontrolle, einschließlich Low-Carb-Diäten.",
-      "parentId": "node-carbohydrates",
-      "childIds": [],
-      "discoveryIds": [
-        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
-      ],
-      "aliases": [
-        "Gewichtsreduktion"
-      ],
-      "keywords": [
-        "Low Carb",
-        "Abnehmen",
-        "Kohlenhydrate"
-      ],
-      "confidence": 0.8
-    },
-    {
-      "id": "node-protein-intake",
-      "title": "Proteinzufuhr",
-      "kind": "topic",
-      "description": "Empfehlungen zur Aufnahme von Protein im Alltag und die Vorteile proteinreicher Lebensmittel.",
-      "parentId": "node-nutrition",
-      "childIds": [
-        "node-protein-rich-foods",
-        "node-daily-protein-needs"
-      ],
-      "discoveryIds": [
-        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
-      ],
-      "aliases": [
-        "Eiweißzufuhr"
-      ],
-      "keywords": [
-        "Protein",
-        "Eiweiß",
-        "proteinreiche Lebensmittel",
-        "Bedarf"
+        "Dickmacher"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-protein-rich-foods",
-      "title": "Proteinreiche Lebensmittel",
-      "kind": "subtopic",
-      "description": "Lebensmittel mit hohem Proteingehalt und deren Integration in die tägliche Ernährung.",
-      "parentId": "node-protein-intake",
+      "id": "node-proteins",
+      "title": "Proteine",
+      "kind": "topic",
+      "description": "Empfehlungen zur Proteinzufuhr und Integration proteinreicher Lebensmittel im Alltag.",
+      "parentId": "node-nutrition",
       "childIds": [],
       "discoveryIds": [
         "a56b02d3-e199-4393-8fcb-c6f5596f8122"
       ],
       "aliases": [
-        "Eiweißquellen"
+        "Eiweiß"
       ],
       "keywords": [
         "proteinreiche Lebensmittel",
+        "Eiweißbedarf",
         "Ernährung"
       ],
-      "confidence": 0.85
+      "confidence": 0.9
     },
     {
-      "id": "node-daily-protein-needs",
-      "title": "Täglicher Proteinbedarf",
-      "kind": "subtopic",
-      "description": "Empfohlene tägliche Eiweißmengen zur Deckung des Bedarfs.",
-      "parentId": "node-protein-intake",
-      "childIds": [],
-      "discoveryIds": [
-        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
-      ],
-      "aliases": [
-        "Proteinbedarf"
-      ],
-      "keywords": [
-        "Protein",
-        "Eiweiß",
-        "täglicher Bedarf"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-news",
-      "title": "Nachrichten",
+      "id": "node-science-environmental-and-earth",
+      "title": "Wissenschaft: Umwelt- und Erdwissenschaften",
       "kind": "domain",
-      "description": "Aktuelle Berichterstattung und Nachrichteninhalte zu vielfältigen Themenbereichen, inklusive regionaler und internationaler Perspektiven.",
+      "description": "Wissenschaftliches Wissen zu Umwelt, Klimawandel, Erdgeschichte und Klimawandel-Anpassung und -Minderung.",
       "parentId": null,
       "childIds": [
-        "node-current-events"
+        "node-climate-change"
       ],
       "discoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "489f404d-a8f4-495c-b09a-7fcf2221312e",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
+        "39a36c46-5aa6-4111-a75f-adba6f78262f",
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
       ],
       "aliases": [
-        "News",
-        "Aktuelle Nachrichten"
+        "Environment Science"
       ],
       "keywords": [
-        "Nachrichten",
-        "News",
-        "Aktuell"
+        "Klimawandel",
+        "IPCC",
+        "historische Klimazyklen",
+        "Adaptation",
+        "Mitigation"
       ],
       "confidence": 0.95
     },
     {
-      "id": "node-current-events",
-      "title": "Aktuelle Ereignisse",
+      "id": "node-climate-change",
+      "title": "Klimawandel",
       "kind": "topic",
-      "description": "Berichterstattung über aktuelle Themen und Ereignisse in verschiedenen Lebensbereichen.",
-      "parentId": "node-news",
-      "childIds": [
-        "node-regional-news-switzerland",
-        "node-politics",
-        "node-economy",
-        "node-entertainment",
-        "node-sports",
-        "node-culture-society-science"
+      "description": "Umfassende wissenschaftliche Erkenntnisse zum Klimawandel, dessen Auswirkungen und Anpassungsstrategien.",
+      "parentId": "node-science-environmental-and-earth",
+      "childIds": [],
+      "discoveryIds": [
+        "39a36c46-5aa6-4111-a75f-adba6f78262f",
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
       ],
+      "aliases": [],
+      "keywords": [
+        "IPCC",
+        "AR6",
+        "Eiszeiten",
+        "Klimawissenschaft"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-technology-and-defense",
+      "title": "Technologie und Verteidigung",
+      "kind": "domain",
+      "description": "Wissen über moderne Technologien in Luftfahrt und Militär, insbesondere moderne Kampfjets und deren Systeme.",
+      "parentId": null,
+      "childIds": [
+        "node-military-aviation"
+      ],
+      "discoveryIds": [
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf",
+        "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Kampfjet",
+        "Avionik",
+        "Drohnenbekämpfung",
+        "Cybersecurity"
+      ],
+      "confidence": 0.93
+    },
+    {
+      "id": "node-military-aviation",
+      "title": "Militärische Luftfahrt",
+      "kind": "topic",
+      "description": "Moderne Leichtangriffsflugzeuge wie die Jak-130M mit erweiterten Waffen- und Zielsystemen gegen Drohnen.",
+      "parentId": "node-technology-and-defense",
+      "childIds": [],
+      "discoveryIds": [
+        "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Jak-130M",
+        "Jettrainer",
+        "Avionik",
+        "Drohnenabwehr"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-business-and-international-relations",
+      "title": "Wirtschaft und internationale Beziehungen",
+      "kind": "domain",
+      "description": "Themen zu internationaler Unterstützung, EU-Hilfen für die Ukraine, Sanktionen und globalen politischen Konflikten.",
+      "parentId": null,
+      "childIds": [
+        "node-international-support-and-conflict"
+      ],
+      "discoveryIds": [
+        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
+        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "EU-Unterstützung",
+        "Ukraine",
+        "Sanktionen",
+        "UN",
+        "Frieden",
+        "internationale Sicherheit"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-international-support-and-conflict",
+      "title": "Internationale Unterstützung und Konflikt",
+      "kind": "topic",
+      "description": "EU-Programme zur wirtschaftlichen und sozialen Unterstützung der Ukraine sowie UN-Friedensappelle und humanitäre Bemühungen.",
+      "parentId": "node-business-and-international-relations",
+      "childIds": [],
+      "discoveryIds": [
+        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
+        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Rekonstruktion",
+        "Waffenembargo",
+        "Frieden",
+        "Kriegsfolgen",
+        "humanitäre Hilfe"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-news-and-media",
+      "title": "Nachrichten und Medien",
+      "kind": "domain",
+      "description": "Umfassende Nachrichtenquellen mit thematischem Fokus auf Schweiz, Politik, Wirtschaft, Gesellschaft und internationale Konflikte.",
+      "parentId": null,
+      "childIds": [],
       "discoveryIds": [
         "b072daa0-eea2-4e0d-a562-203fb318b5e3",
         "489f404d-a8f4-495c-b09a-7fcf2221312e",
         "de797c05-5dea-47ae-a48d-6ef5559e526e"
       ],
       "aliases": [
-        "Nachrichtenereignisse"
-      ],
-      "keywords": [
-        "Nachrichten",
-        "Politik",
-        "Wirtschaft",
-        "Sport",
-        "Kultur"
-      ],
-      "confidence": 0.9
-    },
-    {
-      "id": "node-regional-news-switzerland",
-      "title": "Regionale Nachrichten Schweiz",
-      "kind": "subtopic",
-      "description": "Nachrichten und Hintergründe mit Schwerpunkt auf der Schweiz und deren gesellschaftlichen Begebenheiten.",
-      "parentId": "node-current-events",
-      "childIds": [],
-      "discoveryIds": [
-        "489f404d-a8f4-495c-b09a-7fcf2221312e",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ],
-      "aliases": [
-        "Schweizer Nachrichten"
+        "Aktuelle Nachrichten"
       ],
       "keywords": [
         "Schweiz",
-        "Nachrichten",
-        "Hintergründe"
-      ],
-      "confidence": 0.9
-    },
-    {
-      "id": "node-politics",
-      "title": "Politik",
-      "kind": "subtopic",
-      "description": "Politische Entwicklungen und Berichte in nationalen und internationalen Kontexten.",
-      "parentId": "node-current-events",
-      "childIds": [],
-      "discoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ],
-      "aliases": [
-        "Politische Nachrichten"
-      ],
-      "keywords": [
-        "Politik"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-economy",
-      "title": "Wirtschaft",
-      "kind": "subtopic",
-      "description": "Wirtschaftliche Nachrichten und deren Auswirkungen auf Gesellschaft und Politik.",
-      "parentId": "node-current-events",
-      "childIds": [],
-      "discoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ],
-      "aliases": [
-        "Wirtschaftsnachrichten"
-      ],
-      "keywords": [
-        "Wirtschaft"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-entertainment",
-      "title": "Unterhaltung",
-      "kind": "subtopic",
-      "description": "Berichterstattung über Unterhaltung, Prominente und kulturelle Ereignisse.",
-      "parentId": "node-current-events",
-      "childIds": [],
-      "discoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3"
-      ],
-      "aliases": [
-        "Show",
-        "Prominente"
-      ],
-      "keywords": [
-        "Show",
-        "Promis",
-        "Unterhaltung"
-      ],
-      "confidence": 0.8
-    },
-    {
-      "id": "node-sports",
-      "title": "Sport",
-      "kind": "subtopic",
-      "description": "Sportnachrichten aus verschiedenen Disziplinen und Berichterstattung über Events und Gesellschaft.",
-      "parentId": "node-current-events",
-      "childIds": [],
-      "discoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ],
-      "aliases": [
-        "Sportnachrichten"
-      ],
-      "keywords": [
-        "Sport"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-culture-society-science",
-      "title": "Kultur, Gesellschaft & Wissenschaft",
-      "kind": "subtopic",
-      "description": "Nachrichten und Beiträge aus den Bereichen Kultur, Gesellschaft sowie Wissenschaft und Wissen.",
-      "parentId": "node-current-events",
-      "childIds": [],
-      "discoveryIds": [
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ],
-      "aliases": [
+        "Politik",
+        "Wirtschaft",
         "Kultur",
-        "Gesellschaft",
-        "Wissen"
+        "Sport",
+        "Gesellschaft"
       ],
-      "keywords": [
-        "Kultur",
-        "Gesellschaft",
-        "Wissenschaft",
-        "Wissen",
-        "Lifestyle"
-      ],
-      "confidence": 0.85
+      "confidence": 0.95
     }
   ],
   "relations": [
+    {
+      "id": "relation-node-human-error-node-safety-and-risk-management-part-of",
+      "sourceId": "node-human-error",
+      "targetId": "node-safety-and-risk-management",
+      "kind": "part-of",
+      "strength": 0.98,
+      "reason": "Menschliches Versagen ist zentrales Thema im Sicherheits- und Risikomanagement.",
+      "evidenceDiscoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
+        "1f4e8525-9de2-432d-a284-06faaa910206"
+      ]
+    },
+    {
+      "id": "relation-node-industrial-and-occupational-safety-node-human-error-part-of",
+      "sourceId": "node-industrial-and-occupational-safety",
+      "targetId": "node-human-error",
+      "kind": "part-of",
+      "strength": 0.97,
+      "reason": "Arbeitssicherheit beschäftigt sich mit menschlichem Versagen und organisatorischen Faktoren.",
+      "evidenceDiscoveryIds": [
+        "1f4e8525-9de2-432d-a284-06faaa910206"
+      ]
+    },
+    {
+      "id": "relation-node-investment-funds-and-markets-node-finance-and-investment-part-of",
+      "sourceId": "node-investment-funds-and-markets",
+      "targetId": "node-finance-and-investment",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Investmentfonds und Aktienmärkte sind zentrale Finanzthemen.",
+      "evidenceDiscoveryIds": [
+        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+        "0a407377-28d6-416d-8cb6-4b469ce78782"
+      ]
+    },
+    {
+      "id": "relation-node-climate-change-node-science-environmental-and-earth-part-of",
+      "sourceId": "node-climate-change",
+      "targetId": "node-science-environmental-and-earth",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Klimawandel ist Kernbereich der Umwelt- und Erdwissenschaften.",
+      "evidenceDiscoveryIds": [
+        "39a36c46-5aa6-4111-a75f-adba6f78262f",
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
+      ]
+    },
+    {
+      "id": "relation-node-military-aviation-node-technology-and-defense-part-of",
+      "sourceId": "node-military-aviation",
+      "targetId": "node-technology-and-defense",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Militärische Luftfahrt ist Teil der Technologie- und Verteidigungsdomäne.",
+      "evidenceDiscoveryIds": [
+        "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
+      ]
+    },
+    {
+      "id": "relation-node-cybersecurity-human-factors-node-human-error-part-of",
+      "sourceId": "node-cybersecurity-human-factors",
+      "targetId": "node-human-error",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Menschliche Faktoren sind kritisch in der Cybersicherheit.",
+      "evidenceDiscoveryIds": [
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+      ]
+    },
+    {
+      "id": "relation-node-mediterranean-destinations-node-lifestyle-travel-tourism-part-of",
+      "sourceId": "node-mediterranean-destinations",
+      "targetId": "node-lifestyle-travel-tourism",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Mittelmeerziele sind wichtiger Bereich im Tourismuswissen.",
+      "evidenceDiscoveryIds": [
+        "cceb57b1-9115-4966-9086-d3c2e405482e"
+      ]
+    },
+    {
+      "id": "relation-node-adventure-and-cultural-tourism-node-lifestyle-travel-tourism-part-of",
+      "sourceId": "node-adventure-and-cultural-tourism",
+      "targetId": "node-lifestyle-travel-tourism",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Abenteuer- und Kulturtourismus ist Teil des Lifestyle- und Reisewissens.",
+      "evidenceDiscoveryIds": [
+        "b3878eac-8bfc-429d-8eec-906e5f8ba150"
+      ]
+    },
     {
       "id": "relation-node-carbohydrates-node-nutrition-part-of",
       "sourceId": "node-carbohydrates",
       "targetId": "node-nutrition",
       "kind": "part-of",
-      "strength": 0.95,
-      "reason": "Kohlenhydrate sind ein wichtiger Teilbereich der Ernährung.",
+      "strength": 0.9,
+      "reason": "Kohlenhydrate sind Grundbestandteil der Ernährung.",
       "evidenceDiscoveryIds": [
         "0b87718a-19c3-4f08-9712-5adc9913a5f4"
       ]
     },
     {
-      "id": "relation-node-protein-intake-node-nutrition-part-of",
-      "sourceId": "node-protein-intake",
+      "id": "relation-node-proteins-node-nutrition-part-of",
+      "sourceId": "node-proteins",
       "targetId": "node-nutrition",
       "kind": "part-of",
-      "strength": 0.95,
-      "reason": "Proteinzufuhr gehört zum Ernährungswissen.",
+      "strength": 0.9,
+      "reason": "Proteine sind essentieller Teil der Ernährung.",
       "evidenceDiscoveryIds": [
         "a56b02d3-e199-4393-8fcb-c6f5596f8122"
       ]
     },
     {
-      "id": "relation-node-current-events-node-news-part-of",
-      "sourceId": "node-current-events",
-      "targetId": "node-news",
-      "kind": "part-of",
-      "strength": 0.95,
-      "reason": "Aktuelle Ereignisse sind der Kernbereich der Nachrichten.",
-      "evidenceDiscoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "489f404d-a8f4-495c-b09a-7fcf2221312e",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ]
-    },
-    {
-      "id": "relation-node-complex-carbohydrates-node-carbohydrates-part-of",
-      "sourceId": "node-complex-carbohydrates",
-      "targetId": "node-carbohydrates",
+      "id": "relation-node-international-support-and-conflict-node-business-and-international-relations-part-of",
+      "sourceId": "node-international-support-and-conflict",
+      "targetId": "node-business-and-international-relations",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Komplexe Kohlenhydrate sind ein Unterthema der Kohlenhydrate.",
+      "reason": "Internationale Unterstützung und Konflikte gehören zu internationalen Beziehungen im Business-Kontext.",
       "evidenceDiscoveryIds": [
-        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
+        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
+        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
       ]
     },
     {
-      "id": "relation-node-blood-sugar-impact-node-carbohydrates-part-of",
-      "sourceId": "node-blood-sugar-impact",
-      "targetId": "node-carbohydrates",
+      "id": "relation-node-statistics-and-risk-analysis-node-safety-and-risk-management-part-of",
+      "sourceId": "node-statistics-and-risk-analysis",
+      "targetId": "node-safety-and-risk-management",
       "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Blutzuckereffekte sind eng mit Kohlenhydraten verbunden.",
+      "strength": 0.75,
+      "reason": "Statistiken und Risikoanalysen sind Teil des Risikomanagements.",
       "evidenceDiscoveryIds": [
-        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
-      ]
-    },
-    {
-      "id": "relation-node-protein-rich-foods-node-protein-intake-part-of",
-      "sourceId": "node-protein-rich-foods",
-      "targetId": "node-protein-intake",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Proteinreiche Lebensmittel sind Teil der Proteinzufuhroptimierung.",
-      "evidenceDiscoveryIds": [
-        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
-      ]
-    },
-    {
-      "id": "relation-node-daily-protein-needs-node-protein-intake-part-of",
-      "sourceId": "node-daily-protein-needs",
-      "targetId": "node-protein-intake",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Täglicher Proteinbedarf ist eine essentielle Komponente der Proteinzufuhr.",
-      "evidenceDiscoveryIds": [
-        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
-      ]
-    },
-    {
-      "id": "relation-node-regional-news-switzerland-node-current-events-part-of",
-      "sourceId": "node-regional-news-switzerland",
-      "targetId": "node-current-events",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Regionale Schweizer Nachrichten sind spezifische lokale Ereignisse.",
-      "evidenceDiscoveryIds": [
-        "489f404d-a8f4-495c-b09a-7fcf2221312e",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ]
-    },
-    {
-      "id": "relation-node-politics-node-current-events-part-of",
-      "sourceId": "node-politics",
-      "targetId": "node-current-events",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Politik ist ein zentrales Nachrichtenthema.",
-      "evidenceDiscoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ]
-    },
-    {
-      "id": "relation-node-economy-node-current-events-part-of",
-      "sourceId": "node-economy",
-      "targetId": "node-current-events",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Wirtschaftliche Nachrichten sind Teil der aktuellen Ereignisse.",
-      "evidenceDiscoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ]
-    },
-    {
-      "id": "relation-node-sports-node-current-events-part-of",
-      "sourceId": "node-sports",
-      "targetId": "node-current-events",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Sportnachrichten gehören zu den aktuellen Ereignissen.",
-      "evidenceDiscoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ]
-    },
-    {
-      "id": "relation-node-culture-society-science-node-current-events-part-of",
-      "sourceId": "node-culture-society-science",
-      "targetId": "node-current-events",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Kultur, Gesellschaft und Wissenschaft sind relevante Nachrichtenthemen.",
-      "evidenceDiscoveryIds": [
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ]
-    },
-    {
-      "id": "relation-node-weight-management-node-carbohydrates-part-of",
-      "sourceId": "node-weight-management",
-      "targetId": "node-carbohydrates",
-      "kind": "part-of",
-      "strength": 0.85,
-      "reason": "Gewichtsmanagement ist ein wichtiger Aspekt beim Thema Kohlenhydrate.",
-      "evidenceDiscoveryIds": [
-        "0b87718a-19c3-4f08-9712-5adc9913a5f4"
-      ]
-    },
-    {
-      "id": "relation-node-entertainment-node-current-events-part-of",
-      "sourceId": "node-entertainment",
-      "targetId": "node-current-events",
-      "kind": "part-of",
-      "strength": 0.85,
-      "reason": "Unterhaltung ist ein Teilbereich des Nachrichtengeschehens.",
-      "evidenceDiscoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3"
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
       ]
     }
   ]

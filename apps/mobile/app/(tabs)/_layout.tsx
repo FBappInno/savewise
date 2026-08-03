@@ -2,8 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 import { theme } from "@/theme";
+import { useAppSettings } from "@/providers/app-settings-provider";
 
 export default function TabLayout() {
+  const { t } = useAppSettings();
   return (
     <Tabs
       screenOptions={{
@@ -19,7 +21,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: t("tabs.home"),
 
           tabBarIcon: ({
             color,
@@ -37,7 +39,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="library"
         options={{
-          title: "Library",
+          title: t("tabs.library"),
 
           tabBarIcon: ({
             color,
@@ -55,7 +57,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="insights"
         options={{
-          title: "Brain",
+          title: t("tabs.brain"),
 
           tabBarIcon: ({
             color,
@@ -71,9 +73,9 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="settings"
+        name="research"
         options={{
-          title: "Settings",
+          title: t("tabs.research"),
 
           tabBarIcon: ({
             color,
@@ -81,7 +83,7 @@ export default function TabLayout() {
           }) => (
             <Ionicons
               color={color}
-              name="settings-outline"
+              name="telescope-outline"
               size={size}
             />
           ),
@@ -89,13 +91,13 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="research"
+        name="settings"
         options={{
-          title: "Research",
+          title: t("tabs.settings"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               color={color}
-              name="telescope-outline"
+              name="settings-outline"
               size={size}
             />
           ),

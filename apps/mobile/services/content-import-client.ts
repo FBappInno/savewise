@@ -8,6 +8,7 @@ import type {
   ResearchState,
   SecondBrainOverview,
 } from "@savewise/shared";
+import { loadAppSettings } from "@/services/settings-storage";
 
 export type KnowledgeUpdate = {
   generatedAt: string;
@@ -203,17 +204,23 @@ export function isValidDiscoveryUrl(
   }
 }
 
-export function importContent(
+export async function importContent(
   rawUrl: string,
 ): Promise<ImportResponse> {
   const url =
     normalizeDiscoveryUrl(rawUrl);
 
   if (!isValidDiscoveryUrl(url)) {
-    return Promise.reject(
-      new Error(
-        "Bitte gib eine gültige Internetadresse ein.",
-      ),
+    throw new Error("Bitte gib eine gültige Internetadresse ein.");
+  }
+
+  const settings = await loadAppSettings();
+  if (
+    !settings.privacy.externalContentProcessing ||
+    !settings.ai.contentAnalysis
+  ) {
+    throw new Error(
+      disabledAIMessage(settings.language.display),
     );
   }
 
@@ -224,10 +231,27 @@ export function importContent(
 
       body: JSON.stringify({
         url,
+        preferredLanguage:
+          settings.language.input === "auto"
+            ? undefined
+            : settings.language.input,
       }),
     },
     90_000,
   );
+}
+
+function disabledAIMessage(
+  language: "system" | "de" | "en" | "fr" | "it" | "es",
+): string {
+  return {
+    de: "Die externe KI-Inhaltsanalyse ist in den Einstellungen deaktiviert.",
+    en: "External AI content analysis is disabled in Settings.",
+    fr: "L’analyse externe des contenus par IA est désactivée dans les réglages.",
+    it: "L’analisi esterna dei contenuti con IA è disattivata nelle impostazioni.",
+    es: "El análisis externo de contenidos con IA está desactivado en los ajustes.",
+    system: "External AI content analysis is disabled in Settings.",
+  }[language];
 }
 
 export function getDiscoveries(): Promise<DiscoveriesResponse> {

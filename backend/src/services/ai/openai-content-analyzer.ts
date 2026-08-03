@@ -80,6 +80,7 @@ const ContentAnalysisSchema = z.object({
 
 export async function analyzeContent(
   metadata: PageMetadata,
+  preferredLanguage?: "de" | "en" | "fr" | "it" | "es",
 ): Promise<ContentAnalysis> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error(
@@ -106,10 +107,14 @@ export async function analyzeContent(
       "health -> Nutrition -> Protein -> Muscle Growth",
       "Avoid using the website or platform name as a topic.",
       "Confidence must represent how strongly the supplied metadata supports the classification.",
+      preferredLanguage
+        ? `Write the improved title and summary in ${languageName(preferredLanguage)}.`
+        : "Preserve the dominant language of the content.",
     ].join("\n"),
 
     input: JSON.stringify({
       allowedPrimaryCategories: categories,
+      preferredLanguage: preferredLanguage ?? null,
 
       metadata: {
         url: metadata.url,
@@ -143,4 +148,14 @@ export async function analyzeContent(
   }
 
   return response.output_parsed;
+}
+
+function languageName(language: "de" | "en" | "fr" | "it" | "es"): string {
+  return {
+    de: "German",
+    en: "English",
+    fr: "French",
+    it: "Italian",
+    es: "Spanish",
+  }[language];
 }

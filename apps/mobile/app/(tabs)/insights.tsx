@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 import { useSecondBrain } from "@/hooks/use-second-brain";
+import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type {
   KnowledgeAnswer,
@@ -27,6 +28,7 @@ const EXAMPLE_QUESTIONS = [
 ];
 
 export default function SecondBrainScreen() {
+  const { settings, t } = useAppSettings();
   const [question, setQuestion] = useState("");
   const {
     overview,
@@ -54,21 +56,24 @@ export default function SecondBrainScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SECOND BRAIN</Text>
-          <Text style={styles.title}>Ask SaveWise</Text>
+          <Text style={styles.eyebrow}>{t("brain.eyebrow")}</Text>
+          <Text style={styles.title}>{t("brain.title")}</Text>
           <Text style={styles.subtitle}>
-            Ask questions across everything you have saved. SaveWise combines
-            your knowledge into one grounded answer.
+            {t("brain.subtitle")}
           </Text>
         </View>
 
+        {!settings.ai.knowledgeGraph ? (
+          <ErrorCard message={t("brain.disabled")} />
+        ) : null}
+
         <View style={styles.askCard}>
           <TextInput
-            editable={!isAnswering}
+            editable={!isAnswering && settings.ai.knowledgeGraph}
             multiline
             onChangeText={setQuestion}
             onSubmitEditing={submitQuestion}
-            placeholder="What do I know about…?"
+            placeholder={t("brain.placeholder")}
             placeholderTextColor={theme.colors.textSecondary}
             returnKeyType="send"
             style={styles.input}
@@ -77,7 +82,7 @@ export default function SecondBrainScreen() {
 
           <Pressable
             accessibilityRole="button"
-            disabled={isAnswering || question.trim().length < 3}
+            disabled={isAnswering || question.trim().length < 3 || !settings.ai.knowledgeGraph}
             onPress={submitQuestion}
             style={({ pressed }) => [
               styles.askButton,
@@ -91,7 +96,7 @@ export default function SecondBrainScreen() {
             ) : (
               <>
                 <Ionicons color="#ffffff" name="sparkles" size={18} />
-                <Text style={styles.askButtonText}>Synthesize</Text>
+                <Text style={styles.askButtonText}>{t("brain.synthesize")}</Text>
               </>
             )}
           </Pressable>
@@ -118,8 +123,8 @@ export default function SecondBrainScreen() {
 
         <View style={styles.analysisHeader}>
           <View style={styles.analysisTitleContainer}>
-            <Text style={styles.sectionEyebrow}>KNOWLEDGE HEALTH</Text>
-            <Text style={styles.sectionTitle}>Your development</Text>
+            <Text style={styles.sectionEyebrow}>{t("brain.health")}</Text>
+            <Text style={styles.sectionTitle}>{t("brain.development")}</Text>
           </View>
 
           <Pressable
@@ -134,7 +139,7 @@ export default function SecondBrainScreen() {
               <ActivityIndicator size="small" />
             ) : (
               <Text style={styles.analyzeButtonText}>
-                {overview ? "Refresh" : "Analyze"}
+                {overview ? t("brain.refresh") : t("brain.analyze")}
               </Text>
             )}
           </Pressable>

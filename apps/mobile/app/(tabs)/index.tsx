@@ -19,11 +19,13 @@ import { DiscoveryCard } from "@/components/discovery-card";
 import { SaveWiseButton } from "@/components/savewise-button";
 import { SearchBar } from "@/components/search-bar";
 import { useDiscoveries } from "@/hooks/use-discoveries";
+import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type { CapturedItem } from "@/types/captured-item";
 import type { Discovery } from "@/types/discovery";
 
 export default function HomeScreen() {
+  const { t } = useAppSettings();
   const [
     isCaptureModalVisible,
     setCaptureModalVisible,
@@ -112,7 +114,7 @@ export default function HomeScreen() {
       );
     } catch (importError) {
       Alert.alert(
-        "Import failed",
+        t("home.importFailed"),
         importError instanceof Error
           ? importError.message
           : "The content could not be imported.",
@@ -145,13 +147,12 @@ export default function HomeScreen() {
           </Text>
 
           <Text style={styles.subtitle}>
-            Your personal knowledge
-            assistant
+            {t("home.subtitle")}
           </Text>
         </View>
 
         <SearchBar
-          placeholder="Search your discoveries..."
+          placeholder={t("home.search")}
           value={search}
           onChangeText={setSearch}
         />
@@ -173,7 +174,7 @@ export default function HomeScreen() {
             <Text
               style={styles.sectionTitle}
             >
-              Discoveries
+              {t("home.discoveries")}
             </Text>
 
             <Text
@@ -198,7 +199,7 @@ export default function HomeScreen() {
               <Text
                 style={styles.loadingText}
               >
-                Loading discoveries...
+                {t("home.loading")}
               </Text>
             </View>
           ) : null}
@@ -212,16 +213,13 @@ export default function HomeScreen() {
               <Text
                 style={styles.emptyTitle}
               >
-                No discoveries yet
+                {t("home.emptyTitle")}
               </Text>
 
               <Text
                 style={styles.emptyText}
               >
-                Capture your first URL
-                to start building your
-                personal knowledge
-                library.
+                {t("home.emptyText")}
               </Text>
             </View>
           ) : null}
@@ -251,8 +249,8 @@ export default function HomeScreen() {
           disabled={isImporting}
           label={
             isImporting
-              ? "Analyzing..."
-              : "+ Capture"
+              ? t("home.analyzing")
+              : t("home.capture")
           }
           onPress={() => {
             setCaptureModalVisible(

@@ -99,6 +99,7 @@ app.use(
 
 const ImportRequestSchema = z.object({
   url: z.string().trim().url(),
+  preferredLanguage: z.enum(["de", "en", "fr", "it", "es"]).optional(),
 });
 
 const KnowledgeQuestionSchema = z.object({
@@ -164,6 +165,10 @@ app.post(
         await withTimeout(
           importContent(
             parsedRequest.data.url,
+            {
+              preferredLanguage:
+                parsedRequest.data.preferredLanguage,
+            },
           ),
           90_000,
         );

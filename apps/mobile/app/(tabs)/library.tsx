@@ -15,10 +15,12 @@ import {
 
 import { KnowledgeTree } from "@/components/library/knowledge-tree";
 import { useKnowledgeLibrary } from "@/hooks/use-knowledge-library";
+import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type { Discovery } from "@/types/discovery";
 
 export default function LibraryScreen() {
+  const { locale, settings, t } = useAppSettings();
   const scrollViewRef = useRef<ScrollView>(null);
   const treePosition = useRef(0);
   const {
@@ -75,18 +77,15 @@ export default function LibraryScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.eyebrow}>
-          AI KNOWLEDGE TREE
+          {t("library.eyebrow")}
         </Text>
 
         <Text style={styles.title}>
-          Library
+          {t("library.title")}
         </Text>
 
         <Text style={styles.subtitle}>
-          SaveWise continuously organizes
-          your discoveries into a personal
-          hierarchy of domains, topics and
-          concepts.
+          {t("library.subtitle")}
         </Text>
       </View>
 
@@ -95,8 +94,7 @@ export default function LibraryScreen() {
           <ActivityIndicator />
 
           <Text style={styles.loadingText}>
-            Building your personal
-            knowledge tree...
+            {t("library.loading")}
           </Text>
         </View>
       ) : null}
@@ -104,14 +102,22 @@ export default function LibraryScreen() {
       {!isLoading && error ? (
         <MessageCard
           message={error}
-          title="Library unavailable"
+          title={t("library.unavailable")}
+        />
+      ) : null}
+
+      {!settings.ai.knowledgeGraph ? (
+        <MessageCard
+          message={t("library.disabled")}
+          title={t("library.unavailable")}
         />
       ) : null}
 
       {!isLoading &&
       library &&
       !error &&
-      !graph ? (
+      !graph &&
+      settings.ai.knowledgeGraph ? (
         <MessageCard
           message="Pull down to let SaveWise build the AI knowledge tree."
           title="Knowledge tree unavailable"
@@ -121,24 +127,25 @@ export default function LibraryScreen() {
       {!isLoading &&
       library &&
       !error &&
-      graph ? (
+      graph &&
+      settings.ai.knowledgeGraph ? (
         <>
           <View>
             <Text style={styles.mapLabel}>
-              PERSONAL KNOWLEDGE MAP
+              {t("library.map")}
             </Text>
 
             <View style={styles.metricGrid}>
               <MetricCard
                 icon="documents-outline"
-                label="Saved entries"
+                label={t("library.savedEntries")}
                 onPress={openDiscoveries}
                 value={library.discoveries.length}
               />
 
               <MetricCard
                 icon="folder-open-outline"
-                label="Topics"
+                label={t("library.topics")}
                 onPress={scrollToTopics}
                 value={
                   graph.nodes.filter(
@@ -149,14 +156,14 @@ export default function LibraryScreen() {
 
               <MetricCard
                 icon="today-outline"
-                label="Added today"
+                label={t("library.today")}
                 onPress={openDiscoveries}
                 value={activity.today}
               />
 
               <MetricCard
                 icon="calendar-outline"
-                label="Last 7 days"
+                label={t("library.last7Days")}
                 onPress={openDiscoveries}
                 value={activity.last7Days}
               />
@@ -169,7 +176,7 @@ export default function LibraryScreen() {
           >
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
-                Your knowledge
+                {t("library.knowledge")}
               </Text>
 
               <Text style={styles.language}>
@@ -193,7 +200,7 @@ export default function LibraryScreen() {
 
             <Text style={styles.generatedText}>
               Knowledge tree updated{" "}
-              {formatDate(graph.generatedAt)}
+              {formatDate(graph.generatedAt, locale)}
             </Text>
           </View>
         </>
@@ -288,14 +295,14 @@ function MessageCard({
   );
 }
 
-function formatDate(value: string): string {
+function formatDate(value: string, locale: string): string {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",

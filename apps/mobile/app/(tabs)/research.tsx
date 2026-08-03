@@ -11,9 +11,11 @@ import {
 
 import { ResearchCandidateCard } from "@/components/research/research-candidate-card";
 import { useResearchAgent } from "@/hooks/use-research-agent";
+import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 
 export default function ResearchScreen() {
+  const { settings, t } = useAppSettings();
   const {
     research,
     isLoading,
@@ -34,23 +36,24 @@ export default function ResearchScreen() {
       refreshControl={
         <RefreshControl
           refreshing={isResearching}
-          onRefresh={() => void run()}
+          onRefresh={() => {
+            if (settings.ai.autonomousResearch) void run();
+          }}
         />
       }
       showsVerticalScrollIndicator={false}
       style={styles.screen}
     >
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>PERSONAL RESEARCH AGENT</Text>
-        <Text style={styles.title}>Research</Text>
+        <Text style={styles.eyebrow}>{t("research.eyebrow")}</Text>
+        <Text style={styles.title}>{t("research.title")}</Text>
         <Text style={styles.subtitle}>
-          SaveWise detects your interests, searches for new knowledge and only
-          recommends sources that add meaningful value.
+          {t("research.subtitle")}
         </Text>
       </View>
 
       <Pressable
-        disabled={isResearching}
+        disabled={isResearching || !settings.ai.autonomousResearch}
         onPress={() => void run()}
         style={({ pressed }) => [
           styles.runButton,
@@ -62,10 +65,16 @@ export default function ResearchScreen() {
         ) : (
           <>
             <Ionicons color="#ffffff" name="telescope" size={20} />
-            <Text style={styles.runButtonText}>Find new knowledge</Text>
+            <Text style={styles.runButtonText}>{t("research.run")}</Text>
           </>
         )}
       </Pressable>
+
+      {!settings.ai.autonomousResearch ? (
+        <View style={styles.messageCard}>
+          <Text style={styles.messageText}>{t("research.disabled")}</Text>
+        </View>
+      ) : null}
 
       {error ? (
         <View style={styles.messageCard}>
@@ -81,13 +90,13 @@ export default function ResearchScreen() {
 
       {research && research.interests.length > 0 ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>DETECTED INTERESTS</Text>
+          <Text style={styles.sectionLabel}>{t("research.interests")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {research.interests.map((interest) => (
               <View key={interest.id} style={styles.interestCard}>
                 <Text style={styles.interestTitle}>{interest.title}</Text>
                 <Text style={styles.interestStrength}>
-                  {Math.round(interest.strength * 100)}% · {interest.discoveryCount} entries
+                  {Math.round(interest.strength * 100)}% · {interest.discoveryCount} {t("research.entries")}
                 </Text>
                 {interest.knowledgeGaps.slice(0, 3).map((gap) => (
                   <Text key={gap} style={styles.gap}>• {gap}</Text>
@@ -100,7 +109,7 @@ export default function ResearchScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Research inbox</Text>
+          <Text style={styles.sectionTitle}>{t("research.inbox")}</Text>
           <Text style={styles.count}>{candidates.length}</Text>
         </View>
 
@@ -118,10 +127,9 @@ export default function ResearchScreen() {
           </View>
         ) : !isLoading ? (
           <View style={styles.messageCard}>
-            <Text style={styles.messageTitle}>No suggestions yet</Text>
+            <Text style={styles.messageTitle}>{t("research.noSuggestions")}</Text>
             <Text style={styles.messageText}>
-              Start a research run. SaveWise will search around your current
-              interests and prioritize uncovered areas.
+              {t("research.noSuggestionsText")}
             </Text>
           </View>
         ) : null}
