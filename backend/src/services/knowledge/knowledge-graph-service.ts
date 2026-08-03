@@ -15,6 +15,9 @@ export type KnowledgeGraphBuildOptions = {
   forceRebuild?: boolean;
 };
 
+let backgroundRebuild:
+  Promise<void> | null = null;
+
 export async function getOrBuildKnowledgeGraph(
   discoveries: Discovery[],
   options: KnowledgeGraphBuildOptions = {},
@@ -36,11 +39,25 @@ export async function getOrBuildKnowledgeGraph(
     return storedGraph;
   }
 
+  if (
+    !options.forceRebuild &&
+    storedGraph
+  ) {
+    scheduleBackgroundRebuild(
+      discoveries,
+      sourceFingerprint,
+      storedGraph,
+    );
+
+    return storedGraph;
+  }
+
   try {
     const graph =
       await buildKnowledgeGraphWithAI(
         discoveries,
         sourceFingerprint,
+        storedGraph,
       );
 
     await saveKnowledgeGraph(graph);
@@ -62,6 +79,33 @@ export async function getOrBuildKnowledgeGraph(
 
     return null;
   }
+}
+
+function scheduleBackgroundRebuild(
+  discoveries: Discovery[],
+  sourceFingerprint: string,
+  storedGraph: KnowledgeGraph,
+): void {
+  if (backgroundRebuild) {
+    return;
+  }
+
+  backgroundRebuild =
+    buildKnowledgeGraphWithAI(
+      discoveries,
+      sourceFingerprint,
+      storedGraph,
+    )
+      .then(saveKnowledgeGraph)
+      .catch((error: unknown) => {
+        console.error(
+          "Background AI knowledge graph rebuild failed:",
+          error,
+        );
+      })
+      .finally(() => {
+        backgroundRebuild = null;
+      });
 }
 
 export async function rebuildKnowledgeGraph(

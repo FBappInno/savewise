@@ -147,6 +147,7 @@ const KnowledgeGraphAnalysisSchema = z.object({
 export async function buildKnowledgeGraphWithAI(
   discoveries: Discovery[],
   sourceFingerprint: string,
+  previousGraph: KnowledgeGraph | null = null,
 ): Promise<KnowledgeGraph> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error(
@@ -175,13 +176,6 @@ export async function buildKnowledgeGraphWithAI(
         description:
           discovery.description ?? "",
 
-        currentClassification:
-          discovery.classification ??
-          null,
-
-        topics:
-          discovery.topics,
-
         keywords:
           discovery.keywords,
 
@@ -203,11 +197,16 @@ export async function buildKnowledgeGraphWithAI(
         "Build a personal knowledge graph based exclusively on the supplied discoveries.",
         "Do not use a predefined taxonomy or fixed list of topics.",
         "Infer all domains, topics, subtopics and concepts dynamically from the user's actual content.",
+        "Treat the previous graph as evolutionary context, not as a taxonomy that must be preserved.",
+        "Keep useful stable concepts and keys, but reorganize, rename, merge or replace them whenever the complete discovery set supports a better structure.",
+        "Unify synonyms, translations and closely related multilingual terms under one canonical node and retain useful alternatives as aliases.",
+        "Create new broader parent concepts when several existing or new nodes share a meaningful umbrella concept.",
         "Organize the knowledge as a coherent hierarchy.",
         "The hierarchy may have up to four semantic levels:",
         "domain -> topic -> subtopic -> concept.",
         "Only create levels that are useful for the supplied library.",
-        "A broad parent node may contain discoveries indirectly through its descendants.",
+        "Assign discovery IDs directly only to the lowest meaningful nodes.",
+        "Parent nodes must receive discoveries indirectly through their descendants, never as duplicate direct assignments.",
         "Every discovery must be assigned to at least one meaningful node.",
         "Use the supplied discovery IDs exactly as provided.",
         "Do not invent discovery IDs.",
@@ -236,6 +235,13 @@ export async function buildKnowledgeGraphWithAI(
 
         discoveries:
           compactDiscoveries,
+
+        previousGraph:
+          previousGraph
+            ? compactPreviousGraph(
+                previousGraph,
+              )
+            : null,
       }),
 
       text: {
@@ -257,6 +263,46 @@ export async function buildKnowledgeGraphWithAI(
     discoveries,
     sourceFingerprint,
   );
+}
+
+function compactPreviousGraph(
+  graph: KnowledgeGraph,
+) {
+  return {
+    language: graph.language,
+    summary: graph.summary,
+    nodes: graph.nodes.map((node) => ({
+      key: node.id.replace(/^node-/, ""),
+      title: node.title,
+      kind: node.kind,
+      description: node.description,
+      parentKey: node.parentId?.replace(
+        /^node-/,
+        "",
+      ) ?? null,
+      discoveryIds: node.discoveryIds,
+      aliases: node.aliases,
+      keywords: node.keywords,
+      confidence: node.confidence,
+    })),
+    relations: graph.relations.map(
+      (relation) => ({
+        sourceKey: relation.sourceId.replace(
+          /^node-/,
+          "",
+        ),
+        targetKey: relation.targetId.replace(
+          /^node-/,
+          "",
+        ),
+        kind: relation.kind,
+        strength: relation.strength,
+        reason: relation.reason,
+        evidenceDiscoveryIds:
+          relation.evidenceDiscoveryIds,
+      }),
+    ),
+  };
 }
 
 function convertAnalysisToGraph(
@@ -397,10 +443,7 @@ function convertAnalysisToGraph(
     nodes,
   );
 
-  const filteredNodes =
-    removeEmptyFallbackNode(
-      nodes,
-    );
+  const filteredNodes = nodes;
 
   const filteredNodeMap =
     new Map(
@@ -621,94 +664,40 @@ function assignMissingDiscoveries(
     return;
   }
 
-  const fallbackRoot =
-    getOrCreateFallbackRoot(
-      nodes,
-    );
-
   for (
     const discovery of
       missingDiscoveries
   ) {
-    if (
-      !fallbackRoot.discoveryIds.includes(
-        discovery.id,
-      )
-    ) {
-      fallbackRoot.discoveryIds.push(
-        discovery.id,
-      );
-    }
-  }
-}
+    const title =
+      discovery.improvedTitle ||
+      discovery.title;
 
-function getOrCreateFallbackRoot(
-  nodes: KnowledgeGraphNode[],
-): KnowledgeGraphNode {
-  const existingNode =
-    nodes.find(
-      (node) =>
-        node.id ===
-        "node-uncategorized",
-    );
-
-  if (existingNode) {
-    return existingNode;
-  }
-
-  const fallbackNode:
-    KnowledgeGraphNode = {
-      id:
-        "node-uncategorized",
-
-      title:
-        "Uncategorized",
-
-      kind:
-        "domain",
-
-      description:
-        "Discoveries that could not yet be assigned confidently.",
-
-      parentId:
-        null,
-
-      childIds:
-        [],
-
-      discoveryIds:
-        [],
-
-      aliases:
-        [],
-
-      keywords:
-        [],
-
-      confidence:
-        0,
-    };
-
-  nodes.push(
-    fallbackNode,
-  );
-
-  return fallbackNode;
-}
-
-function removeEmptyFallbackNode(
-  nodes: KnowledgeGraphNode[],
-): KnowledgeGraphNode[] {
-  return nodes.filter(
-    (node) =>
-      !(
-        node.id ===
-          "node-uncategorized" &&
-        node.discoveryIds.length ===
-          0 &&
-        node.childIds.length === 0
+    nodes.push({
+      id: createNodeId(
+        `${title}-${discovery.id}`,
       ),
-  );
+      title,
+      kind: "concept",
+      description:
+        discovery.summary ||
+        discovery.description ||
+        title,
+      parentId: null,
+      childIds: [],
+      discoveryIds: [
+        discovery.id,
+      ],
+      aliases: [],
+      keywords: uniqueStrings(
+        discovery.keywords,
+      ),
+      confidence:
+        normalizeScore(
+          discovery.confidence ??
+            0,
+        ),
+    });
+  }
 }
 
 function cleanInvalidReferences(

@@ -72,20 +72,11 @@ export function KnowledgeTreeNode({
 
   const directDiscoveryIds =
     useMemo(() => {
-      const childDiscoveryIds =
-        new Set(
-          children.flatMap(
-            (child) =>
-              child.discoveryIds,
-          ),
-        );
+      if (children.length > 0) {
+        return [];
+      }
 
-      return node.discoveryIds.filter(
-        (discoveryId) =>
-          !childDiscoveryIds.has(
-            discoveryId,
-          ),
-      );
+      return node.discoveryIds;
     }, [
       children,
       node.discoveryIds,
@@ -114,15 +105,7 @@ export function KnowledgeTreeNode({
       ],
     );
 
-  const hasChildren =
-    children.length > 0;
-
-  const hasDirectDiscoveries =
-    directDiscoveries.length > 0;
-
-  const canExpand =
-    hasChildren ||
-    hasDirectDiscoveries;
+  const canExpand = true;
 
   function toggleExpanded() {
     if (!canExpand) {
