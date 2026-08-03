@@ -20,6 +20,10 @@ import {
   saveDiscovery,
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
+import {
+  analyzeSecondBrain,
+  answerKnowledgeQuestion,
+} from "./services/ai/openai-second-brain";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -88,6 +92,14 @@ app.use(
 
 const ImportRequestSchema = z.object({
   url: z.string().trim().url(),
+});
+
+const KnowledgeQuestionSchema = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(3)
+    .max(500),
 });
 
 const DiscoveryIdSchema = z
@@ -700,6 +712,109 @@ app.get(
           error instanceof Error
             ? error.message
             : "Topics could not be loaded.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/knowledge/ask",
+  async (request, response) => {
+    const parsedRequest =
+      KnowledgeQuestionSchema.safeParse(
+        request.body,
+      );
+
+    if (!parsedRequest.success) {
+      response.status(400).json({
+        error:
+          "A question between 3 and 500 characters is required.",
+        details:
+          parsedRequest.error.flatten(),
+      });
+
+      return;
+    }
+
+    try {
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
+
+      if (!library.graph) {
+        response.status(503).json({
+          error:
+            "The AI knowledge graph is currently unavailable.",
+        });
+
+        return;
+      }
+
+      const answer = await withTimeout(
+        answerKnowledgeQuestion(
+          parsedRequest.data.question,
+          library.discoveries,
+          library.graph,
+        ),
+        100_000,
+      );
+
+      response.json(answer);
+    } catch (error) {
+      console.error(
+        "Knowledge question failed:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "The knowledge question could not be answered.",
+      });
+    }
+  },
+);
+
+app.get(
+  "/api/knowledge/second-brain",
+  async (_request, response) => {
+    try {
+      const library =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+        );
+
+      if (!library.graph) {
+        response.status(503).json({
+          error:
+            "The AI knowledge graph is currently unavailable.",
+        });
+
+        return;
+      }
+
+      const overview = await withTimeout(
+        analyzeSecondBrain(
+          library.discoveries,
+          library.graph,
+        ),
+        100_000,
+      );
+
+      response.json(overview);
+    } catch (error) {
+      console.error(
+        "Second Brain analysis failed:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "The Second Brain analysis could not be generated.",
       });
     }
   },

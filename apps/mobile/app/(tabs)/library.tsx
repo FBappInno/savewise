@@ -1,13 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useMemo, useRef } from "react";
 
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  type LayoutChangeEvent,
 } from "react-native";
 
 import { KnowledgeTree } from "@/components/library/knowledge-tree";
@@ -16,6 +19,8 @@ import { theme } from "@/theme";
 import type { Discovery } from "@/types/discovery";
 
 export default function LibraryScreen() {
+  const scrollViewRef = useRef<ScrollView>(null);
+  const treePosition = useRef(0);
   const {
     library,
     isLoading,
@@ -25,6 +30,10 @@ export default function LibraryScreen() {
   } = useKnowledgeLibrary();
 
   const graph = library?.graph ?? null;
+  const activity = useMemo(
+    () => calculateActivity(library?.discoveries ?? []),
+    [library?.discoveries],
+  );
 
   function openDiscovery(
     discovery: Discovery,
@@ -34,9 +43,25 @@ export default function LibraryScreen() {
     );
   }
 
+  function openDiscoveries() {
+    router.push("/");
+  }
+
+  function scrollToTopics() {
+    scrollViewRef.current?.scrollTo({
+      animated: true,
+      y: Math.max(0, treePosition.current - 24),
+    });
+  }
+
+  function saveTreePosition(event: LayoutChangeEvent) {
+    treePosition.current = event.nativeEvent.layout.y;
+  }
+
   return (
     <ScrollView
       contentContainerStyle={styles.content}
+      ref={scrollViewRef}
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
@@ -98,36 +123,50 @@ export default function LibraryScreen() {
       !error &&
       graph ? (
         <>
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryHeader}>
-              <View style={styles.aiIcon}>
-                <Ionicons
-                  color={theme.colors.primary}
-                  name="sparkles-outline"
-                  size={19}
-                />
-              </View>
-
-              <View style={styles.summaryMeta}>
-                <Text style={styles.summaryLabel}>
-                  PERSONAL KNOWLEDGE MAP
-                </Text>
-
-                <Text style={styles.summaryStats}>
-                  {graph.rootNodeIds.length}{" "}
-                  domains · {graph.nodes.length}{" "}
-                  nodes · {library.discoveries.length}{" "}
-                  discoveries
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.summaryText}>
-              {graph.summary}
+          <View>
+            <Text style={styles.mapLabel}>
+              PERSONAL KNOWLEDGE MAP
             </Text>
+
+            <View style={styles.metricGrid}>
+              <MetricCard
+                icon="documents-outline"
+                label="Saved entries"
+                onPress={openDiscoveries}
+                value={library.discoveries.length}
+              />
+
+              <MetricCard
+                icon="folder-open-outline"
+                label="Topics"
+                onPress={scrollToTopics}
+                value={
+                  graph.nodes.filter(
+                    (node) => node.kind === "topic",
+                  ).length
+                }
+              />
+
+              <MetricCard
+                icon="today-outline"
+                label="Added today"
+                onPress={openDiscoveries}
+                value={activity.today}
+              />
+
+              <MetricCard
+                icon="calendar-outline"
+                label="Last 7 days"
+                onPress={openDiscoveries}
+                value={activity.last7Days}
+              />
+            </View>
           </View>
 
-          <View style={styles.treeSection}>
+          <View
+            onLayout={saveTreePosition}
+            style={styles.treeSection}
+          >
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
                 Your knowledge
@@ -160,6 +199,72 @@ export default function LibraryScreen() {
         </>
       ) : null}
     </ScrollView>
+  );
+}
+
+function MetricCard({
+  icon,
+  label,
+  value,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: number;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityLabel={`${label}: ${value}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.metricCard,
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={styles.metricIcon}>
+        <Ionicons
+          color={theme.colors.primary}
+          name={icon}
+          size={20}
+        />
+      </View>
+
+      <Text style={styles.metricValue}>{value}</Text>
+      <Text style={styles.metricLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function calculateActivity(discoveries: Discovery[]) {
+  const now = new Date();
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
+  const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+
+  return discoveries.reduce(
+    (counts, discovery) => {
+      const createdAt = new Date(discovery.createdAt).getTime();
+
+      if (!Number.isFinite(createdAt)) {
+        return counts;
+      }
+
+      if (createdAt >= startOfToday) {
+        counts.today += 1;
+      }
+
+      if (createdAt >= sevenDaysAgo) {
+        counts.last7Days += 1;
+      }
+
+      return counts;
+    },
+    { today: 0, last7Days: 0 },
   );
 }
 
@@ -236,44 +341,46 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.md,
     textAlign: "center",
   },
-  summaryCard: {
+  mapLabel: {
+    ...theme.typography.caption,
+    color: theme.colors.primary,
+    letterSpacing: 1,
+    marginBottom: theme.spacing.md,
+  },
+  metricGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.md,
+  },
+  metricCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
+    minHeight: 132,
     padding: theme.spacing.lg,
+    width: "47%",
   },
-  summaryHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  aiIcon: {
+  metricIcon: {
     alignItems: "center",
     backgroundColor: theme.colors.background,
     borderRadius: 999,
     height: 38,
     justifyContent: "center",
-    marginRight: theme.spacing.md,
     width: 38,
   },
-  summaryMeta: {
-    flex: 1,
+  metricValue: {
+    ...theme.typography.screenTitle,
+    color: theme.colors.text,
+    marginTop: theme.spacing.sm,
   },
-  summaryLabel: {
-    ...theme.typography.caption,
-    color: theme.colors.primary,
-    letterSpacing: 1,
-  },
-  summaryStats: {
+  metricLabel: {
     ...theme.typography.caption,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.xs,
   },
-  summaryText: {
-    ...theme.typography.body,
-    color: theme.colors.text,
-    lineHeight: 22,
-    marginTop: theme.spacing.md,
+  pressed: {
+    opacity: 0.7,
   },
   treeSection: {
     marginTop: theme.spacing.xxxl,

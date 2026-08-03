@@ -55,7 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="insights"
         options={{
-          title: "Insights",
+          title: "Brain",
 
           tabBarIcon: ({
             color,
@@ -63,7 +63,7 @@ export default function TabLayout() {
           }) => (
             <Ionicons
               color={color}
-              name="sparkles-outline"
+              name="hardware-chip-outline"
               size={size}
             />
           ),

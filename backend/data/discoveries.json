@@ -249,5 +249,407 @@
     "createdAt": "2026-08-03T16:57:35.689Z",
     "updatedAt": "2026-08-03T16:57:35.689Z",
     "savedAtLabel": "Just now"
+  },
+  {
+    "id": "89df7ae0-1f83-497c-8066-bb39090b8a46",
+    "source": "web",
+    "url": "https://science.nasa.gov/climate-change/evidence/",
+    "title": "Evidence - NASA Science",
+    "improvedTitle": "Scientific Evidence of Earth's Climate Change Over History",
+    "description": "Earth's climate has changed throughout history. Just in the last 800,000 years, there have been eight cycles of ice ages and warmer periods, with the end of",
+    "summary": "Earth's climate has experienced changes throughout history, including eight cycles of ice ages and warmer periods in the last 800,000 years. This article presents scientific evidence illustrating these climate variations.",
+    "thumbnailUrl": "https://assets.science.nasa.gov/content/dam/science/esd/climate/internal_resources/2715/evidence_banner_new_1920.jpeg/jcr:content/renditions/cq5dam.web.1280.1280.jpeg",
+    "publishedAt": "2022-06-15T17:44:44-04:00",
+    "classification": {
+      "primaryCategory": "science",
+      "secondaryCategory": "Earth Science",
+      "topic": "Climate Change",
+      "subtopics": [
+        "Historical Climate Cycles",
+        "Ice Ages",
+        "Global Temperature Variations"
+      ]
+    },
+    "keywords": [
+      "climate change",
+      "Earth",
+      "ice ages",
+      "global warming",
+      "historical climate cycles",
+      "NASA"
+    ],
+    "language": "en",
+    "confidence": 0.95,
+    "topics": [
+      "Climate Change",
+      "Historical Climate Cycles",
+      "Ice Ages",
+      "Global Temperature Variations"
+    ],
+    "createdAt": "2026-08-03T17:42:12.504Z",
+    "updatedAt": "2026-08-03T17:42:12.504Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "39a36c46-5aa6-4111-a75f-adba6f78262f",
+    "source": "web",
+    "url": "https://www.ipcc.ch/report/ar6/syr/",
+    "title": "AR6 Synthesis Report: Climate Change 2023",
+    "improvedTitle": "AR6 Climate Change Synthesis Report 2023",
+    "description": "Intergovernmental Panel on Climate Change",
+    "summary": "Le rapport de synthèse AR6 de 2023, publié par le Groupe d'experts intergouvernemental sur l'évolution du climat (GIEC), présente un résumé consolidé des connaissances scientifiques actuelles sur le changement climatique, ses impacts, et les stratégies possibles pour atténuer ses effets ainsi que pour s'adapter aux transformations en cours.",
+    "thumbnailUrl": "https://ipcc.ch/frontcover.jpg",
+    "classification": {
+      "primaryCategory": "science",
+      "secondaryCategory": "environmental Science",
+      "topic": "climate change",
+      "subtopics": [
+        "climate science",
+        "impact assessment",
+        "mitigation strategies",
+        "adaptation"
+      ]
+    },
+    "keywords": [
+      "climate change",
+      "IPCC",
+      "AR6 report",
+      "environment",
+      "mitigation",
+      "adaptation",
+      "2023"
+    ],
+    "language": "fr",
+    "confidence": 0.95,
+    "topics": [
+      "climate change",
+      "climate science",
+      "impact assessment",
+      "mitigation strategies",
+      "adaptation"
+    ],
+    "createdAt": "2026-08-03T17:42:16.010Z",
+    "updatedAt": "2026-08-03T17:42:16.010Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "c0c3d18d-9efb-42de-b910-1ad03aadc93d",
+    "source": "web",
+    "url": "https://news.un.org/en/focus/ukraine",
+    "title": "Ukraine",
+    "improvedTitle": "United Nations Appeals for Peace and Support in Ukraine Conflict",
+    "description": "We call on Member States, organizations and individuals to not forget Ukraine. Ukraine’s voice must be heard clearly, and this unbearable war must end in a just and lasting peace. Achieving this in Ukraine would send a powerful signal for strengthening international peace and security. UN Resident and Humanitarian Coordinator Matthias Schmale(full statement)",
+    "summary": "The United Nations calls on member states, organizations, and individuals to remember Ukraine and amplify its voice amid the ongoing war. Emphasizing the need to end this unbearable conflict through a just and lasting peace, the UN highlights that achieving peace in Ukraine would strengthen international peace and security. The statement is made by the UN Resident and Humanitarian Coordinator Matthias Schmale.",
+    "thumbnailUrl": "https://global.unitednations.entermediadb.net/assets/mediadb/services/module/asset/downloads/preset/Collections/Embargoed/23-09-2024-UNOCHA-Ukraine-04.jpg/image770x420cropped.jpg",
+    "publishedAt": "2022-02-21T13:31:48-05:00",
+    "classification": {
+      "primaryCategory": "news",
+      "secondaryCategory": "international affairs",
+      "topic": "conflict and peacebuilding",
+      "subtopics": [
+        "Ukraine conflict",
+        "UN humanitarian efforts",
+        "international peace"
+      ]
+    },
+    "keywords": [
+      "Ukraine",
+      "war",
+      "peace",
+      "United Nations",
+      "humanitarian",
+      "international security"
+    ],
+    "language": "en",
+    "confidence": 0.9,
+    "topics": [
+      "conflict and peacebuilding",
+      "Ukraine conflict",
+      "UN humanitarian efforts",
+      "international peace"
+    ],
+    "createdAt": "2026-08-03T17:42:19.997Z",
+    "updatedAt": "2026-08-03T17:42:19.997Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
+    "source": "web",
+    "url": "https://european-union.europa.eu/priorities-and-actions/eu-support-ukraine_en",
+    "title": "EU support for Ukraine | European Union",
+    "improvedTitle": "European Union Support for Ukraine’s Economy, Society, and Reconstruction",
+    "description": "Find out what kind of support the EU is providing for Ukraine’s economy, society and future reconstruction and how it is imposing sanctions against Russia.",
+    "summary": "This content outlines the European Union's efforts to support Ukraine through economic aid, social initiatives, and future reconstruction plans, as well as the measures taken to impose sanctions against Russia.",
+    "thumbnailUrl": "https://european-union.europa.eu/profiles/contrib/ewcms/modules/ewcms_seo/assets/images/eu-socialmedia-fallback.png",
+    "classification": {
+      "primaryCategory": "business",
+      "secondaryCategory": "international Relations",
+      "topic": "EU External Support",
+      "subtopics": [
+        "Economic Aid",
+        "Social Support",
+        "Reconstruction Planning",
+        "Sanctions"
+      ]
+    },
+    "keywords": [
+      "EU support",
+      "Ukraine",
+      "economic aid",
+      "social initiatives",
+      "reconstruction",
+      "sanctions",
+      "Russia"
+    ],
+    "language": "en",
+    "confidence": 0.9,
+    "topics": [
+      "EU External Support",
+      "Economic Aid",
+      "Social Support",
+      "Reconstruction Planning",
+      "Sanctions"
+    ],
+    "createdAt": "2026-08-03T17:42:23.070Z",
+    "updatedAt": "2026-08-03T17:42:23.070Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d",
+    "source": "web",
+    "url": "https://www.visitgreece.gr/islands/cyclades/",
+    "title": "Visit Greece",
+    "improvedTitle": "Travel Guide to the Cyclades Islands in Greece",
+    "description": "If you are looking for travel inspiration, visitgreece.gr has everything you need to know. Travel ideas, Events, guides, what to do, where to go in Greece.",
+    "summary": "This resource provides comprehensive travel inspiration and information about the Cyclades islands in Greece, including travel ideas, events, guides, and recommendations on activities and destinations.",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "travel",
+      "topic": "destinations",
+      "subtopics": [
+        "Cyclades Islands",
+        "Greece"
+      ]
+    },
+    "keywords": [
+      "Cyclades",
+      "Greece",
+      "travel",
+      "travel guide",
+      "islands",
+      "events",
+      "travel ideas"
+    ],
+    "language": "en",
+    "confidence": 0.9,
+    "topics": [
+      "destinations",
+      "Cyclades Islands",
+      "Greece"
+    ],
+    "createdAt": "2026-08-03T17:42:25.936Z",
+    "updatedAt": "2026-08-03T17:42:25.936Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "cceb57b1-9115-4966-9086-d3c2e405482e",
+    "source": "web",
+    "url": "https://www.spain.info/en/region/balearic-islands/",
+    "title": "Balearic Islands: what to see. The best tourism plans | spain.info",
+    "improvedTitle": "Balearic Islands: Top Tourism Experiences and Attractions",
+    "description": "We propose unmissable experiences and trips. Have you visited the beautiful Mediterranean islands of Majorca, Minorca, Ibiza and Formentera? | spain.info",
+    "summary": "Discover key experiences and travel recommendations for the Mediterranean islands of Majorca, Minorca, Ibiza, and Formentera in the Balearic Islands. This guide highlights the best tourism plans to enjoy the beauty and culture of these popular destinations.",
+    "thumbnailUrl": "https://www.spain.info/export/sites/segtur/.content/imagenes/cabeceras-grandes/baleares/cala-mallorca-c-oscar-nord-u-jGogTlnawA8.jpg",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "travel",
+      "topic": "tourism",
+      "subtopics": [
+        "Mediterranean destinations",
+        "Balearic Islands",
+        "travel itineraries"
+      ]
+    },
+    "keywords": [
+      "Balearic Islands",
+      "Majorca",
+      "Minorca",
+      "Ibiza",
+      "Formentera",
+      "Mediterranean",
+      "tourism",
+      "travel plans",
+      "experiences"
+    ],
+    "language": "en",
+    "confidence": 0.9,
+    "topics": [
+      "tourism",
+      "Mediterranean destinations",
+      "Balearic Islands",
+      "travel itineraries"
+    ],
+    "createdAt": "2026-08-03T17:42:29.317Z",
+    "updatedAt": "2026-08-03T17:42:29.317Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "b3878eac-8bfc-429d-8eec-906e5f8ba150",
+    "source": "web",
+    "url": "https://croatia.hr/en-gb",
+    "title": "Croatia full of life - Discover beauty at every step",
+    "improvedTitle": "Explore the Vibrant Beauty and Adventures of Croatia",
+    "description": "Discover why is Croatia full of life. From the Adriatic and islands to mountains and historic cities. Adventures and experiences that create memories for a lifetime!",
+    "summary": "Discover why Croatia is full of life, offering a rich variety of experiences from the Adriatic Sea and its islands to mountains and historic cities. Enjoy adventures and memorable experiences throughout the country.",
+    "thumbnailUrl": "https://croatia.hr/cmsmedia/OLD_Activity/home-header.jpg",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "travel",
+      "topic": "tourism",
+      "subtopics": [
+        "adventure travel",
+        "cultural heritage",
+        "nature"
+      ]
+    },
+    "keywords": [
+      "Croatia",
+      "Adriatic",
+      "islands",
+      "mountains",
+      "historic cities",
+      "adventure",
+      "travel",
+      "tourism"
+    ],
+    "language": "en",
+    "confidence": 0.9,
+    "topics": [
+      "tourism",
+      "adventure travel",
+      "cultural heritage",
+      "nature"
+    ],
+    "createdAt": "2026-08-03T17:42:31.696Z",
+    "updatedAt": "2026-08-03T17:42:31.696Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "c6267e81-aee0-48bd-95b9-851227b31ea5",
+    "source": "web",
+    "url": "https://www.italia.it/en",
+    "title": "Discover Italy: Official Tourism Website - Italia.it",
+    "improvedTitle": "Discover Italy: Your Official Guide to Planning a Trip",
+    "description": "Browse the Official Tourism Website and plan your holidays to Italy. Find out where to go and what to do during your next Italian trip.",
+    "summary": "Explore Italy by browsing the official tourism website, where you can plan your holidays, discover top destinations, and find activities for your next Italian trip.",
+    "thumbnailUrl": "https://www.italia.it/content/dam/tdh/immagini-fallback/og-image.jpg",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "travel",
+      "topic": "tourism",
+      "subtopics": [
+        "trip planning",
+        "destination guides",
+        "activities"
+      ]
+    },
+    "keywords": [
+      "Italy",
+      "tourism",
+      "travel planning",
+      "holidays",
+      "destinations",
+      "activities"
+    ],
+    "language": "en",
+    "confidence": 0.9,
+    "topics": [
+      "tourism",
+      "trip planning",
+      "destination guides",
+      "activities"
+    ],
+    "createdAt": "2026-08-03T17:42:35.053Z",
+    "updatedAt": "2026-08-03T17:42:35.053Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "0a407377-28d6-416d-8cb6-4b469ce78782",
+    "source": "web",
+    "url": "https://en.wikipedia.org/wiki/Stock",
+    "title": "Stock - Wikipedia",
+    "improvedTitle": "Stock - Comprehensive Overview",
+    "summary": "This Wikipedia article provides a detailed overview of stocks, which represent ownership shares in a corporation. It covers the definition, types, issuance, and role of stocks in financial markets, offering foundational knowledge about equity securities.",
+    "thumbnailUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Vereinigte_Ostindische_Compagnie_bond_-_Middelburg_-_Amsterdam_-_1622.jpg",
+    "classification": {
+      "primaryCategory": "finance",
+      "secondaryCategory": "Investing",
+      "topic": "Stocks",
+      "subtopics": [
+        "Types of Stocks",
+        "Stock Issuance",
+        "Stock Markets",
+        "Equity Securities"
+      ]
+    },
+    "keywords": [
+      "stock",
+      "equity",
+      "shares",
+      "financial markets",
+      "investing",
+      "ownership",
+      "corporation"
+    ],
+    "language": "en",
+    "confidence": 0.95,
+    "topics": [
+      "Stocks",
+      "Types of Stocks",
+      "Stock Issuance",
+      "Stock Markets",
+      "Equity Securities"
+    ],
+    "createdAt": "2026-08-03T17:42:48.673Z",
+    "updatedAt": "2026-08-03T17:42:48.673Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+    "source": "web",
+    "url": "https://en.wikipedia.org/wiki/Exchange-traded_fund",
+    "title": "Exchange-traded fund - Wikipedia",
+    "improvedTitle": "Exchange-Traded Fund (ETF)",
+    "summary": "An exchange-traded fund (ETF) is a type of investment fund traded on stock exchanges, similar to stocks. ETFs hold assets such as stocks, commodities, or bonds and generally operate with an arbitrage mechanism designed to keep trading close to its net asset value, though deviations can occasionally occur.",
+    "classification": {
+      "primaryCategory": "finance",
+      "secondaryCategory": "Investing",
+      "topic": "Funds and Investment Vehicles",
+      "subtopics": [
+        "Exchange-Traded Funds",
+        "Stock Trading"
+      ]
+    },
+    "keywords": [
+      "Exchange-traded fund",
+      "ETF",
+      "Investment fund",
+      "Stock exchange",
+      "Stocks",
+      "Bonds",
+      "Commodities",
+      "Trading",
+      "Net asset value"
+    ],
+    "language": "en",
+    "confidence": 0.95,
+    "topics": [
+      "Funds and Investment Vehicles",
+      "Exchange-Traded Funds",
+      "Stock Trading"
+    ],
+    "createdAt": "2026-08-03T17:42:51.263Z",
+    "updatedAt": "2026-08-03T17:42:51.263Z",
+    "savedAtLabel": "Just now"
   }
 ]

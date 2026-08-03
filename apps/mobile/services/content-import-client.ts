@@ -2,7 +2,9 @@ import type {
   Discovery,
   DiscoveryCategory,
   DiscoverySource,
+  KnowledgeAnswer,
   KnowledgeLibrary,
+  SecondBrainOverview,
 } from "@savewise/shared";
 
 export type KnowledgeUpdate = {
@@ -256,6 +258,29 @@ export function deleteDiscovery(
 export function getKnowledgeLibrary(): Promise<KnowledgeLibrary> {
   return apiRequest<KnowledgeLibrary>(
     "/api/knowledge",
+  );
+}
+
+export function askKnowledgeQuestion(
+  question: string,
+): Promise<KnowledgeAnswer> {
+  return apiRequest<KnowledgeAnswer>(
+    "/api/knowledge/ask",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        question: question.trim(),
+      }),
+    },
+    105_000,
+  );
+}
+
+export function getSecondBrainOverview(): Promise<SecondBrainOverview> {
+  return apiRequest<SecondBrainOverview>(
+    "/api/knowledge/second-brain",
+    {},
+    105_000,
   );
 }
 
