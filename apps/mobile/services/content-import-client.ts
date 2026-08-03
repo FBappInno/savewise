@@ -1,6 +1,7 @@
 import type {
   Discovery,
   DiscoveryCategory,
+  DiscoveryUpdate,
   DiscoverySource,
   KnowledgeAnswer,
   KnowledgeLibrary,
@@ -64,6 +65,16 @@ export type DiscoveriesResponse = {
 
 export type DiscoveryResponse = {
   discovery: Discovery;
+};
+
+export type DiscoveryUpdateResponse = {
+  discovery: Discovery;
+  knowledgeUpdate: {
+    generatedAt: string;
+    totalDiscoveries: number;
+    totalTopics: number;
+    totalGraphNodes: number;
+  };
 };
 
 export type RelatedDiscovery = {
@@ -280,6 +291,20 @@ export function deleteDiscovery(
     {
       method: "DELETE",
     },
+  );
+}
+
+export function updateDiscovery(
+  discoveryId: string,
+  update: DiscoveryUpdate,
+): Promise<DiscoveryUpdateResponse> {
+  return apiRequest<DiscoveryUpdateResponse>(
+    `/api/discoveries/${encodeURIComponent(discoveryId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(update),
+    },
+    90_000,
   );
 }
 

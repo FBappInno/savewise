@@ -3,4 +3,5 @@ export type {
   DiscoveryCategory,
   DiscoveryClassification,
   DiscoverySource,
+  DiscoveryUpdate,
 } from "@savewise/shared";

@@ -38,7 +38,7 @@ const ContentAnalysisSchema = z.object({
   summary: z
     .string()
     .min(20)
-    .max(900),
+    .max(420),
 
   classification: z.object({
     primaryCategory: z.enum(categories),
@@ -96,7 +96,9 @@ export async function analyzeContent(
       "Analyze saved online content using only the provided metadata and extracted text.",
       "Do not invent information that is not supported by the metadata.",
       "Create a clear and factual improved title.",
-      "Write the summary in the original language of the content.",
+      "Write a compact summary with at most two short sentences and roughly 55 words.",
+      "Lead with the central insight. Remove introductions, repetition, examples and secondary details unless essential.",
+      "Never start with phrases such as 'This article discusses' or 'The content is about'.",
       "Build a reusable hierarchy for a personal knowledge library.",
       "The hierarchy must follow this order:",
       "primaryCategory -> secondaryCategory -> topic -> subtopics.",

@@ -110,6 +110,41 @@ export async function getDiscoveryById(
   );
 }
 
+export async function updateDiscovery(
+  repository: DiscoveryRepository,
+  discoveryId: string,
+  update: import("@savewise/shared").DiscoveryUpdate,
+): Promise<Discovery | null> {
+  const discoveries = await repository.getAll();
+  const index = discoveries.findIndex(
+    (discovery) => discovery.id === discoveryId,
+  );
+  if (index < 0) return null;
+
+  const existing = discoveries[index];
+  const updated: Discovery = {
+    ...existing,
+    improvedTitle: update.title.trim(),
+    summary: update.summary.trim() || undefined,
+    classification: {
+      ...update.classification,
+      secondaryCategory: update.classification.secondaryCategory.trim(),
+      topic: update.classification.topic.trim(),
+      subtopics: uniqueStrings(update.classification.subtopics),
+    },
+    topics: uniqueStrings([
+      update.classification.topic.trim(),
+      ...update.classification.subtopics.map((value) => value.trim()),
+    ]),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const next = [...discoveries];
+  next[index] = updated;
+  await repository.saveAll(next);
+  return updated;
+}
+
 export async function deleteDiscovery(
   repository: DiscoveryRepository,
   discoveryId: string,

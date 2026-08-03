@@ -18,6 +18,7 @@ import {
   getRelatedDiscoveries,
   rebuildCurrentKnowledgeLibrary,
   saveDiscovery,
+  updateDiscovery,
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
 import { ContentFetchError } from "./types/content-fetch-error";
@@ -118,6 +119,20 @@ const DiscoveryIdSchema = z
   .string()
   .trim()
   .min(1);
+
+const DiscoveryUpdateSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  summary: z.string().trim().max(420),
+  classification: z.object({
+    primaryCategory: z.enum([
+      "technology", "finance", "business", "science", "health",
+      "education", "productivity", "culture", "news", "lifestyle", "other",
+    ]),
+    secondaryCategory: z.string().trim().min(2).max(60),
+    topic: z.string().trim().min(2).max(60),
+    subtopics: z.array(z.string().trim().min(2).max(50)).max(6),
+  }),
+});
 
 const LimitQuerySchema = z.coerce
   .number()
@@ -336,6 +351,51 @@ app.get(
           error instanceof Error
             ? error.message
             : "Discovery could not be loaded.",
+      });
+    }
+  },
+);
+
+app.patch(
+  "/api/discoveries/:discoveryId",
+  async (request, response) => {
+    const parsedId = DiscoveryIdSchema.safeParse(request.params.discoveryId);
+    const parsedUpdate = DiscoveryUpdateSchema.safeParse(request.body);
+    if (!parsedId.success || !parsedUpdate.success) {
+      response.status(400).json({
+        error: "Valid discovery changes are required.",
+        details: parsedUpdate.success ? undefined : parsedUpdate.error.flatten(),
+      });
+      return;
+    }
+
+    try {
+      const discovery = await updateDiscovery(
+        discoveryRepository,
+        parsedId.data,
+        parsedUpdate.data,
+      );
+      if (!discovery) {
+        response.status(404).json({ error: "Discovery not found." });
+        return;
+      }
+
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      response.json({
+        discovery,
+        knowledgeUpdate: {
+          generatedAt: library.generatedAt,
+          totalDiscoveries: library.discoveries.length,
+          totalTopics: library.topics.length,
+          totalGraphNodes: library.graph?.nodes.length ?? 0,
+        },
+      });
+    } catch (error) {
+      console.error("Discovery could not be updated:", error);
+      response.status(500).json({
+        error: error instanceof Error
+          ? error.message
+          : "Discovery could not be updated.",
       });
     }
   },

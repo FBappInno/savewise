@@ -112,7 +112,7 @@ export async function importContent(
       metadata.description,
     ),
 
-    summary: analysis.summary.trim(),
+    summary: compactSummary(analysis.summary),
 
     thumbnailUrl: normalizeOptionalText(
       metadata.thumbnailUrl,
@@ -290,4 +290,18 @@ function normalizeConfidence(
     1,
     Math.max(0, confidence),
   );
+}
+
+function compactSummary(value: string): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  const sentences = normalized.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [];
+  const twoSentences = sentences.slice(0, 2).join(" ").trim();
+
+  if (twoSentences.length <= 420) {
+    return twoSentences;
+  }
+
+  const shortened = twoSentences.slice(0, 417);
+  const lastSpace = shortened.lastIndexOf(" ");
+  return `${shortened.slice(0, Math.max(lastSpace, 0)).trim()}…`;
 }

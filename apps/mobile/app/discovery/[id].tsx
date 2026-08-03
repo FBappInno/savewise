@@ -22,14 +22,18 @@ import {
 } from "react-native";
 
 import { RelatedDiscoveries } from "@/components/related-discoveries";
+import { DiscoveryEditModal } from "@/components/discovery-edit-modal";
+import { useAppSettings } from "@/providers/app-settings-provider";
 import {
   deleteDiscovery,
   getDiscovery,
+  updateDiscovery,
 } from "@/services/content-import-client";
 import { theme } from "@/theme";
 import type { Discovery } from "@/types/discovery";
 
 export default function DiscoveryDetailScreen() {
+  const { locale, t } = useAppSettings();
   const params =
     useLocalSearchParams<{
       id?: string | string[];
@@ -49,6 +53,8 @@ export default function DiscoveryDetailScreen() {
   const [error, setError] = useState<
     string | null
   >(null);
+
+  const [isEditing, setEditing] = useState(false);
 
   const loadDiscovery =
     useCallback(async () => {
@@ -149,6 +155,24 @@ export default function DiscoveryDetailScreen() {
     }
   }
 
+  async function handleUpdate(
+    update: import("@savewise/shared").DiscoveryUpdate,
+  ) {
+    if (!discovery) return;
+    try {
+      const response = await updateDiscovery(discovery.id, update);
+      setDiscovery(response.discovery);
+      setEditing(false);
+    } catch (updateError) {
+      Alert.alert(
+        t("discovery.updateFailed"),
+        updateError instanceof Error
+          ? updateError.message
+          : t("discovery.updateFailedMessage"),
+      );
+    }
+  }
+
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -236,16 +260,12 @@ export default function DiscoveryDetailScreen() {
             <Text
               style={styles.metadata}
             >
-              {formatDate(
-                discovery.publishedAt,
-              )}
+              {formatDate(discovery.publishedAt, locale)}
             </Text>
           ) : null}
 
           <Text style={styles.metadata}>
-            {formatDate(
-              discovery.createdAt,
-            )}
+            {formatDate(discovery.createdAt, locale)}
           </Text>
         </View>
 
@@ -260,7 +280,7 @@ export default function DiscoveryDetailScreen() {
             <Text
               style={styles.summary}
             >
-              {discovery.summary}
+              {compactSummary(discovery.summary)}
             </Text>
           </View>
         ) : null}
@@ -473,30 +493,47 @@ export default function DiscoveryDetailScreen() {
           }}
         />
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={handleDelete}
-          style={({ pressed }) => [
-            styles.deleteButton,
-            pressed &&
-              styles.pressed,
-          ]}
-        >
-          <Ionicons
-            color="#B42318"
-            name="trash-outline"
-            size={18}
-          />
-
-          <Text
-            style={
-              styles.deleteButtonText
-            }
+        <View style={styles.actionRow}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setEditing(true)}
+            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
           >
-            Delete discovery
-          </Text>
-        </Pressable>
+            <Ionicons color={theme.colors.primary} name="create-outline" size={18} />
+            <Text style={styles.editButtonText}>{t("discovery.edit")}</Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleDelete}
+            style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+          >
+            <Ionicons color="#B42318" name="trash-outline" size={18} />
+            <Text style={styles.deleteButtonText}>{t("discovery.delete")}</Text>
+          </Pressable>
+        </View>
       </ScrollView>
+
+      <DiscoveryEditModal
+        discovery={discovery}
+        labels={{
+          title: t("discovery.editTitle"),
+          description: t("discovery.editDescription"),
+          titleField: t("discovery.titleField"),
+          summary: t("discovery.summaryField"),
+          primaryCategory: t("discovery.primaryCategory"),
+          secondaryCategory: t("discovery.secondaryCategory"),
+          topic: t("discovery.topic"),
+          subtopics: t("discovery.subtopics"),
+          subtopicsHint: t("discovery.subtopicsHint"),
+          cancel: t("discovery.cancel"),
+          save: t("discovery.save"),
+          saving: t("discovery.saving"),
+        }}
+        onClose={() => setEditing(false)}
+        onSave={handleUpdate}
+        visible={isEditing}
+      />
     </>
   );
 }
@@ -532,6 +569,7 @@ function formatCategory(
 
 function formatDate(
   value: string,
+  locale: string,
 ): string {
   const date = new Date(value);
 
@@ -542,13 +580,27 @@ function formatDate(
   }
 
   return new Intl.DateTimeFormat(
-    "en",
+    locale,
     {
       day: "numeric",
       month: "short",
       year: "numeric",
     },
   ).format(date);
+}
+
+function compactSummary(value: string): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  const sentences = normalized.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [];
+  const twoSentences = sentences.slice(0, 2).join(" ").trim();
+
+  if (twoSentences.length <= 420) {
+    return twoSentences;
+  }
+
+  const shortened = twoSentences.slice(0, 417);
+  const lastSpace = shortened.lastIndexOf(" ");
+  return `${shortened.slice(0, Math.max(lastSpace, 0)).trim()}…`;
 }
 
 const styles = StyleSheet.create({
@@ -777,16 +829,39 @@ const styles = StyleSheet.create({
       theme.colors.primary,
   },
 
+  actionRow: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    marginTop: theme.spacing.xxxl,
+  },
+
+  editButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.primary,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+    justifyContent: "center",
+    padding: theme.spacing.lg,
+  },
+
+  editButtonText: {
+    ...theme.typography.bodyStrong,
+    color: theme.colors.primary,
+  },
+
   deleteButton: {
     alignItems: "center",
     borderRadius:
       theme.radius.lg,
+    flex: 1,
     flexDirection: "row",
     gap:
       theme.spacing.sm,
     justifyContent: "center",
-    marginTop:
-      theme.spacing.xxxl,
     padding:
       theme.spacing.lg,
   },

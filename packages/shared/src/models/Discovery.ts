@@ -61,3 +61,9 @@ export interface Discovery {
 
   savedAtLabel: string;
 }
+
+export type DiscoveryUpdate = {
+  title: string;
+  summary: string;
+  classification: DiscoveryClassification;
+};
