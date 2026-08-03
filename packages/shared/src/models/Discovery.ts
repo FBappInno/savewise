@@ -1,29 +1,63 @@
+export type DiscoverySource =
+  | "youtube"
+  | "instagram"
+  | "tiktok"
+  | "web";
+
+export type DiscoveryCategory =
+  | "technology"
+  | "finance"
+  | "business"
+  | "science"
+  | "health"
+  | "education"
+  | "productivity"
+  | "culture"
+  | "news"
+  | "lifestyle"
+  | "other";
+
+export interface DiscoveryClassification {
+  primaryCategory: DiscoveryCategory;
+  secondaryCategory: string;
+  topic: string;
+  subtopics: string[];
+}
+
 export interface Discovery {
   id: string;
 
-  url: string;
+  source: DiscoverySource;
+
+  url?: string;
 
   title: string;
 
-  improvedTitle: string;
+  improvedTitle?: string;
 
-  summary: string;
+  description?: string;
 
-  primaryCategory: string;
+  summary?: string;
 
-  secondaryCategory: string;
+  thumbnailUrl?: string;
 
-  topic: string;
+  author?: string;
 
-  subtopics: string[];
+  publishedAt?: string;
+
+  classification?: DiscoveryClassification;
 
   keywords: string[];
 
-  language: string;
+  language?: string;
 
-  confidence: number;
+  confidence?: number;
+
+  topics: string[];
 
   createdAt: string;
 
   updatedAt: string;
+
+  savedAtLabel: string;
 }

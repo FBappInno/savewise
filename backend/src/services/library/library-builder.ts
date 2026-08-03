@@ -50,7 +50,8 @@ function buildTopicAccumulators(
 
   for (const discovery of discoveries) {
     const topicName =
-      discovery.topic?.trim() ||
+      discovery.classification?.topic.trim() ||
+      discovery.topics[0]?.trim() ||
       "Uncategorized";
 
     const topicId = createSlug(topicName);
