@@ -35,9 +35,18 @@ export default function RootLayout() {
         <Stack.Screen
           name="discovery/[id]"
           options={{
-            headerShown: true,
             headerBackTitle: "Back",
+            headerShown: true,
             title: "Discovery",
+          }}
+        />
+
+        <Stack.Screen
+          name="topic/[id]"
+          options={{
+            headerBackTitle: "Library",
+            headerShown: true,
+            title: "Topic",
           }}
         />
 
