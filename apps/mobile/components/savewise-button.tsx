@@ -7,9 +7,10 @@ import {
 
 import { theme } from "@/theme";
 
-type SaveWiseButtonProps = PressableProps & {
-  label: string;
-};
+type SaveWiseButtonProps =
+  PressableProps & {
+    label: string;
+  };
 
 export function SaveWiseButton({
   label,
@@ -21,15 +22,22 @@ export function SaveWiseButton({
     <Pressable
       accessibilityRole="button"
       disabled={disabled}
-      style={({ pressed }) => [
+      style={(state) => [
         styles.button,
-        pressed && !disabled && styles.pressed,
-        disabled && styles.disabled,
-        typeof style === "function" ? style({ pressed }) : style,
+        state.pressed &&
+          !disabled &&
+          styles.pressed,
+        disabled &&
+          styles.disabled,
+        typeof style === "function"
+          ? style(state)
+          : style,
       ]}
       {...props}
     >
-      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.label}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -37,14 +45,19 @@ export function SaveWiseButton({
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.radius.lg,
-    paddingHorizontal: theme.spacing.xl,
-    paddingVertical: theme.spacing.lg,
+    backgroundColor:
+      theme.colors.primary,
+    borderRadius:
+      theme.radius.lg,
+    paddingHorizontal:
+      theme.spacing.xl,
+    paddingVertical:
+      theme.spacing.lg,
   },
 
   pressed: {
-    backgroundColor: theme.colors.primaryPressed,
+    backgroundColor:
+      theme.colors.primaryPressed,
   },
 
   disabled: {
@@ -53,6 +66,7 @@ const styles = StyleSheet.create({
 
   label: {
     ...theme.typography.button,
-    color: theme.colors.textOnPrimary,
+    color:
+      theme.colors.textOnPrimary,
   },
 });

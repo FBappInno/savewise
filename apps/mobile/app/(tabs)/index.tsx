@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import {
   useMemo,
   useState,
@@ -28,10 +29,8 @@ export default function HomeScreen() {
     setCaptureModalVisible,
   ] = useState(false);
 
-  const [
-    search,
-    setSearch,
-  ] = useState("");
+  const [search, setSearch] =
+    useState("");
 
   const {
     discoveries,
@@ -92,10 +91,12 @@ export default function HomeScreen() {
   function handleDiscoveryPress(
     discovery: Discovery,
   ) {
-    console.log(
-      "Discovery pressed:",
-      discovery.id,
-    );
+    router.push({
+      pathname: "/discovery/[id]",
+      params: {
+        id: discovery.id,
+      },
+    });
   }
 
   async function handleSaveCapture(
@@ -111,10 +112,10 @@ export default function HomeScreen() {
       );
     } catch (importError) {
       Alert.alert(
-        "Import fehlgeschlagen",
+        "Import failed",
         importError instanceof Error
           ? importError.message
-          : "Der Inhalt konnte nicht importiert werden.",
+          : "The content could not be imported.",
       );
     }
   }
@@ -126,18 +127,16 @@ export default function HomeScreen() {
           styles.scrollContent
         }
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={
-          false
-        }
         refreshControl={
           <RefreshControl
-            refreshing={
-              isRefreshing
-            }
+            refreshing={isRefreshing}
             onRefresh={() => {
               void refresh();
             }}
           />
+        }
+        showsVerticalScrollIndicator={
+          false
         }
       >
         <View style={styles.header}>
@@ -160,9 +159,7 @@ export default function HomeScreen() {
         {error ? (
           <View style={styles.errorBox}>
             <Text
-              style={
-                styles.errorText
-              }
+              style={styles.errorText}
             >
               {error}
             </Text>
@@ -171,14 +168,10 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <View
-            style={
-              styles.sectionHeader
-            }
+            style={styles.sectionHeader}
           >
             <Text
-              style={
-                styles.sectionTitle
-              }
+              style={styles.sectionTitle}
             >
               Discoveries
             </Text>
@@ -203,9 +196,7 @@ export default function HomeScreen() {
               <ActivityIndicator />
 
               <Text
-                style={
-                  styles.loadingText
-                }
+                style={styles.loadingText}
               >
                 Loading discoveries...
               </Text>
@@ -216,22 +207,16 @@ export default function HomeScreen() {
           filteredDiscoveries.length ===
             0 ? (
             <View
-              style={
-                styles.emptyState
-              }
+              style={styles.emptyState}
             >
               <Text
-                style={
-                  styles.emptyTitle
-                }
+                style={styles.emptyTitle}
               >
                 No discoveries yet
               </Text>
 
               <Text
-                style={
-                  styles.emptyText
-                }
+                style={styles.emptyText}
               >
                 Capture your first URL
                 to start building your
@@ -242,9 +227,7 @@ export default function HomeScreen() {
           ) : null}
 
           <View
-            style={
-              styles.discoveryList
-            }
+            style={styles.discoveryList}
           >
             {filteredDiscoveries.map(
               (discovery) => (
@@ -265,12 +248,12 @@ export default function HomeScreen() {
 
       <View style={styles.footer}>
         <SaveWiseButton
+          disabled={isImporting}
           label={
             isImporting
               ? "Analyzing..."
               : "+ Capture"
           }
-          disabled={isImporting}
           onPress={() => {
             setCaptureModalVisible(
               true,
@@ -290,9 +273,7 @@ export default function HomeScreen() {
             );
           }
         }}
-        onSave={
-          handleSaveCapture
-        }
+        onSave={handleSaveCapture}
       />
     </View>
   );
@@ -321,7 +302,8 @@ const styles = StyleSheet.create({
 
   logo: {
     ...theme.typography.screenTitle,
-    color: theme.colors.text,
+    color:
+      theme.colors.text,
   },
 
   subtitle: {
@@ -334,17 +316,17 @@ const styles = StyleSheet.create({
   },
 
   errorBox: {
-    marginTop:
-      theme.spacing.lg,
-    padding:
-      theme.spacing.md,
-    borderRadius:
-      theme.radius.md,
     backgroundColor:
       theme.colors.surface,
     borderColor:
       theme.colors.border,
+    borderRadius:
+      theme.radius.md,
     borderWidth: 1,
+    marginTop:
+      theme.spacing.lg,
+    padding:
+      theme.spacing.md,
   },
 
   errorText: {
@@ -359,8 +341,8 @@ const styles = StyleSheet.create({
   },
 
   sectionHeader: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
     justifyContent:
       "space-between",
     marginBottom:
@@ -369,7 +351,8 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     ...theme.typography.sectionTitle,
-    color: theme.colors.text,
+    color:
+      theme.colors.text,
   },
 
   discoveryCount: {
@@ -379,7 +362,8 @@ const styles = StyleSheet.create({
   },
 
   discoveryList: {
-    gap: theme.spacing.lg,
+    gap:
+      theme.spacing.lg,
   },
 
   loadingContainer: {
@@ -398,15 +382,16 @@ const styles = StyleSheet.create({
 
   emptyState: {
     alignItems: "center",
-    paddingVertical:
-      theme.spacing.xxxl,
     paddingHorizontal:
       theme.spacing.xl,
+    paddingVertical:
+      theme.spacing.xxxl,
   },
 
   emptyTitle: {
     ...theme.typography.sectionTitle,
-    color: theme.colors.text,
+    color:
+      theme.colors.text,
     textAlign: "center",
   },
 
@@ -420,9 +405,12 @@ const styles = StyleSheet.create({
   },
 
   footer: {
+    bottom:
+      theme.spacing.xl,
+    left:
+      theme.spacing.xl,
     position: "absolute",
-    left: theme.spacing.xl,
-    right: theme.spacing.xl,
-    bottom: theme.spacing.xl,
+    right:
+      theme.spacing.xl,
   },
 });
