@@ -20,6 +20,8 @@ type DiscoveryCardProps = {
   ) => void;
 };
 
+const MAX_VISIBLE_TOPICS = 3;
+
 const sourceLabels: Record<
   DiscoverySource,
   string
@@ -37,57 +39,69 @@ export function DiscoveryCard({
   const classification =
     discovery.classification;
 
+  const visibleTopics =
+    discovery.topics.slice(
+      0,
+      MAX_VISIBLE_TOPICS,
+    );
+
+  const hiddenTopicCount =
+    Math.max(
+      0,
+      discovery.topics.length -
+        visibleTopics.length,
+    );
+
+  const displayedTitle =
+    discovery.improvedTitle ||
+    discovery.title;
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={
-        `Open ${discovery.title}`
-      }
-      onPress={() =>
-        onPress?.(discovery)
-      }
+      accessibilityLabel={`Open ${displayedTitle}`}
+      onPress={() => {
+        onPress?.(discovery);
+      }}
       style={({ pressed }) => [
         styles.card,
-
-        pressed &&
-          styles.pressed,
+        pressed && styles.pressed,
       ]}
     >
-      <Text style={styles.source}>
-        {
-          sourceLabels[
-            discovery.source
-          ]
-        }
+      <View style={styles.topRow}>
+        <Text style={styles.source}>
+          {sourceLabels[discovery.source]}
+        </Text>
+
+        <Text style={styles.savedAt}>
+          {discovery.savedAtLabel}
+        </Text>
+      </View>
+
+      <Text
+        numberOfLines={2}
+        style={styles.title}
+      >
+        {displayedTitle}
       </Text>
 
-      <Text style={styles.title}>
-        {discovery.title}
-      </Text>
+      {discovery.author ? (
+        <Text
+          numberOfLines={1}
+          style={styles.author}
+        >
+          {discovery.author}
+        </Text>
+      ) : null}
 
-      <Text style={styles.metadata}>
-        {discovery.author
-          ? `${discovery.author} · `
-          : ""}
-
-        {discovery.savedAtLabel}
-      </Text>
-
-      {classification && (
+      {classification ? (
         <View
           style={
             styles.classification
           }
         >
           <Text
-            style={
-              styles.classificationLabel
-            }
-          >
-            Knowledge path
-          </Text>
-
-          <Text
+            numberOfLines={1}
             style={
               styles.classificationPath
             }
@@ -102,44 +116,55 @@ export function DiscoveryCard({
                 .secondaryCategory
             }
             {"  ›  "}
-            {
-              classification.topic
-            }
+            {classification.topic}
           </Text>
         </View>
-      )}
+      ) : null}
 
-      {discovery.summary && (
+      {discovery.summary ? (
         <Text
-          numberOfLines={3}
+          numberOfLines={2}
           style={styles.summary}
         >
           {discovery.summary}
         </Text>
-      )}
+      ) : null}
 
-      {discovery.topics.length >
-        0 && (
+      {visibleTopics.length > 0 ? (
         <View style={styles.topics}>
-          {discovery.topics.map(
+          {visibleTopics.map(
             (topic) => (
               <TopicBadge
-                key={
-                  `${discovery.id}-${topic}`
-                }
+                key={`${discovery.id}-${topic}`}
                 label={topic}
               />
             ),
           )}
+
+          {hiddenTopicCount > 0 ? (
+            <View
+              style={
+                styles.moreTopicsBadge
+              }
+            >
+              <Text
+                style={
+                  styles.moreTopicsText
+                }
+              >
+                +{hiddenTopicCount}
+              </Text>
+            </View>
+          ) : null}
         </View>
-      )}
+      ) : null}
     </Pressable>
   );
 }
 
 function formatCategory(
   category: string,
-) {
+): string {
   return category
     .split("_")
     .map(
@@ -163,12 +188,27 @@ const styles = StyleSheet.create({
 
     borderWidth: 1,
 
-    padding:
+    paddingHorizontal:
       theme.spacing.lg,
+
+    paddingVertical:
+      theme.spacing.md,
   },
 
   pressed: {
     opacity: 0.75,
+  },
+
+  topRow: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
+
+    marginBottom:
+      theme.spacing.xs,
   },
 
   source: {
@@ -176,9 +216,13 @@ const styles = StyleSheet.create({
 
     color:
       theme.colors.primary,
+  },
 
-    marginBottom:
-      theme.spacing.xs,
+  savedAt: {
+    ...theme.typography.caption,
+
+    color:
+      theme.colors.textSecondary,
   },
 
   title: {
@@ -186,9 +230,11 @@ const styles = StyleSheet.create({
 
     color:
       theme.colors.text,
+
+    lineHeight: 21,
   },
 
-  metadata: {
+  author: {
     ...theme.typography.caption,
 
     color:
@@ -206,27 +252,20 @@ const styles = StyleSheet.create({
       theme.radius.md,
 
     marginTop:
-      theme.spacing.lg,
-
-    padding:
       theme.spacing.md,
-  },
 
-  classificationLabel: {
-    ...theme.typography.caption,
+    paddingHorizontal:
+      theme.spacing.md,
 
-    color:
-      theme.colors.textSecondary,
+    paddingVertical:
+      theme.spacing.sm,
   },
 
   classificationPath: {
-    ...theme.typography.bodyStrong,
+    ...theme.typography.caption,
 
     color:
       theme.colors.text,
-
-    marginTop:
-      theme.spacing.xs,
   },
 
   summary: {
@@ -235,19 +274,51 @@ const styles = StyleSheet.create({
     color:
       theme.colors.textSecondary,
 
+    lineHeight: 19,
+
     marginTop:
-      theme.spacing.lg,
+      theme.spacing.md,
   },
 
   topics: {
+    alignItems: "center",
+
     flexDirection: "row",
 
     flexWrap: "wrap",
 
     gap:
-      theme.spacing.sm,
+      theme.spacing.xs,
 
     marginTop:
-      theme.spacing.lg,
+      theme.spacing.md,
+  },
+
+  moreTopicsBadge: {
+    alignItems: "center",
+
+    backgroundColor:
+      theme.colors.background,
+
+    borderColor:
+      theme.colors.border,
+
+    borderRadius: 999,
+
+    borderWidth: 1,
+
+    justifyContent: "center",
+
+    minHeight: 26,
+
+    paddingHorizontal:
+      theme.spacing.sm,
+  },
+
+  moreTopicsText: {
+    ...theme.typography.caption,
+
+    color:
+      theme.colors.textSecondary,
   },
 });
