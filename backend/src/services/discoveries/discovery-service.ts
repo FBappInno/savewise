@@ -126,6 +126,7 @@ export async function updateDiscovery(
     ...existing,
     improvedTitle: update.title.trim(),
     summary: update.summary.trim() || undefined,
+    language: update.language ?? existing.language,
     classification: {
       ...update.classification,
       secondaryCategory: update.classification.secondaryCategory.trim(),

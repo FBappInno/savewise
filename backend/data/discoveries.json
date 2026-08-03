@@ -1041,15 +1041,16 @@
     "source": "tiktok",
     "url": "https://www.tiktok.com/@dshkrka/video/7658295918382288148",
     "title": "TikTok - Make Your Day",
-    "improvedTitle": "Short Entertaining Video Clip from TikTok",
-    "summary": "A brief video shared on TikTok aimed at entertainment and engagement for users.  The content is representative of TikTok's casual, user-generated multimedia format without specified details or context.",
+    "improvedTitle": "Hund als charmanter Blogger in einem TikTok-Video",
+    "summary": "Ein TikTok-Video zeigt einen Hund, der als Blogger dargestellt wird und im Fokus eines aktuellen Trends steht. Das Video verwendet Hashtags wie #собака (Hund) und #тренд (Trend), was die wachsende Beliebtheit von Haustieren in sozialen Medien unterstreicht.",
     "classification": {
-      "primaryCategory": "culture",
-      "secondaryCategory": "social media",
-      "topic": "video content",
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "Freizeit & Unterhaltung",
+      "topic": "Haustiere",
       "subtopics": [
-        "short-form video",
-        "user engagement"
+        "Hundeverhalten",
+        "Soziale Medien",
+        "Trends"
       ]
     },
     "keywords": [
@@ -1059,15 +1060,16 @@
       "social media",
       "short video"
     ],
-    "language": "unknown",
+    "language": "de",
     "confidence": 0.6,
     "topics": [
-      "video content",
-      "short-form video",
-      "user engagement"
+      "Haustiere",
+      "Hundeverhalten",
+      "Soziale Medien",
+      "Trends"
     ],
     "createdAt": "2026-08-03T19:52:47.045Z",
-    "updatedAt": "2026-08-03T19:52:47.045Z",
+    "updatedAt": "2026-08-03T20:09:36.192Z",
     "savedAtLabel": "Just now"
   },
   {
@@ -1075,15 +1077,15 @@
     "source": "tiktok",
     "url": "https://www.tiktok.com/@spezialagentt1/video/7647952007390694688?is_from_webapp=1&sender_device=pc",
     "title": "TikTok - Make Your Day",
-    "improvedTitle": "Engaging Short-Form Video Content on TikTok",
-    "summary": "This TikTok video exemplifies the platform's dynamic short-form content designed to entertain and engage users quickly.  It showcases how TikTok fosters rapid creativity and social interaction through concise video clips.",
+    "improvedTitle": "Virales Streetcomedy-Video von @SmileBright auf TikTok",
+    "summary": "Das Video zeigt eine Streetcomedy-Szene, produziert von @SmileBright und geteilt von DerAgent🕵️‍♂️. Es ist viral auf TikTok verbreitet und nutzt humorvolle Elemente zur Unterhaltung.",
     "classification": {
       "primaryCategory": "culture",
-      "secondaryCategory": "social media",
-      "topic": "video content",
+      "secondaryCategory": "comedy",
+      "topic": "Streetcomedy",
       "subtopics": [
-        "short-form videos",
-        "digital engagement"
+        "TikTok",
+        "virale Videos"
       ]
     },
     "keywords": [
@@ -1093,15 +1095,15 @@
       "engagement",
       "digital content"
     ],
-    "language": "en",
+    "language": "de",
     "confidence": 0.7,
     "topics": [
-      "video content",
-      "short-form videos",
-      "digital engagement"
+      "Streetcomedy",
+      "TikTok",
+      "virale Videos"
     ],
     "createdAt": "2026-08-03T19:53:11.824Z",
-    "updatedAt": "2026-08-03T19:53:11.824Z",
+    "updatedAt": "2026-08-03T20:09:36.180Z",
     "savedAtLabel": "Just now"
   },
   {
@@ -1109,13 +1111,16 @@
     "source": "tiktok",
     "url": "https://www.tiktok.com/@bratan.thebest/video/7663877193814019361?is_from_webapp=1&sender_device=pc",
     "title": "TikTok - Make Your Day",
-    "improvedTitle": "Short Entertaining Video Clip from TikTok",
-    "summary": "This TikTok video provides brief entertainment content designed to make the viewer's day better.  It likely features engaging or amusing footage typical of the platform's style.",
+    "improvedTitle": "Kleiner Pool hinter Garten Terrasse eingebaut",
+    "summary": "Eine Frau wünschte sich einen Pool, der erfolgreich hinter einer Terrasse installiert wurde. Diese kompakte Pool-Lösung zeigt, wie man auf engstem Raum eine Wasserstelle schaffen kann.",
     "classification": {
       "primaryCategory": "lifestyle",
-      "secondaryCategory": "entertainment",
-      "topic": "short videos",
-      "subtopics": []
+      "secondaryCategory": "Heim & Garten",
+      "topic": "Garten",
+      "subtopics": [
+        "Pools",
+        "Terrassengestaltung"
+      ]
     },
     "keywords": [
       "TikTok",
@@ -1124,13 +1129,169 @@
       "short clip",
       "social media"
     ],
-    "language": "en",
+    "language": "de",
     "confidence": 0.6,
     "topics": [
-      "short videos"
+      "Garten",
+      "Pools",
+      "Terrassengestaltung"
     ],
     "createdAt": "2026-08-03T19:53:31.426Z",
-    "updatedAt": "2026-08-03T19:53:31.426Z",
+    "updatedAt": "2026-08-03T20:09:36.151Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "eac0675f-6b73-4cad-a187-68b02eeba64a",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@alinsuniverse/video/7669885957054762273?q=cat&t=1785787637231",
+    "title": "My love ❤️❤️❤️",
+    "improvedTitle": "Kuschelige Katze beim Schlafen auf dem Bett",
+    "description": "My love ❤️❤️❤️",
+    "summary": "Eine gemütliche Katze ruht entspannt auf einem weichen Bett und zeigt eine typische Schlafposition.  Das Video zeigt liebevolle Momente zwischen Tier und Mensch.",
+    "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast2a-p-0037-euttp/oAgvooBZqwBIE0ZNyi5VkityLCKn6iIaADKy9~tplv-tiktokx-origin.image?dr=10395&x-expires=1785960000&x-signature=4DWh%2BJjxnZGB4OfqxMwMLGmdJBY%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+    "author": "Alina&Fritz",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "Haustiere",
+      "topic": "Katzen",
+      "subtopics": [
+        "Schlafverhalten",
+        "Tierliebe"
+      ]
+    },
+    "keywords": [
+      "Katze",
+      "Schlaf",
+      "Kuscheln",
+      "Haustier",
+      "Entspannung",
+      "Tierliebe"
+    ],
+    "language": "de",
+    "confidence": 0.9,
+    "topics": [
+      "Katzen",
+      "Schlafverhalten",
+      "Tierliebe"
+    ],
+    "createdAt": "2026-08-03T20:13:35.855Z",
+    "updatedAt": "2026-08-03T20:13:35.855Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "156e6465-ca35-4363-8054-9c54736b498d",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@fightercombatant/video/7667704189245492500?q=Drone%20ukraine&t=1785788031229",
+    "title": "#slavaukraine🇺🇦 #drones #abate #знищення #fpv",
+    "improvedTitle": "Einsatz von Drohnen durch ukrainische Soldaten im Kampf",
+    "description": "#slavaukraine🇺🇦 #drones #abate #знищення #fpv",
+    "summary": "Ein ukrainischer Soldat bereitet eine Drohne für den Einsatz vor, was die Bedeutung unbemannter Luftfahrtsysteme in militärischen Konflikten unterstreicht.  Solche Drohnen ermöglichen gezielte Aktionen und unterstützen die Truppen vor Ort effektiv.",
+    "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-p-0037/o8Sk3XEjoMUD0fICUAAGAAKBI8svefDQShQAlA~tplv-tiktokx-origin.image?dr=10395&x-expires=1785960000&x-signature=pVi%2Byv5zlLt3b9FtEI47EXJbfn4%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+    "author": "FighterCombatant",
+    "classification": {
+      "primaryCategory": "technology",
+      "secondaryCategory": "militärische Technologie",
+      "topic": "Drohnen",
+      "subtopics": [
+        "unbemannte Luftfahrzeuge",
+        "militärische Anwendung",
+        "FPV-Drone"
+      ]
+    },
+    "keywords": [
+      "Ukraine",
+      "Drohnen",
+      "Militär",
+      "FPV",
+      "unbemannte Luftfahrzeuge",
+      "Kampfunterstützung",
+      "FighterCombatant"
+    ],
+    "language": "de",
+    "confidence": 0.75,
+    "topics": [
+      "Drohnen",
+      "unbemannte Luftfahrzeuge",
+      "militärische Anwendung",
+      "FPV-Drone"
+    ],
+    "createdAt": "2026-08-03T20:14:11.643Z",
+    "updatedAt": "2026-08-03T20:14:11.643Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "f006971e-f706-455d-bad7-d8b13a0c109c",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@ancbrief/video/7645607176416906517?q=Drone%20ukraine&t=1785788031229",
+    "title": "Ukraine has unveiled a new interceptor drone designed to automatically track and engage enemy aerial targets. Once the drone locks onto its target, it can autonomously pursue and attack, enhancing Ukraine's air defense capabilities. As drone warfare continues to evolve, Ukraine remains at the forefront of developing and deploying advanced unmanned systems on the battlefield. The rapid advancement of these technologies is drawing international attention, with experts emphasizing the importance of closely monitoring emerging drone warfare tactics and capabilities.",
+    "improvedTitle": "Ukraine stellt neuen autonomen Abfangdrohnen vor zur Luftabwehr vor",
+    "description": "Ukraine has unveiled a new interceptor drone designed to automatically track and engage enemy aerial targets. Once the drone locks onto its target, it can autonomously pursue and attack, enhancing Ukraine's air defense capabilities. As drone warfare continues to evolve, Ukraine remains at the forefront of developing and deploying advanced unmanned systems on the battlefield. The rapid advancement of these technologies is drawing international attention, with experts emphasizing the importance of closely monitoring emerging drone warfare tactics and capabilities.",
+    "summary": "Ukraine hat eine neue Abfangdrohne entwickelt, die automatisch feindliche Luftziele verfolgt und angreift, was die Luftverteidigung des Landes stärkt.  Diese technologische Entwicklung unterstreicht die fortschrittliche Nutzung unbemannter Systeme im modernen Drohnenkrieg und zieht internationale Aufmerksamkeit auf sich.",
+    "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-p-0037/ocHGDfxuCEWpQ9QyPAqgFCl1IfVqAATAAB0Avq~tplv-tiktokx-origin.image?dr=10395&x-expires=1785960000&x-signature=BGVvB5JmQtW2tlWhDOltqAW1u%2Fs%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+    "author": "ANCbrief",
+    "classification": {
+      "primaryCategory": "technology",
+      "secondaryCategory": "Verteidigungstechnologie",
+      "topic": "Drohnen",
+      "subtopics": [
+        "Abfangdrohnen",
+        "Autonome Systeme",
+        "Luftverteidigung"
+      ]
+    },
+    "keywords": [
+      "Ukraine",
+      "Abfangdrohne",
+      "autonom",
+      "Luftabwehr",
+      "Drohnenkrieg",
+      "unbemannte Systeme",
+      "technologische Entwicklung"
+    ],
+    "language": "de",
+    "confidence": 0.95,
+    "topics": [
+      "Drohnen",
+      "Abfangdrohnen",
+      "Autonome Systeme",
+      "Luftverteidigung"
+    ],
+    "createdAt": "2026-08-03T20:14:31.722Z",
+    "updatedAt": "2026-08-03T20:14:31.722Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "cb37f305-ff8f-4635-bd44-8c6469548484",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@chriskroemer/video/7286360696516840737?q=paragliding&t=1785788089544",
+    "title": "Schon Paragleiten gewesen? Würdest du das machen? 🥳😍🪂 #mayrhofen #paragliding",
+    "improvedTitle": "Paragleiten in Mayrhofen: Das Gefühl des Fliegens erleben",
+    "description": "Schon Paragleiten gewesen? Würdest du das machen? 🥳😍🪂 #mayrhofen #paragliding",
+    "summary": "Paragleiten in Mayrhofen vermittelt das intensive Gefühl des Fliegens, das sich anfühlt, als würde man abstürzen.  Dieses Video vermittelt eine eindrucksvolle Perspektive auf das Gleitschirmfliegen in den Alpen.",
+    "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast2a-p-0037-euttp/8e7b5fe417c64f6294163442e3f05b31_1696488067~tplv-tiktokx-origin.image?dr=10395&x-expires=1785960000&x-signature=EAI1Py7fhJVitCwc3lszARO5fj0%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+    "author": "chriskroemer",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "Freizeit",
+      "topic": "Paragliding",
+      "subtopics": []
+    },
+    "keywords": [
+      "Paragleiten",
+      "Mayrhofen",
+      "Gleitschirmfliegen",
+      "Extremsport",
+      "Alpen",
+      "Freizeit",
+      "Flugerlebnis"
+    ],
+    "language": "de",
+    "confidence": 0.9,
+    "topics": [
+      "Paragliding"
+    ],
+    "createdAt": "2026-08-03T20:15:09.567Z",
+    "updatedAt": "2026-08-03T20:28:47.248Z",
     "savedAtLabel": "Just now"
   }
 ]

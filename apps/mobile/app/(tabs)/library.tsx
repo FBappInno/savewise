@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
   ActivityIndicator,
@@ -14,15 +14,18 @@ import {
 } from "react-native";
 
 import { KnowledgeTree } from "@/components/library/knowledge-tree";
+import { TopicManagementModal } from "@/components/library/topic-management-modal";
 import { useKnowledgeLibrary } from "@/hooks/use-knowledge-library";
 import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type { Discovery } from "@/types/discovery";
+import { updateKnowledgeTopic } from "@/services/content-import-client";
 
 export default function LibraryScreen() {
   const { locale, settings, t } = useAppSettings();
   const scrollViewRef = useRef<ScrollView>(null);
   const treePosition = useRef(0);
+  const [isManagingTopics, setIsManagingTopics] = useState(false);
   const {
     library,
     isLoading,
@@ -58,6 +61,14 @@ export default function LibraryScreen() {
 
   function saveTreePosition(event: LayoutChangeEvent) {
     treePosition.current = event.nativeEvent.layout.y;
+  }
+
+  async function saveTopicChanges(
+    nodeId: string,
+    update: { title: string; parentId: string | null },
+  ) {
+    await updateKnowledgeTopic(nodeId, update);
+    await refresh();
   }
 
   return (
@@ -189,7 +200,26 @@ export default function LibraryScreen() {
               graph={graph}
               onOpenDiscovery={openDiscovery}
             />
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setIsManagingTopics(true)}
+              style={({ pressed }) => [
+                styles.manageTopicsButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Ionicons color={theme.colors.primary} name="options-outline" size={19} />
+              <Text style={styles.manageTopicsText}>{t("library.manageTopics")}</Text>
+            </Pressable>
           </View>
+
+          <TopicManagementModal
+            graph={graph}
+            onClose={() => setIsManagingTopics(false)}
+            onSave={saveTopicChanges}
+            visible={isManagingTopics}
+          />
 
           <View style={styles.generatedCard}>
             <Ionicons
@@ -434,5 +464,23 @@ const styles = StyleSheet.create({
   generatedText: {
     ...theme.typography.caption,
     color: theme.colors.textSecondary,
+  },
+  manageTopicsButton: {
+    alignItems: "center",
+    alignSelf: "center",
+    borderColor: theme.colors.primary,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+    justifyContent: "center",
+    marginTop: theme.spacing.xl,
+    minHeight: 48,
+    paddingHorizontal: theme.spacing.xl,
+  },
+  manageTopicsText: {
+    ...theme.typography.body,
+    color: theme.colors.primary,
+    fontWeight: "700",
   },
 });

@@ -7,7 +7,8 @@
     "start": "tsx src/server.ts",
     "typecheck": "tsc --noEmit",
     "test:library": "tsx src/scripts/test-library-builder.ts",
-    "test:content-fetcher": "tsx --test src/scripts/test-content-fetcher.ts"
+    "test:content-fetcher": "tsx --test src/scripts/test-content-fetcher.ts",
+    "test:knowledge-overrides": "tsx --test src/scripts/test-knowledge-graph-overrides.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

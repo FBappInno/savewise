@@ -21,6 +21,7 @@ import {
   updateDiscovery,
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
+import { updateKnowledgeGraphNode } from "./services/knowledge/knowledge-graph-overrides";
 import { ContentFetchError } from "./types/content-fetch-error";
 import {
   analyzeSecondBrain,
@@ -123,6 +124,7 @@ const DiscoveryIdSchema = z
 const DiscoveryUpdateSchema = z.object({
   title: z.string().trim().min(3).max(120),
   summary: z.string().trim().max(420),
+  language: z.enum(["de", "en", "fr", "it", "es"]).optional(),
   classification: z.object({
     primaryCategory: z.enum([
       "technology", "finance", "business", "science", "health",
@@ -140,6 +142,11 @@ const LimitQuerySchema = z.coerce
   .min(1)
   .max(100)
   .default(20);
+
+const KnowledgeTopicUpdateSchema = z.object({
+  title: z.string().trim().min(2).max(80),
+  parentId: z.string().trim().min(1).nullable(),
+});
 
 app.get(
   "/health",
@@ -540,6 +547,38 @@ app.post(
           error instanceof Error
             ? error.message
             : "Knowledge library rebuild failed.",
+      });
+    }
+  },
+);
+
+app.patch(
+  "/api/knowledge/topics/:nodeId",
+  async (request, response) => {
+    const parsedNodeId = z.string().trim().min(1).safeParse(request.params.nodeId);
+    const parsedUpdate = KnowledgeTopicUpdateSchema.safeParse(request.body);
+    if (!parsedNodeId.success || !parsedUpdate.success) {
+      response.status(400).json({ error: "Valid topic changes are required." });
+      return;
+    }
+
+    try {
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (!library.graph) {
+        response.status(503).json({ error: "Knowledge graph unavailable." });
+        return;
+      }
+
+      const graph = await updateKnowledgeGraphNode(
+        library.discoveries,
+        library.graph,
+        parsedNodeId.data,
+        parsedUpdate.data,
+      );
+      response.json({ graph });
+    } catch (error) {
+      response.status(400).json({
+        error: error instanceof Error ? error.message : "Topic could not be updated.",
       });
     }
   },

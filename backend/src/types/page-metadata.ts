@@ -7,6 +7,9 @@ export type PageMetadata = {
   siteName?: string;
   publishedAt?: string;
   extractedText?: string;
+  mediaType?: "video";
+  videoPlatform?: string;
+  videoTranscript?: string;
   contentType: "html" | "pdf";
   fetchStrategy: "standard" | "browser-compatible";
 };

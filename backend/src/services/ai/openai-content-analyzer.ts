@@ -88,12 +88,51 @@ export async function analyzeContent(
     );
   }
 
+  const metadataInput = JSON.stringify({
+    allowedPrimaryCategories: categories,
+    preferredLanguage: preferredLanguage ?? null,
+
+    metadata: {
+      url: metadata.url,
+      title: metadata.title,
+      description: metadata.description ?? null,
+      author: metadata.author ?? null,
+      siteName: metadata.siteName ?? null,
+      publishedAt: metadata.publishedAt ?? null,
+      contentType: metadata.contentType,
+      mediaType: metadata.mediaType ?? null,
+      videoPlatform: metadata.videoPlatform ?? null,
+      videoTranscript: metadata.videoTranscript?.slice(0, 12_000) ?? null,
+      extractedText: metadata.extractedText?.slice(0, 12_000) ?? null,
+    },
+  });
+
+  const input = metadata.mediaType === "video" && metadata.thumbnailUrl
+    ? [{
+        role: "user" as const,
+        content: [
+          {
+            type: "input_text" as const,
+            text: metadataInput,
+          },
+          {
+            type: "input_image" as const,
+            image_url: metadata.thumbnailUrl,
+            detail: "low" as const,
+          },
+        ],
+      }]
+    : metadataInput;
+
   const response = await openai.responses.parse({
     model: "gpt-4.1-mini",
 
     instructions: [
       "You are the knowledge organization engine for SaveWise.",
       "Analyze saved online content using only the provided metadata and extracted text.",
+      "For video links, combine the creator caption, embedded transcript and visible thumbnail evidence.",
+      "Never claim to have watched motion or heard audio when only a thumbnail or caption is supplied.",
+      "If video evidence is sparse, describe only what is supported and lower confidence.",
       "Do not invent information that is not supported by the metadata.",
       "Create a clear and factual improved title.",
       "Write a compact summary with at most two short sentences and roughly 55 words.",
@@ -110,30 +149,11 @@ export async function analyzeContent(
       "Avoid using the website or platform name as a topic.",
       "Confidence must represent how strongly the supplied metadata supports the classification.",
       preferredLanguage
-        ? `Write the improved title and summary in ${languageName(preferredLanguage)}.`
+        ? `Write the improved title, summary, hierarchy labels and keywords exclusively in ${languageName(preferredLanguage)}. Set language to '${preferredLanguage}'.`
         : "Preserve the dominant language of the content.",
     ].join("\n"),
 
-    input: JSON.stringify({
-      allowedPrimaryCategories: categories,
-      preferredLanguage: preferredLanguage ?? null,
-
-      metadata: {
-        url: metadata.url,
-        title: metadata.title,
-        description:
-          metadata.description ?? null,
-        author:
-          metadata.author ?? null,
-        siteName:
-          metadata.siteName ?? null,
-        publishedAt:
-          metadata.publishedAt ?? null,
-        contentType: metadata.contentType,
-        extractedText:
-          metadata.extractedText?.slice(0, 12_000) ?? null,
-      },
-    }),
+    input,
 
     text: {
       format: zodTextFormat(
@@ -149,7 +169,10 @@ export async function analyzeContent(
     );
   }
 
-  return response.output_parsed;
+  return {
+    ...response.output_parsed,
+    language: preferredLanguage ?? response.output_parsed.language,
+  };
 }
 
 function languageName(language: "de" | "en" | "fr" | "it" | "es"): string {

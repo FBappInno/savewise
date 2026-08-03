@@ -5,11 +5,13 @@ import type {
   DiscoverySource,
   KnowledgeAnswer,
   KnowledgeLibrary,
+  KnowledgeGraph,
   ResearchCandidateStatus,
   ResearchState,
   SecondBrainOverview,
 } from "@savewise/shared";
 import { loadAppSettings } from "@/services/settings-storage";
+import { getLocales } from "expo-localization";
 
 export type KnowledgeUpdate = {
   generatedAt: string;
@@ -242,14 +244,31 @@ export async function importContent(
 
       body: JSON.stringify({
         url,
-        preferredLanguage:
-          settings.language.input === "auto"
-            ? undefined
-            : settings.language.input,
+        preferredLanguage: resolveAnalysisLanguage(settings),
       }),
     },
     90_000,
   );
+}
+
+function resolveAnalysisLanguage(
+  settings: Awaited<ReturnType<typeof loadAppSettings>>,
+): "de" | "en" | "fr" | "it" | "es" {
+  if (settings.language.input !== "auto") {
+    return settings.language.input;
+  }
+
+  if (settings.language.display !== "system") {
+    return settings.language.display;
+  }
+
+  const deviceLanguage = getLocales()[0]?.languageCode;
+  return deviceLanguage === "de" ||
+    deviceLanguage === "fr" ||
+    deviceLanguage === "it" ||
+    deviceLanguage === "es"
+    ? deviceLanguage
+    : "en";
 }
 
 function disabledAIMessage(
@@ -311,6 +330,20 @@ export function updateDiscovery(
 export function getKnowledgeLibrary(): Promise<KnowledgeLibrary> {
   return apiRequest<KnowledgeLibrary>(
     "/api/knowledge",
+  );
+}
+
+export function updateKnowledgeTopic(
+  nodeId: string,
+  update: { title: string; parentId: string | null },
+): Promise<{ graph: KnowledgeGraph }> {
+  return apiRequest<{ graph: KnowledgeGraph }>(
+    `/api/knowledge/topics/${encodeURIComponent(nodeId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(update),
+    },
+    90_000,
   );
 }
 

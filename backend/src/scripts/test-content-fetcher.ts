@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { parseHtml } from "../utils/metadata-fetcher";
+import { resolveVideoMetadata } from "../utils/video-metadata-resolver";
 
 test("extracts metadata and readable article text", () => {
   const metadata = parseHtml(
@@ -38,4 +39,42 @@ test("resolves relative preview images", () => {
   );
 
   assert.equal(metadata.thumbnailUrl, "https://example.com/preview.jpg");
+});
+
+test("extracts structured video context and transcript", () => {
+  const metadata = parseHtml(
+    `<html><head><title>Generic video page</title></head><body>
+      <script type="application/ld+json">
+        {"@type":"VideoObject","name":"Omega-3 einfach erklärt","description":"Wirkung und Quellen von Omega-3.","transcript":"Omega-3-Fettsäuren kommen unter anderem in Fisch und Algen vor."}
+      </script>
+    </body></html>`,
+    new URL("https://example.com/video/omega-3"),
+  );
+
+  assert.equal(metadata.mediaType, "video");
+  assert.equal(metadata.title, "Omega-3 einfach erklärt");
+  assert.match(metadata.videoTranscript ?? "", /Fisch und Algen/);
+  assert.match(metadata.extractedText ?? "", /Wirkung und Quellen/);
+});
+
+test("loads creator caption and thumbnail from video oEmbed metadata", async () => {
+  const mockFetch: typeof fetch = async () => new Response(JSON.stringify({
+    title: "Drei Übungen für einen gesunden Rücken",
+    author_name: "Physio Kanal",
+    thumbnail_url: "https://cdn.example.com/video-cover.jpg",
+    provider_name: "TikTok",
+  }), {
+    headers: { "content-type": "application/json" },
+    status: 200,
+  });
+
+  const metadata = await resolveVideoMetadata(
+    new URL("https://www.tiktok.com/@physio/video/123"),
+    mockFetch,
+  );
+
+  assert.equal(metadata?.mediaType, "video");
+  assert.equal(metadata?.title, "Drei Übungen für einen gesunden Rücken");
+  assert.equal(metadata?.author, "Physio Kanal");
+  assert.equal(metadata?.thumbnailUrl, "https://cdn.example.com/video-cover.jpg");
 });

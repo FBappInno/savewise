@@ -4,6 +4,7 @@ import { PDFParse } from "pdf-parse";
 import { ContentFetchError } from "../types/content-fetch-error";
 import type { PageMetadata } from "../types/page-metadata";
 import { validatePublicUrl } from "./url-validator";
+import { resolveVideoMetadata } from "./video-metadata-resolver";
 
 const FETCH_TIMEOUT_MS = 15_000;
 const MAX_HTML_BYTES = 1_500_000;
@@ -44,18 +45,37 @@ export async function fetchPageMetadata(
     );
   }
 
-  const standardResponse = await fetchWithTimeout(
-    url,
-    STANDARD_HEADERS,
-  );
+  const videoMetadataPromise = resolveVideoMetadata(url);
 
-  if (standardResponse.status === 403 || standardResponse.status === 406) {
-    standardResponse.body?.cancel().catch(() => undefined);
-    const browserResponse = await fetchWithTimeout(url, BROWSER_HEADERS);
-    return parseResponse(browserResponse, "browser-compatible");
+  let pageMetadata: PageMetadata;
+  try {
+    const standardResponse = await fetchWithTimeout(
+      url,
+      STANDARD_HEADERS,
+    );
+
+    if (standardResponse.status === 403 || standardResponse.status === 406) {
+      standardResponse.body?.cancel().catch(() => undefined);
+      const browserResponse = await fetchWithTimeout(url, BROWSER_HEADERS);
+      pageMetadata = await parseResponse(browserResponse, "browser-compatible");
+    } else {
+      pageMetadata = await parseResponse(standardResponse, "standard");
+    }
+  } catch (error) {
+    const videoMetadata = await videoMetadataPromise;
+    if (!videoMetadata) throw error;
+    return {
+      url: url.toString(),
+      ...videoMetadata,
+      contentType: "html",
+      fetchStrategy: "browser-compatible",
+    };
   }
 
-  return parseResponse(standardResponse, "standard");
+  const videoMetadata = await videoMetadataPromise;
+  return videoMetadata
+    ? mergeVideoMetadata(pageMetadata, videoMetadata)
+    : pageMetadata;
 }
 
 async function fetchWithTimeout(
@@ -172,6 +192,7 @@ export function parseHtml(
     $('meta[property="og:site_name"]').attr("content"),
     finalUrl.hostname.replace(/^www\./, ""),
   );
+  const structuredVideo = extractStructuredVideo($);
 
   $("script,style,noscript,svg,nav,footer,form,dialog").remove();
   const contentRoot = $("article").first().length
@@ -194,16 +215,89 @@ export function parseHtml(
 
   return {
     url: finalUrl.toString(),
-    title: title ?? "Untitled content",
-    description,
+    title: firstValue(structuredVideo.title, title) ?? "Untitled content",
+    description: firstValue(structuredVideo.description, description),
     author,
     thumbnailUrl: toAbsoluteUrl(thumbnailValue, finalUrl),
     siteName,
     publishedAt,
-    extractedText: extractedText || undefined,
+    extractedText: [
+      structuredVideo.transcript,
+      structuredVideo.description,
+      extractedText,
+    ].filter(Boolean).join("\n").slice(0, MAX_EXTRACTED_TEXT_LENGTH) || undefined,
+    mediaType: structuredVideo.isVideo ? "video" : undefined,
+    videoTranscript: structuredVideo.transcript,
     contentType: "html",
     fetchStrategy,
   };
+}
+
+function mergeVideoMetadata(
+  page: PageMetadata,
+  video: Awaited<ReturnType<typeof resolveVideoMetadata>> & object,
+): PageMetadata {
+  const pageTitleIsGeneric = /^(tiktok|instagram|youtube)(\s*-.*)?$/i.test(page.title);
+  const extractedText = [
+    video.extractedText,
+    page.videoTranscript,
+    page.extractedText,
+  ].filter(Boolean).join("\n").slice(0, MAX_EXTRACTED_TEXT_LENGTH);
+
+  return {
+    ...page,
+    title: pageTitleIsGeneric ? video.title : firstValue(video.title, page.title)!,
+    description: firstValue(video.description, page.description),
+    author: firstValue(video.author, page.author),
+    thumbnailUrl: firstValue(video.thumbnailUrl, page.thumbnailUrl),
+    siteName: firstValue(video.siteName, page.siteName),
+    extractedText: extractedText || undefined,
+    mediaType: "video",
+    videoPlatform: video.videoPlatform,
+  };
+}
+
+function extractStructuredVideo($: cheerio.CheerioAPI): {
+  isVideo: boolean;
+  title?: string;
+  description?: string;
+  transcript?: string;
+} {
+  const candidates: unknown[] = [];
+  $('script[type="application/ld+json"]').each((_index, element) => {
+    try {
+      const parsed = JSON.parse($(element).text()) as unknown;
+      candidates.push(...flattenStructuredData(parsed));
+    } catch {
+      // Ignore malformed structured data and continue with regular metadata.
+    }
+  });
+
+  const video = candidates.find((candidate) => {
+    if (!candidate || typeof candidate !== "object") return false;
+    const type = (candidate as Record<string, unknown>)["@type"];
+    return type === "VideoObject" ||
+      (Array.isArray(type) && type.includes("VideoObject"));
+  }) as Record<string, unknown> | undefined;
+
+  if (!video) return { isVideo: false };
+  return {
+    isVideo: true,
+    title: firstValue(asText(video.name), asText(video.headline)),
+    description: asText(video.description),
+    transcript: firstValue(asText(video.transcript), asText(video.caption)),
+  };
+}
+
+function flattenStructuredData(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value.flatMap(flattenStructuredData);
+  if (!value || typeof value !== "object") return [];
+  const record = value as Record<string, unknown>;
+  return [record, ...flattenStructuredData(record["@graph"])] ;
+}
+
+function asText(value: unknown): string | undefined {
+  return typeof value === "string" ? normalizeText(value) || undefined : undefined;
 }
 
 async function parsePdfResponse(

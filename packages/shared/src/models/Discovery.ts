@@ -66,4 +66,5 @@ export type DiscoveryUpdate = {
   title: string;
   summary: string;
   classification: DiscoveryClassification;
+  language?: "de" | "en" | "fr" | "it" | "es";
 };

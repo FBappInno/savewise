@@ -1,0 +1,15 @@
+[
+  {
+    "node": {
+      "id": "node-node-node-lifestyle-freizeit-extremsport",
+      "title": "Extremsport",
+      "kind": "subtopic",
+      "discoveryIds": [
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ]
+    },
+    "title": "Paragliding",
+    "parent": null,
+    "updatedAt": "2026-08-03T20:27:57.760Z"
+  }
+]

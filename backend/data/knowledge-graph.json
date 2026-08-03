@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-08-03T19:40:56.082Z",
-  "sourceFingerprint": "ff7edf266b0046dbc8e4b276ed57e170c77ffa7bb71562bf82176076a7572f3b",
+  "generatedAt": "2026-08-03T20:27:57.759Z",
+  "sourceFingerprint": "3961f7dc1f49655aadc9bac13020cbbe778cec5bc8152204c95426e7ceec4a99",
   "language": "de",
-  "summary": "Die aktualisierte Wissensbasis des Nutzers umfasst sieben Hauptdomänen: \"Sicherheits- und Risikomanagement\" mit Fokus auf den menschlichen Faktor als Hauptursache von Arbeits-, Industrie- und Cybersicherheitsvorfällen, sowie auf statistische Risikoanalysen; \"Ernährung\" mit Schwerpunkten auf gesunden sowie ungesunden Kohlenhydraten, Proteinen und ihrer Rolle für Gesundheit und Gewichtsmanagement; \"Lifestyle\" mit Themen rund ums Kochen, insbesondere Heißluftfritteuse-Rezepte, und Haustiere mit Fokus auf Katzenverhalten und Kommunikation; \"Wissenschaft: Umwelt- und Erdwissenschaften\" mit Schwerpunkt auf Klimawandel und historischer Klimaentwicklung; \"Technologie und Verteidigung\" mit Details zu modernisierten Kampfjets und Anti-Drohnen-Technologien; \"Wirtschaft und internationale Beziehungen\"",
+  "summary": "Die aktualisierte Wissensbasis des Nutzers deckt mehrere Domänen ab: Sicherheits- und Risikomanagement mit Schwerpunkt auf menschlichem Versagen und Arbeitssicherheit sowie Cybersicherheit; Ernährung mit Fokus auf gesunde und ungesunde Kohlenhydrate sowie Proteinzufuhr; Lifestyle mit Themen zu Kochen, insbesondere Heißluftfritteuse-Rezepten, Haustieren und Unterhaltung durch kurze Videoformate (TikTok); Wissenschaft: Umwelt- und Erdwissenschaften mit Schwerpunkt Klimawandel; Technologie und Verteidigung bezüglich moderner Kampfjets zur Drohnenbekämpfung; Wirtschaft und internationale Beziehungen mit EU- und UN-Unterstützung für die Ukraine; Nachrichten und Medien mit Fokus auf Schweizer und internationale Themen. Neue Erkenntnisse vertiefen die Rolle des menschlichen Faktors in Sicherheits",
   "rootNodeIds": [
     "node-safety-and-risk-management",
     "node-nutrition",
     "node-lifestyle",
+    "node-culture",
     "node-science-environmental-and-earth",
     "node-technology-and-defense",
     "node-business-and-international-relations",
@@ -16,7 +17,9 @@
     "node-discover-italy-your-official-guide-to-planning-a-trip-c6267e81-aee0-48bd-95b9-851227b31ea5",
     "node-explore-the-vibrant-beauty-and-adventures-of-croatia-b3878eac-8bfc-429d-8eec-906e5f8ba150",
     "node-balearic-islands-top-tourism-experiences-and-attractions-cceb57b1-9115-4966-9086-d3c2e405482e",
-    "node-travel-guide-to-the-cyclades-islands-in-greece-a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+    "node-travel-guide-to-the-cyclades-islands-in-greece-a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d",
+    "node-node-node-lifestyle-freizeit-extremsport",
+    "node-root-technology"
   ],
   "nodes": [
     {
@@ -211,32 +214,41 @@
       "id": "node-lifestyle",
       "title": "Lifestyle",
       "kind": "domain",
-      "description": "Freizeit, Hobbys und alltägliche Interessen, vor allem Kochen und Haustiere.",
+      "description": "Freizeit, Hobbys und alltägliche Interessen, vor allem Kochen, Haustiere und Unterhaltung durch kurze Videoformate.",
       "parentId": null,
       "childIds": [
         "node-cooking-and-recipes",
-        "node-pets"
+        "node-pets",
+        "node-entertainment",
+        "node-node-lifestyle-freizeit"
       ],
       "discoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3",
         "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
         "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
+        "2e9e5d14-0259-4567-92aa-51ae573ac96c",
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+        "3b471827-69b2-4d22-ad51-f4fa8888e991",
+        "cb37f305-ff8f-4635-bd44-8c6469548484",
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
       ],
       "aliases": [],
       "keywords": [
         "Kochen",
         "Haustiere",
-        "Lebensstil"
+        "Lebensstil",
+        "Unterhaltung",
+        "TikTok"
       ],
-      "confidence": 0.85
+      "confidence": 0.9
     },
     {
       "id": "node-cooking-and-recipes",
       "title": "Kochen und Rezepte",
       "kind": "topic",
-      "description": "Rezepte und Kochideen mit Schwerpunkt auf schnellen, leckeren Gerichten und der Nutzung von Heißluftfritteusen.",
+      "description": "Rezepte und Kochideen mit Fokus auf schnellen, leckeren Gerichten und der Nutzung von Heißluftfritteusen.",
       "parentId": "node-lifestyle",
       "childIds": [
         "node-airfryer-recipes"
@@ -260,7 +272,7 @@
       "id": "node-airfryer-recipes",
       "title": "Heißluftfritteuse Rezepte",
       "kind": "subtopic",
-      "description": "Spezielle Kochrezepte für die Zubereitung mit der Heißluftfritteuse, inklusive schneller Gerichte und z.B. Eizubereitung.",
+      "description": "Spezielle Kochrezepte für die Zubereitung mit der Heißluftfritteuse, inklusive schneller Gerichte und Beispielrezept für Ei.",
       "parentId": "node-cooking-and-recipes",
       "childIds": [
         "node-quick-meals",
@@ -303,7 +315,7 @@
       "id": "node-egg-preparation-airfryer",
       "title": "Ei im Airfryer zubereiten",
       "kind": "concept",
-      "description": "Anleitung und Rezept für das optimale Kochen von Eiern in der Heißluftfritteuse, vorgestellt von Steffen Henssler.",
+      "description": "Anleitung und Rezept für die optimale Zubereitung von Eiern in der Heißluftfritteuse, vorgestellt von Steffen Henssler.",
       "parentId": "node-airfryer-recipes",
       "childIds": [],
       "discoveryIds": [
@@ -322,7 +334,7 @@
       "id": "node-pets",
       "title": "Haustiere",
       "kind": "topic",
-      "description": "Informationen über Haustiere, mit Schwerpunkt auf Katzen, Kätzchen und deren Verhalten und Kommunikation.",
+      "description": "Informationen über Haustiere mit Schwerpunkt auf Katzen, Kätzchen und deren Verhalten und Kommunikation.",
       "parentId": "node-lifestyle",
       "childIds": [
         "node-cats"
@@ -330,7 +342,8 @@
       "discoveryIds": [
         "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
         "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
+        "2e9e5d14-0259-4567-92aa-51ae573ac96c",
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
       ],
       "aliases": [],
       "keywords": [
@@ -348,12 +361,14 @@
       "description": "Verhalten und Lautäußerungen von Katzen und Kätzchen mit Fokus auf spielerisches Erkunden und Kommunikation.",
       "parentId": "node-pets",
       "childIds": [
-        "node-kitten-behavior"
+        "node-kitten-behavior",
+        "node-node-cats-schlafverhalten"
       ],
       "discoveryIds": [
         "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
         "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
+        "2e9e5d14-0259-4567-92aa-51ae573ac96c",
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
       ],
       "aliases": [],
       "keywords": [
@@ -385,6 +400,132 @@
       "confidence": 0.85
     },
     {
+      "id": "node-entertainment",
+      "title": "Unterhaltung",
+      "kind": "topic",
+      "description": "Kurze, unterhaltsame Videoformate, insbesondere auf TikTok, die schnelle Freude und Interaktion bieten.",
+      "parentId": "node-lifestyle",
+      "childIds": [
+        "node-short-videos"
+      ],
+      "discoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ],
+      "aliases": [],
+      "keywords": [
+        "TikTok",
+        "kurze Videos",
+        "soziale Medien",
+        "Unterhaltung"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-short-videos",
+      "title": "Kurze Videos",
+      "kind": "subtopic",
+      "description": "Schnelle und unterhaltsame Videoclips, typisch für Plattformen wie TikTok, die Nutzer schnell ansprechen und unterhalten.",
+      "parentId": "node-entertainment",
+      "childIds": [
+        "node-digital-engagement"
+      ],
+      "discoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ],
+      "aliases": [
+        "Short-Form Videos"
+      ],
+      "keywords": [
+        "TikTok",
+        "Video",
+        "Unterhaltung",
+        "soziale Medien",
+        "kurze Clips"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-digital-engagement",
+      "title": "Digitale Nutzerinteraktion",
+      "kind": "concept",
+      "description": "Die dynamische Nutzung und Interaktion in sozialen Medien, z.B. durch TikTok-Videos, die Kreativität und soziales Engagement fördern.",
+      "parentId": "node-short-videos",
+      "childIds": [],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ],
+      "aliases": [],
+      "keywords": [
+        "TikTok",
+        "Kurzvideos",
+        "soziale Medien",
+        "Engagement"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-culture",
+      "title": "Kultur",
+      "kind": "domain",
+      "description": "Breiter Bereich zu kulturellen Phänomenen mit Fokus auf soziale Medien als Teil moderner Kultur.",
+      "parentId": null,
+      "childIds": [
+        "node-social-media"
+      ],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Soziale Medien",
+        "Videoformate",
+        "Digitale Kultur"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-social-media",
+      "title": "Soziale Medien",
+      "kind": "topic",
+      "description": "Digitale Plattformen für Nutzerinteraktion und Content-Sharing, mit Schwerpunkt auf kurzen Videoinhalten.",
+      "parentId": "node-culture",
+      "childIds": [
+        "node-video-content"
+      ],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ],
+      "aliases": [],
+      "keywords": [
+        "TikTok",
+        "Video-Content",
+        "soziale Interaktion"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-video-content",
+      "title": "Video-Content",
+      "kind": "subtopic",
+      "description": "Digitale, kurze und unterhaltsame Videos zur schnellen Nutzeransprache, typisch für Plattformen wie TikTok.",
+      "parentId": "node-social-media",
+      "childIds": [],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Kurzvideos",
+        "soziale Medien"
+      ],
+      "confidence": 0.7
+    },
+    {
       "id": "node-science-environmental-and-earth",
       "title": "Wissenschaft: Umwelt- und Erdwissenschaften",
       "kind": "domain",
@@ -395,7 +536,8 @@
       ],
       "discoveryIds": [
         "39a36c46-5aa6-4111-a75f-adba6f78262f",
-        "89df7ae0-1f83-497c-8066-bb39090b8a46"
+        "89df7ae0-1f83-497c-8066-bb39090b8a46",
+        "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
       ],
       "aliases": [
         "Umweltwissenschaften",
@@ -678,6 +820,317 @@
         "travel ideas"
       ],
       "confidence": 0.9
+    },
+    {
+      "id": "node-node-lifestyle-freizeit",
+      "title": "Freizeit",
+      "kind": "topic",
+      "description": "Knowledge about Freizeit.",
+      "parentId": "node-lifestyle",
+      "childIds": [],
+      "discoveryIds": [
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-lifestyle-freizeit-extremsport",
+      "title": "Paragliding",
+      "kind": "subtopic",
+      "description": "Knowledge about Extremsport.",
+      "parentId": null,
+      "childIds": [
+        "node-node-node-node-lifestyle-freizeit-extremsport-paragleiten"
+      ],
+      "discoveryIds": [
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-node-lifestyle-freizeit-extremsport-paragleiten",
+      "title": "Paragleiten",
+      "kind": "concept",
+      "description": "Knowledge about Paragleiten.",
+      "parentId": "node-node-node-lifestyle-freizeit-extremsport",
+      "childIds": [
+        "node-node-node-node-node-lifestyle-freizeit-extremsport-paragleiten-gleitschirmfliegen"
+      ],
+      "discoveryIds": [
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-node-node-lifestyle-freizeit-extremsport-paragleiten-gleitschirmfliegen",
+      "title": "Gleitschirmfliegen",
+      "kind": "concept",
+      "description": "Knowledge about Gleitschirmfliegen.",
+      "parentId": "node-node-node-node-lifestyle-freizeit-extremsport-paragleiten",
+      "childIds": [
+        "node-node-node-node-node-node-lifestyle-freizeit-extremsport-paragleiten-gleitschirmfliegen-alpensport"
+      ],
+      "discoveryIds": [
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-node-node-node-lifestyle-freizeit-extremsport-paragleiten-gleitschirmfliegen-alpensport",
+      "title": "Alpensport",
+      "kind": "concept",
+      "description": "Paragleiten in Mayrhofen vermittelt das intensive Gefühl des Fliegens, das sich anfühlt, als würde man abstürzen.  Dieses Video vermittelt eine eindrucksvolle Perspektive auf das Gleitschirmfliegen in den Alpen.",
+      "parentId": "node-node-node-node-node-lifestyle-freizeit-extremsport-paragleiten-gleitschirmfliegen",
+      "childIds": [],
+      "discoveryIds": [
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Paragleiten",
+        "Mayrhofen",
+        "Gleitschirmfliegen",
+        "Extremsport",
+        "Alpen",
+        "Freizeit",
+        "Flugerlebnis"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-root-technology",
+      "title": "Technology",
+      "kind": "domain",
+      "description": "Knowledge about Technology.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-technology-verteidigungstechnologie",
+        "node-node-root-technology-militarische-technologie"
+      ],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c",
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-technology-verteidigungstechnologie",
+      "title": "Verteidigungstechnologie",
+      "kind": "topic",
+      "description": "Knowledge about Verteidigungstechnologie.",
+      "parentId": "node-root-technology",
+      "childIds": [
+        "node-node-node-root-technology-verteidigungstechnologie-drohnen"
+      ],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-technology-verteidigungstechnologie-drohnen",
+      "title": "Drohnen",
+      "kind": "subtopic",
+      "description": "Knowledge about Drohnen.",
+      "parentId": "node-node-root-technology-verteidigungstechnologie",
+      "childIds": [
+        "node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen"
+      ],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen",
+      "title": "Abfangdrohnen",
+      "kind": "concept",
+      "description": "Knowledge about Abfangdrohnen.",
+      "parentId": "node-node-node-root-technology-verteidigungstechnologie-drohnen",
+      "childIds": [
+        "node-node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen-autonome-systeme"
+      ],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen-autonome-systeme",
+      "title": "Autonome Systeme",
+      "kind": "concept",
+      "description": "Knowledge about Autonome Systeme.",
+      "parentId": "node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen",
+      "childIds": [
+        "node-node-node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen-autonome-systeme-luftverteidigung"
+      ],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen-autonome-systeme-luftverteidigung",
+      "title": "Luftverteidigung",
+      "kind": "concept",
+      "description": "Ukraine hat eine neue Abfangdrohne entwickelt, die automatisch feindliche Luftziele verfolgt und angreift, was die Luftverteidigung des Landes stärkt.  Diese technologische Entwicklung unterstreicht die fortschrittliche Nutzung unbemannter Systeme im modernen Drohnenkrieg und zieht internationale Aufmerksamkeit auf sich.",
+      "parentId": "node-node-node-node-node-root-technology-verteidigungstechnologie-drohnen-abfangdrohnen-autonome-systeme",
+      "childIds": [],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Ukraine",
+        "Abfangdrohne",
+        "autonom",
+        "Luftabwehr",
+        "Drohnenkrieg",
+        "unbemannte Systeme",
+        "technologische Entwicklung"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-technology-militarische-technologie",
+      "title": "militärische Technologie",
+      "kind": "topic",
+      "description": "Knowledge about militärische Technologie.",
+      "parentId": "node-root-technology",
+      "childIds": [
+        "node-node-node-root-technology-militarische-technologie-drohnen"
+      ],
+      "discoveryIds": [
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-node-node-root-technology-militarische-technologie-drohnen",
+      "title": "Drohnen",
+      "kind": "subtopic",
+      "description": "Knowledge about Drohnen.",
+      "parentId": "node-node-root-technology-militarische-technologie",
+      "childIds": [
+        "node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge"
+      ],
+      "discoveryIds": [
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge",
+      "title": "unbemannte Luftfahrzeuge",
+      "kind": "concept",
+      "description": "Knowledge about unbemannte Luftfahrzeuge.",
+      "parentId": "node-node-node-root-technology-militarische-technologie-drohnen",
+      "childIds": [
+        "node-node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge-militarische-anwendung"
+      ],
+      "discoveryIds": [
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge-militarische-anwendung",
+      "title": "militärische Anwendung",
+      "kind": "concept",
+      "description": "Knowledge about militärische Anwendung.",
+      "parentId": "node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge",
+      "childIds": [
+        "node-node-node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge-militarische-anwendung-fpv-drone"
+      ],
+      "discoveryIds": [
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-node-node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge-militarische-anwendung-fpv-drone",
+      "title": "FPV-Drone",
+      "kind": "concept",
+      "description": "Ein ukrainischer Soldat bereitet eine Drohne für den Einsatz vor, was die Bedeutung unbemannter Luftfahrtsysteme in militärischen Konflikten unterstreicht.  Solche Drohnen ermöglichen gezielte Aktionen und unterstützen die Truppen vor Ort effektiv.",
+      "parentId": "node-node-node-node-node-root-technology-militarische-technologie-drohnen-unbemannte-luftfahrzeuge-militarische-anwendung",
+      "childIds": [],
+      "discoveryIds": [
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Ukraine",
+        "Drohnen",
+        "Militär",
+        "FPV",
+        "unbemannte Luftfahrzeuge",
+        "Kampfunterstützung",
+        "FighterCombatant"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-node-cats-schlafverhalten",
+      "title": "Schlafverhalten",
+      "kind": "concept",
+      "description": "Knowledge about Schlafverhalten.",
+      "parentId": "node-cats",
+      "childIds": [
+        "node-node-node-cats-schlafverhalten-tierliebe"
+      ],
+      "discoveryIds": [
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-cats-schlafverhalten-tierliebe",
+      "title": "Tierliebe",
+      "kind": "concept",
+      "description": "Eine gemütliche Katze ruht entspannt auf einem weichen Bett und zeigt eine typische Schlafposition.  Das Video zeigt liebevolle Momente zwischen Tier und Mensch.",
+      "parentId": "node-node-cats-schlafverhalten",
+      "childIds": [],
+      "discoveryIds": [
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Katze",
+        "Schlaf",
+        "Kuscheln",
+        "Haustier",
+        "Entspannung",
+        "Tierliebe"
+      ],
+      "confidence": 0.9
     }
   ],
   "relations": [
@@ -687,7 +1140,7 @@
       "targetId": "node-safety-and-risk-management",
       "kind": "part-of",
       "strength": 0.98,
-      "reason": "Menschliches Versagen ist Kernaspekt im Sicherheits- und Risikomanagement.",
+      "reason": "Menschliches Versagen ist zentraler Risikofaktor im Sicherheitsmanagement.",
       "evidenceDiscoveryIds": [
         "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
         "1f4e8525-9de2-432d-a284-06faaa910206"
@@ -699,7 +1152,7 @@
       "targetId": "node-human-error",
       "kind": "part-of",
       "strength": 0.97,
-      "reason": "Arbeitssicherheit beschäftigt sich mit dem menschlichen Faktor und organisatorischen Fehlern.",
+      "reason": "Arbeitssicherheit fokussiert auf menschliche Fehler und Organisation.",
       "evidenceDiscoveryIds": [
         "1f4e8525-9de2-432d-a284-06faaa910206"
       ]
@@ -710,7 +1163,7 @@
       "targetId": "node-airfryer-recipes",
       "kind": "part-of",
       "strength": 0.95,
-      "reason": "Rezept für die Zubereitung von Eiern im Airfryer ist Teil der Airfryer-Küche.",
+      "reason": "Ei-Rezept ist spezifischer Teil der Airfryer-Küche.",
       "evidenceDiscoveryIds": [
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
       ]
@@ -721,7 +1174,7 @@
       "targetId": "node-science-environmental-and-earth",
       "kind": "part-of",
       "strength": 0.95,
-      "reason": "Klimawandel ist zentrale Forschungsrichtung der Umwelt- und Erdwissenschaften.",
+      "reason": "Klimawandel ist Kernbereich der Umwelt- und Erdwissenschaften.",
       "evidenceDiscoveryIds": [
         "39a36c46-5aa6-4111-a75f-adba6f78262f",
         "89df7ae0-1f83-497c-8066-bb39090b8a46"
@@ -733,7 +1186,7 @@
       "targetId": "node-technology-and-defense",
       "kind": "part-of",
       "strength": 0.95,
-      "reason": "Militärische Luftfahrt ist Kernbereich in Technologie und Verteidigung.",
+      "reason": "Militärische Luftfahrt ist Kernbereich der Technologie und Verteidigung.",
       "evidenceDiscoveryIds": [
         "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
       ]
@@ -744,7 +1197,7 @@
       "targetId": "node-human-error",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Menschliche Faktoren beeinflussen die Cybersicherheit erheblich.",
+      "reason": "Menschliches Verhalten beeinflusst Cybersicherheit wesentlich.",
       "evidenceDiscoveryIds": [
         "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
       ]
@@ -766,7 +1219,7 @@
       "targetId": "node-nutrition",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Proteine gehören zu den zentralen Nährstoffen in der Ernährung.",
+      "reason": "Proteine gehören zu den zentralen Nährstoffen.",
       "evidenceDiscoveryIds": [
         "a56b02d3-e199-4393-8fcb-c6f5596f8122"
       ]
@@ -777,7 +1230,7 @@
       "targetId": "node-lifestyle",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Kochen ist ein Kernbereich des persönlichen Lifestyles und Freizeitgestaltung.",
+      "reason": "Kochen ist wichtiger Lifestyle-Aspekt.",
       "evidenceDiscoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
@@ -789,7 +1242,7 @@
       "targetId": "node-cooking-and-recipes",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Spezialisierte Rezepte rund um die Heißluftfritteuse sind Teil des Kochens.",
+      "reason": "Airfryer-Rezepte sind Teilbereich vom Kochen.",
       "evidenceDiscoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
@@ -801,7 +1254,7 @@
       "targetId": "node-business-and-international-relations",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Internationale Unterstützung und Konflikte sind Bestandteil der Wirtschaft und internationalen Beziehungen.",
+      "reason": "Internationale Unterstützung und Konflikte sind Teil von Wirtschaft und internationalen Beziehungen.",
       "evidenceDiscoveryIds": [
         "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
         "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
@@ -813,7 +1266,7 @@
       "targetId": "node-airfryer-recipes",
       "kind": "part-of",
       "strength": 0.85,
-      "reason": "Schnelle Gerichte sind häufige Beispiele für Airfryer-Rezepte.",
+      "reason": "Schnelle Gerichte sind Beispiele für Airfryer-Rezepte.",
       "evidenceDiscoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f"
       ]
@@ -824,7 +1277,7 @@
       "targetId": "node-lifestyle",
       "kind": "part-of",
       "strength": 0.85,
-      "reason": "Haustiere sind zentraler Aspekt im Bereich Lifestyle.",
+      "reason": "Haustiere sind zentral für Lifestyle-Themen.",
       "evidenceDiscoveryIds": [
         "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
         "3048920b-c274-42f8-8025-5360a982ab4c",
@@ -837,7 +1290,7 @@
       "targetId": "node-pets",
       "kind": "part-of",
       "strength": 0.85,
-      "reason": "Katzen sind eine bedeutsame Haustiergruppe.",
+      "reason": "Katzen sind eine wichtige Haustierkategorie.",
       "evidenceDiscoveryIds": [
         "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
         "3048920b-c274-42f8-8025-5360a982ab4c",
@@ -850,7 +1303,7 @@
       "targetId": "node-cats",
       "kind": "part-of",
       "strength": 0.85,
-      "reason": "Kätzchenverhalten ist spezieller Fokus innerhalb der Katzenkunde.",
+      "reason": "Kätzchen-Verhalten ist Spezialgebiet innerhalb Katzenkunde.",
       "evidenceDiscoveryIds": [
         "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
         "3048920b-c274-42f8-8025-5360a982ab4c",
@@ -863,9 +1316,66 @@
       "targetId": "node-safety-and-risk-management",
       "kind": "part-of",
       "strength": 0.75,
-      "reason": "Statistik und Risikoanalyse sind integraler Bestandteil des Risikomanagements.",
+      "reason": "Statistische Risikoanalyse ist Bestandteil des Risikomanagements.",
       "evidenceDiscoveryIds": [
         "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+      ]
+    },
+    {
+      "id": "relation-node-entertainment-node-lifestyle-part-of",
+      "sourceId": "node-entertainment",
+      "targetId": "node-lifestyle",
+      "kind": "part-of",
+      "strength": 0.75,
+      "reason": "Kurze Unterhaltungsvideos sind Teil des Lifestyles.",
+      "evidenceDiscoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
+      ]
+    },
+    {
+      "id": "relation-node-short-videos-node-entertainment-part-of",
+      "sourceId": "node-short-videos",
+      "targetId": "node-entertainment",
+      "kind": "part-of",
+      "strength": 0.7,
+      "reason": "Kurze Videos sind ein Unterthema der Unterhaltung.",
+      "evidenceDiscoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
+      ]
+    },
+    {
+      "id": "relation-node-digital-engagement-node-short-videos-part-of",
+      "sourceId": "node-digital-engagement",
+      "targetId": "node-short-videos",
+      "kind": "part-of",
+      "strength": 0.7,
+      "reason": "Digitale Interaktion ist Bestandteil kurzer Videoformate.",
+      "evidenceDiscoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ]
+    },
+    {
+      "id": "relation-node-video-content-node-social-media-part-of",
+      "sourceId": "node-video-content",
+      "targetId": "node-social-media",
+      "kind": "part-of",
+      "strength": 0.7,
+      "reason": "Videoinhalte sind ein Teilbereich sozialer Medien.",
+      "evidenceDiscoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ]
+    },
+    {
+      "id": "relation-node-social-media-node-culture-part-of",
+      "sourceId": "node-social-media",
+      "targetId": "node-culture",
+      "kind": "part-of",
+      "strength": 0.7,
+      "reason": "Soziale Medien sind Teil moderner Kultur.",
+      "evidenceDiscoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
       ]
     }
   ]

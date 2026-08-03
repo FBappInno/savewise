@@ -10,6 +10,7 @@ import {
   saveKnowledgeGraph,
 } from "../../persistence/knowledge/knowledge-graph-store";
 import { buildKnowledgeGraphWithAI } from "../ai/openai-knowledge-architect";
+import { applyKnowledgeGraphOverrides } from "./knowledge-graph-overrides";
 
 export type KnowledgeGraphBuildOptions = {
   forceRebuild?: boolean;
@@ -36,7 +37,7 @@ export async function getOrBuildKnowledgeGraph(
     storedGraph.sourceFingerprint ===
       sourceFingerprint
   ) {
-    return storedGraph;
+    return applyKnowledgeGraphOverrides(storedGraph);
   }
 
   if (!options.forceRebuild) {
@@ -57,13 +58,14 @@ export async function getOrBuildKnowledgeGraph(
   }
 
   try {
-    const graph =
+    const generatedGraph =
       await buildKnowledgeGraphWithAI(
         discoveries,
         sourceFingerprint,
         storedGraph,
       );
 
+    const graph = await applyKnowledgeGraphOverrides(generatedGraph);
     await saveKnowledgeGraph(graph);
 
     return graph;
@@ -78,7 +80,7 @@ export async function getOrBuildKnowledgeGraph(
         "Using the previously stored knowledge graph.",
       );
 
-      return storedGraph;
+      return applyKnowledgeGraphOverrides(storedGraph);
     }
 
     return null;
