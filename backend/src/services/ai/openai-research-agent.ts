@@ -11,11 +11,16 @@ import type {
   ResearchInterest,
 } from "@savewise/shared";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 120_000,
-  maxRetries: 1,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  openai ??= new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    timeout: 75_000,
+    maxRetries: 0,
+  });
+  return openai;
+}
 
 const ScoreSchema = z.number().min(0).max(1);
 
@@ -40,9 +45,15 @@ const CandidateAnalysisSchema = z.object({
       "study",
       "paper",
       "video",
+      "podcast",
+      "news",
+      "github",
       "startup",
       "company",
+      "product",
       "technology",
+      "whitepaper",
+      "documentation",
       "article",
       "other",
     ]),
@@ -58,6 +69,11 @@ const CandidateAnalysisSchema = z.object({
       gapCoverage: ScoreSchema,
       overall: ScoreSchema,
     }),
+    relevance: z.enum([
+      "relevant",
+      "partially-relevant",
+      "not-relevant",
+    ]),
     decisionReason: z.string().min(10).max(800),
     impact: z.enum([
       "confirms",
@@ -73,60 +89,74 @@ const CandidateAnalysisSchema = z.object({
 export async function researchNewKnowledge(
   discoveries: Discovery[],
   graph: KnowledgeGraph,
+  previousInterests: ResearchInterest[] = [],
 ): Promise<{
   interests: ResearchInterest[];
   candidates: ResearchCandidate[];
+  discardedCount: number;
 }> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured.");
   }
 
   if (discoveries.length === 0) {
-    return { interests: [], candidates: [] };
+    return { interests: [], candidates: [], discardedCount: 0 };
   }
 
-  const interestResponse = await openai.responses.parse({
-    model: "gpt-4.1-mini",
-    max_output_tokens: 5_000,
-    instructions: [
-      "You are the interest and knowledge-gap analyst for SaveWise.",
-      "Infer the user's current interests exclusively from the supplied knowledge graph and discoveries; never use a fixed topic list.",
-      "Cover the full current library and identify 4 to 8 meaningful broad interests, including recently added domains when supported by discoveries.",
-      "Detect adjacent knowledge gaps and prioritize research that closes those gaps.",
-      "Every interest must be directly supported by supplied graph nodes and discovery counts.",
-      "Do not introduce a domain that is absent from the supplied knowledge.",
-      "Use only supplied graph node IDs.",
-      "Write in the dominant language of the knowledge graph.",
-    ].join("\n"),
-    input: JSON.stringify({
-      now: new Date().toISOString(),
-      graph: compactGraph(graph),
-      discoveries: compactDiscoveries(discoveries),
-    }),
-    text: {
-      format: zodTextFormat(
-        InterestAnalysisSchema,
-        "savewise_research_interests",
-      ),
-    },
-  });
-
-  if (!interestResponse.output_parsed) {
-    throw new Error("AI returned no interest analysis.");
+  let analyzedInterests = deriveGroundedInterests(previousInterests, graph);
+  if (process.env.OPENAI_INTEREST_REFINEMENT_ENABLED === "true") {
+    try {
+      const interestResponse = await getOpenAI().responses.parse({
+        model: process.env.OPENAI_RESEARCH_MODEL ?? "gpt-5.6-luna",
+        max_output_tokens: 5_000,
+        instructions: [
+          "You are the interest and knowledge-gap analyst for SaveWise.",
+          "Infer the user's current interests exclusively from the supplied knowledge graph and discoveries; never use a fixed topic list.",
+          "Cover the full current library and identify 4 to 8 meaningful broad interests, including recently added domains when supported by discoveries.",
+          "Detect adjacent knowledge gaps and prioritize research that closes those gaps.",
+          "Every interest must be directly supported by supplied graph nodes and discovery counts.",
+          "Do not introduce a domain that is absent from the supplied knowledge.",
+          "Use only supplied graph node IDs.",
+          "Write in the dominant language of the knowledge graph.",
+        ].join("\n"),
+        input: JSON.stringify({
+          now: new Date().toISOString(),
+          graph: compactGraph(graph),
+          discoveries: compactDiscoveries(discoveries),
+          previousInterests,
+        }),
+        text: {
+          format: zodTextFormat(
+            InterestAnalysisSchema,
+            "savewise_research_interests",
+          ),
+        },
+      });
+      if (!interestResponse.output_parsed) {
+        throw new Error("AI returned no interest analysis.");
+      }
+      analyzedInterests = validateInterests(
+        interestResponse.output_parsed.interests,
+        graph,
+      );
+    } catch (error) {
+      console.warn("AI interest refinement failed; using grounded graph analysis:", error);
+    }
   }
 
-  const interests = validateInterests(
-    interestResponse.output_parsed.interests,
-    graph,
+  const interests = enrichInterestTrends(
+    analyzedInterests,
+    previousInterests,
+    graph.language,
   );
-  if (interests.length < 3) {
+  if (interests.length === 0) {
     throw new Error(
       "AI interest analysis was not sufficiently grounded in the knowledge graph.",
     );
   }
   const interestBatches = chunk(interests, 3);
   const batchResults = await Promise.allSettled(
-    interestBatches.map((batch, index) => researchInterestBatch(
+    interestBatches.map((batch, index) => researchInterestBatchWithRetry(
       batch,
       discoveries,
       graph.language,
@@ -142,22 +172,97 @@ export async function researchNewKnowledge(
     );
     throw new Error(`All AI research batches failed: ${reasons.join("; ")}`);
   }
-  const candidates = validateCandidates(
+  const validatedCandidates = validateCandidates(
     candidateResults.flat(),
     interests,
     discoveries,
   );
+  const candidates = validatedCandidates.filter(
+    (candidate) => candidate.relevance !== "not-relevant",
+  );
   const coveredInterestCount = new Set(
     candidates.map((candidate) => candidate.interestId),
   ).size;
-  const requiredInterestCount = Math.min(5, interests.length);
-  if (coveredInterestCount < requiredInterestCount) {
-    throw new Error(
-      `AI research covered ${coveredInterestCount} interests; ${requiredInterestCount} are required.`,
+  if (coveredInterestCount < interests.length) {
+    console.warn(
+      `AI research covered ${coveredInterestCount} of ${interests.length} interests; preserving the qualified partial result.`,
     );
   }
 
-  return { interests, candidates };
+  return {
+    interests,
+    candidates,
+    discardedCount: validatedCandidates.length - candidates.length,
+  };
+}
+
+export function deriveGroundedInterests(
+  previousInterests: ResearchInterest[],
+  graph: KnowledgeGraph,
+): ResearchInterest[] {
+  const nodesById = new Map(graph.nodes.map((node) => [node.id, node]));
+  const graphDiscoveryCount = new Set(
+    graph.nodes.flatMap((node) => node.discoveryIds),
+  ).size;
+  const now = new Date().toISOString();
+  const retained = previousInterests.flatMap((interest) => {
+    const nodeIds = interest.nodeIds.filter((id) => nodesById.has(id));
+    if (nodeIds.length === 0) return [];
+    const discoveryIds = new Set(
+      nodeIds.flatMap((id) => nodesById.get(id)?.discoveryIds ?? []),
+    );
+    return [{
+      ...interest,
+      nodeIds,
+      discoveryCount: discoveryIds.size,
+      strength: normalizeScore(
+        Math.max(0.15, Math.min(1, discoveryIds.size / Math.max(1, graphDiscoveryCount))),
+      ),
+    }];
+  });
+  const dynamic = graph.nodes
+    .filter((node) => node.discoveryIds.length > 0)
+    .sort((a, b) => b.discoveryIds.length - a.discoveryIds.length)
+    .slice(0, 8)
+    .map((node): ResearchInterest => ({
+      id: normalizeKey(node.id),
+      title: node.title,
+      description: node.description,
+      nodeIds: [node.id],
+      discoveryCount: node.discoveryIds.length,
+      strength: normalizeScore(node.discoveryIds.length / Math.max(1, graphDiscoveryCount)),
+      previousStrength: null,
+      trend: "new",
+      trendExplanation: "",
+      firstDetectedAt: now,
+      observedRuns: 1,
+      knowledgeGaps: [],
+    }));
+  return uniqueInterests([...retained, ...dynamic]).slice(0, 10);
+}
+
+function uniqueInterests(interests: ResearchInterest[]): ResearchInterest[] {
+  return [...new Map(interests.map((interest) => [interest.id, interest])).values()];
+}
+
+async function researchInterestBatchWithRetry(
+  interests: ResearchInterest[],
+  discoveries: Discovery[],
+  language: string,
+  batchIndex: number,
+): Promise<z.infer<typeof CandidateAnalysisSchema>["candidates"]> {
+  try {
+    return await researchInterestBatch(interests, discoveries, language, batchIndex);
+  } catch (firstError) {
+    await new Promise((resolve) => setTimeout(resolve, 750 * (batchIndex + 1)));
+    try {
+      return await researchInterestBatch(interests, discoveries, language, batchIndex);
+    } catch (retryError) {
+      throw new Error(
+        `Research batch failed twice: ${String(firstError)}; ${String(retryError)}`,
+      );
+    }
+  }
 }
 
 async function researchInterestBatch(
@@ -166,8 +271,8 @@ async function researchInterestBatch(
   language: string,
   batchIndex: number,
 ): Promise<z.infer<typeof CandidateAnalysisSchema>["candidates"]> {
-  const response = await openai.responses.parse({
-    model: "gpt-4.1-mini",
+  const response = await getOpenAI().responses.parse({
+    model: process.env.OPENAI_WEB_RESEARCH_MODEL ?? "gpt-4.1-mini",
     max_output_tokens: 5_000,
     tools: [{ type: "web_search" }],
     tool_choice: "required",
@@ -176,10 +281,12 @@ async function researchInterestBatch(
       "You are the autonomous web research agent for SaveWise.",
       "The supplied interests are locked and grounded in the user's knowledge. Research only these interests and their listed gaps.",
       "Search the live web for recent, trustworthy and high-value primary or reputable specialist sources.",
-      "Return one or two qualified candidates per supplied interest and cover every supplied interest.",
-      "Do not suggest existing URLs. Omit duplicates and candidates with an overall score below 0.55.",
+      "Consider scientific papers, YouTube, specialist blogs, news, GitHub, podcasts, companies, startups, products, whitepapers and documentation.",
+      "Return one or two evaluated candidates per supplied interest and cover every supplied interest.",
+      "Classify each result as relevant, partially-relevant or not-relevant. Include rejected results in the response so the system can count and discard them.",
+      "Do not suggest existing URLs. Mark candidates with an overall score below 0.55 as not-relevant.",
       "Score relevance, quality, recency, trustworthiness, new knowledge value and gap coverage independently.",
-      "Compare candidates with existing knowledge: confirms, contradicts, extends or new-perspective. Never manufacture contradictions.",
+      "Prioritize gaps and information gain. Compare candidates with existing knowledge: confirms, contradicts, extends or new-perspective. Never manufacture contradictions.",
       "Use only supplied interest IDs and discovery IDs, and canonical public HTTPS URLs discovered by web search.",
       "Write descriptions in the supplied language.",
     ].join("\n"),
@@ -218,6 +325,11 @@ function validateInterests(
       ),
       knowledgeGaps: uniqueStrings(interest.knowledgeGaps),
       strength: normalizeScore(interest.strength),
+      previousStrength: null,
+      trend: "new" as const,
+      trendExplanation: "",
+      firstDetectedAt: new Date().toISOString(),
+      observedRuns: 1,
     }))
     .filter((interest) => interest.nodeIds.length > 0);
 }
@@ -244,7 +356,6 @@ function validateCandidates(
       const interestId = normalizeKey(candidate.interestId);
       if (
         !candidate.url.startsWith("https://") ||
-        candidate.scores.overall < 0.55 ||
         existingUrls.has(normalizedUrl) ||
         candidateUrls.has(normalizedUrl) ||
         !interestIds.has(interestId)
@@ -272,6 +383,9 @@ function validateCandidates(
         gapCoverage: normalizeScore(candidate.scores.gapCoverage),
         overall: normalizeScore(candidate.scores.overall),
       },
+      relevance: candidate.scores.overall < 0.55
+        ? "not-relevant"
+        : candidate.relevance,
       relatedDiscoveryIds: uniqueStrings(
         candidate.relatedDiscoveryIds.filter((id) =>
           validDiscoveryIds.has(id),
@@ -280,6 +394,57 @@ function validateCandidates(
       status: "suggested",
       foundAt,
     }));
+}
+
+export function enrichInterestTrends(
+  interests: ResearchInterest[],
+  previousInterests: ResearchInterest[],
+  language: string,
+  now = new Date(),
+): ResearchInterest[] {
+  const previousById = new Map(previousInterests.map((item) => [item.id, item]));
+  return interests.map((interest) => {
+    const previous = previousById.get(interest.id);
+    const delta = previous ? interest.strength - previous.strength : 0;
+    const observedRuns = (previous?.observedRuns ?? 0) + 1;
+    const trend = !previous
+      ? "new"
+      : delta >= 0.08
+        ? "rising"
+        : delta <= -0.08
+          ? "declining"
+          : observedRuns >= 3
+            ? "long-term"
+            : "stable";
+    return {
+      ...interest,
+      previousStrength: previous?.strength ?? null,
+      trend,
+      trendExplanation: describeTrend(trend, delta, language),
+      firstDetectedAt: previous?.firstDetectedAt ?? now.toISOString(),
+      observedRuns,
+    };
+  });
+}
+
+function describeTrend(
+  trend: ResearchInterest["trend"],
+  delta: number,
+  language: string,
+): string {
+  const percentage = Math.abs(Math.round(delta * 100));
+  if (language.toLowerCase().startsWith("de")) {
+    if (trend === "new") return "Neu aus der persönlichen Bibliothek erkannt.";
+    if (trend === "rising") return `Das Interesse ist um ${percentage} Prozentpunkte gestiegen.`;
+    if (trend === "declining") return `Das Interesse ist um ${percentage} Prozentpunkte gesunken.`;
+    if (trend === "long-term") return "Über mehrere Rechercheläufe stabiler Schwerpunkt.";
+    return "Seit dem letzten Recherchelauf weitgehend stabil.";
+  }
+  if (trend === "new") return "Newly detected from the personal library.";
+  if (trend === "rising") return `Interest increased by ${percentage} percentage points.`;
+  if (trend === "declining") return `Interest decreased by ${percentage} percentage points.`;
+  if (trend === "long-term") return "A stable focus across multiple research runs.";
+  return "Largely stable since the previous research run.";
 }
 
 function compactGraph(graph: KnowledgeGraph) {

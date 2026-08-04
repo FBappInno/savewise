@@ -37,6 +37,7 @@ import {
   getResearchState,
   runPersonalResearch,
   startResearchScheduler,
+  isResearchDue,
   updateResearchCandidateStatus,
 } from "./services/research/research-service";
 
@@ -1215,6 +1216,8 @@ app.listen(
 );
 
 startResearchScheduler(async () => {
+  const state = await getResearchState();
+  if (!isResearchDue(state)) return;
   const library = await buildCurrentKnowledgeLibrary(
     discoveryRepository,
   );

@@ -1,248 +1,330 @@
 {
-  "lastRunAt": "2026-08-03T18:25:31.865Z",
-  "nextRecommendedRunAt": "2026-08-04T18:25:31.865Z",
+  "lastRunAt": "2026-08-03T21:28:48.423Z",
+  "nextRecommendedRunAt": "2026-08-04T21:28:48.423Z",
   "interests": [
     {
       "id": "node-nutrition",
       "title": "Ernährung",
       "description": "Wissen rund um Ernährung, Makronährstoffe und gesundheitsbezogene Ernährungsempfehlungen.",
       "nodeIds": [
-        "node-carbohydrates",
-        "node-protein-intake"
+        "node-carbohydrates"
       ],
-      "discoveryCount": 2,
-      "strength": 0.95,
+      "discoveryCount": 1,
+      "strength": 0.15,
       "knowledgeGaps": [
         "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit"
-      ]
-    },
-    {
-      "id": "node-carbohydrates",
-      "title": "Kohlenhydrate",
-      "description": "Untersuchung von Kohlenhydraten, deren Wirkung auf den Blutzuckerspiegel und deren Rolle bei der Gewichtskontrolle.",
-      "nodeIds": [
-        "node-complex-carbohydrates",
-        "node-blood-sugar-impact",
-        "node-weight-management"
       ],
-      "discoveryCount": 1,
-      "strength": 0.9,
-      "knowledgeGaps": [
-        "Genauere Bewertung der Auswirkungen unterschiedlicher Kohlenhydrattypen auf Stoffwechsel und Gesundheit"
-      ]
-    },
-    {
-      "id": "node-protein-intake",
-      "title": "Proteinzufuhr",
-      "description": "Empfehlungen zur Aufnahme von Protein im Alltag und die Vorteile proteinreicher Lebensmittel.",
-      "nodeIds": [
-        "node-protein-rich-foods",
-        "node-daily-protein-needs"
-      ],
-      "discoveryCount": 1,
-      "strength": 0.9,
-      "knowledgeGaps": [
-        "Optimale Proteinzufuhr bei verschiedenen Altersgruppen und Lebensstilen"
-      ]
-    },
-    {
-      "id": "node-news",
-      "title": "Nachrichten",
-      "description": "Aktuelle Berichterstattung und Nachrichteninhalte zu vielfältigen Themenbereichen, inklusive regionaler und internationaler Perspektiven.",
-      "nodeIds": [
-        "node-current-events"
-      ],
-      "discoveryCount": 4,
-      "strength": 0.95,
-      "knowledgeGaps": [
-        "Vertiefte Analysen zu internationalen Konflikten und deren globalen Auswirkungen"
-      ]
+      "previousStrength": 0.95,
+      "trend": "declining",
+      "trendExplanation": "Das Interesse ist um 80 Prozentpunkte gesunken.",
+      "firstDetectedAt": "2026-08-03T18:25:31.865Z",
+      "observedRuns": 2
     },
     {
       "id": "node-current-events",
       "title": "Aktuelle Ereignisse",
       "description": "Berichterstattung über aktuelle Themen und Ereignisse in verschiedenen Lebensbereichen.",
       "nodeIds": [
-        "node-regional-news-switzerland",
-        "node-politics",
-        "node-economy",
-        "node-sports",
-        "node-culture-society-science",
         "node-entertainment"
       ],
-      "discoveryCount": 4,
-      "strength": 0.9,
+      "discoveryCount": 2,
+      "strength": 0.15,
       "knowledgeGaps": [
         "Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz"
-      ]
-    },
-    {
-      "id": "node-root-finance",
-      "title": "Finance",
-      "description": "Knowledge about Finance.",
-      "nodeIds": [
-        "node-node-root-finance-investing"
       ],
-      "discoveryCount": 2,
-      "strength": 0.95,
-      "knowledgeGaps": [
-        "Vertiefte Kenntnis zu nachhaltigen Investmentstrategien"
-      ]
+      "previousStrength": 0.9,
+      "trend": "declining",
+      "trendExplanation": "Das Interesse ist um 75 Prozentpunkte gesunken.",
+      "firstDetectedAt": "2026-08-03T18:25:31.865Z",
+      "observedRuns": 2
     },
     {
-      "id": "node-node-root-finance-investing",
-      "title": "Investing",
-      "description": "Knowledge about Investing.",
-      "nodeIds": [
-        "node-node-node-root-finance-investing-funds-and-investment-vehicles",
-        "node-node-node-root-finance-investing-stocks"
-      ],
-      "discoveryCount": 2,
-      "strength": 0.95,
-      "knowledgeGaps": [
-        "Analyse der Risiken und Chancen neuer Anlagemodelle wie ETFs im volatilen Markt"
-      ]
-    },
-    {
-      "id": "node-root-lifestyle",
+      "id": "node-lifestyle",
       "title": "Lifestyle",
-      "description": "Knowledge about Lifestyle.",
+      "description": "Freizeit, Hobbys und alltägliche Interessen, vor allem Kochen, Haustiere und Unterhaltung durch kurze Videoformate.",
       "nodeIds": [
-        "node-node-root-lifestyle-travel"
+        "node-lifestyle"
+      ],
+      "discoveryCount": 10,
+      "strength": 0.303,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-safety-and-risk-management",
+      "title": "Sicherheits- und Risikomanagement",
+      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit sowie statistischer Risikoanalyse.",
+      "nodeIds": [
+        "node-safety-and-risk-management"
+      ],
+      "discoveryCount": 5,
+      "strength": 0.1515,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-human-error",
+      "title": "Menschliches Versagen",
+      "description": "Der zentrale Risikofaktor in Sicherheitsvorfällen, Unfällen und Störfällen, beeinflusst Arbeits-, Industrie- und Cybersicherheit.",
+      "nodeIds": [
+        "node-human-error"
+      ],
+      "discoveryCount": 5,
+      "strength": 0.1515,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-pets",
+      "title": "Haustiere",
+      "description": "Informationen über Haustiere mit Schwerpunkt auf Katzen, Kätzchen und deren Verhalten und Kommunikation.",
+      "nodeIds": [
+        "node-pets"
       ],
       "discoveryCount": 4,
-      "strength": 0.9,
-      "knowledgeGaps": [
-        "Nachhaltiges Reisen und ökologischer Tourismus in beliebten Destinationen"
-      ]
+      "strength": 0.1212,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-cats",
+      "title": "Katzen",
+      "description": "Verhalten und Lautäußerungen von Katzen und Kätzchen mit Fokus auf spielerisches Erkunden und Kommunikation.",
+      "nodeIds": [
+        "node-cats"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.1212,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-industrial-and-occupational-safety",
+      "title": "Industrie- und Arbeitssicherheit",
+      "description": "Analyse von Unfallursachen, organisatorischen Fehlern und Präventionsmaßnahmen im Arbeits- und Industrieumfeld.",
+      "nodeIds": [
+        "node-industrial-and-occupational-safety"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.0909,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-kitten-behavior",
+      "title": "Verhalten von Kätzchen",
+      "description": "Beobachtungen zum spielerischen Entdecken und kommunikativen Miauen junger Kätzchen.",
+      "nodeIds": [
+        "node-kitten-behavior"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.0909,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-science-environmental-and-earth",
+      "title": "Wissenschaft: Umwelt- und Erdwissenschaften",
+      "description": "Wissenschaftliche Erkenntnisse zum Klimawandel, historischen Klimazyklen sowie Strategien zur Minderung und Anpassung.",
+      "nodeIds": [
+        "node-science-environmental-and-earth"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.0909,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
     }
   ],
   "candidates": [
     {
-      "title": "Langfristige Auswirkungen verschiedener Diäten auf die Gesundheit",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/32728757/",
-      "sourceName": "Nutritional Reviews",
-      "sourceType": "study",
-      "publishedAt": "2020-08-01",
-      "summary": "Diese Übersichtsarbeit untersucht die Auswirkungen kohlenhydratarmer Diäten auf die kardiometabolische Gesundheit und betont die Bedeutung der Qualität der Kohlenhydrate über deren Quantität.",
-      "interestId": "node-nutrition",
-      "scores": {
-        "relevance": 0.95,
-        "quality": 0.9,
-        "recency": 0.8,
-        "trustworthiness": 0.95,
-        "knowledgeValue": 0.9,
-        "gapCoverage": 0.85,
-        "overall": 0.9
-      },
-      "decisionReason": "Diese Studie bietet eine umfassende Analyse der langfristigen Auswirkungen kohlenhydratarmer Diäten auf die Gesundheit und betont die Bedeutung der Kohlenhydratqualität, was eine wertvolle Ergänzung zu den bestehenden Kenntnissen darstellt.",
-      "impact": "extends",
-      "impactExplanation": "Die Studie erweitert das Verständnis über die Auswirkungen kohlenhydratarmer Diäten auf die Gesundheit und unterstreicht die Bedeutung der Kohlenhydratqualität.",
-      "relatedDiscoveryIds": [],
-      "id": "research-b624527abd3d7284",
-      "status": "suggested",
-      "foundAt": "2026-08-03T18:25:31.864Z"
-    },
-    {
-      "title": "Auswirkungen unterschiedlicher Kohlenhydrattypen auf Stoffwechsel und Gesundheit",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/34099926/",
-      "sourceName": "Nature Metabolism",
-      "sourceType": "study",
-      "publishedAt": "2021-06-08",
-      "summary": "Diese Forschung analysiert die Auswirkungen verschiedener Kohlenhydrattypen und deren Wechselwirkungen mit Proteinen auf die metabolische Gesundheit.",
-      "interestId": "node-carbohydrates",
-      "scores": {
-        "relevance": 0.95,
-        "quality": 0.9,
-        "recency": 0.8,
-        "trustworthiness": 0.95,
-        "knowledgeValue": 0.9,
-        "gapCoverage": 0.85,
-        "overall": 0.9
-      },
-      "decisionReason": "Diese Studie liefert detaillierte Einblicke in die Auswirkungen verschiedener Kohlenhydrattypen auf den Stoffwechsel und die Gesundheit, was eine wertvolle Erweiterung des bestehenden Wissens darstellt.",
-      "impact": "extends",
-      "impactExplanation": "Die Forschung erweitert das Verständnis über die Auswirkungen unterschiedlicher Kohlenhydrattypen auf den Stoffwechsel und die Gesundheit.",
-      "relatedDiscoveryIds": [],
-      "id": "research-3a91c8dc0f5ab597",
-      "status": "suggested",
-      "foundAt": "2026-08-03T18:25:31.864Z"
-    },
-    {
-      "title": "Schweizerischer Verein für ausgewogene Berichterstattung (SVFAB)",
-      "url": "https://svfab.ch/",
-      "sourceName": "SVFAB",
-      "sourceType": "company",
-      "summary": "Der SVFAB ist eine gemeinnützige Organisation, die sich für Fairness und Meinungsvielfalt in den Schweizer Medien einsetzt. Sie betreibt den weltweit größten systematischen Corpus KI-gestützter normativer Medienanalyse und misst die Ausgewogenheit öffentlich-rechtlicher Sendungen.",
-      "interestId": "node-current-events",
-      "scores": {
-        "relevance": 0.95,
-        "quality": 0.95,
-        "recency": 0.95,
-        "trustworthiness": 0.95,
-        "knowledgeValue": 0.95,
-        "gapCoverage": 0.95,
-        "overall": 0.95
-      },
-      "decisionReason": "Der SVFAB bietet eine umfassende Analyse der Medienausgewogenheit in der Schweiz und kann zur ausgewogeneren Berichterstattung beitragen.",
-      "impact": "extends",
-      "impactExplanation": "Durch die Bereitstellung von Messungen zur Medienausgewogenheit unterstützt der SVFAB die Verbesserung der Berichterstattung.",
-      "relatedDiscoveryIds": [],
-      "id": "research-90cd9f159b5e6a6b",
-      "status": "suggested",
-      "foundAt": "2026-08-03T18:25:31.864Z"
-    },
-    {
-      "title": "IUX veröffentlicht Analyse der ETF-Risikofaktoren in Zeiten von Marktvolatilität",
-      "url": "https://www.financialcommission.org/de/2026/06/11/IUX-ver%C3%B6ffentlicht-eine-Analyse-der-ETF-Risikofaktoren-w%C3%A4hrend-Marktschwankungen./",
-      "sourceName": "Financial Commission",
+      "title": "Langfristige Auswirkungen von Di\u0000ten auf die Gesundheit: Eine umfassende Analyse",
+      "url": "https://www.gesundheits-lexikon.com/Ernaehrung-Diaeten/Einleitung",
+      "sourceName": "DocMedicus Gesundheitslexikon",
       "sourceType": "article",
-      "publishedAt": "2026-06-11",
-      "summary": "IUX hat einen Lehrartikel veröffentlicht, der fünf ETF-Risiken in volatilen Märkten untersucht, darunter Marktrisiko, Liquiditätsrisiko und Kontrahentenrisiko.",
-      "interestId": "node-node-root-finance-investing",
+      "publishedAt": "2026-07-15",
+      "summary": "Dieser Artikel bietet eine detaillierte Untersuchung der langfristigen Auswirkungen verschiedener Di\u0000ten auf die Gesundheit, basierend auf aktuellen wissenschaftlichen Erkenntnissen.",
+      "interestId": "node-nutrition",
       "scores": {
         "relevance": 0.9,
         "quality": 0.85,
         "recency": 0.8,
         "trustworthiness": 0.9,
-        "knowledgeValue": 0.85,
+        "knowledgeValue": 0.95,
+        "gapCoverage": 0.95,
+        "overall": 0.9
+      },
+      "relevance": "relevant",
+      "decisionReason": "Deckt umfassend die langfristigen Auswirkungen von Di\u0000ten auf die Gesundheit ab.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das bestehende Wissen durch detaillierte Analysen und aktuelle Forschungsergebnisse.",
+      "relatedDiscoveryIds": [],
+      "id": "research-dfd853b697bf165c",
+      "status": "suggested",
+      "foundAt": "2026-08-03T21:28:48.422Z"
+    },
+    {
+      "title": "Human Risk in der Cybersecurity: Warum der Mensch die größte Schwachstelle ist",
+      "url": "https://www.cyberport-it-services.de/it-insights/human-risk-in-der-cybersecurity/",
+      "sourceName": "Cyberport IT Services",
+      "sourceType": "article",
+      "publishedAt": "2026-07-20",
+      "summary": "Dieser Artikel beleuchtet, dass menschliches Fehlverhalten in über 85 % aller Cyberangriffe eine entscheidende Rolle spielt. Er diskutiert typische Situationen, in denen menschliche Fehler auftreten, und bietet Strategien zur Minimierung dieses Risikos.",
+      "interestId": "node-safety-and-risk-management",
+      "scores": {
+        "relevance": 0.9,
+        "quality": 0.85,
+        "recency": 0.8,
+        "trustworthiness": 0.9,
+        "knowledgeValue": 0.95,
         "gapCoverage": 0.9,
         "overall": 0.88
       },
-      "decisionReason": "Diese Quelle bietet eine detaillierte Analyse der Risiken von ETFs in volatilen Märkten und deckt somit die Wissenslücke ab.",
-      "impact": "new-perspective",
-      "impactExplanation": "Die Analyse beleuchtet spezifische Risiken von ETFs in volatilen Märkten und erweitert das Verständnis über die Chancen und Risiken neuer Anlagemodelle.",
-      "relatedDiscoveryIds": [
-        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91"
-      ],
-      "id": "research-3ccebeead9914716",
+      "relevance": "relevant",
+      "decisionReason": "Bietet aktuelle und detaillierte Informationen über den Einfluss menschlichen Versagens auf die Cybersicherheit und diskutiert präventive Maßnahmen.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das Verständnis über die Rolle menschlichen Versagens in der Cybersicherheit und bietet praktische Lösungen.",
+      "relatedDiscoveryIds": [],
+      "id": "research-45417c1b02cbb3c5",
       "status": "suggested",
-      "foundAt": "2026-08-03T18:25:31.864Z"
+      "foundAt": "2026-08-03T21:28:48.422Z"
     },
     {
-      "title": "Sanfter Tourismus: nachhaltig reisen",
-      "url": "https://www.swd-ag.de/magazin/freizeit/sanfter-tourismus/",
-      "sourceName": "Stadtwerke Düsseldorf",
+      "title": "Katzenkommunikation: Körpersprache und Lautäußerungen verstehen",
+      "url": "https://www.tierfreund.de/katzenverhalten-korpersprache-und-lautsprache/",
+      "sourceName": "Tierfreund",
       "sourceType": "article",
-      "publishedAt": "2025-11-03",
-      "summary": "Der Artikel erläutert Konzepte des sanften Tourismus, der auf Nachhaltigkeit und ökologische Verantwortung setzt, und gibt Empfehlungen für nachhaltige Reiseziele.",
-      "interestId": "node-root-lifestyle",
+      "publishedAt": "2024-06-15",
+      "summary": "Dieser Artikel bietet einen umfassenden Überblick über die Körpersprache und Lautäußerungen von Katzen, mit besonderem Fokus auf das Spielverhalten und die damit verbundene Kommunikation.",
+      "interestId": "node-cats",
       "scores": {
-        "relevance": 0.85,
-        "quality": 0.8,
-        "recency": 0.75,
-        "trustworthiness": 0.85,
-        "knowledgeValue": 0.8,
-        "gapCoverage": 0.85,
-        "overall": 0.82
+        "relevance": 0.9,
+        "quality": 0.85,
+        "recency": 0.8,
+        "trustworthiness": 0.9,
+        "knowledgeValue": 0.95,
+        "gapCoverage": 0.9,
+        "overall": 0.88
       },
-      "decisionReason": "Diese Quelle bietet praktische Tipps und Informationen zu nachhaltigem Reisen und ökologischer Verantwortung, was die bestehende Wissenslücke adressiert.",
-      "impact": "new-perspective",
-      "impactExplanation": "Der Artikel erweitert das Verständnis von nachhaltigem Reisen und ökologischer Verantwortung in beliebten Reisezielen.",
+      "relevance": "relevant",
+      "decisionReason": "Bietet detaillierte Einblicke in die Körpersprache und Kommunikation von Katzen, insbesondere im Kontext des Spielverhaltens.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das Verständnis über die nonverbale Kommunikation von Katzen während des Spiels.",
       "relatedDiscoveryIds": [],
-      "id": "research-4a60c173eb0ea182",
+      "id": "research-e95bdcffea18c2d0",
       "status": "suggested",
-      "foundAt": "2026-08-03T18:25:31.864Z"
+      "foundAt": "2026-08-03T21:28:48.422Z"
+    },
+    {
+      "title": "Klimawandel: Historische Klimazyklen und aktuelle Trends",
+      "url": "https://www.climate.gov/news-features/climate-qa/hasnt-earth-warmed-and-cooled-naturally-throughout-history",
+      "sourceName": "NOAA Climate.gov",
+      "sourceType": "article",
+      "publishedAt": "2020-10-29",
+      "summary": "Dieser Artikel der National Oceanic and Atmospheric Administration (NOAA) erläutert, dass die Erde in den letzten Millionen Jahren natürliche Klimaschwankungen durchlief, einschließlich Kalt- und Warmperioden. Diese natürlichen Zyklen wurden durch Faktoren wie Änderungen der Erdumlaufbahn und Sonnenaktivität beeinflusst. Allerdings betonen die Autoren, dass die aktuelle Erwärmung der Erde hauptsächlich durch menschliche Aktivitäten, insbesondere den Ausstoß von Treibhausgasen, verursacht wird.",
+      "interestId": "node-science-environmental-and-earth",
+      "scores": {
+        "relevance": 0.9,
+        "quality": 0.85,
+        "recency": 0.8,
+        "trustworthiness": 0.95,
+        "knowledgeValue": 0.9,
+        "gapCoverage": 0.85,
+        "overall": 0.88
+      },
+      "relevance": "relevant",
+      "decisionReason": "Bietet eine fundierte Erklärung zu natürlichen Klimaschwankungen und deren Unterscheidung von aktuellen menschlich verursachten Veränderungen.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das Verständnis über die Ursachen von Klimaschwankungen und betont die Rolle menschlicher Aktivitäten in der aktuellen Erwärmung.",
+      "relatedDiscoveryIds": [],
+      "id": "research-a6268ba819ab1a84",
+      "status": "suggested",
+      "foundAt": "2026-08-03T21:28:48.422Z"
+    }
+  ],
+  "insights": [
+    {
+      "id": "insight-trends-2026-08-03",
+      "kind": "trend",
+      "title": "Interessen verändern sich",
+      "description": "Ernährung: Das Interesse ist um 80 Prozentpunkte gesunken. Aktuelle Ereignisse: Das Interesse ist um 75 Prozentpunkte gesunken. Lifestyle: Neu aus der persönlichen Bibliothek erkannt. Sicherheits- und Risikomanagement: Neu aus der persönlichen Bibliothek erkannt. Menschliches Versagen: Neu aus der persönlichen Bibliothek erkannt. Haustiere: Neu aus der persönlichen Bibliothek erkannt. Katzen: Neu aus der persönlichen Bibliothek erkannt. Industrie- und Arbeitssicherheit: Neu aus der persönlichen Bibliothek erkannt. Verhalten von Kätzchen: Neu aus der persönlichen Bibliothek erkannt. Wissenschaft: Umwelt- und Erdwissenschaften: Neu aus der persönlichen Bibliothek erkannt.",
+      "candidateIds": [],
+      "discoveryIds": [],
+      "createdAt": "2026-08-03T21:28:48.423Z"
+    },
+    {
+      "id": "insight-gaps-2026-08-03",
+      "kind": "knowledge-gap",
+      "title": "Gezielte Wissenslücken",
+      "description": "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit · Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz",
+      "candidateIds": [
+        "research-dfd853b697bf165c",
+        "research-45417c1b02cbb3c5",
+        "research-e95bdcffea18c2d0",
+        "research-a6268ba819ab1a84"
+      ],
+      "discoveryIds": [],
+      "createdAt": "2026-08-03T21:28:48.423Z"
+    }
+  ],
+  "briefings": [
+    {
+      "id": "briefing-2026-08-03",
+      "date": "2026-08-03",
+      "title": "Dein tägliches Research-Briefing",
+      "summary": "4 relevante Quellen gefunden, 0 ungeeignete Treffer verworfen und 2 Wissenslücken berücksichtigt.",
+      "counts": {
+        "totalFound": 4,
+        "papers": 0,
+        "videos": 0,
+        "startups": 0,
+        "studies": 0,
+        "trends": 10,
+        "knowledgeGaps": 2,
+        "discarded": 0
+      },
+      "candidateIds": [
+        "research-dfd853b697bf165c",
+        "research-45417c1b02cbb3c5",
+        "research-e95bdcffea18c2d0",
+        "research-a6268ba819ab1a84"
+      ],
+      "insightIds": [
+        "insight-trends-2026-08-03",
+        "insight-gaps-2026-08-03"
+      ],
+      "createdAt": "2026-08-03T21:28:48.423Z"
     }
   ]
 }

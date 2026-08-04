@@ -1,17 +1,18 @@
 {
   "interests": [
-    "Lifestyle",
     "Sicherheits- und Risikomanagement",
-    "Wissenschaft: Umwelt- und Erdwissenschaften",
-    "Nachrichten und Medien",
-    "Ernährung",
-    "Kultur",
-    "Wirtschaft und internationale Beziehungen",
-    "Technology",
-    "Technologie und Verteidigung",
-    "Exchange-Traded Fund (ETF)",
-    "Stock - Comprehensive Overview",
-    "Discover Italy: Your Official Guide to Planning a Trip"
+    "Menschliches Versagen und Cybersicherheit",
+    "Ernährung, insbesondere Proteine und Kohlenhydrate",
+    "Kochen und Heißluftfritteusen",
+    "Katzen und Haustierverhalten",
+    "Umwelt- und Klimawissenschaften",
+    "Technologie und Verteidigung, insbesondere militärische Drohnen",
+    "Nachrichten aus der Schweiz und der Welt",
+    "Wirtschaft und internationale Beziehungen mit Schwerpunkt Ukraine",
+    "Soziale Medien und kurze Videos",
+    "Reisen in Italien, Kroatien, die Balearen und die griechischen Kykladen",
+    "Exchange-Traded Funds und Aktien",
+    "Paragleiten"
   ],
   "projects": [],
   "learningGoals": [
@@ -21,6 +22,6 @@
     "Welche Erkenntnisse habe ich über Quantencomputer-Fehlerkorrektur?",
     "Was weiß ich über Protein?"
   ],
-  "developmentSummary": "Das Profil wird aus wiederkehrenden Themen, Fragen und der zeitlichen Wissensentwicklung abgeleitet.",
-  "updatedAt": "2026-08-03T20:51:48.329Z"
+  "developmentSummary": "Das aktuelle Profil wird durch wiederkehrende Themencluster zu Sicherheitsmanagement, Katzen, Kochen, Ernährung, Klima, Nachrichten und Verteidigung gestützt. Die jüngsten Einzelfunde erweitern es um Paragleiten, Reisen sowie grundlegende Finanzthemen; daraus lässt sich noch kein eigenständiges Projekt ableiten.",
+  "updatedAt": "2026-08-04T03:48:17.136Z"
 }

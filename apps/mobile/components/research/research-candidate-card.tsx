@@ -8,6 +8,7 @@ import {
 } from "react-native";
 
 import { theme } from "@/theme";
+import { useAppSettings } from "@/providers/app-settings-provider";
 import type { ResearchCandidate } from "@savewise/shared";
 
 type Props = {
@@ -23,6 +24,7 @@ export function ResearchCandidateCard({
   onDismiss,
   onSave,
 }: Props) {
+  const { t } = useAppSettings();
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -33,7 +35,7 @@ export function ResearchCandidateCard({
         </View>
 
         <Text style={styles.score}>
-          {Math.round(candidate.scores.overall * 100)}% match
+          {Math.round(candidate.scores.overall * 100)}% {t("research.match")}
         </Text>
       </View>
 
@@ -49,7 +51,7 @@ export function ResearchCandidateCard({
         />
         <View style={styles.flex}>
           <Text style={styles.impactTitle}>
-            {formatLabel(candidate.impact)} your knowledge
+            {t(`research.impact.${candidate.impact}`)}
           </Text>
           <Text style={styles.impactText}>
             {candidate.impactExplanation}
@@ -68,7 +70,7 @@ export function ResearchCandidateCard({
             pressed && styles.pressed,
           ]}
         >
-          <Text style={styles.secondaryButtonText}>Dismiss</Text>
+          <Text style={styles.secondaryButtonText}>{t("research.dismiss")}</Text>
         </Pressable>
 
         <Pressable
@@ -84,7 +86,7 @@ export function ResearchCandidateCard({
           ) : (
             <>
               <Ionicons color="#ffffff" name="bookmark-outline" size={17} />
-              <Text style={styles.primaryButtonText}>Save</Text>
+              <Text style={styles.primaryButtonText}>{t("research.save")}</Text>
             </>
           )}
         </Pressable>

@@ -14,6 +14,8 @@ const EMPTY_STATE: ResearchState = {
   nextRecommendedRunAt: null,
   interests: [],
   candidates: [],
+  insights: [],
+  briefings: [],
 };
 
 export async function loadResearchState(): Promise<ResearchState> {
@@ -21,7 +23,29 @@ export async function loadResearchState(): Promise<ResearchState> {
     const content = await fs.readFile(RESEARCH_FILE, "utf8");
     const parsed: unknown = JSON.parse(content);
 
-    return isResearchState(parsed) ? parsed : { ...EMPTY_STATE };
+    return isResearchState(parsed)
+      ? {
+          ...parsed,
+          interests: parsed.interests.map((interest) => ({
+            ...interest,
+            previousStrength: interest.previousStrength ?? null,
+            trend: interest.trend ?? "stable",
+            trendExplanation: interest.trendExplanation ?? "",
+            firstDetectedAt: interest.firstDetectedAt ?? parsed.lastRunAt ?? new Date(0).toISOString(),
+            observedRuns: interest.observedRuns ?? 1,
+          })),
+          candidates: parsed.candidates.map((candidate) => ({
+            ...candidate,
+            relevance: candidate.relevance ?? (
+              candidate.scores.overall >= 0.7
+                ? "relevant"
+                : "partially-relevant"
+            ),
+          })),
+          insights: parsed.insights ?? [],
+          briefings: parsed.briefings ?? [],
+        }
+      : { ...EMPTY_STATE };
   } catch (error) {
     if (isNodeError(error) && error.code === "ENOENT") {
       return { ...EMPTY_STATE };
