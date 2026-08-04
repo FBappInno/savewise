@@ -37,7 +37,7 @@ export type ImportResponse = {
     siteName?: string;
     publishedAt?: string;
     contentType: "html" | "pdf";
-    fetchStrategy: "standard" | "browser-compatible";
+    fetchStrategy: "standard" | "browser-compatible" | "url-derived";
   };
 
   analysis: {

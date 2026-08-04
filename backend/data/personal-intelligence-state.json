@@ -1,6 +1,72 @@
 {
-  "modelVersion": 6,
+  "modelVersion": 9,
   "events": [
+    {
+      "id": "learning-9-672f86ad2bbb",
+      "version": 9,
+      "trigger": "discovery-updated",
+      "discoveryId": "24ea02ed-81fa-442b-bcca-c5c81942a29e",
+      "graphFingerprint": "6436aeb10405f663fec44f913bc503b4d9a399af9c939262248f9e785c7de2c1",
+      "delta": {
+        "addedNodeIds": [
+          "node-root-3d-druck",
+          "node-node-root-3d-druck-muttertag"
+        ],
+        "removedNodeIds": [
+          "node-root-geschenke-dekoration",
+          "node-node-root-geschenke-dekoration-muttertag",
+          "node-node-node-root-geschenke-dekoration-muttertag-3d-druck"
+        ],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "2 neue Knoten, 3 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:58:36.322Z"
+    },
+    {
+      "id": "learning-8-445f41e3927f",
+      "version": 8,
+      "trigger": "discovery-added",
+      "discoveryId": "24ea02ed-81fa-442b-bcca-c5c81942a29e",
+      "graphFingerprint": "5d19d52d962b4fc648d9e8a9302e371243b99b8a6aa115763095d62be230aa8f",
+      "delta": {
+        "addedNodeIds": [
+          "node-root-geschenke-dekoration",
+          "node-node-root-geschenke-dekoration-muttertag",
+          "node-node-node-root-geschenke-dekoration-muttertag-3d-druck"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "3 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:53:21.447Z"
+    },
+    {
+      "id": "learning-7-e33ca7f269aa",
+      "version": 7,
+      "trigger": "discovery-added",
+      "discoveryId": "d52cffb7-9e98-406a-999e-246414b5d3e1",
+      "graphFingerprint": "1583dc89b810743ec7dc4316634950148f1b0ec9a551af78a3914d2ced4d6b90",
+      "delta": {
+        "addedNodeIds": [
+          "node-root-hardware",
+          "node-node-root-hardware-elektroinstallation",
+          "node-node-node-root-hardware-elektroinstallation-steckdosen"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "3 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:53:09.689Z"
+    },
     {
       "id": "learning-6-9d3c02946d74",
       "version": 6,
@@ -242,7 +308,7 @@
     }
   ],
   "graphSnapshot": {
-    "fingerprint": "4b1a093a0361cab1b42413012962c449cf9c1d1afbe32d90803c1633b4a947ea",
+    "fingerprint": "6436aeb10405f663fec44f913bc503b4d9a399af9c939262248f9e785c7de2c1",
     "summary": "Die Wissensbasis des Nutzers umfasst neun klar strukturierte Hauptdomänen. Im Bereich Sicherheits- und Risikomanagement steht menschliches Versagen als zentraler Faktor bei Arbeits- und Industrieunfällen sowie in der Cybersicherheit im Fokus. Ernährung wird durch differenzierte Kenntnisse zu gesundheitsrelevanten Kohlenhydraten und Proteinen abgedeckt. Lebensstilthemen gliedern sich in Kochen mit Schwerpunkt auf Heißluftfritteusen-Rezepte, Haustiere mit besonderem Fokus auf Katzenverhalten und digitale Unterhaltung via TikTok. Wissenschaftliche Inhalte befassen sich mit Umwelt- und Erdwissenschaften, insbesondere Klimawandel. Technologie und Verteidigung thematisieren moderne militärische Luftfahrt und Drohnenabwehr. Wirtschaft und internationale Beziehungen dokumentieren EU- und UN-Unter­",
     "nodes": [
       {
@@ -428,6 +494,26 @@
       {
         "id": "node-node-node-root-travel-destinations-cyclades-islands",
         "parentId": "node-node-root-travel-destinations"
+      },
+      {
+        "id": "node-root-3d-druck",
+        "parentId": null
+      },
+      {
+        "id": "node-node-root-3d-druck-muttertag",
+        "parentId": "node-root-3d-druck"
+      },
+      {
+        "id": "node-root-hardware",
+        "parentId": null
+      },
+      {
+        "id": "node-node-root-hardware-elektroinstallation",
+        "parentId": "node-root-hardware"
+      },
+      {
+        "id": "node-node-node-root-hardware-elektroinstallation-steckdosen",
+        "parentId": "node-node-root-hardware-elektroinstallation"
       },
       {
         "id": "node-root-shopping",

@@ -9,6 +9,7 @@ import {
   rebuildKnowledgeGraph,
 } from "../knowledge/knowledge-graph-service";
 import { buildKnowledgeLibrary } from "../library/library-builder";
+import { canonicalizeDiscoveryUrl } from "../../utils/discovery-url";
 
 export type RelatedDiscovery = {
   discovery: Discovery;
@@ -108,6 +109,18 @@ export async function getDiscoveryById(
         discovery.id === discoveryId,
     ) ?? null
   );
+}
+
+export async function getDiscoveryByUrl(
+  repository: DiscoveryRepository,
+  url: string,
+): Promise<Discovery | null> {
+  const canonicalUrl = canonicalizeDiscoveryUrl(url);
+  if (!canonicalUrl) return null;
+  const discoveries = await repository.getAll();
+  return discoveries.find((discovery) =>
+    canonicalizeDiscoveryUrl(discovery.url) === canonicalUrl,
+  ) ?? null;
 }
 
 export async function updateDiscovery(
@@ -662,29 +675,8 @@ function findSharedValues(
   );
 }
 
-function normalizeUrl(
-  url: string | undefined,
-): string {
-  if (!url) {
-    return "";
-  }
-
-  try {
-    const normalizedUrl =
-      new URL(url);
-
-    normalizedUrl.hash = "";
-
-    return normalizedUrl
-      .toString()
-      .replace(/\/$/, "")
-      .toLowerCase();
-  } catch {
-    return url
-      .trim()
-      .replace(/\/$/, "")
-      .toLowerCase();
-  }
+function normalizeUrl(url: string | undefined): string {
+  return canonicalizeDiscoveryUrl(url);
 }
 
 function normalizeText(

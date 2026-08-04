@@ -1464,5 +1464,79 @@
     "createdAt": "2026-08-04T04:45:29.385Z",
     "updatedAt": "2026-08-04T04:45:29.385Z",
     "savedAtLabel": "Just now"
+  },
+  {
+    "id": "d52cffb7-9e98-406a-999e-246414b5d3e1",
+    "source": "web",
+    "url": "https://www.digitec.ch/de/s1/product/feller-nevo-steckdose-12644632",
+    "title": "Feller Nevo",
+    "improvedTitle": "Feller Nevo Nass-Steckdose mit IP21 Schutz für den Innenbereich",
+    "description": "Die Nevo Nass-Steckdose von Feller ist eine zuverlässige Lösung für die Aufputz-Montage in Innenbereichen. Sie ist mit einem T13-Anschluss ausgestattet und bietet eine einfache Installation durch die Verwendung von Steckklemmen. Diese Steckdose ist für den Einsatz in Umgebungen konzipiert, in denen ein gewisser Schutz gegen Feuchtigkeit erforderlich ist, und erfüllt die Schutzart IP21. Die Nevo-Serie zeichnet sich durch ihre robuste Bauweise aus, die aus hochwertigem Kunststoff gefertigt ist. Mit einem klappbaren Deckel bietet die Steckdose zusätzlichen Schutz und Sicherheit. Die Nevo Nass-Steckdose ist eine praktische Wahl für alle, die eine funktionale und langlebige Steckdosenlösung suchen.\n\n- Schutzart IP21 für begrenzten Feuchtigkeitsschutz\n- Robuste Bauweise aus hochwertigem Kunststoff\n- Einfache Installation mit Steckklemmen\n- Klappdeckel für zusätzlichen Schutz.",
+    "summary": "Die Feller Nevo Nass-Steckdose bietet mit Schutzart IP21 Feuchtigkeitsschutz für Innenräume und gewährleistet durch ihren klappbaren Deckel zusätzliche Sicherheit.  Ihre robuste Kunststoffbauweise und einfache Installation mittels Steckklemmen machen sie zu einer zuverlässigen und langlebigen Steckdosenlösung für feuchte Umgebungen.",
+    "thumbnailUrl": "https://static01.galaxus.com/productimages/4/6/2/3/8/6/4/4/1/3/2/6/2/4/5/2/6/3/019e696a-3de0-75a4-af87-c1e079e4170b_sea.jpeg",
+    "classification": {
+      "primaryCategory": "technology",
+      "secondaryCategory": "hardware",
+      "topic": "Elektroinstallation",
+      "subtopics": [
+        "Steckdosen",
+        "Feuchtigkeitsschutz",
+        "Innenanwendung"
+      ]
+    },
+    "keywords": [
+      "Feller Nevo",
+      "Nass-Steckdose",
+      "IP21",
+      "Feuchtigkeitsschutz",
+      "Kunststoff",
+      "Innenbereich",
+      "Steckdose",
+      "klappbarer Deckel",
+      "elektrische Installation",
+      "T13-Anschluss"
+    ],
+    "language": "de",
+    "confidence": 0.9,
+    "topics": [
+      "Elektroinstallation",
+      "Steckdosen",
+      "Feuchtigkeitsschutz",
+      "Innenanwendung"
+    ],
+    "createdAt": "2026-08-04T04:53:09.665Z",
+    "updatedAt": "2026-08-04T04:53:09.665Z",
+    "savedAtLabel": "Just now"
+  },
+  {
+    "id": "24ea02ed-81fa-442b-bcca-c5c81942a29e",
+    "source": "web",
+    "url": "https://www.printables.com/model/1703801-beste-mama-sign-mothers-day-gift-3d-printed-decor",
+    "title": "Beste mama sign mothers day gift 3d printed decor",
+    "improvedTitle": "Beste Mama Schild: 3D-gedruckte Dekoration zum Muttertag",
+    "description": "Public link from printables.com. The website blocked automated content extraction; title and topic are derived from the URL.",
+    "summary": "Dieses 3D-gedruckte Dekorationsschild 'Beste Mama' ist ein personalisierbares Geschenk zum Muttertag.  Es kann einfach mit einem 3D-Drucker hergestellt werden und bietet eine kreative Möglichkeit, Wertschätzung auszudrücken.",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "3D-Druck",
+      "topic": "Muttertag",
+      "subtopics": []
+    },
+    "keywords": [
+      "Beste Mama",
+      "Muttertag",
+      "3D-Druck",
+      "Dekoration",
+      "Geschenk",
+      "personalisierte Geschenke"
+    ],
+    "language": "de",
+    "confidence": 0.75,
+    "topics": [
+      "Muttertag"
+    ],
+    "createdAt": "2026-08-04T04:53:21.436Z",
+    "updatedAt": "2026-08-04T04:58:36.310Z",
+    "savedAtLabel": "Just now"
   }
 ]

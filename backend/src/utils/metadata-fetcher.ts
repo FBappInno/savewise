@@ -54,28 +54,66 @@ export async function fetchPageMetadata(
       STANDARD_HEADERS,
     );
 
-    if (standardResponse.status === 403 || standardResponse.status === 406) {
-      standardResponse.body?.cancel().catch(() => undefined);
-      const browserResponse = await fetchWithTimeout(url, BROWSER_HEADERS);
-      pageMetadata = await parseResponse(browserResponse, "browser-compatible");
-    } else {
-      pageMetadata = await parseResponse(standardResponse, "standard");
-    }
+    pageMetadata = await parseResponse(standardResponse, "standard");
   } catch (error) {
     const videoMetadata = await videoMetadataPromise;
-    if (!videoMetadata) throw error;
-    return {
-      url: url.toString(),
-      ...videoMetadata,
-      contentType: "html",
-      fetchStrategy: "browser-compatible",
-    };
+    if (videoMetadata) {
+      return {
+        url: url.toString(),
+        ...videoMetadata,
+        contentType: "html",
+        fetchStrategy: "browser-compatible",
+      };
+    }
+
+    if (!supportsUrlFallback(error)) throw error;
+
+    try {
+      const browserResponse = await fetchWithTimeout(url, BROWSER_HEADERS);
+      pageMetadata = await parseResponse(browserResponse, "browser-compatible");
+    } catch (browserError) {
+      if (!supportsUrlFallback(browserError)) throw browserError;
+      return createUrlFallbackMetadata(url);
+    }
   }
 
   const videoMetadata = await videoMetadataPromise;
   return videoMetadata
     ? mergeVideoMetadata(pageMetadata, videoMetadata)
     : pageMetadata;
+}
+
+export function createUrlFallbackMetadata(url: URL): PageMetadata {
+  const hostname = url.hostname.replace(/^www\./, "");
+  const lastPathSegment = decodeURIComponent(
+    url.pathname.split("/").filter(Boolean).at(-1) ?? "",
+  )
+    .replace(/^\d+-/, "")
+    .replace(/-\d{5,}$/, "");
+  const readableTitle = normalizeText(lastPathSegment.replace(/[-_]+/g, " "));
+  const title = readableTitle
+    ? readableTitle.charAt(0).toLocaleUpperCase() + readableTitle.slice(1)
+    : hostname;
+
+  return {
+    url: url.toString(),
+    title,
+    description: `Public link from ${hostname}. The website blocked automated content extraction; title and topic are derived from the URL.`,
+    siteName: hostname,
+    extractedText: `${title}. Public content hosted on ${hostname}.`,
+    contentType: "html",
+    fetchStrategy: "url-derived",
+  };
+}
+
+function supportsUrlFallback(error: unknown): boolean {
+  return error instanceof ContentFetchError && [
+    "access_denied",
+    "authentication_required",
+    "timeout",
+    "network_error",
+    "upstream_error",
+  ].includes(error.code);
 }
 
 async function fetchWithTimeout(

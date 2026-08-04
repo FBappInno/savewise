@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseHtml } from "../utils/metadata-fetcher";
+import { createUrlFallbackMetadata, parseHtml } from "../utils/metadata-fetcher";
+import { canonicalizeDiscoveryUrl } from "../utils/discovery-url";
 import { resolveVideoMetadata } from "../utils/video-metadata-resolver";
 
 test("extracts metadata and readable article text", () => {
@@ -77,4 +78,25 @@ test("loads creator caption and thumbnail from video oEmbed metadata", async () 
   assert.equal(metadata?.title, "Drei Übungen für einen gesunden Rücken");
   assert.equal(metadata?.author, "Physio Kanal");
   assert.equal(metadata?.thumbnailUrl, "https://cdn.example.com/video-cover.jpg");
+});
+
+test("derives usable metadata from a blocked product URL", () => {
+  const metadata = createUrlFallbackMetadata(new URL(
+    "https://www.printables.com/model/1703801-beste-mama-sign-mothers-day-gift-3d-printed-decor",
+  ));
+
+  assert.equal(metadata.fetchStrategy, "url-derived");
+  assert.equal(metadata.title, "Beste mama sign mothers day gift 3d printed decor");
+  assert.match(metadata.extractedText ?? "", /Printables/i);
+});
+
+test("canonicalizes tracking variants to the same discovery URL", () => {
+  const first = canonicalizeDiscoveryUrl(
+    "https://www.example.com/article/?utm_source=newsletter&b=2&a=1#details",
+  );
+  const second = canonicalizeDiscoveryUrl(
+    "https://example.com/article?a=1&b=2",
+  );
+
+  assert.equal(first, second);
 });

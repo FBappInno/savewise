@@ -15,6 +15,7 @@ import {
   getAllDiscoveries,
   getDiscoveriesForInterest,
   getDiscoveryById,
+  getDiscoveryByUrl,
   getRelatedDiscoveries,
   rebuildCurrentKnowledgeLibrary,
   saveDiscovery,
@@ -221,6 +222,22 @@ app.post(
     }
 
     try {
+      const duplicateDiscovery = await getDiscoveryByUrl(
+        discoveryRepository,
+        parsedRequest.data.url,
+      );
+      if (duplicateDiscovery) {
+        response.status(409).json({
+          code: "duplicate_discovery",
+          error: duplicateDiscoveryMessage(
+            parsedRequest.data.preferredLanguage,
+            duplicateDiscovery.improvedTitle || duplicateDiscovery.title,
+          ),
+          discoveryId: duplicateDiscovery.id,
+        });
+        return;
+      }
+
       const importResult =
         await withTimeout(
           importContent(
@@ -308,6 +325,20 @@ app.post(
     }
   },
 );
+
+function duplicateDiscoveryMessage(
+  language: "de" | "en" | "fr" | "it" | "es" | undefined,
+  title: string,
+): string {
+  const messages = {
+    de: `Dieser Beitrag ist bereits gespeichert: ${title}`,
+    en: `This entry is already saved: ${title}`,
+    fr: `Ce contenu est déjà enregistré : ${title}`,
+    it: `Questo contenuto è già salvato: ${title}`,
+    es: `Este contenido ya está guardado: ${title}`,
+  };
+  return messages[language ?? "en"];
+}
 
 function contentImportStatus(error: unknown): number {
   if (!(error instanceof ContentFetchError)) return 500;
