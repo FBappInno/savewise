@@ -15,6 +15,8 @@ import type {
   SecondBrainOverview,
   WorkAssistantRequest,
   WorkAssistantResult,
+  PortableSyncBundle,
+  SyncImportResult,
 } from "@savewise/shared";
 import { loadAppSettings } from "@/services/settings-storage";
 import { getLocales } from "expo-localization";
@@ -344,6 +346,26 @@ export function updateDiscovery(
 export function getKnowledgeLibrary(): Promise<KnowledgeLibrary> {
   return apiRequest<KnowledgeLibrary>(
     "/api/knowledge",
+  );
+}
+
+export function exportSyncBundle(
+  installationId: string,
+): Promise<{ bundle: PortableSyncBundle }> {
+  return apiRequest<{ bundle: PortableSyncBundle }>(
+    "/api/storage/sync/export",
+    { headers: { "X-SaveWise-Installation-Id": installationId } },
+    90_000,
+  );
+}
+
+export function importSyncBundle(
+  bundle: PortableSyncBundle,
+): Promise<{ result: SyncImportResult }> {
+  return apiRequest<{ result: SyncImportResult }>(
+    "/api/storage/sync/import",
+    { method: "POST", body: JSON.stringify({ bundle }) },
+    90_000,
   );
 }
 

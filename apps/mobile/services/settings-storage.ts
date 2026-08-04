@@ -63,6 +63,10 @@ function mergeSettings(
   settings: Partial<AppSettings>,
   hasPassword: boolean,
 ): AppSettings {
+  const legacyStorage = settings.storage as
+    | (Partial<AppSettings["storage"]> & { location?: "local" | "cloud" })
+    | undefined;
+
   return {
     account: {
       ...DEFAULT_APP_SETTINGS.account,
@@ -80,6 +84,18 @@ function mergeSettings(
     storage: {
       ...DEFAULT_APP_SETTINGS.storage,
       ...settings.storage,
+      activeMode:
+        legacyStorage?.connectionStatus === "connected" &&
+        legacyStorage.activeMode === "bring-your-own-cloud"
+          ? "bring-your-own-cloud"
+          : "local",
+      preferredMode:
+        legacyStorage?.preferredMode ??
+        (legacyStorage?.location === "cloud" ? "savewise-cloud" : "local"),
+      provider: legacyStorage?.provider ?? null,
+      syncEnabled: legacyStorage?.syncEnabled ?? false,
+      connectionStatus: legacyStorage?.connectionStatus ?? "local-only",
+      lastSyncAt: legacyStorage?.lastSyncAt ?? null,
     },
     privacy: {
       ...DEFAULT_APP_SETTINGS.privacy,

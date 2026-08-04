@@ -11,7 +11,8 @@
     "test:knowledge-overrides": "tsx --test src/scripts/test-knowledge-graph-overrides.ts",
     "test:personal-assistant": "tsx --test src/scripts/test-personal-knowledge-assistant.ts",
     "test:autonomous-research": "tsx --test src/scripts/test-autonomous-research-agent.ts",
-    "test:personal-intelligence": "tsx --test src/scripts/test-personal-intelligence-platform.ts"
+    "test:personal-intelligence": "tsx --test src/scripts/test-personal-intelligence-platform.ts",
+    "test:storage": "tsx --test src/scripts/test-storage-architecture.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

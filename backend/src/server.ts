@@ -46,6 +46,11 @@ import {
   recordLearningCycle,
 } from "./services/intelligence/personal-intelligence-service";
 import { createPersonalWorkProduct } from "./services/intelligence/personal-work-assistant";
+import {
+  createPortableSyncBundle,
+  mergePortableSyncBundle,
+} from "./services/storage/cloud-sync-service";
+import type { PortableSyncBundle } from "@savewise/shared";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -108,7 +113,7 @@ app.use(
 
 app.use(
   express.json({
-    limit: "20kb",
+    limit: "5mb",
   }),
 );
 
@@ -153,6 +158,43 @@ const WorkAssistantRequestSchema = z.object({
 
 const ResearchCandidateStatusSchema = z.object({
   status: z.enum(["suggested", "dismissed"]),
+});
+
+const SyncDiscoverySchema = z.object({
+  id: z.string().trim().min(1).max(200),
+  source: z.enum(["youtube", "instagram", "tiktok", "web"]),
+  url: z.string().url().optional(),
+  title: z.string().min(1).max(5_000),
+  improvedTitle: z.string().max(5_000).optional(),
+  description: z.string().max(100_000).optional(),
+  summary: z.string().max(5_000).optional(),
+  thumbnailUrl: z.string().url().optional(),
+  author: z.string().max(500).optional(),
+  publishedAt: z.string().optional(),
+  classification: z.object({
+    primaryCategory: z.enum([
+      "technology", "finance", "business", "science", "health",
+      "education", "productivity", "culture", "news", "lifestyle", "other",
+    ]),
+    secondaryCategory: z.string().trim().min(2).max(60),
+    topic: z.string().trim().min(2).max(60),
+    subtopics: z.array(z.string().trim().min(2).max(50)).max(6),
+  }).optional(),
+  keywords: z.array(z.string().max(200)).max(100),
+  language: z.string().max(20).optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  topics: z.array(z.string().max(200)).max(100),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  savedAtLabel: z.string().max(100),
+});
+
+const PortableSyncBundleSchema = z.object({
+  schemaVersion: z.literal(1),
+  exportedAt: z.string().datetime(),
+  sourceInstallationId: z.string().trim().min(1).max(200),
+  discoveries: z.array(SyncDiscoverySchema).max(50_000),
+  knowledgeGraph: z.unknown().nullable(),
 });
 
 const DiscoveryIdSchema = z
@@ -200,6 +242,42 @@ app.get(
     });
   },
 );
+
+app.get("/api/storage/sync/export", async (request, response) => {
+  try {
+    const bundle = await createPortableSyncBundle(
+      discoveryRepository,
+      typeof request.headers["x-savewise-installation-id"] === "string"
+        ? request.headers["x-savewise-installation-id"]
+        : undefined,
+    );
+    response.json({ bundle });
+  } catch (error) {
+    response.status(500).json({
+      error: error instanceof Error ? error.message : "Sync export failed.",
+    });
+  }
+});
+
+app.post("/api/storage/sync/import", async (request, response) => {
+  const parsed = PortableSyncBundleSchema.safeParse(request.body?.bundle);
+  if (!parsed.success) {
+    response.status(400).json({ error: "A valid SaveWise sync bundle is required." });
+    return;
+  }
+
+  try {
+    const result = await mergePortableSyncBundle(
+      discoveryRepository,
+      parsed.data as PortableSyncBundle,
+    );
+    response.json({ result });
+  } catch (error) {
+    response.status(500).json({
+      error: error instanceof Error ? error.message : "Sync import failed.",
+    });
+  }
+});
 
 app.post(
   "/api/import",

@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import { useAppSettings } from "@/providers/app-settings-provider";
+import { StorageSettingsPanel } from "@/components/settings/storage-settings-panel";
 import { formatAppDateTime } from "@/i18n/date-time";
 import { getKnowledgeLibrary } from "@/services/content-import-client";
 import { theme } from "@/theme";
@@ -191,14 +192,7 @@ export default function SettingsScreen() {
           icon="server-outline"
           title={t("settings.storage")}
         >
-          <ChoiceRow
-            onChange={() => undefined}
-            options={[
-              { label: t("settings.local"), value: "local" },
-              { label: `${t("settings.cloud")} · ${t("settings.comingLater")}`, value: "cloud", disabled: true },
-            ]}
-            value={settings.storage.location}
-          />
+          <StorageSettingsPanel />
         </SettingsSection>
 
         <SettingsSection icon="shield-checkmark-outline" title={t("settings.privacy")}>
@@ -314,37 +308,6 @@ function Field(props: React.ComponentProps<typeof TextInput> & { label: string }
         style={styles.input}
         {...inputProps}
       />
-    </View>
-  );
-}
-
-function ChoiceRow<T extends string>({ onChange, options, value }: {
-  onChange: (value: T) => void;
-  options: { label: string; value: T; disabled?: boolean }[];
-  value: T;
-}) {
-  return (
-    <View style={styles.choiceRow}>
-      {options.map((option) => {
-        const selected = option.value === value;
-        return (
-          <Pressable
-            disabled={option.disabled}
-            key={option.value}
-            onPress={() => onChange(option.value)}
-            style={({ pressed }) => [
-              styles.choice,
-              selected && styles.choiceSelected,
-              option.disabled && styles.disabled,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={[styles.choiceText, selected && styles.choiceTextSelected]}>
-              {option.label}
-            </Text>
-          </Pressable>
-        );
-      })}
     </View>
   );
 }
@@ -473,11 +436,6 @@ const styles = StyleSheet.create({
   dropdownOptionSelected: { backgroundColor: "#EFF6FF" },
   dropdownOptionText: { ...theme.typography.body, color: theme.colors.text },
   dropdownOptionTextSelected: { color: theme.colors.primary, fontWeight: "600" },
-  choiceRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm, marginTop: theme.spacing.sm },
-  choice: { backgroundColor: theme.colors.background, borderColor: theme.colors.border, borderRadius: theme.radius.pill, borderWidth: 1, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm },
-  choiceSelected: { backgroundColor: "#EFF6FF", borderColor: theme.colors.primary },
-  choiceText: { ...theme.typography.caption, color: theme.colors.textSecondary },
-  choiceTextSelected: { color: theme.colors.primary, fontWeight: "600" },
   toggleRow: { alignItems: "center", borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", gap: theme.spacing.md, minHeight: 62, paddingVertical: theme.spacing.sm },
   toggleText: { flex: 1 },
   toggleLabel: { ...theme.typography.bodyStrong, color: theme.colors.text },

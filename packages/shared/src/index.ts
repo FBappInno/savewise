@@ -7,6 +7,7 @@ export * from "./models/KnowledgeLibrary";
 export * from "./models/KnowledgeNode";
 export * from "./models/KnowledgeSource";
 export * from "./models/PersonalIntelligence";
+export * from "./models/StorageArchitecture";
 export * from "./models/Relation";
 export * from "./models/Research";
 export * from "./models/SecondBrain";
