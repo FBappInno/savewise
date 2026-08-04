@@ -29,6 +29,8 @@ import type {
   ExternalStorageProvider,
   StorageMode,
 } from "@savewise/shared";
+import { classifyAnonymousError, trackAnonymousEvent } from "@/services/anonymous-analytics";
+import { hasVerifiedAccountSession } from "@/services/account-client";
 
 const providerNames: Record<ExternalStorageProvider, string> = {
   dropbox: "Dropbox",
@@ -68,6 +70,10 @@ export function StorageSettingsPanel() {
   }, []);
 
   async function selectMode(preferredMode: StorageMode) {
+    if (preferredMode !== "local" && !await hasVerifiedAccountSession()) {
+      Alert.alert(t("accountAuth.cloudLoginRequired"), t("accountAuth.cloudLoginRequiredDescription"));
+      return;
+    }
     if (preferredMode === "local") {
       await deleteWebDavCredentials();
       await deleteDropboxSession();
@@ -104,6 +110,10 @@ export function StorageSettingsPanel() {
   }
 
   async function connectWebDav() {
+    if (!await hasVerifiedAccountSession()) {
+      Alert.alert(t("accountAuth.cloudLoginRequired"), t("accountAuth.cloudLoginRequiredDescription"));
+      return;
+    }
     const credentials = {
       serverUrl: serverUrl.trim(),
       username: username.trim(),
@@ -144,7 +154,13 @@ export function StorageSettingsPanel() {
   }
 
   async function syncNow() {
+    if (!await hasVerifiedAccountSession()) {
+      Alert.alert(t("accountAuth.cloudLoginRequired"), t("accountAuth.cloudLoginRequiredDescription"));
+      return;
+    }
     setSyncing(true);
+    const startedAt = Date.now();
+    void trackAnonymousEvent("SyncStarted", { operation: "cloud-sync" });
     try {
       const result = supportsDropbox && dropboxAppKey
         ? await syncWithDropbox(dropboxAppKey)
@@ -161,7 +177,17 @@ export function StorageSettingsPanel() {
         t("settings.storageSyncComplete"),
         t("settings.storageSyncCompleteDescription", { count: result.uploadedDiscoveries }),
       );
+      void trackAnonymousEvent("SyncFinished", {
+        durationMs: Date.now() - startedAt,
+        itemCount: result.uploadedDiscoveries,
+        operation: "cloud-sync",
+      });
     } catch (error) {
+      void trackAnonymousEvent("SyncFailed", {
+        durationMs: Date.now() - startedAt,
+        operation: "cloud-sync",
+        errorKind: classifyAnonymousError(error),
+      });
       Alert.alert(
         t("settings.storageSyncFailed"),
         error instanceof Error ? error.message : t("settings.storageSyncFailed"),
@@ -192,6 +218,10 @@ export function StorageSettingsPanel() {
   }
 
   async function connectDropboxAccount() {
+    if (!await hasVerifiedAccountSession()) {
+      Alert.alert(t("accountAuth.cloudLoginRequired"), t("accountAuth.cloudLoginRequiredDescription"));
+      return;
+    }
     if (!dropboxAppKey) {
       Alert.alert(t("settings.storageDropboxSetupRequired"), t("settings.storageDropboxSetupDescription"));
       return;

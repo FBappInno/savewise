@@ -32,6 +32,7 @@ export type AppSettings = {
   };
   privacy: {
     usageAnalytics: boolean;
+    analyticsConsent: "undecided" | "granted" | "denied";
     externalContentProcessing: boolean;
   };
   ai: {
@@ -65,6 +66,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   },
   privacy: {
     usageAnalytics: false,
+    analyticsConsent: "undecided",
     externalContentProcessing: true,
   },
   ai: {

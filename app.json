@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.savewise"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.savewise"
+  }
+}

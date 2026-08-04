@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   ActivityIndicator,
@@ -20,6 +20,7 @@ import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type { Discovery } from "@/types/discovery";
 import { updateKnowledgeTopic } from "@/services/content-import-client";
+import { trackAnonymousEvent } from "@/services/anonymous-analytics";
 
 export default function LibraryScreen() {
   const { settings, t } = useAppSettings();
@@ -39,6 +40,10 @@ export default function LibraryScreen() {
     () => calculateActivity(library?.discoveries ?? []),
     [library?.discoveries],
   );
+
+  useEffect(() => {
+    void trackAnonymousEvent("LibraryOpened", { operation: "library" });
+  }, []);
 
   function openDiscovery(
     discovery: Discovery,

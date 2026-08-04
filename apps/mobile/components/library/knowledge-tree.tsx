@@ -15,6 +15,7 @@ import type {
   KnowledgeGraph,
   KnowledgeGraphNode,
 } from "@savewise/shared";
+import { trackAnonymousEvent } from "@/services/anonymous-analytics";
 
 type KnowledgeTreeProps = {
   graph: KnowledgeGraph;
@@ -68,6 +69,7 @@ export function KnowledgeTree({
   }
 
   function openNode(nodeId: string) {
+    void trackAnonymousEvent("TopicOpened", { operation: "library" });
     setPath((currentPath) => [...currentPath, nodeId]);
   }
 

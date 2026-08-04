@@ -10,24 +10,22 @@ const SETTINGS_KEY = "savewise.app-settings.v1";
 const PASSWORD_KEY = "savewise.account.password";
 
 export async function loadAppSettings(): Promise<AppSettings> {
-  const [storedSettings, storedPassword] = await Promise.all([
-    AsyncStorage.getItem(SETTINGS_KEY),
-    SecureStore.getItemAsync(PASSWORD_KEY),
-  ]);
+  const storedSettings = await AsyncStorage.getItem(SETTINGS_KEY);
+  await SecureStore.deleteItemAsync(PASSWORD_KEY).catch(() => undefined);
 
   if (!storedSettings) {
     return {
       ...DEFAULT_APP_SETTINGS,
       account: {
         ...DEFAULT_APP_SETTINGS.account,
-        hasPassword: Boolean(storedPassword),
+        hasPassword: false,
       },
     };
   }
 
   try {
     const parsed = JSON.parse(storedSettings) as Partial<AppSettings>;
-    return mergeSettings(parsed, Boolean(storedPassword));
+    return mergeSettings(parsed, false);
   } catch {
     return DEFAULT_APP_SETTINGS;
   }
@@ -46,17 +44,6 @@ export async function saveAppSettings(
       },
     }),
   );
-}
-
-export async function saveAccountPassword(password: string): Promise<boolean> {
-  const normalized = password.trim();
-  if (normalized) {
-    await SecureStore.setItemAsync(PASSWORD_KEY, normalized, {
-      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-    });
-    return true;
-  }
-  return SecureStore.getItemAsync(PASSWORD_KEY).then(Boolean);
 }
 
 function mergeSettings(

@@ -1,17 +1,17 @@
 {
   "interests": [
-    "Lifestyle",
     "Sicherheits- und Risikomanagement",
-    "Wissenschaft: Umwelt- und Erdwissenschaften",
+    "Haustiere",
+    "Travel",
     "Technologie und Verteidigung",
     "Nachrichten und Medien",
-    "Ernährung",
-    "Kultur",
-    "Wirtschaft und internationale Beziehungen",
     "Paragliding",
-    "Exchange-Traded Fund (ETF)",
-    "Stock - Comprehensive Overview",
-    "Discover Italy: Your Official Guide to Planning a Trip"
+    "Ernährung",
+    "Kochen und Rezepte",
+    "Unterhaltung",
+    "Kultur",
+    "Wissenschaft: Umwelt- und Erdwissenschaften",
+    "Wirtschaft und internationale Beziehungen"
   ],
   "projects": [],
   "learningGoals": [
@@ -21,6 +21,6 @@
     "Welche Erkenntnisse habe ich über Quantencomputer-Fehlerkorrektur?",
     "Was weiß ich über Protein?"
   ],
-  "developmentSummary": "Die breite Interessenstruktur bleibt erhalten. Die größte Tiefe liegt weiterhin im Sicherheits- und Risikomanagement. Ernährung bleibt durch das explizite Protein-Lernziel aktiv, ist aber quellenmäßig begrenzt. Paragliding wird praktischer und sicherheitsorientierter; Drohnenabwehr wird innerhalb von Technologie und Verteidigung stärker spezialisiert. ETFs, Aktien, Reisen, Einrichtung, Elektroinstallation, Shopping und 3D-Druck sind neu sichtbar und überwiegend oberflächlich. Der frühere Fokus auf Quantencomputer-Fehlerkorrektur wird durch die aktuelle Bibliothek nicht gestützt.",
-  "updatedAt": "2026-08-04T05:18:12.791Z"
+  "developmentSummary": "Das Profil wird aus wiederkehrenden Themen, Fragen und der zeitlichen Wissensentwicklung abgeleitet.",
+  "updatedAt": "2026-08-04T11:08:35.884Z"
 }

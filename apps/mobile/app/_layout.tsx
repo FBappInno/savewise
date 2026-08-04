@@ -9,6 +9,10 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AppSettingsProvider, useAppSettings } from "@/providers/app-settings-provider";
+import { AnalyticsConsentModal } from "@/components/analytics-consent-modal";
+import { trackAnonymousEvent } from "@/services/anonymous-analytics";
+import { useEffect } from "react";
+import { AppState } from "react-native";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -25,6 +29,14 @@ export default function RootLayout() {
 function RootNavigator() {
   const colorScheme = useColorScheme();
   const { t } = useAppSettings();
+
+  useEffect(() => {
+    void trackAnonymousEvent("AppStart", { operation: "app" });
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "background") void trackAnonymousEvent("AppClosed", { operation: "app" });
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <ThemeProvider
@@ -61,6 +73,11 @@ function RootNavigator() {
         />
 
         <Stack.Screen
+          name="account-verified"
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
           name="modal"
           options={{
             presentation: "modal",
@@ -70,6 +87,7 @@ function RootNavigator() {
       </Stack>
 
       <StatusBar style="auto" />
+      <AnalyticsConsentModal />
     </ThemeProvider>
   );
 }

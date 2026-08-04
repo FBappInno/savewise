@@ -20,6 +20,8 @@ import { StorageSettingsPanel } from "@/components/settings/storage-settings-pan
 import { formatAppDateTime } from "@/i18n/date-time";
 import { getKnowledgeLibrary } from "@/services/content-import-client";
 import { theme } from "@/theme";
+import { deleteMyAnonymousAnalytics } from "@/services/anonymous-analytics";
+import { loginAccount, requestAccountVerification } from "@/services/account-client";
 import type {
   DisplayLanguage,
   DateFormat,
@@ -28,12 +30,16 @@ import type {
 } from "@/types/app-settings";
 
 export default function SettingsScreen() {
-  const { locale, settings, t, updateSettings, saveAccount } = useAppSettings();
+  const { locale, settings, t, updateSettings } = useAppSettings();
   const [username, setUsername] = useState(settings.account.username);
   const [email, setEmail] = useState(settings.account.email);
-  const [password, setPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [isSaving, setSaving] = useState(false);
   const [lastKnowledgeUpdate, setLastKnowledgeUpdate] = useState<string | null>(null);
+  const [isDeletingAnalytics, setDeletingAnalytics] = useState(false);
 
   useEffect(() => {
     setUsername(settings.account.username);
@@ -47,13 +53,84 @@ export default function SettingsScreen() {
   }, []);
 
   async function handleSaveAccount() {
+    if (!username.trim() || !email.trim() || newPassword.length < 10) {
+      Alert.alert(t("accountAuth.invalidInput"), t("accountAuth.passwordRequirements"));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert(t("accountAuth.passwordMismatch"), t("accountAuth.passwordMismatchDescription"));
+      return;
+    }
     setSaving(true);
     try {
-      await saveAccount({ username, email, password });
-      setPassword("");
-      Alert.alert(t("settings.saved"), t("settings.accountSaved"));
+      await requestAccountVerification({
+        username: username.trim(),
+        email: email.trim(),
+        ...(oldPassword ? { oldPassword } : {}),
+        newPassword,
+      });
+      await updateSettings((current) => ({
+        ...current,
+        account: { ...current.account, username: username.trim(), email: email.trim() },
+      }));
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      Alert.alert(t("accountAuth.emailSent"), t("accountAuth.emailSentDescription"));
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "ACCOUNT_UPDATE_FAILED";
+      Alert.alert(
+        t("accountAuth.updateFailed"),
+        code === "OLD_PASSWORD_REQUIRED" || code === "OLD_PASSWORD_INVALID"
+          ? t("accountAuth.oldPasswordInvalid")
+          : t("accountAuth.updateFailedDescription"),
+      );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleAnalyticsChange(usageAnalytics: boolean) {
+    await updateSettings((current) => ({
+      ...current,
+      privacy: {
+        ...current.privacy,
+        analyticsConsent: usageAnalytics ? "granted" : "denied",
+        usageAnalytics,
+      },
+    }));
+  }
+
+  async function handleLogin() {
+    if (!email.trim() || !loginPassword) return;
+    setSaving(true);
+    try {
+      await loginAccount(email.trim(), loginPassword);
+      setLoginPassword("");
+      Alert.alert(t("accountAuth.loginSuccess"), t("accountAuth.loginSuccessDescription"));
+    } catch {
+      Alert.alert(t("accountAuth.loginFailed"), t("accountAuth.loginFailedDescription"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteAnalytics() {
+    setDeletingAnalytics(true);
+    try {
+      const deletedEvents = await deleteMyAnonymousAnalytics();
+      await updateSettings((current) => ({
+        ...current,
+        privacy: { ...current.privacy, analyticsConsent: "denied", usageAnalytics: false },
+      }));
+      Alert.alert(
+        t("settings.analyticsDeleted"),
+        t("settings.analyticsDeletedDescription", { count: deletedEvents }),
+      );
+    } catch {
+      Alert.alert(t("settings.analyticsDeleteFailed"), t("settings.analyticsDeleteFailedDescription"));
+    } finally {
+      setDeletingAnalytics(false);
     }
   }
 
@@ -93,13 +170,26 @@ export default function SettingsScreen() {
           />
           <Field
             autoCapitalize="none"
-            label={t("settings.password")}
-            onChangeText={setPassword}
-            placeholder={settings.account.hasPassword
-              ? t("settings.passwordSaved")
-              : t("settings.passwordPlaceholder")}
+            label={t("accountAuth.oldPassword")}
+            onChangeText={setOldPassword}
+            placeholder={t("accountAuth.oldPasswordOptional")}
             secureTextEntry
-            value={password}
+            value={oldPassword}
+          />
+          <Field
+            autoCapitalize="none"
+            label={t("accountAuth.newPassword")}
+            onChangeText={setNewPassword}
+            placeholder={t("accountAuth.passwordRequirements")}
+            secureTextEntry
+            value={newPassword}
+          />
+          <Field
+            autoCapitalize="none"
+            label={t("accountAuth.confirmPassword")}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            value={confirmPassword}
           />
           <Pressable
             disabled={isSaving}
@@ -112,6 +202,22 @@ export default function SettingsScreen() {
           >
             <Ionicons color="#ffffff" name="save-outline" size={18} />
             <Text style={styles.saveButtonText}>{t("settings.saveAccount")}</Text>
+          </Pressable>
+          <View style={styles.accountDivider} />
+          <Text style={styles.controlLabel}>{t("accountAuth.existingAccount")}</Text>
+          <Field
+            autoCapitalize="none"
+            label={t("settings.password")}
+            onChangeText={setLoginPassword}
+            secureTextEntry
+            value={loginPassword}
+          />
+          <Pressable
+            disabled={isSaving || !email.trim() || !loginPassword}
+            onPress={() => void handleLogin()}
+            style={({ pressed }) => [styles.loginButton, pressed && styles.pressed, isSaving && styles.disabled]}
+          >
+            <Text style={styles.loginButtonText}>{t("accountAuth.login")}</Text>
           </Pressable>
         </SettingsSection>
 
@@ -199,12 +305,24 @@ export default function SettingsScreen() {
           <ToggleRow
             description={t("settings.analyticsDescription")}
             label={t("settings.analytics")}
-            onValueChange={(usageAnalytics) => void updateSettings((current) => ({
-              ...current,
-              privacy: { ...current.privacy, usageAnalytics },
-            }))}
+            onValueChange={(usageAnalytics) => void handleAnalyticsChange(usageAnalytics)}
             value={settings.privacy.usageAnalytics}
           />
+          <View style={styles.analyticsFacts}>
+            <Text style={styles.analyticsFact}>• {t("settings.analyticsNoContent")}</Text>
+            <Text style={styles.analyticsFact}>• {t("settings.analyticsTechnicalOnly")}</Text>
+            <Text style={styles.analyticsFact}>• {t("settings.analyticsRetention")}</Text>
+          </View>
+          <Pressable
+            disabled={isDeletingAnalytics}
+            onPress={() => void handleDeleteAnalytics()}
+            style={({ pressed }) => [styles.deleteAnalyticsButton, pressed && styles.pressed, isDeletingAnalytics && styles.disabled]}
+          >
+            <Ionicons color="#B42318" name="trash-outline" size={17} />
+            <Text style={styles.deleteAnalyticsText}>
+              {isDeletingAnalytics ? t("settings.analyticsDeleting") : t("settings.analyticsDelete")}
+            </Text>
+          </Pressable>
           <ToggleRow
             description={t("settings.externalProcessingDescription")}
             label={t("settings.externalProcessing")}
@@ -424,6 +542,9 @@ const styles = StyleSheet.create({
   input: { ...theme.typography.body, backgroundColor: theme.colors.background, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, color: theme.colors.text, minHeight: 48, paddingHorizontal: theme.spacing.md },
   saveButton: { alignItems: "center", backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, flexDirection: "row", gap: theme.spacing.sm, justifyContent: "center", minHeight: 50, marginTop: theme.spacing.xs },
   saveButtonText: { ...theme.typography.button, color: "#ffffff" },
+  accountDivider: { backgroundColor: theme.colors.border, height: StyleSheet.hairlineWidth, marginVertical: theme.spacing.lg },
+  loginButton: { alignItems: "center", borderColor: theme.colors.primary, borderRadius: theme.radius.md, borderWidth: 1, justifyContent: "center", minHeight: 48 },
+  loginButtonText: { ...theme.typography.button, color: theme.colors.primary },
   controlLabel: { ...theme.typography.bodyStrong, color: theme.colors.text },
   dropdownGroup: { marginBottom: theme.spacing.lg },
   dropdown: { alignItems: "center", backgroundColor: theme.colors.background, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, flexDirection: "row", justifyContent: "space-between", marginTop: theme.spacing.sm, minHeight: 50, paddingHorizontal: theme.spacing.md },
@@ -440,6 +561,10 @@ const styles = StyleSheet.create({
   toggleText: { flex: 1 },
   toggleLabel: { ...theme.typography.bodyStrong, color: theme.colors.text },
   toggleDescription: { ...theme.typography.caption, color: theme.colors.textSecondary, marginTop: 2 },
+  analyticsFacts: { backgroundColor: theme.colors.background, borderRadius: theme.radius.md, gap: theme.spacing.xs, marginTop: theme.spacing.sm, padding: theme.spacing.md },
+  analyticsFact: { ...theme.typography.caption, color: theme.colors.textSecondary },
+  deleteAnalyticsButton: { alignItems: "center", borderColor: "#FECACA", borderRadius: theme.radius.md, borderWidth: 1, flexDirection: "row", gap: theme.spacing.sm, justifyContent: "center", marginTop: theme.spacing.md, minHeight: 46 },
+  deleteAnalyticsText: { ...theme.typography.button, color: "#B42318" },
   disabled: { opacity: 0.42 },
   pressed: { opacity: 0.7 },
   infoRow: { alignItems: "center", borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", gap: theme.spacing.md, justifyContent: "space-between", minHeight: 48 },

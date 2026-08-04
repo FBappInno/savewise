@@ -5,39 +5,71 @@ import {
 
 import { useFocusEffect } from "@react-navigation/native";
 
-import { getKnowledgeLibrary } from "@/services/content-import-client";
-import type { KnowledgeLibrary } from "@savewise/shared";
+import { hybridKnowledgeRepository } from "@/repositories/hybrid-knowledge-repository";
+import type {
+  KnowledgeLibrary,
+} from "@savewise/shared";
 
 export function useKnowledgeLibrary() {
-  const [library, setLibrary] =
+  const [
+    library,
+    setLibrary,
+  ] =
     useState<KnowledgeLibrary | null>(
       null,
     );
 
-  const [isLoading, setIsLoading] =
+  const [
+    isLoading,
+    setIsLoading,
+  ] =
     useState(true);
 
-  const [isRefreshing, setIsRefreshing] =
+  const [
+    isRefreshing,
+    setIsRefreshing,
+  ] =
     useState(false);
 
-  const [error, setError] = useState<
+  const [
+    error,
+    setError,
+  ] = useState<
     string | null
   >(null);
 
   const loadLibrary =
     useCallback(async () => {
       setError(null);
+      setIsLoading(true);
 
       try {
-        const loadedLibrary =
-          await getKnowledgeLibrary();
+        const localLibrary =
+          await hybridKnowledgeRepository.getLibrary();
 
-        setLibrary(loadedLibrary);
+        if (localLibrary) {
+          setLibrary(
+            localLibrary,
+          );
+
+          return;
+        }
+
+        try {
+          const refreshedLibrary =
+            await hybridKnowledgeRepository.refresh();
+
+          setLibrary(
+            refreshedLibrary,
+          );
+        } catch {
+          setLibrary(null);
+        }
       } catch (loadError) {
         setError(
           getErrorMessage(
             loadError,
-            "Die Wissensbibliothek konnte nicht geladen werden.",
+            "Die Wissensbibliothek konnte nicht lokal geladen werden.",
           ),
         );
       } finally {
@@ -52,16 +84,59 @@ export function useKnowledgeLibrary() {
 
       try {
         const refreshedLibrary =
-          await getKnowledgeLibrary();
+          await hybridKnowledgeRepository.refresh();
 
-        setLibrary(refreshedLibrary);
-      } catch (refreshError) {
-        setError(
-          getErrorMessage(
-            refreshError,
-            "Die Wissensbibliothek konnte nicht aktualisiert werden.",
-          ),
+        setLibrary(
+          refreshedLibrary,
         );
+      } catch (refreshError) {
+        const localLibrary =
+          await hybridKnowledgeRepository.getLibrary();
+
+        if (localLibrary) {
+          setLibrary(
+            localLibrary,
+          );
+
+          setError(null);
+        } else {
+          setError(
+            getErrorMessage(
+              refreshError,
+              "Die Wissensbibliothek konnte nicht aktualisiert werden.",
+            ),
+          );
+        }
+      } finally {
+        setIsRefreshing(false);
+        setIsLoading(false);
+      }
+    }, []);
+
+  const rebuild =
+    useCallback(async () => {
+      setError(null);
+      setIsRefreshing(true);
+
+      try {
+        const rebuiltLibrary =
+          await hybridKnowledgeRepository.rebuild();
+
+        setLibrary(
+          rebuiltLibrary,
+        );
+
+        return rebuiltLibrary;
+      } catch (rebuildError) {
+        const message =
+          getErrorMessage(
+            rebuildError,
+            "Die Wissensbibliothek konnte nicht neu aufgebaut werden.",
+          );
+
+        setError(message);
+
+        throw new Error(message);
       } finally {
         setIsRefreshing(false);
         setIsLoading(false);
@@ -80,6 +155,7 @@ export function useKnowledgeLibrary() {
     isRefreshing,
     error,
     refresh,
+    rebuild,
   };
 }
 

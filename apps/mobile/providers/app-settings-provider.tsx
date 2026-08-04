@@ -14,7 +14,6 @@ import {
 import { translations } from "@/i18n/translations";
 import {
   loadAppSettings,
-  saveAccountPassword,
   saveAppSettings,
 } from "@/services/settings-storage";
 import {
@@ -29,7 +28,6 @@ type SettingsContextValue = {
   isReady: boolean;
   t: (key: string, options?: Record<string, unknown>) => string;
   updateSettings: (update: (current: AppSettings) => AppSettings) => Promise<void>;
-  saveAccount: (account: { username: string; email: string; password: string }) => Promise<void>;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -65,18 +63,6 @@ export function AppSettingsProvider({ children }: PropsWithChildren) {
     await saveAppSettings(nextSettings);
   }, []);
 
-  const saveAccount = useCallback(async ({ username, email, password }: {
-    username: string;
-    email: string;
-    password: string;
-  }) => {
-    const hasPassword = await saveAccountPassword(password);
-    await updateSettings((current) => ({
-      ...current,
-      account: { username: username.trim(), email: email.trim(), hasPassword },
-    }));
-  }, [updateSettings]);
-
   return (
     <SettingsContext.Provider value={{
       settings,
@@ -84,7 +70,6 @@ export function AppSettingsProvider({ children }: PropsWithChildren) {
       isReady,
       t: (key, options) => i18n.t(key, options),
       updateSettings,
-      saveAccount,
     }}>
       {children}
     </SettingsContext.Provider>

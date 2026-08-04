@@ -20,6 +20,7 @@ import type {
 } from "@savewise/shared";
 import { loadAppSettings } from "@/services/settings-storage";
 import { getLocales } from "expo-localization";
+import { classifyAnonymousError, trackAnonymousEvent } from "@/services/anonymous-analytics";
 
 export type KnowledgeUpdate = {
   generatedAt: string;
@@ -229,6 +230,8 @@ export async function importContent(
   rawUrl: string,
   preferredKnowledgePath?: string[],
 ): Promise<ImportResponse> {
+  const startedAt = Date.now();
+  void trackAnonymousEvent("ImportStarted", { operation: "discovery-import" });
   const url =
     normalizeDiscoveryUrl(rawUrl);
 
@@ -246,19 +249,31 @@ export async function importContent(
     );
   }
 
-  return apiRequest<ImportResponse>(
-    "/api/import",
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-        url,
-        preferredLanguage: resolveAnalysisLanguage(settings),
-        preferredKnowledgePath: normalizeKnowledgePath(preferredKnowledgePath),
-      }),
-    },
-    90_000,
-  );
+  try {
+    const result = await apiRequest<ImportResponse>(
+      "/api/import",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          url,
+          preferredLanguage: resolveAnalysisLanguage(settings),
+          preferredKnowledgePath: normalizeKnowledgePath(preferredKnowledgePath),
+        }),
+      },
+      90_000,
+    );
+    const metrics = { durationMs: Date.now() - startedAt, operation: "discovery-import" as const };
+    void trackAnonymousEvent("ImportFinished", metrics);
+    void trackAnonymousEvent("DiscoveryCreated", metrics);
+    return result;
+  } catch (error) {
+    void trackAnonymousEvent("ImportFailed", {
+      durationMs: Date.now() - startedAt,
+      operation: "discovery-import",
+      errorKind: classifyAnonymousError(error),
+    });
+    throw error;
+  }
 }
 
 function normalizeKnowledgePath(path: string[] | undefined): string[] | undefined {
@@ -316,10 +331,10 @@ export function getDiscovery(
   );
 }
 
-export function deleteDiscovery(
+export async function deleteDiscovery(
   discoveryId: string,
 ): Promise<void> {
-  return apiRequest<void>(
+  await apiRequest<void>(
     `/api/discoveries/${encodeURIComponent(
       discoveryId,
     )}`,
@@ -327,13 +342,14 @@ export function deleteDiscovery(
       method: "DELETE",
     },
   );
+  void trackAnonymousEvent("DiscoveryDeleted", { operation: "discovery-delete" });
 }
 
-export function updateDiscovery(
+export async function updateDiscovery(
   discoveryId: string,
   update: DiscoveryUpdate,
 ): Promise<DiscoveryUpdateResponse> {
-  return apiRequest<DiscoveryUpdateResponse>(
+  const result = await apiRequest<DiscoveryUpdateResponse>(
     `/api/discoveries/${encodeURIComponent(discoveryId)}`,
     {
       method: "PATCH",
@@ -341,6 +357,8 @@ export function updateDiscovery(
     },
     90_000,
   );
+  void trackAnonymousEvent("DiscoveryEdited", { operation: "discovery-edit" });
+  return result;
 }
 
 export function getKnowledgeLibrary(): Promise<KnowledgeLibrary> {

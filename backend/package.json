@@ -12,13 +12,16 @@
     "test:personal-assistant": "tsx --test src/scripts/test-personal-knowledge-assistant.ts",
     "test:autonomous-research": "tsx --test src/scripts/test-autonomous-research-agent.ts",
     "test:personal-intelligence": "tsx --test src/scripts/test-personal-intelligence-platform.ts",
-    "test:storage": "tsx --test src/scripts/test-storage-architecture.ts"
+    "test:storage": "tsx --test src/scripts/test-storage-architecture.ts",
+    "test:analytics": "tsx --test src/scripts/test-anonymous-analytics.ts",
+    "test:account": "tsx --test src/scripts/test-account-service.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "nodemailer": "^9.0.3",
     "openai": "^6.49.0",
     "pdf-parse": "^2.4.5",
     "zod": "^4.4.3"
@@ -27,6 +30,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^24",
+    "@types/nodemailer": "^8.0.1",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3"
   }

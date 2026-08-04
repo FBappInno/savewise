@@ -13,9 +13,16 @@
     "dev:backend": "npm run dev --workspace=@savewise/backend",
     "build:web": "npm run build --workspace=web",
     "lint:web": "npm run lint --workspace=web",
-    "lint:mobile": "npm run lint --workspace=mobile"
+    "lint:mobile": "npm run lint --workspace=mobile",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "engines": {
     "node": ">=24 <25"
+  },
+  "dependencies": {
+    "expo": "~54.0.36",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   }
 }

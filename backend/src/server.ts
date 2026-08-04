@@ -51,6 +51,22 @@ import {
   mergePortableSyncBundle,
 } from "./services/storage/cloud-sync-service";
 import type { PortableSyncBundle } from "@savewise/shared";
+import type { AnonymousAnalyticsEvent } from "@savewise/shared";
+import {
+  appendAnonymousAnalyticsEvent,
+  deleteAnonymousAnalyticsEvents,
+} from "./services/analytics/anonymous-analytics-store";
+import {
+  AnonymousAnalyticsEventSchema,
+  AnonymousIdSchema,
+} from "./services/analytics/anonymous-analytics-schema";
+import {
+  AccountError,
+  authenticateAccount,
+  loginAccount,
+  requestAccountVerification,
+  verifyAccountEmail,
+} from "./services/account/account-service";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -160,6 +176,18 @@ const ResearchCandidateStatusSchema = z.object({
   status: z.enum(["suggested", "dismissed"]),
 });
 
+const AccountVerificationRequestSchema = z.object({
+  username: z.string().trim().min(2).max(80),
+  email: z.string().trim().email().max(254),
+  oldPassword: z.string().min(1).max(128).optional(),
+  newPassword: z.string().min(10).max(128),
+}).strict();
+
+const AccountLoginSchema = z.object({
+  email: z.string().trim().email().max(254),
+  password: z.string().min(1).max(128),
+}).strict();
+
 const SyncDiscoverySchema = z.object({
   id: z.string().trim().min(1).max(200),
   source: z.enum(["youtube", "instagram", "tiktok", "web"]),
@@ -242,6 +270,90 @@ app.get(
     });
   },
 );
+
+app.post("/api/analytics/events", async (request, response) => {
+  const parsed = AnonymousAnalyticsEventSchema.safeParse(request.body);
+  if (!parsed.success) {
+    response.status(400).json({ error: "A valid anonymous analytics event is required." });
+    return;
+  }
+
+  try {
+    await appendAnonymousAnalyticsEvent(parsed.data as AnonymousAnalyticsEvent);
+    response.status(204).send();
+  } catch {
+    response.status(503).json({ error: "Anonymous analytics are temporarily unavailable." });
+  }
+});
+
+app.delete("/api/analytics/devices/:anonymousId", async (request, response) => {
+  const anonymousId = AnonymousIdSchema.safeParse(request.params.anonymousId);
+  if (!anonymousId.success) {
+    response.status(400).json({ error: "A valid anonymous identifier is required." });
+    return;
+  }
+
+  try {
+    const deletedEvents = await deleteAnonymousAnalyticsEvents(anonymousId.data);
+    response.json({ deletedEvents });
+  } catch {
+    response.status(503).json({ error: "Anonymous analytics deletion is temporarily unavailable." });
+  }
+});
+
+app.post("/api/account/request-verification", async (request, response) => {
+  const parsed = AccountVerificationRequestSchema.safeParse(request.body);
+  if (!parsed.success) {
+    response.status(400).json({ error: "ACCOUNT_INPUT_INVALID" });
+    return;
+  }
+  try {
+    const result = await requestAccountVerification(parsed.data);
+    response.status(202).json(result);
+  } catch (error) {
+    const accountError = error instanceof AccountError ? error : null;
+    response.status(accountError?.status ?? 500).json({ error: accountError?.code ?? "ACCOUNT_UPDATE_FAILED" });
+  }
+});
+
+app.get("/api/account/verify", async (request, response) => {
+  const token = z.string().min(20).safeParse(request.query.token);
+  if (!token.success) {
+    response.status(400).send("Ungültiger Bestätigungslink.");
+    return;
+  }
+  try {
+    await verifyAccountEmail(token.data);
+    response.redirect("savewise://account-verified");
+  } catch {
+    response.status(400).send("Der Bestätigungslink ist ungültig oder abgelaufen.");
+  }
+});
+
+app.post("/api/account/login", async (request, response) => {
+  const parsed = AccountLoginSchema.safeParse(request.body);
+  if (!parsed.success) {
+    response.status(400).json({ error: "LOGIN_INPUT_INVALID" });
+    return;
+  }
+  try {
+    response.json(await loginAccount(parsed.data.email, parsed.data.password));
+  } catch (error) {
+    const accountError = error instanceof AccountError ? error : null;
+    response.status(accountError?.status ?? 500).json({ error: accountError?.code ?? "LOGIN_FAILED" });
+  }
+});
+
+app.get("/api/account/session", async (request, response) => {
+  const authorization = request.headers.authorization;
+  const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
+  const account = token ? await authenticateAccount(token) : null;
+  if (!account) {
+    response.status(401).json({ error: "SESSION_INVALID" });
+    return;
+  }
+  response.json({ account: { username: account.username, email: account.email } });
+});
 
 app.get("/api/storage/sync/export", async (request, response) => {
   try {

@@ -21,19 +21,20 @@ import {
   View,
 } from "react-native";
 
-import { RelatedDiscoveries } from "@/components/related-discoveries";
 import { DiscoveryEditModal } from "@/components/discovery-edit-modal";
+import { RelatedDiscoveries } from "@/components/related-discoveries";
+import { hybridDiscoveryRepository } from "@/repositories/hybrid-discovery-repository";
 import { useAppSettings } from "@/providers/app-settings-provider";
-import {
-  deleteDiscovery,
-  getDiscovery,
-  updateDiscovery,
-} from "@/services/content-import-client";
 import { theme } from "@/theme";
-import type { Discovery } from "@/types/discovery";
+import type {
+  Discovery,
+  DiscoveryUpdate,
+} from "@/types/discovery";
 
 export default function DiscoveryDetailScreen() {
-  const { locale, t } = useAppSettings();
+  const { locale, t } =
+    useAppSettings();
+
   const params =
     useLocalSearchParams<{
       id?: string | string[];
@@ -44,17 +45,29 @@ export default function DiscoveryDetailScreen() {
       ? params.id
       : params.id?.[0] ?? "";
 
-  const [discovery, setDiscovery] =
-    useState<Discovery | null>(null);
+  const [
+    discovery,
+    setDiscovery,
+  ] = useState<Discovery | null>(
+    null,
+  );
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
 
-  const [error, setError] = useState<
-    string | null
-  >(null);
+  const [
+    error,
+    setError,
+  ] = useState<string | null>(
+    null,
+  );
 
-  const [isEditing, setEditing] = useState(false);
+  const [
+    isEditing,
+    setEditing,
+  ] = useState(false);
 
   const loadDiscovery =
     useCallback(async () => {
@@ -62,7 +75,9 @@ export default function DiscoveryDetailScreen() {
         setError(
           "No discovery ID was provided.",
         );
+
         setIsLoading(false);
+
         return;
       }
 
@@ -70,13 +85,23 @@ export default function DiscoveryDetailScreen() {
       setIsLoading(true);
 
       try {
-        const response =
-          await getDiscovery(
+        const localDiscovery =
+          await hybridDiscoveryRepository.getById(
             discoveryId,
           );
 
+        if (!localDiscovery) {
+          setError(
+            "Die Discovery wurde lokal nicht gefunden.",
+          );
+
+          setDiscovery(null);
+
+          return;
+        }
+
         setDiscovery(
-          response.discovery,
+          localDiscovery,
         );
       } catch (loadError) {
         setError(
@@ -117,7 +142,7 @@ export default function DiscoveryDetailScreen() {
 
     Alert.alert(
       "Delete discovery?",
-      "This discovery will be permanently removed.",
+      "This discovery will be removed from this device. If the server is unavailable, the remote deletion will be synchronized later.",
       [
         {
           text: "Cancel",
@@ -140,7 +165,7 @@ export default function DiscoveryDetailScreen() {
     }
 
     try {
-      await deleteDiscovery(
+      await hybridDiscoveryRepository.delete(
         discovery.id,
       );
 
@@ -156,19 +181,32 @@ export default function DiscoveryDetailScreen() {
   }
 
   async function handleUpdate(
-    update: import("@savewise/shared").DiscoveryUpdate,
+    update: DiscoveryUpdate,
   ) {
-    if (!discovery) return;
+    if (!discovery) {
+      return;
+    }
+
     try {
-      const response = await updateDiscovery(discovery.id, update);
-      setDiscovery(response.discovery);
+      const updatedDiscovery =
+        await hybridDiscoveryRepository.update(
+          discovery.id,
+          update,
+        );
+
+      setDiscovery(
+        updatedDiscovery,
+      );
+
       setEditing(false);
     } catch (updateError) {
       Alert.alert(
         t("discovery.updateFailed"),
         updateError instanceof Error
           ? updateError.message
-          : t("discovery.updateFailedMessage"),
+          : t(
+              "discovery.updateFailedMessage",
+            ),
       );
     }
   }
@@ -205,7 +243,9 @@ export default function DiscoveryDetailScreen() {
           style={styles.backButton}
         >
           <Text
-            style={styles.backButtonText}
+            style={
+              styles.backButtonText
+            }
           >
             Go back
           </Text>
@@ -247,7 +287,9 @@ export default function DiscoveryDetailScreen() {
           {displayedTitle}
         </Text>
 
-        <View style={styles.metadataRow}>
+        <View
+          style={styles.metadataRow}
+        >
           {discovery.author ? (
             <Text
               style={styles.metadata}
@@ -260,12 +302,20 @@ export default function DiscoveryDetailScreen() {
             <Text
               style={styles.metadata}
             >
-              {formatDate(discovery.publishedAt, locale)}
+              {formatDate(
+                discovery.publishedAt,
+                locale,
+              )}
             </Text>
           ) : null}
 
-          <Text style={styles.metadata}>
-            {formatDate(discovery.createdAt, locale)}
+          <Text
+            style={styles.metadata}
+          >
+            {formatDate(
+              discovery.createdAt,
+              locale,
+            )}
           </Text>
         </View>
 
@@ -280,7 +330,9 @@ export default function DiscoveryDetailScreen() {
             <Text
               style={styles.summary}
             >
-              {compactSummary(discovery.summary)}
+              {compactSummary(
+                discovery.summary,
+              )}
             </Text>
           </View>
         ) : null}
@@ -298,16 +350,11 @@ export default function DiscoveryDetailScreen() {
                 styles.knowledgePath
               }
             >
-              <Text
-                style={
-                  styles.knowledgePathText
-                }
-              >
-                {formatCategory(
-                  classification
-                    .primaryCategory,
+              <KnowledgePathItem
+                label={formatCategory(
+                  classification.primaryCategory,
                 )}
-              </Text>
+              />
 
               <Ionicons
                 color={
@@ -318,16 +365,11 @@ export default function DiscoveryDetailScreen() {
                 size={16}
               />
 
-              <Text
-                style={
-                  styles.knowledgePathText
+              <KnowledgePathItem
+                label={
+                  classification.secondaryCategory
                 }
-              >
-                {
-                  classification
-                    .secondaryCategory
-                }
-              </Text>
+              />
 
               <Ionicons
                 color={
@@ -338,13 +380,11 @@ export default function DiscoveryDetailScreen() {
                 size={16}
               />
 
-              <Text
-                style={
-                  styles.knowledgePathText
+              <KnowledgePathItem
+                label={
+                  classification.topic
                 }
-              >
-                {classification.topic}
-              </Text>
+              />
             </View>
 
             {classification.subtopics
@@ -479,37 +519,69 @@ export default function DiscoveryDetailScreen() {
         ) : null}
 
         <RelatedDiscoveries
-          discoveryId={discovery.id}
+          discoveryId={
+            discovery.id
+          }
           onSelectDiscovery={(
             relatedDiscovery,
           ) => {
-            router.push({
-              pathname:
-                "/discovery/[id]",
-              params: {
-                id: relatedDiscovery.id,
-              },
-            });
+            router.push(
+              `/discovery/${relatedDiscovery.id}`,
+            );
           }}
         />
 
         <View style={styles.actionRow}>
           <Pressable
             accessibilityRole="button"
-            onPress={() => setEditing(true)}
-            style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+            onPress={() => {
+              setEditing(true);
+            }}
+            style={({ pressed }) => [
+              styles.editButton,
+              pressed &&
+                styles.pressed,
+            ]}
           >
-            <Ionicons color={theme.colors.primary} name="create-outline" size={18} />
-            <Text style={styles.editButtonText}>{t("discovery.edit")}</Text>
+            <Ionicons
+              color={
+                theme.colors.primary
+              }
+              name="create-outline"
+              size={18}
+            />
+
+            <Text
+              style={
+                styles.editButtonText
+              }
+            >
+              {t("discovery.edit")}
+            </Text>
           </Pressable>
 
           <Pressable
             accessibilityRole="button"
             onPress={handleDelete}
-            style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              pressed &&
+                styles.pressed,
+            ]}
           >
-            <Ionicons color="#B42318" name="trash-outline" size={18} />
-            <Text style={styles.deleteButtonText}>{t("discovery.delete")}</Text>
+            <Ionicons
+              color="#B42318"
+              name="trash-outline"
+              size={18}
+            />
+
+            <Text
+              style={
+                styles.deleteButtonText
+              }
+            >
+              {t("discovery.delete")}
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -517,24 +589,92 @@ export default function DiscoveryDetailScreen() {
       <DiscoveryEditModal
         discovery={discovery}
         labels={{
-          title: t("discovery.editTitle"),
-          description: t("discovery.editDescription"),
-          titleField: t("discovery.titleField"),
-          summary: t("discovery.summaryField"),
-          primaryCategory: t("discovery.primaryCategory"),
-          secondaryCategory: t("discovery.secondaryCategory"),
-          topic: t("discovery.topic"),
-          subtopics: t("discovery.subtopics"),
-          subtopicsHint: t("discovery.subtopicsHint"),
-          cancel: t("discovery.cancel"),
-          save: t("discovery.save"),
-          saving: t("discovery.saving"),
+          title:
+            t(
+              "discovery.editTitle",
+            ),
+
+          description:
+            t(
+              "discovery.editDescription",
+            ),
+
+          titleField:
+            t(
+              "discovery.titleField",
+            ),
+
+          summary:
+            t(
+              "discovery.summaryField",
+            ),
+
+          primaryCategory:
+            t(
+              "discovery.primaryCategory",
+            ),
+
+          secondaryCategory:
+            t(
+              "discovery.secondaryCategory",
+            ),
+
+          topic:
+            t(
+              "discovery.topic",
+            ),
+
+          subtopics:
+            t(
+              "discovery.subtopics",
+            ),
+
+          subtopicsHint:
+            t(
+              "discovery.subtopicsHint",
+            ),
+
+          cancel:
+            t(
+              "discovery.cancel",
+            ),
+
+          save:
+            t(
+              "discovery.save",
+            ),
+
+          saving:
+            t(
+              "discovery.saving",
+            ),
         }}
-        onClose={() => setEditing(false)}
+        onClose={() => {
+          setEditing(false);
+        }}
         onSave={handleUpdate}
         visible={isEditing}
       />
     </>
+  );
+}
+
+type KnowledgePathItemProps = {
+  label: string;
+};
+
+function KnowledgePathItem({
+  label,
+}: KnowledgePathItemProps) {
+  return (
+    <Text
+      numberOfLines={2}
+      style={
+        styles.knowledgePathText
+      }
+    >
+      {label}
+    </Text>
   );
 }
 
@@ -589,110 +729,133 @@ function formatDate(
   ).format(date);
 }
 
-function compactSummary(value: string): string {
-  const normalized = value.replace(/\s+/g, " ").trim();
-  const sentences = normalized.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [];
-  const twoSentences = sentences.slice(0, 2).join(" ").trim();
-
-  if (twoSentences.length <= 420) {
-    return twoSentences;
-  }
-
-  const shortened = twoSentences.slice(0, 417);
-  const lastSpace = shortened.lastIndexOf(" ");
-  return `${shortened.slice(0, Math.max(lastSpace, 0)).trim()}…`;
+function compactSummary(
+  value: string,
+): string {
+  return value
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 const styles = StyleSheet.create({
   content: {
     backgroundColor:
       theme.colors.background,
+
+    paddingBottom: 80,
+
     paddingHorizontal:
       theme.spacing.xl,
+
     paddingTop:
       theme.spacing.xl,
-    paddingBottom:
-      theme.spacing.xxxl,
   },
 
   centered: {
     alignItems: "center",
+
     backgroundColor:
       theme.colors.background,
+
     flex: 1,
+
     justifyContent: "center",
+
     padding:
       theme.spacing.xl,
   },
 
   loadingText: {
     ...theme.typography.body,
+
     color:
       theme.colors.textSecondary,
+
     marginTop:
       theme.spacing.md,
   },
 
   errorTitle: {
     ...theme.typography.sectionTitle,
+
     color:
       theme.colors.text,
+
     textAlign: "center",
   },
 
   errorText: {
     ...theme.typography.body,
+
     color:
       theme.colors.textSecondary,
+
     marginTop:
       theme.spacing.sm,
+
     textAlign: "center",
   },
 
   backButton: {
     backgroundColor:
       theme.colors.primary,
+
     borderRadius:
       theme.radius.lg,
+
     marginTop:
       theme.spacing.xl,
+
     paddingHorizontal:
       theme.spacing.xl,
+
     paddingVertical:
       theme.spacing.md,
   },
 
   backButtonText: {
     ...theme.typography.button,
+
     color:
       theme.colors.textOnPrimary,
   },
 
   source: {
     ...theme.typography.caption,
+
     color:
       theme.colors.primary,
-    marginBottom:
-      theme.spacing.sm,
+
+    letterSpacing: 1,
+
+    textTransform: "uppercase",
   },
 
   title: {
     ...theme.typography.screenTitle,
+
     color:
       theme.colors.text,
+
+    marginTop:
+      theme.spacing.sm,
   },
 
   metadataRow: {
     flexDirection: "row",
+
     flexWrap: "wrap",
+
     gap:
       theme.spacing.sm,
+
     marginTop:
       theme.spacing.md,
   },
 
   metadata: {
     ...theme.typography.caption,
+
     color:
       theme.colors.textSecondary,
   },
@@ -704,48 +867,56 @@ const styles = StyleSheet.create({
 
   eyebrow: {
     ...theme.typography.caption,
+
     color:
-      theme.colors.textSecondary,
-    letterSpacing: 1.2,
-    marginBottom:
-      theme.spacing.sm,
+      theme.colors.primary,
+
+    letterSpacing: 1.1,
   },
 
   summary: {
     ...theme.typography.body,
+
     color:
       theme.colors.text,
-    lineHeight: 24,
+
+    lineHeight: 23,
+
+    marginTop:
+      theme.spacing.md,
   },
 
   knowledgePath: {
     alignItems: "center",
-    backgroundColor:
-      theme.colors.surface,
-    borderColor:
-      theme.colors.border,
-    borderRadius:
-      theme.radius.lg,
-    borderWidth: 1,
+
     flexDirection: "row",
+
     flexWrap: "wrap",
+
     gap:
-      theme.spacing.xs,
-    padding:
-      theme.spacing.lg,
+      theme.spacing.sm,
+
+    marginTop:
+      theme.spacing.md,
   },
 
   knowledgePathText: {
     ...theme.typography.bodyStrong,
+
     color:
       theme.colors.text,
+
+    flexShrink: 1,
   },
 
   chips: {
     flexDirection: "row",
+
     flexWrap: "wrap",
+
     gap:
       theme.spacing.sm,
+
     marginTop:
       theme.spacing.md,
   },
@@ -753,18 +924,24 @@ const styles = StyleSheet.create({
   chip: {
     backgroundColor:
       theme.colors.surface,
+
     borderColor:
       theme.colors.border,
+
     borderRadius: 999,
+
     borderWidth: 1,
+
     paddingHorizontal:
       theme.spacing.md,
+
     paddingVertical:
       theme.spacing.sm,
   },
 
   chipText: {
     ...theme.typography.caption,
+
     color:
       theme.colors.textSecondary,
   },
@@ -772,17 +949,25 @@ const styles = StyleSheet.create({
   confidenceCard: {
     backgroundColor:
       theme.colors.surface,
+
     borderColor:
       theme.colors.border,
+
     borderRadius:
       theme.radius.lg,
+
     borderWidth: 1,
+
+    marginTop:
+      theme.spacing.md,
+
     padding:
       theme.spacing.lg,
   },
 
   confidenceValue: {
     ...theme.typography.sectionTitle,
+
     color:
       theme.colors.text,
   },
@@ -790,84 +975,133 @@ const styles = StyleSheet.create({
   confidenceTrack: {
     backgroundColor:
       theme.colors.background,
+
     borderRadius: 999,
+
     height: 8,
+
     marginTop:
       theme.spacing.md,
+
     overflow: "hidden",
   },
 
   confidenceFill: {
     backgroundColor:
       theme.colors.primary,
+
     borderRadius: 999,
+
     height: "100%",
   },
 
   sourceButton: {
     alignItems: "center",
+
     backgroundColor:
       theme.colors.surface,
+
     borderColor:
       theme.colors.border,
+
     borderRadius:
       theme.radius.lg,
+
     borderWidth: 1,
+
     flexDirection: "row",
+
     gap:
       theme.spacing.sm,
+
     justifyContent: "center",
+
     marginTop:
       theme.spacing.xxxl,
+
     padding:
       theme.spacing.lg,
   },
 
   sourceButtonText: {
     ...theme.typography.bodyStrong,
+
     color:
       theme.colors.primary,
   },
 
   actionRow: {
     flexDirection: "row",
-    gap: theme.spacing.md,
-    marginTop: theme.spacing.xxxl,
+
+    gap:
+      theme.spacing.md,
+
+    marginTop:
+      theme.spacing.xxxl,
   },
 
   editButton: {
     alignItems: "center",
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.primary,
-    borderRadius: theme.radius.lg,
+
+    backgroundColor:
+      theme.colors.surface,
+
+    borderColor:
+      theme.colors.primary,
+
+    borderRadius:
+      theme.radius.lg,
+
     borderWidth: 1,
+
     flex: 1,
+
     flexDirection: "row",
-    gap: theme.spacing.sm,
+
+    gap:
+      theme.spacing.sm,
+
     justifyContent: "center",
-    padding: theme.spacing.lg,
+
+    padding:
+      theme.spacing.lg,
   },
 
   editButtonText: {
     ...theme.typography.bodyStrong,
-    color: theme.colors.primary,
+
+    color:
+      theme.colors.primary,
   },
 
   deleteButton: {
     alignItems: "center",
+
+    backgroundColor: "#FFF5F4",
+
+    borderColor: "#FECACA",
+
     borderRadius:
       theme.radius.lg,
+
+    borderWidth: 1,
+
     flex: 1,
+
     flexDirection: "row",
+
     gap:
       theme.spacing.sm,
+
     justifyContent: "center",
+
     padding:
       theme.spacing.lg,
   },
 
   deleteButtonText: {
     ...theme.typography.bodyStrong,
+
     color: "#B42318",
   },
 

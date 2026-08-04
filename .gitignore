@@ -43,3 +43,9 @@ Desktop.ini
 
 # Local backup folders
 backup/
+
+# Local anonymous analytics development store
+backend/data/anonymous-analytics.json
+backend/data/anonymous-analytics.json.tmp
+backend/data/accounts.json
+backend/data/accounts.json.tmp

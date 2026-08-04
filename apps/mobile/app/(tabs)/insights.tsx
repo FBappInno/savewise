@@ -24,6 +24,7 @@ import type {
   KnowledgeDocumentType,
   SecondBrainOverview,
 } from "@savewise/shared";
+import { trackAnonymousEvent } from "@/services/anonymous-analytics";
 
 const DOCUMENT_TYPES: { type: KnowledgeDocumentType; icon: keyof typeof Ionicons.glyphMap }[] = [
   { type: "summary", icon: "reader-outline" },
@@ -66,6 +67,7 @@ export default function SecondBrainScreen() {
     const currentQuestion = question.trim();
     if (currentQuestion.length < 3) return;
     setQuestion("");
+    void trackAnonymousEvent("AIChatQuestion", { operation: "ai-chat" });
     await ask(currentQuestion);
   }
 

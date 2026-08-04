@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import {
   useMemo,
+  useEffect,
   useState,
 } from "react";
 
@@ -23,6 +24,7 @@ import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type { CapturedItem } from "@/types/captured-item";
 import type { Discovery } from "@/types/discovery";
+import { trackAnonymousEvent } from "@/services/anonymous-analytics";
 
 export default function HomeScreen() {
   const { t } = useAppSettings();
@@ -33,6 +35,14 @@ export default function HomeScreen() {
 
   const [search, setSearch] =
     useState("");
+
+  useEffect(() => {
+    if (search.trim().length < 2) return;
+    const timeout = setTimeout(() => {
+      void trackAnonymousEvent("SearchUsed", { operation: "search" });
+    }, 700);
+    return () => clearTimeout(timeout);
+  }, [search]);
 
   const {
     discoveries,

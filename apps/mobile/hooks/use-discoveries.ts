@@ -5,7 +5,7 @@ import {
 
 import { useFocusEffect } from "@react-navigation/native";
 
-import { apiDiscoveryRepository } from "@/repositories/api-discovery-repository";
+import { hybridDiscoveryRepository } from "@/repositories/hybrid-discovery-repository";
 import type { Discovery } from "@/types/discovery";
 
 export function useDiscoveries() {
@@ -39,19 +39,20 @@ export function useDiscoveries() {
   const loadDiscoveries =
     useCallback(async () => {
       setError(null);
+      setIsLoading(true);
 
       try {
-        const loadedDiscoveries =
-          await apiDiscoveryRepository.getAll();
+        const localDiscoveries =
+          await hybridDiscoveryRepository.getAll();
 
         setDiscoveries(
-          loadedDiscoveries,
+          localDiscoveries,
         );
       } catch (loadError) {
         setError(
           getErrorMessage(
             loadError,
-            "Discoveries konnten nicht geladen werden.",
+            "Discoveries konnten nicht lokal geladen werden.",
           ),
         );
       } finally {
@@ -66,7 +67,7 @@ export function useDiscoveries() {
 
       try {
         const refreshedDiscoveries =
-          await apiDiscoveryRepository.refresh();
+          await hybridDiscoveryRepository.refresh();
 
         setDiscoveries(
           refreshedDiscoveries,
@@ -95,20 +96,22 @@ export function useDiscoveries() {
 
         try {
           const discovery =
-            await apiDiscoveryRepository.importFromUrl(
+            await hybridDiscoveryRepository.importFromUrl(
               url,
               preferredKnowledgePath,
             );
 
           setDiscoveries(
-            (currentDiscoveries) => [
-              discovery,
-              ...currentDiscoveries.filter(
-                (currentDiscovery) =>
-                  currentDiscovery.id !==
-                  discovery.id,
-              ),
-            ],
+            (currentDiscoveries) =>
+              sortDiscoveries([
+                discovery,
+
+                ...currentDiscoveries.filter(
+                  (currentDiscovery) =>
+                    currentDiscovery.id !==
+                    discovery.id,
+                ),
+              ]),
           );
 
           return discovery;
@@ -149,7 +152,7 @@ export function useDiscoveries() {
         );
 
         try {
-          await apiDiscoveryRepository.delete(
+          await hybridDiscoveryRepository.delete(
             discoveryId,
           );
         } catch (deleteError) {
@@ -173,8 +176,8 @@ export function useDiscoveries() {
 
   useFocusEffect(
     useCallback(() => {
-      void refresh();
-    }, [refresh]),
+      void loadDiscoveries();
+    }, [loadDiscoveries]),
   );
 
   return {
@@ -187,6 +190,22 @@ export function useDiscoveries() {
     importDiscovery,
     removeDiscovery,
   };
+}
+
+function sortDiscoveries(
+  discoveries: Discovery[],
+): Discovery[] {
+  return [
+    ...discoveries,
+  ].sort(
+    (first, second) =>
+      new Date(
+        second.createdAt,
+      ).getTime() -
+      new Date(
+        first.createdAt,
+      ).getTime(),
+  );
 }
 
 function getErrorMessage(

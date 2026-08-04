@@ -1,6 +1,22 @@
 {
-  "modelVersion": 9,
+  "modelVersion": 10,
   "events": [
+    {
+      "id": "learning-10-7343ec73235f",
+      "version": 10,
+      "trigger": "research-completed",
+      "graphFingerprint": "6436aeb10405f663fec44f913bc503b4d9a399af9c939262248f9e785c7de2c1",
+      "delta": {
+        "addedNodeIds": [],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "0 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T11:08:56.248Z"
+    },
     {
       "id": "learning-9-672f86ad2bbb",
       "version": 9,

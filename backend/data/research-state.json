@@ -1,6 +1,6 @@
 {
-  "lastRunAt": "2026-08-03T21:28:48.423Z",
-  "nextRecommendedRunAt": "2026-08-04T21:28:48.423Z",
+  "lastRunAt": "2026-08-04T11:08:56.242Z",
+  "nextRecommendedRunAt": "2026-08-05T11:08:56.242Z",
   "interests": [
     {
       "id": "node-nutrition",
@@ -14,11 +14,11 @@
       "knowledgeGaps": [
         "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit"
       ],
-      "previousStrength": 0.95,
-      "trend": "declining",
-      "trendExplanation": "Das Interesse ist um 80 Prozentpunkte gesunken.",
+      "previousStrength": 0.15,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T18:25:31.865Z",
-      "observedRuns": 2
+      "observedRuns": 3
     },
     {
       "id": "node-current-events",
@@ -32,42 +32,26 @@
       "knowledgeGaps": [
         "Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz"
       ],
-      "previousStrength": 0.9,
-      "trend": "declining",
-      "trendExplanation": "Das Interesse ist um 75 Prozentpunkte gesunken.",
+      "previousStrength": 0.15,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T18:25:31.865Z",
-      "observedRuns": 2
-    },
-    {
-      "id": "node-lifestyle",
-      "title": "Lifestyle",
-      "description": "Freizeit, Hobbys und alltägliche Interessen, vor allem Kochen, Haustiere und Unterhaltung durch kurze Videoformate.",
-      "nodeIds": [
-        "node-lifestyle"
-      ],
-      "discoveryCount": 10,
-      "strength": 0.303,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
-      "knowledgeGaps": []
+      "observedRuns": 3
     },
     {
       "id": "node-safety-and-risk-management",
       "title": "Sicherheits- und Risikomanagement",
-      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit sowie statistischer Risikoanalyse.",
+      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit.",
       "nodeIds": [
         "node-safety-and-risk-management"
       ],
       "discoveryCount": 5,
-      "strength": 0.1515,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "strength": 0.1282,
+      "previousStrength": 0.1515,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     },
     {
@@ -78,12 +62,12 @@
         "node-human-error"
       ],
       "discoveryCount": 5,
-      "strength": 0.1515,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "strength": 0.1282,
+      "previousStrength": 0.1515,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     },
     {
@@ -94,12 +78,12 @@
         "node-pets"
       ],
       "discoveryCount": 4,
-      "strength": 0.1212,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "strength": 0.1026,
+      "previousStrength": 0.1212,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     },
     {
@@ -110,12 +94,12 @@
         "node-cats"
       ],
       "discoveryCount": 4,
-      "strength": 0.1212,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "strength": 0.1026,
+      "previousStrength": 0.1212,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     },
     {
@@ -126,12 +110,12 @@
         "node-industrial-and-occupational-safety"
       ],
       "discoveryCount": 3,
-      "strength": 0.0909,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "strength": 0.0769,
+      "previousStrength": 0.0909,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     },
     {
@@ -142,12 +126,12 @@
         "node-kitten-behavior"
       ],
       "discoveryCount": 3,
-      "strength": 0.0909,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "strength": 0.0769,
+      "previousStrength": 0.0909,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     },
     {
@@ -157,103 +141,123 @@
       "nodeIds": [
         "node-science-environmental-and-earth"
       ],
-      "discoveryCount": 3,
-      "strength": 0.0909,
+      "discoveryCount": 2,
+      "strength": 0.15,
+      "previousStrength": 0.0909,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "observedRuns": 2,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-root-travel",
+      "title": "Travel",
+      "description": "Knowledge about travel.",
+      "nodeIds": [
+        "node-root-travel"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.1026,
       "previousStrength": null,
       "trend": "new",
       "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
+      "firstDetectedAt": "2026-08-04T11:08:18.945Z",
       "observedRuns": 1,
       "knowledgeGaps": []
     }
   ],
   "candidates": [
     {
-      "title": "Langfristige Auswirkungen von Di\u0000ten auf die Gesundheit: Eine umfassende Analyse",
-      "url": "https://www.gesundheits-lexikon.com/Ernaehrung-Diaeten/Einleitung",
-      "sourceName": "DocMedicus Gesundheitslexikon",
-      "sourceType": "article",
-      "publishedAt": "2026-07-15",
-      "summary": "Dieser Artikel bietet eine detaillierte Untersuchung der langfristigen Auswirkungen verschiedener Di\u0000ten auf die Gesundheit, basierend auf aktuellen wissenschaftlichen Erkenntnissen.",
+      "title": "Langfristige Auswirkungen von kalorienreduzierten Diäten auf Gesundheit und Altern",
+      "url": "https://www.becker-stiftung.de/pros-cons-von-kalorienreduzierten-diaeten-auf-das-altern-und-die-gesundheit/",
+      "sourceName": "Becker Stiftung",
+      "sourceType": "study",
+      "publishedAt": "2016-03-29",
+      "summary": "Eine Studie des Leibniz-Instituts für Alternsforschung zeigt, dass kalorienreduzierte Diäten den Erhalt von Stammzellen in Mäusen fördern, jedoch auf Kosten der Immunabwehr, was die lebensverlängernden Effekte beeinträchtigen könnte.",
       "interestId": "node-nutrition",
       "scores": {
         "relevance": 0.9,
         "quality": 0.85,
-        "recency": 0.8,
+        "recency": 0.2,
         "trustworthiness": 0.9,
-        "knowledgeValue": 0.95,
-        "gapCoverage": 0.95,
-        "overall": 0.9
+        "knowledgeValue": 0.8,
+        "gapCoverage": 0.9,
+        "overall": 0.85
       },
       "relevance": "relevant",
-      "decisionReason": "Deckt umfassend die langfristigen Auswirkungen von Di\u0000ten auf die Gesundheit ab.",
+      "decisionReason": "Die Studie beleuchtet die langfristigen Auswirkungen kalorienreduzierter Diäten auf Gesundheit und Altern.",
       "impact": "extends",
-      "impactExplanation": "Erweitert das bestehende Wissen durch detaillierte Analysen und aktuelle Forschungsergebnisse.",
+      "impactExplanation": "Erweitert das Verständnis über die komplexen Effekte kalorienreduzierter Diäten auf die Gesundheit.",
       "relatedDiscoveryIds": [],
-      "id": "research-dfd853b697bf165c",
+      "id": "research-ab3174cf6c1d6f67",
       "status": "suggested",
-      "foundAt": "2026-08-03T21:28:48.422Z"
+      "foundAt": "2026-08-04T11:08:56.241Z"
     },
     {
-      "title": "Human Risk in der Cybersecurity: Warum der Mensch die größte Schwachstelle ist",
-      "url": "https://www.cyberport-it-services.de/it-insights/human-risk-in-der-cybersecurity/",
-      "sourceName": "Cyberport IT Services",
-      "sourceType": "article",
-      "publishedAt": "2026-07-20",
-      "summary": "Dieser Artikel beleuchtet, dass menschliches Fehlverhalten in über 85 % aller Cyberangriffe eine entscheidende Rolle spielt. Er diskutiert typische Situationen, in denen menschliche Fehler auftreten, und bietet Strategien zur Minimierung dieses Risikos.",
-      "interestId": "node-safety-and-risk-management",
+      "title": "Menschliches Versagen als Risikofaktor in Sicherheitsvorf\u0000llen und Unf\u0000llen",
+      "url": "https://www.zh.ch/de/umwelt-tiere/umweltschutz/umweltpraxis/definitionsseite/1995/7/zup007_1995_a0053_risikofaktor-pdf.html",
+      "sourceName": "Kanton Z\u0000rich",
+      "sourceType": "news",
+      "publishedAt": "1995-10-21",
+      "summary": "Dieser Artikel analysiert, dass \u0000ber 80 % der Tankerunf\u0000lle mit \u0000laustritt auf menschliches Fehlverhalten zur\u0000ckzuf\u0000hren sind, w\u0000hrend nur 20 % auf technische M\u0000ngel oder andere Faktoren. Er betont die Notwendigkeit, den Umgang mit gef\u0000hrlichen G\u0000tern im Arbeitsumfeld st\u0000ndig zu verbessern, um Sicherheitsvorf\u0000lle zu reduzieren.",
+      "interestId": "node-human-error",
       "scores": {
         "relevance": 0.9,
-        "quality": 0.85,
-        "recency": 0.8,
+        "quality": 0.8,
+        "recency": 0.1,
         "trustworthiness": 0.9,
-        "knowledgeValue": 0.95,
+        "knowledgeValue": 0.8,
         "gapCoverage": 0.9,
-        "overall": 0.88
+        "overall": 0.8
       },
       "relevance": "relevant",
-      "decisionReason": "Bietet aktuelle und detaillierte Informationen über den Einfluss menschlichen Versagens auf die Cybersicherheit und diskutiert präventive Maßnahmen.",
-      "impact": "extends",
-      "impactExplanation": "Erweitert das Verständnis über die Rolle menschlichen Versagens in der Cybersicherheit und bietet praktische Lösungen.",
-      "relatedDiscoveryIds": [],
-      "id": "research-45417c1b02cbb3c5",
+      "decisionReason": "Bietet eine detaillierte Analyse des Einflusses menschlichen Versagens auf Sicherheitsvorf\u0000lle und Unf\u0000lle.",
+      "impact": "confirms",
+      "impactExplanation": "Best\u0000tigt die Erkenntnis, dass menschliches Versagen ein signifikanter Risikofaktor in Sicherheitsvorf\u0000llen ist.",
+      "relatedDiscoveryIds": [
+        "24ea02ed-81fa-442b-bcca-c5c81942a29e"
+      ],
+      "id": "research-997685b448585ec0",
       "status": "suggested",
-      "foundAt": "2026-08-03T21:28:48.422Z"
+      "foundAt": "2026-08-04T11:08:56.241Z"
     },
     {
-      "title": "Katzenkommunikation: Körpersprache und Lautäußerungen verstehen",
-      "url": "https://www.tierfreund.de/katzenverhalten-korpersprache-und-lautsprache/",
-      "sourceName": "Tierfreund",
+      "title": "K\u0000rpersprache und Kommunikation von Katzen",
+      "url": "https://www.tfa-wissen.de/koerpersprache-und-kommunikation-von-katzen",
+      "sourceName": "tfa-wissen",
       "sourceType": "article",
-      "publishedAt": "2024-06-15",
-      "summary": "Dieser Artikel bietet einen umfassenden Überblick über die Körpersprache und Lautäußerungen von Katzen, mit besonderem Fokus auf das Spielverhalten und die damit verbundene Kommunikation.",
+      "publishedAt": "2025-10-13",
+      "summary": "Dieser Artikel erkl\u0000rt, dass Katzen haupts\u0000chlich nonverbal kommunizieren und ihre Signale wie Ohrenstellung, Schwanzhaltung und Mimik genutzt werden, um ihre Stimmung und Absichten zu vermitteln. Er betont die Bedeutung der Beobachtung dieser Signale, um das Verhalten von Katzen besser zu verstehen.",
       "interestId": "node-cats",
       "scores": {
         "relevance": 0.9,
-        "quality": 0.85,
-        "recency": 0.8,
-        "trustworthiness": 0.9,
-        "knowledgeValue": 0.95,
+        "quality": 0.8,
+        "recency": 0.9,
+        "trustworthiness": 0.8,
+        "knowledgeValue": 0.8,
         "gapCoverage": 0.9,
-        "overall": 0.88
+        "overall": 0.8
       },
       "relevance": "relevant",
-      "decisionReason": "Bietet detaillierte Einblicke in die Körpersprache und Kommunikation von Katzen, insbesondere im Kontext des Spielverhaltens.",
-      "impact": "extends",
-      "impactExplanation": "Erweitert das Verständnis über die nonverbale Kommunikation von Katzen während des Spiels.",
-      "relatedDiscoveryIds": [],
-      "id": "research-e95bdcffea18c2d0",
+      "decisionReason": "Bietet umfassende Informationen zur nonverbalen Kommunikation von Katzen.",
+      "impact": "confirms",
+      "impactExplanation": "Best\u0000tigt die Erkenntnis, dass Katzen haupts\u0000chlich nonverbal kommunizieren und ihre Signale genutzt werden, um ihre Stimmung und Absichten zu vermitteln.",
+      "relatedDiscoveryIds": [
+        "d52cffb7-9e98-406a-999e-246414b5d3e1"
+      ],
+      "id": "research-89460b48c586f836",
       "status": "suggested",
-      "foundAt": "2026-08-03T21:28:48.422Z"
+      "foundAt": "2026-08-04T11:08:56.241Z"
     },
     {
-      "title": "Klimawandel: Historische Klimazyklen und aktuelle Trends",
-      "url": "https://www.climate.gov/news-features/climate-qa/hasnt-earth-warmed-and-cooled-naturally-throughout-history",
-      "sourceName": "NOAA Climate.gov",
+      "title": "Tipps zur Unfallprävention",
+      "url": "https://www.arbeitsunfaelle.de/praevention",
+      "sourceName": "Arbeitsunfaelle.de",
       "sourceType": "article",
-      "publishedAt": "2020-10-29",
-      "summary": "Dieser Artikel der National Oceanic and Atmospheric Administration (NOAA) erläutert, dass die Erde in den letzten Millionen Jahren natürliche Klimaschwankungen durchlief, einschließlich Kalt- und Warmperioden. Diese natürlichen Zyklen wurden durch Faktoren wie Änderungen der Erdumlaufbahn und Sonnenaktivität beeinflusst. Allerdings betonen die Autoren, dass die aktuelle Erwärmung der Erde hauptsächlich durch menschliche Aktivitäten, insbesondere den Ausstoß von Treibhausgasen, verursacht wird.",
-      "interestId": "node-science-environmental-and-earth",
+      "publishedAt": "2025-07-15",
+      "summary": "Dieser Artikel bietet praxisnahe Empfehlungen zur Unfallprävention in der Arbeitswelt, einschließlich technischer, organisatorischer und personenbezogener Maßnahmen.",
+      "interestId": "node-industrial-and-occupational-safety",
       "scores": {
         "relevance": 0.9,
         "quality": 0.85,
@@ -264,16 +268,92 @@
         "overall": 0.88
       },
       "relevance": "relevant",
-      "decisionReason": "Bietet eine fundierte Erklärung zu natürlichen Klimaschwankungen und deren Unterscheidung von aktuellen menschlich verursachten Veränderungen.",
+      "decisionReason": "Bietet umfassende und aktuelle Informationen zur Unfallprävention.",
       "impact": "extends",
-      "impactExplanation": "Erweitert das Verständnis über die Ursachen von Klimaschwankungen und betont die Rolle menschlicher Aktivitäten in der aktuellen Erwärmung.",
+      "impactExplanation": "Erweitert das Verständnis von Unfallprävention durch detaillierte Maßnahmen.",
       "relatedDiscoveryIds": [],
-      "id": "research-a6268ba819ab1a84",
+      "id": "research-16a21957b69e6800",
       "status": "suggested",
-      "foundAt": "2026-08-03T21:28:48.422Z"
+      "foundAt": "2026-08-04T11:08:56.241Z"
+    },
+    {
+      "title": "Die 25 besten Reiseziele 2026",
+      "url": "https://www.lonelyplanet.de/best-in-travel/best-in-travel-2026",
+      "sourceName": "Lonely Planet",
+      "sourceType": "article",
+      "publishedAt": "2025-10-25",
+      "summary": "Lonely Planet präsentiert die 25 besten Reiseziele für 2026, darunter Peru, Réunion und Botswana.",
+      "interestId": "node-root-travel",
+      "scores": {
+        "relevance": 0.9,
+        "quality": 0.95,
+        "recency": 0.85,
+        "trustworthiness": 0.95,
+        "knowledgeValue": 0.9,
+        "gapCoverage": 0.85,
+        "overall": 0.9
+      },
+      "relevance": "relevant",
+      "decisionReason": "Aktuelle und vertrauenswürdige Quelle mit umfassenden Reiseempfehlungen.",
+      "impact": "new-perspective",
+      "impactExplanation": "Bietet neue Perspektiven auf weniger bekannte Reiseziele.",
+      "relatedDiscoveryIds": [],
+      "id": "research-a1a3e1aa38404e6c",
+      "status": "suggested",
+      "foundAt": "2026-08-04T11:08:56.241Z"
     }
   ],
   "insights": [
+    {
+      "id": "insight-confirms-research-997685b448585ec0",
+      "kind": "confirmation",
+      "title": "Bestehendes Wissen bestätigt",
+      "description": "Best\u0000tigt die Erkenntnis, dass menschliches Versagen ein signifikanter Risikofaktor in Sicherheitsvorf\u0000llen ist.",
+      "candidateIds": [
+        "research-997685b448585ec0"
+      ],
+      "discoveryIds": [
+        "24ea02ed-81fa-442b-bcca-c5c81942a29e"
+      ],
+      "createdAt": "2026-08-04T11:08:56.242Z"
+    },
+    {
+      "id": "insight-confirms-research-89460b48c586f836",
+      "kind": "confirmation",
+      "title": "Bestehendes Wissen bestätigt",
+      "description": "Best\u0000tigt die Erkenntnis, dass Katzen haupts\u0000chlich nonverbal kommunizieren und ihre Signale genutzt werden, um ihre Stimmung und Absichten zu vermitteln.",
+      "candidateIds": [
+        "research-89460b48c586f836"
+      ],
+      "discoveryIds": [
+        "d52cffb7-9e98-406a-999e-246414b5d3e1"
+      ],
+      "createdAt": "2026-08-04T11:08:56.242Z"
+    },
+    {
+      "id": "insight-trends-2026-08-04",
+      "kind": "trend",
+      "title": "Interessen verändern sich",
+      "description": "Travel: Neu aus der persönlichen Bibliothek erkannt.",
+      "candidateIds": [],
+      "discoveryIds": [],
+      "createdAt": "2026-08-04T11:08:56.242Z"
+    },
+    {
+      "id": "insight-gaps-2026-08-04",
+      "kind": "knowledge-gap",
+      "title": "Gezielte Wissenslücken",
+      "description": "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit · Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz",
+      "candidateIds": [
+        "research-ab3174cf6c1d6f67",
+        "research-997685b448585ec0",
+        "research-89460b48c586f836",
+        "research-16a21957b69e6800",
+        "research-a1a3e1aa38404e6c"
+      ],
+      "discoveryIds": [],
+      "createdAt": "2026-08-04T11:08:56.242Z"
+    },
     {
       "id": "insight-trends-2026-08-03",
       "kind": "trend",
@@ -299,6 +379,36 @@
     }
   ],
   "briefings": [
+    {
+      "id": "briefing-2026-08-04",
+      "date": "2026-08-04",
+      "title": "Dein tägliches Research-Briefing",
+      "summary": "5 relevante Quellen gefunden, 0 ungeeignete Treffer verworfen und 2 Wissenslücken berücksichtigt.",
+      "counts": {
+        "totalFound": 5,
+        "papers": 0,
+        "videos": 0,
+        "startups": 0,
+        "studies": 1,
+        "trends": 1,
+        "knowledgeGaps": 2,
+        "discarded": 0
+      },
+      "candidateIds": [
+        "research-ab3174cf6c1d6f67",
+        "research-997685b448585ec0",
+        "research-89460b48c586f836",
+        "research-16a21957b69e6800",
+        "research-a1a3e1aa38404e6c"
+      ],
+      "insightIds": [
+        "insight-confirms-research-997685b448585ec0",
+        "insight-confirms-research-89460b48c586f836",
+        "insight-trends-2026-08-04",
+        "insight-gaps-2026-08-04"
+      ],
+      "createdAt": "2026-08-04T11:08:56.242Z"
+    },
     {
       "id": "briefing-2026-08-03",
       "date": "2026-08-03",
