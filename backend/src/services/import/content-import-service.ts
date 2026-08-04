@@ -59,6 +59,7 @@ export async function importContent(
   url: string,
   options: {
     preferredLanguage?: "de" | "en" | "fr" | "it" | "es";
+    preferredKnowledgePath?: string[];
   } = {},
 ): Promise<ContentImportResult> {
   console.log("[Import] Starting:", url);
@@ -86,9 +87,17 @@ export async function importContent(
 
   const now = new Date().toISOString();
 
+  const preferredPath = normalizeStringArray(
+    options.preferredKnowledgePath ?? [],
+  ).slice(0, 3);
+  const classification = applyPreferredKnowledgePath(
+    analysis.classification,
+    preferredPath,
+  );
+
   const topics = createTopics(
-    analysis.classification.topic,
-    analysis.classification.subtopics,
+    classification.topic,
+    classification.subtopics,
   );
 
   const discovery: Discovery = {
@@ -128,16 +137,16 @@ export async function importContent(
 
     classification: {
       primaryCategory:
-        analysis.classification.primaryCategory,
+        classification.primaryCategory,
 
       secondaryCategory:
-        analysis.classification.secondaryCategory.trim(),
+        classification.secondaryCategory.trim(),
 
       topic:
-        analysis.classification.topic.trim(),
+        classification.topic.trim(),
 
       subtopics: normalizeStringArray(
-        analysis.classification.subtopics,
+        classification.subtopics,
       ),
     },
 
@@ -194,19 +203,37 @@ export async function importContent(
 
     organization: {
       primaryCategory:
-        analysis.classification.primaryCategory,
+        classification.primaryCategory,
 
       secondaryCategory:
-        analysis.classification.secondaryCategory,
+        classification.secondaryCategory,
 
       topic:
-        analysis.classification.topic,
+        classification.topic,
 
       subtopics:
-        analysis.classification.subtopics,
+        classification.subtopics,
     },
 
     discovery,
+  };
+}
+
+function applyPreferredKnowledgePath(
+  classification: ContentImportResult["analysis"]["classification"],
+  path: string[],
+): ContentImportResult["analysis"]["classification"] {
+  if (path.length === 0) return classification;
+
+  if (path.length === 1) {
+    return { ...classification, secondaryCategory: path[0], topic: path[0], subtopics: [] };
+  }
+
+  return {
+    ...classification,
+    secondaryCategory: path[0],
+    topic: path[1],
+    subtopics: path.slice(2),
   };
 }
 

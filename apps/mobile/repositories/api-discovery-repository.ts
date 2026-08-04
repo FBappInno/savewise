@@ -48,9 +48,10 @@ export class ApiDiscoveryRepository
 
   async importFromUrl(
     url: string,
+    preferredKnowledgePath?: string[],
   ): Promise<Discovery> {
     const response =
-      await importContent(url);
+      await importContent(url, preferredKnowledgePath);
 
     const currentDiscoveries =
       await loadCachedDiscoveries();

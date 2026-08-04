@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Alert,
@@ -15,23 +16,34 @@ import {
 } from "react-native";
 
 import { useAppSettings } from "@/providers/app-settings-provider";
+import { formatAppDateTime } from "@/i18n/date-time";
+import { getKnowledgeLibrary } from "@/services/content-import-client";
 import { theme } from "@/theme";
 import type {
   DisplayLanguage,
+  DateFormat,
   InputLanguage,
+  TimeFormat,
 } from "@/types/app-settings";
 
 export default function SettingsScreen() {
-  const { settings, t, updateSettings, saveAccount } = useAppSettings();
+  const { locale, settings, t, updateSettings, saveAccount } = useAppSettings();
   const [username, setUsername] = useState(settings.account.username);
   const [email, setEmail] = useState(settings.account.email);
   const [password, setPassword] = useState("");
   const [isSaving, setSaving] = useState(false);
+  const [lastKnowledgeUpdate, setLastKnowledgeUpdate] = useState<string | null>(null);
 
   useEffect(() => {
     setUsername(settings.account.username);
     setEmail(settings.account.email);
   }, [settings.account.email, settings.account.username]);
+
+  useEffect(() => {
+    void getKnowledgeLibrary()
+      .then((library) => setLastKnowledgeUpdate(library.graph?.generatedAt ?? library.generatedAt))
+      .catch(() => setLastKnowledgeUpdate(null));
+  }, []);
 
   async function handleSaveAccount() {
     setSaving(true);
@@ -142,6 +154,39 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         <SettingsSection
+          description={t("settings.dateTimeDescription")}
+          icon="calendar-outline"
+          title={t("settings.dateTime")}
+        >
+          <DropdownSelect<DateFormat>
+            label={t("settings.dateFormat")}
+            onChange={(dateFormat) => void updateSettings((current) => ({
+              ...current,
+              dateTime: { ...current.dateTime, dateFormat },
+            }))}
+            options={[
+              { label: t("settings.dateDayMonthYear"), value: "day-month-year" },
+              { label: t("settings.dateMonthDayYear"), value: "month-day-year" },
+              { label: t("settings.dateYearMonthDay"), value: "year-month-day" },
+            ]}
+            value={settings.dateTime.dateFormat}
+          />
+          <DropdownSelect<TimeFormat>
+            label={t("settings.timeFormat")}
+            onChange={(timeFormat) => void updateSettings((current) => ({
+              ...current,
+              dateTime: { ...current.dateTime, timeFormat },
+            }))}
+            options={[
+              { label: t("settings.system"), value: "system" },
+              { label: t("settings.time24Hour"), value: "24-hour" },
+              { label: t("settings.time12Hour"), value: "12-hour" },
+            ]}
+            value={settings.dateTime.timeFormat}
+          />
+        </SettingsSection>
+
+        <SettingsSection
           description={t("settings.storageDescription")}
           icon="server-outline"
           title={t("settings.storage")}
@@ -207,8 +252,35 @@ export default function SettingsScreen() {
             value={settings.ai.autonomousResearch}
           />
         </SettingsSection>
+
+        <SettingsSection icon="information-circle-outline" title={t("settings.appVersion")}>
+          <InfoRow
+            label={t("settings.appVersion")}
+            value={Constants.expoConfig?.version ?? "1.0.0"}
+          />
+          <InfoRow
+            label={t("settings.lastUpdate")}
+            value={lastKnowledgeUpdate
+              ? formatAppDateTime(
+                lastKnowledgeUpdate,
+                locale,
+                settings.dateTime.dateFormat,
+                settings.dateTime.timeFormat,
+              )
+              : t("settings.unavailable")}
+          />
+        </SettingsSection>
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
   );
 }
 
@@ -373,7 +445,7 @@ function ToggleRow({ description, label, onValueChange, value }: {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.background },
-  content: { paddingBottom: 110, paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.xxxl },
+  content: { paddingBottom: 110, paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.xxxl + theme.spacing.sm },
   header: { marginBottom: theme.spacing.xxl },
   eyebrow: { ...theme.typography.caption, color: theme.colors.primary, letterSpacing: 1.1 },
   title: { ...theme.typography.screenTitle, color: theme.colors.text, marginTop: theme.spacing.sm },
@@ -412,4 +484,7 @@ const styles = StyleSheet.create({
   toggleDescription: { ...theme.typography.caption, color: theme.colors.textSecondary, marginTop: 2 },
   disabled: { opacity: 0.42 },
   pressed: { opacity: 0.7 },
+  infoRow: { alignItems: "center", borderBottomColor: theme.colors.border, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", gap: theme.spacing.md, justifyContent: "space-between", minHeight: 48 },
+  infoLabel: { ...theme.typography.body, color: theme.colors.textSecondary },
+  infoValue: { ...theme.typography.bodyStrong, color: theme.colors.text, flex: 1, textAlign: "right" },
 });

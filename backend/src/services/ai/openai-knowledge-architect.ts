@@ -184,6 +184,9 @@ export async function buildKnowledgeGraphWithAI(
 
         createdAt:
           discovery.createdAt,
+
+        classification:
+          discovery.classification ?? null,
       }),
     );
 
@@ -202,8 +205,13 @@ export async function buildKnowledgeGraphWithAI(
         "Unify synonyms, translations and closely related multilingual terms under one canonical node and retain useful alternatives as aliases.",
         "Create new broader parent concepts when several existing or new nodes share a meaningful umbrella concept.",
         "Organize the knowledge as a coherent hierarchy.",
-        "The hierarchy may have up to four semantic levels:",
-        "domain -> topic -> subtopic -> concept.",
+        "Prefer a shallow, easy-to-scan hierarchy with two levels; use at most three semantic levels when the content truly requires it.",
+        "Root nodes must be clear, specific areas of knowledge rather than generic containers.",
+        "Do not place a strong coherent area below a vague umbrella such as Lifestyle, Other, General or Miscellaneous.",
+        "When a branch contains several distinct themes or many discoveries, promote that coherent branch to its own root topic.",
+        "For example, multiple travel themes previously below a generic lifestyle node should become one canonical Travel root with useful children.",
+        "Apply this promotion principle dynamically to every subject area; the example does not prescribe a fixed Travel topic.",
+        "Prefer more clear root topics over deep navigation, while still merging roots that are true synonyms or the same subject in different languages.",
         "Only create levels that are useful for the supplied library.",
         "Assign discovery IDs directly only to the lowest meaningful nodes.",
         "Parent nodes must receive discoveries indirectly through their descendants, never as duplicate direct assignments.",
@@ -215,6 +223,8 @@ export async function buildKnowledgeGraphWithAI(
         "parentKey must reference another returned node key or be null.",
         "Do not create circular parent relationships.",
         "Merge synonyms and closely overlapping themes into one node.",
+        "Never return several roots for variants of the same area; consolidate them under one canonical root and preserve the variants as aliases or children.",
+        "Treat a discovery's supplied classification as user context. If it represents a manually selected path, preserve its semantic intent while still merging synonyms and keeping the overall tree shallow.",
         "Store alternative terminology in aliases.",
         "Do not create separate nodes merely because two discoveries use different languages.",
         "Use titles in the dominant language of the user's discoveries.",
@@ -438,6 +448,8 @@ function convertAnalysisToGraph(
     nodes,
     discoveries,
   );
+
+  optimizeHierarchy(nodes);
 
   propagateDiscoveryIds(
     nodes,
@@ -671,32 +683,94 @@ function assignMissingDiscoveries(
     const title =
       discovery.improvedTitle ||
       discovery.title;
+    const classification = discovery.classification;
+    const path = uniqueStrings([
+      classification?.secondaryCategory ?? "",
+      classification?.topic ?? "",
+      ...(classification?.subtopics ?? []),
+    ].map((part) => part.trim()).filter(Boolean)).slice(0, 3);
+    const labels = path.length > 0 ? path : [title];
+    let parentId: string | null = null;
 
-    nodes.push({
-      id: createNodeId(
-        `${title}-${discovery.id}`,
-      ),
-      title,
-      kind: "concept",
-      description:
-        discovery.summary ||
-        discovery.description ||
-        title,
-      parentId: null,
-      childIds: [],
-      discoveryIds: [
-        discovery.id,
-      ],
-      aliases: [],
-      keywords: uniqueStrings(
-        discovery.keywords,
-      ),
-      confidence:
-        normalizeScore(
-          discovery.confidence ??
-            0,
+    labels.forEach((label, depth) => {
+      const normalizedLabel = normalizeKey(label);
+      let node = nodes.find((candidate) =>
+        candidate.parentId === parentId &&
+        [candidate.title, ...candidate.aliases].some(
+          (candidateLabel) => normalizeKey(candidateLabel) === normalizedLabel,
         ),
+      );
+
+      if (!node) {
+        node = {
+          id: createNodeId(`${parentId ?? "root"}-${label}`),
+          title: label,
+          kind: depth === 0 ? "domain" : depth === 1 ? "topic" : "subtopic",
+          description: depth === labels.length - 1
+            ? discovery.summary || discovery.description || title
+            : `Knowledge about ${label}.`,
+          parentId,
+          childIds: [],
+          discoveryIds: [],
+          aliases: [],
+          keywords: depth === labels.length - 1 ? uniqueStrings(discovery.keywords) : [],
+          confidence: normalizeScore(discovery.confidence ?? 0.5),
+        };
+        nodes.push(node);
+      }
+
+      if (depth === labels.length - 1 && !node.discoveryIds.includes(discovery.id)) {
+        node.discoveryIds.push(discovery.id);
+      }
+      parentId = node.id;
     });
+  }
+
+  rebuildChildIds(nodes);
+}
+
+function optimizeHierarchy(nodes: KnowledgeGraphNode[]): void {
+  rebuildChildIds(nodes);
+
+  const broadRootIds = new Set(
+    nodes
+      .filter((node) => node.parentId === null && node.childIds.length >= 4)
+      .map((node) => node.id),
+  );
+
+  if (broadRootIds.size > 0) {
+    for (const node of nodes) {
+      if (node.parentId && broadRootIds.has(node.parentId)) node.parentId = null;
+    }
+    for (let index = nodes.length - 1; index >= 0; index -= 1) {
+      if (broadRootIds.has(nodes[index].id)) nodes.splice(index, 1);
+    }
+  }
+
+  rebuildChildIds(nodes);
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+  for (const node of nodes) {
+    let parent = node.parentId ? nodeMap.get(node.parentId) : undefined;
+    let depth = 0;
+    while (parent && depth < 10) {
+      depth += 1;
+      if (depth >= 3) {
+        node.parentId = parent.parentId;
+        break;
+      }
+      parent = parent.parentId ? nodeMap.get(parent.parentId) : undefined;
+    }
+  }
+  rebuildChildIds(nodes);
+}
+
+function rebuildChildIds(nodes: KnowledgeGraphNode[]): void {
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+  for (const node of nodes) node.childIds = [];
+  for (const node of nodes) {
+    if (!node.parentId) continue;
+    const parent = nodeMap.get(node.parentId);
+    if (parent && !parent.childIds.includes(node.id)) parent.childIds.push(node.id);
   }
 }
 

@@ -22,7 +22,7 @@ import type { Discovery } from "@/types/discovery";
 import { updateKnowledgeTopic } from "@/services/content-import-client";
 
 export default function LibraryScreen() {
-  const { locale, settings, t } = useAppSettings();
+  const { settings, t } = useAppSettings();
   const scrollViewRef = useRef<ScrollView>(null);
   const treePosition = useRef(0);
   const [isManagingTopics, setIsManagingTopics] = useState(false);
@@ -221,18 +221,6 @@ export default function LibraryScreen() {
             visible={isManagingTopics}
           />
 
-          <View style={styles.generatedCard}>
-            <Ionicons
-              color={theme.colors.textSecondary}
-              name="time-outline"
-              size={16}
-            />
-
-            <Text style={styles.generatedText}>
-              Knowledge tree updated{" "}
-              {formatDate(graph.generatedAt, locale)}
-            </Text>
-          </View>
         </>
       ) : null}
     </ScrollView>
@@ -325,21 +313,6 @@ function MessageCard({
   );
 }
 
-function formatDate(value: string, locale: string): string {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-  }).format(date);
-}
-
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,
@@ -347,7 +320,7 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: theme.spacing.xxxl,
     paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.xxxl,
+    paddingTop: theme.spacing.xxxl + theme.spacing.sm,
   },
   header: {
     marginBottom: theme.spacing.xxl,
@@ -452,18 +425,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     lineHeight: 21,
     marginTop: theme.spacing.sm,
-  },
-  generatedCard: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: theme.spacing.sm,
-    justifyContent: "center",
-    marginTop: theme.spacing.xxxl,
-    padding: theme.spacing.md,
-  },
-  generatedText: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
   },
   manageTopicsButton: {
     alignItems: "center",

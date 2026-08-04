@@ -1,0 +1,494 @@
+{
+  "modelVersion": 6,
+  "events": [
+    {
+      "id": "learning-6-9d3c02946d74",
+      "version": 6,
+      "trigger": "discovery-added",
+      "discoveryId": "79fc9e0b-52f7-42cd-a473-a59119127b44",
+      "graphFingerprint": "4b1a093a0361cab1b42413012962c449cf9c1d1afbe32d90803c1633b4a947ea",
+      "delta": {
+        "addedNodeIds": [
+          "node-root-shopping"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "1 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:45:29.403Z"
+    },
+    {
+      "id": "learning-5-f80321c9a1c6",
+      "version": 5,
+      "trigger": "graph-refined",
+      "graphFingerprint": "62dc0682172ad5cdb90469498bdc9ec2b43341b3cffa5aa249bbceec8d0ce5dd",
+      "delta": {
+        "addedNodeIds": [
+          "node-root-einrichtung",
+          "node-node-root-einrichtung-mobel",
+          "node-node-node-root-einrichtung-mobel-kuchenwagen",
+          "node-root-investing",
+          "node-node-root-investing-funds-and-investment-vehicles",
+          "node-node-node-root-investing-funds-and-investment-vehicles-exchange-traded-funds",
+          "node-node-root-investing-stocks",
+          "node-node-node-root-investing-stocks-types-of-stocks",
+          "node-root-travel",
+          "node-node-root-travel-tourism",
+          "node-node-node-root-travel-tourism-trip-planning",
+          "node-node-node-root-travel-tourism-adventure-travel",
+          "node-node-node-root-travel-tourism-mediterranean-destinations",
+          "node-node-root-travel-destinations",
+          "node-node-node-root-travel-destinations-cyclades-islands"
+        ],
+        "removedNodeIds": [
+          "node-lifestyle",
+          "node-exchange-traded-fund-etf-302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+          "node-stock-comprehensive-overview-0a407377-28d6-416d-8cb6-4b469ce78782",
+          "node-discover-italy-your-official-guide-to-planning-a-trip-c6267e81-aee0-48bd-95b9-851227b31ea5",
+          "node-explore-the-vibrant-beauty-and-adventures-of-croatia-b3878eac-8bfc-429d-8eec-906e5f8ba150",
+          "node-balearic-islands-top-tourism-experiences-and-attractions-cceb57b1-9115-4966-9086-d3c2e405482e",
+          "node-travel-guide-to-the-cyclades-islands-in-greece-a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d",
+          "node-root-science",
+          "node-node-root-science-meteorologie",
+          "node-node-node-root-science-meteorologie-wettervorhersage",
+          "node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell",
+          "node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose",
+          "node-node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose-alpine-luftdichte",
+          "node-node-node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose-alpine-luftdichte-flugwetter",
+          "node-node-node-node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose-alpine-luftdichte-flugwetter-thermiktief",
+          "node-node-lifestyle-einrichtung",
+          "node-node-node-lifestyle-einrichtung-mobel",
+          "node-node-node-node-lifestyle-einrichtung-mobel-kuchenwagen",
+          "node-node-node-node-node-lifestyle-einrichtung-mobel-kuchenwagen-stauraumlosungen",
+          "node-node-node-node-node-node-lifestyle-einrichtung-mobel-kuchenwagen-stauraumlosungen-mobiles-mobel",
+          "node-node-lifestyle-sport",
+          "node-node-node-lifestyle-sport-gleitschirmfliegen",
+          "node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung",
+          "node-node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung-sicherheit",
+          "node-node-node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung-sicherheit-gurtzeuge",
+          "node-node-node-node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung-sicherheit-gurtzeuge-rucksacke"
+        ],
+        "movedNodeIds": [
+          "node-cooking-and-recipes",
+          "node-pets",
+          "node-entertainment",
+          "node-paragliding"
+        ],
+        "addedRelationIds": [],
+        "removedRelationIds": [
+          "relation-node-cooking-and-recipes-node-lifestyle-part-of",
+          "relation-node-pets-node-lifestyle-part-of",
+          "relation-node-entertainment-node-lifestyle-part-of"
+        ],
+        "summaryChanged": true
+      },
+      "explanation": "15 neue Knoten, 26 entfernte oder zusammengeführte Knoten, 4 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:42:08.918Z"
+    },
+    {
+      "id": "learning-4-6e19fbfcac6d",
+      "version": 4,
+      "trigger": "discovery-added",
+      "discoveryId": "03361564-75f6-47a8-ba9c-d69218313422",
+      "graphFingerprint": "d025ec643c0d66649353aba94ed655c393d8249db500ac31ff4203b203332acc",
+      "delta": {
+        "addedNodeIds": [
+          "node-root-science",
+          "node-node-root-science-meteorologie",
+          "node-node-node-root-science-meteorologie-wettervorhersage",
+          "node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell",
+          "node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose",
+          "node-node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose-alpine-luftdichte",
+          "node-node-node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose-alpine-luftdichte-flugwetter",
+          "node-node-node-node-node-node-node-node-root-science-meteorologie-wettervorhersage-thermikmodell-windprognose-alpine-luftdichte-flugwetter-thermiktief"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "8 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:04:57.882Z"
+    },
+    {
+      "id": "learning-3-efd2087376d2",
+      "version": 3,
+      "trigger": "discovery-added",
+      "discoveryId": "f753a3cc-4216-4e76-b79f-d182c2b9413a",
+      "graphFingerprint": "0e5c2c24a3766794ccd7a38c07e5552dc534f4a1d7b288e9b811d4bd5886bb3e",
+      "delta": {
+        "addedNodeIds": [
+          "node-node-lifestyle-einrichtung",
+          "node-node-node-lifestyle-einrichtung-mobel",
+          "node-node-node-node-lifestyle-einrichtung-mobel-kuchenwagen",
+          "node-node-node-node-node-lifestyle-einrichtung-mobel-kuchenwagen-stauraumlosungen",
+          "node-node-node-node-node-node-lifestyle-einrichtung-mobel-kuchenwagen-stauraumlosungen-mobiles-mobel"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "5 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:04:35.774Z"
+    },
+    {
+      "id": "learning-2-f4233be71a8b",
+      "version": 2,
+      "trigger": "discovery-added",
+      "discoveryId": "6054cf4b-a1bd-408f-908d-3ee05a1ebb33",
+      "graphFingerprint": "29536961c588cd04d53547bd2b417e5023744eb857bda6c1f4bd2863fc92925f",
+      "delta": {
+        "addedNodeIds": [
+          "node-node-lifestyle-sport",
+          "node-node-node-lifestyle-sport-gleitschirmfliegen",
+          "node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung",
+          "node-node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung-sicherheit",
+          "node-node-node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung-sicherheit-gurtzeuge",
+          "node-node-node-node-node-node-node-lifestyle-sport-gleitschirmfliegen-ausrustung-sicherheit-gurtzeuge-rucksacke"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [
+          "node-paragliding"
+        ],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "6 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 1 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-04T04:04:26.452Z"
+    },
+    {
+      "id": "learning-1-fa58977d7b8b",
+      "version": 1,
+      "trigger": "graph-refined",
+      "graphFingerprint": "a421895eccfa893ff503859664a6bc0492d37c7c10cf290fbe9b8b20dcd80e01",
+      "delta": {
+        "addedNodeIds": [
+          "node-safety-and-risk-management",
+          "node-human-error",
+          "node-industrial-and-occupational-safety",
+          "node-cybersecurity-human-factors",
+          "node-statistics-and-risk-analysis",
+          "node-nutrition",
+          "node-carbohydrates",
+          "node-proteins",
+          "node-lifestyle",
+          "node-cooking-and-recipes",
+          "node-airfryer-recipes",
+          "node-quick-meals",
+          "node-egg-preparation-airfryer",
+          "node-pets",
+          "node-cats",
+          "node-kitten-behavior",
+          "node-sleeping-cats",
+          "node-entertainment",
+          "node-short-videos",
+          "node-digital-engagement",
+          "node-culture",
+          "node-social-media",
+          "node-video-content",
+          "node-science-environmental-and-earth",
+          "node-climate-change",
+          "node-technology-and-defense",
+          "node-military-aviation",
+          "node-business-and-international-relations",
+          "node-international-support-and-conflict",
+          "node-news-and-media",
+          "node-paragliding",
+          "node-technology-defense-drones",
+          "node-exchange-traded-fund-etf-302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+          "node-stock-comprehensive-overview-0a407377-28d6-416d-8cb6-4b469ce78782",
+          "node-discover-italy-your-official-guide-to-planning-a-trip-c6267e81-aee0-48bd-95b9-851227b31ea5",
+          "node-explore-the-vibrant-beauty-and-adventures-of-croatia-b3878eac-8bfc-429d-8eec-906e5f8ba150",
+          "node-balearic-islands-top-tourism-experiences-and-attractions-cceb57b1-9115-4966-9086-d3c2e405482e",
+          "node-travel-guide-to-the-cyclades-islands-in-greece-a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [
+          "relation-node-human-error-node-safety-and-risk-management-part-of",
+          "relation-node-industrial-and-occupational-safety-node-human-error-part-of",
+          "relation-node-egg-preparation-airfryer-node-airfryer-recipes-part-of",
+          "relation-node-climate-change-node-science-environmental-and-earth-part-of",
+          "relation-node-military-aviation-node-technology-and-defense-part-of",
+          "relation-node-cybersecurity-human-factors-node-human-error-part-of",
+          "relation-node-carbohydrates-node-nutrition-part-of",
+          "relation-node-proteins-node-nutrition-part-of",
+          "relation-node-cooking-and-recipes-node-lifestyle-part-of",
+          "relation-node-airfryer-recipes-node-cooking-and-recipes-part-of",
+          "relation-node-international-support-and-conflict-node-business-and-international-relations-part-of",
+          "relation-node-quick-meals-node-airfryer-recipes-part-of",
+          "relation-node-pets-node-lifestyle-part-of",
+          "relation-node-cats-node-pets-part-of",
+          "relation-node-kitten-behavior-node-cats-part-of",
+          "relation-node-statistics-and-risk-analysis-node-safety-and-risk-management-part-of",
+          "relation-node-entertainment-node-lifestyle-part-of",
+          "relation-node-short-videos-node-entertainment-part-of",
+          "relation-node-digital-engagement-node-short-videos-part-of",
+          "relation-node-video-content-node-social-media-part-of",
+          "relation-node-social-media-node-culture-part-of"
+        ],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "38 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 21 neue Beziehungen.",
+      "createdAt": "2026-08-04T03:59:53.534Z"
+    }
+  ],
+  "graphSnapshot": {
+    "fingerprint": "4b1a093a0361cab1b42413012962c449cf9c1d1afbe32d90803c1633b4a947ea",
+    "summary": "Die Wissensbasis des Nutzers umfasst neun klar strukturierte Hauptdomänen. Im Bereich Sicherheits- und Risikomanagement steht menschliches Versagen als zentraler Faktor bei Arbeits- und Industrieunfällen sowie in der Cybersicherheit im Fokus. Ernährung wird durch differenzierte Kenntnisse zu gesundheitsrelevanten Kohlenhydraten und Proteinen abgedeckt. Lebensstilthemen gliedern sich in Kochen mit Schwerpunkt auf Heißluftfritteusen-Rezepte, Haustiere mit besonderem Fokus auf Katzenverhalten und digitale Unterhaltung via TikTok. Wissenschaftliche Inhalte befassen sich mit Umwelt- und Erdwissenschaften, insbesondere Klimawandel. Technologie und Verteidigung thematisieren moderne militärische Luftfahrt und Drohnenabwehr. Wirtschaft und internationale Beziehungen dokumentieren EU- und UN-Unter­",
+    "nodes": [
+      {
+        "id": "node-safety-and-risk-management",
+        "parentId": null
+      },
+      {
+        "id": "node-human-error",
+        "parentId": "node-safety-and-risk-management"
+      },
+      {
+        "id": "node-industrial-and-occupational-safety",
+        "parentId": "node-human-error"
+      },
+      {
+        "id": "node-cybersecurity-human-factors",
+        "parentId": "node-human-error"
+      },
+      {
+        "id": "node-statistics-and-risk-analysis",
+        "parentId": "node-safety-and-risk-management"
+      },
+      {
+        "id": "node-nutrition",
+        "parentId": null
+      },
+      {
+        "id": "node-carbohydrates",
+        "parentId": "node-nutrition"
+      },
+      {
+        "id": "node-proteins",
+        "parentId": "node-nutrition"
+      },
+      {
+        "id": "node-cooking-and-recipes",
+        "parentId": null
+      },
+      {
+        "id": "node-airfryer-recipes",
+        "parentId": "node-cooking-and-recipes"
+      },
+      {
+        "id": "node-quick-meals",
+        "parentId": "node-airfryer-recipes"
+      },
+      {
+        "id": "node-egg-preparation-airfryer",
+        "parentId": "node-airfryer-recipes"
+      },
+      {
+        "id": "node-pets",
+        "parentId": null
+      },
+      {
+        "id": "node-cats",
+        "parentId": "node-pets"
+      },
+      {
+        "id": "node-kitten-behavior",
+        "parentId": "node-cats"
+      },
+      {
+        "id": "node-sleeping-cats",
+        "parentId": "node-cats"
+      },
+      {
+        "id": "node-entertainment",
+        "parentId": null
+      },
+      {
+        "id": "node-short-videos",
+        "parentId": "node-entertainment"
+      },
+      {
+        "id": "node-digital-engagement",
+        "parentId": "node-short-videos"
+      },
+      {
+        "id": "node-culture",
+        "parentId": null
+      },
+      {
+        "id": "node-social-media",
+        "parentId": "node-culture"
+      },
+      {
+        "id": "node-video-content",
+        "parentId": "node-social-media"
+      },
+      {
+        "id": "node-science-environmental-and-earth",
+        "parentId": null
+      },
+      {
+        "id": "node-climate-change",
+        "parentId": "node-science-environmental-and-earth"
+      },
+      {
+        "id": "node-technology-and-defense",
+        "parentId": null
+      },
+      {
+        "id": "node-military-aviation",
+        "parentId": "node-technology-and-defense"
+      },
+      {
+        "id": "node-technology-defense-drones",
+        "parentId": "node-technology-and-defense"
+      },
+      {
+        "id": "node-business-and-international-relations",
+        "parentId": null
+      },
+      {
+        "id": "node-international-support-and-conflict",
+        "parentId": "node-business-and-international-relations"
+      },
+      {
+        "id": "node-news-and-media",
+        "parentId": null
+      },
+      {
+        "id": "node-paragliding",
+        "parentId": null
+      },
+      {
+        "id": "node-root-einrichtung",
+        "parentId": null
+      },
+      {
+        "id": "node-node-root-einrichtung-mobel",
+        "parentId": "node-root-einrichtung"
+      },
+      {
+        "id": "node-node-node-root-einrichtung-mobel-kuchenwagen",
+        "parentId": "node-node-root-einrichtung-mobel"
+      },
+      {
+        "id": "node-root-investing",
+        "parentId": null
+      },
+      {
+        "id": "node-node-root-investing-funds-and-investment-vehicles",
+        "parentId": "node-root-investing"
+      },
+      {
+        "id": "node-node-node-root-investing-funds-and-investment-vehicles-exchange-traded-funds",
+        "parentId": "node-node-root-investing-funds-and-investment-vehicles"
+      },
+      {
+        "id": "node-node-root-investing-stocks",
+        "parentId": "node-root-investing"
+      },
+      {
+        "id": "node-node-node-root-investing-stocks-types-of-stocks",
+        "parentId": "node-node-root-investing-stocks"
+      },
+      {
+        "id": "node-root-travel",
+        "parentId": null
+      },
+      {
+        "id": "node-node-root-travel-tourism",
+        "parentId": "node-root-travel"
+      },
+      {
+        "id": "node-node-node-root-travel-tourism-trip-planning",
+        "parentId": "node-node-root-travel-tourism"
+      },
+      {
+        "id": "node-node-node-root-travel-tourism-adventure-travel",
+        "parentId": "node-node-root-travel-tourism"
+      },
+      {
+        "id": "node-node-node-root-travel-tourism-mediterranean-destinations",
+        "parentId": "node-node-root-travel-tourism"
+      },
+      {
+        "id": "node-node-root-travel-destinations",
+        "parentId": "node-root-travel"
+      },
+      {
+        "id": "node-node-node-root-travel-destinations-cyclades-islands",
+        "parentId": "node-node-root-travel-destinations"
+      },
+      {
+        "id": "node-root-shopping",
+        "parentId": null
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation-node-human-error-node-safety-and-risk-management-part-of"
+      },
+      {
+        "id": "relation-node-industrial-and-occupational-safety-node-human-error-part-of"
+      },
+      {
+        "id": "relation-node-egg-preparation-airfryer-node-airfryer-recipes-part-of"
+      },
+      {
+        "id": "relation-node-climate-change-node-science-environmental-and-earth-part-of"
+      },
+      {
+        "id": "relation-node-military-aviation-node-technology-and-defense-part-of"
+      },
+      {
+        "id": "relation-node-cybersecurity-human-factors-node-human-error-part-of"
+      },
+      {
+        "id": "relation-node-carbohydrates-node-nutrition-part-of"
+      },
+      {
+        "id": "relation-node-proteins-node-nutrition-part-of"
+      },
+      {
+        "id": "relation-node-airfryer-recipes-node-cooking-and-recipes-part-of"
+      },
+      {
+        "id": "relation-node-international-support-and-conflict-node-business-and-international-relations-part-of"
+      },
+      {
+        "id": "relation-node-quick-meals-node-airfryer-recipes-part-of"
+      },
+      {
+        "id": "relation-node-cats-node-pets-part-of"
+      },
+      {
+        "id": "relation-node-kitten-behavior-node-cats-part-of"
+      },
+      {
+        "id": "relation-node-statistics-and-risk-analysis-node-safety-and-risk-management-part-of"
+      },
+      {
+        "id": "relation-node-short-videos-node-entertainment-part-of"
+      },
+      {
+        "id": "relation-node-digital-engagement-node-short-videos-part-of"
+      },
+      {
+        "id": "relation-node-video-content-node-social-media-part-of"
+      },
+      {
+        "id": "relation-node-social-media-node-culture-part-of"
+      }
+    ]
+  }
+}

@@ -1,18 +1,17 @@
 {
   "interests": [
+    "Lifestyle",
     "Sicherheits- und Risikomanagement",
-    "Menschliches Versagen und Cybersicherheit",
-    "Ernährung, insbesondere Proteine und Kohlenhydrate",
-    "Kochen und Heißluftfritteusen",
-    "Katzen und Haustierverhalten",
-    "Umwelt- und Klimawissenschaften",
-    "Technologie und Verteidigung, insbesondere militärische Drohnen",
-    "Nachrichten aus der Schweiz und der Welt",
-    "Wirtschaft und internationale Beziehungen mit Schwerpunkt Ukraine",
-    "Soziale Medien und kurze Videos",
-    "Reisen in Italien, Kroatien, die Balearen und die griechischen Kykladen",
-    "Exchange-Traded Funds und Aktien",
-    "Paragleiten"
+    "Wissenschaft: Umwelt- und Erdwissenschaften",
+    "Technologie und Verteidigung",
+    "Nachrichten und Medien",
+    "Ernährung",
+    "Kultur",
+    "Wirtschaft und internationale Beziehungen",
+    "Paragliding",
+    "Exchange-Traded Fund (ETF)",
+    "Stock - Comprehensive Overview",
+    "Discover Italy: Your Official Guide to Planning a Trip"
   ],
   "projects": [],
   "learningGoals": [
@@ -22,6 +21,6 @@
     "Welche Erkenntnisse habe ich über Quantencomputer-Fehlerkorrektur?",
     "Was weiß ich über Protein?"
   ],
-  "developmentSummary": "Das aktuelle Profil wird durch wiederkehrende Themencluster zu Sicherheitsmanagement, Katzen, Kochen, Ernährung, Klima, Nachrichten und Verteidigung gestützt. Die jüngsten Einzelfunde erweitern es um Paragleiten, Reisen sowie grundlegende Finanzthemen; daraus lässt sich noch kein eigenständiges Projekt ableiten.",
-  "updatedAt": "2026-08-04T03:48:17.136Z"
+  "developmentSummary": "Die Bibliothek bestätigt breite Interessen, mit der größten bestehenden Tiefe bei menschlichem Versagen und Sicherheitsmanagement. Ernährung bleibt durch das explizite Protein-Lernziel aktiv, ist aber noch quellenmäßig begrenzt. Neuere Entwicklungen liegen bei praktischerem Paragliding sowie bei militärischer Drohnenabwehr. ETFs, Aktien, Reisen und Möbel sind neu oder aktuell sichtbar, bleiben jedoch oberflächliche Informationsfelder. Der frühere Fokus auf Quantencomputer-Fehlerkorrektur wird weiterhin nicht durch die aktuelle Bibliothek gestützt.",
+  "updatedAt": "2026-08-04T04:42:34.089Z"
 }

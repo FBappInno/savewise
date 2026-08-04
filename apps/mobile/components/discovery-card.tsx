@@ -7,6 +7,8 @@ import {
 
 import { TopicBadge } from "@/components/topic-badge";
 import { theme } from "@/theme";
+import { useAppSettings } from "@/providers/app-settings-provider";
+import { formatAppDate } from "@/i18n/date-time";
 import type {
   Discovery,
   DiscoverySource,
@@ -36,6 +38,7 @@ export function DiscoveryCard({
   discovery,
   onPress,
 }: DiscoveryCardProps) {
+  const { locale, settings } = useAppSettings();
   const classification =
     discovery.classification;
 
@@ -74,7 +77,11 @@ export function DiscoveryCard({
         </Text>
 
         <Text style={styles.savedAt}>
-          {discovery.savedAtLabel}
+          {formatAppDate(
+            discovery.createdAt,
+            locale,
+            settings.dateTime.dateFormat,
+          )}
         </Text>
       </View>
 
@@ -226,12 +233,13 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    ...theme.typography.sectionTitle,
+    fontSize: 18,
+    fontWeight: "600",
 
     color:
       theme.colors.text,
 
-    lineHeight: 21,
+    lineHeight: 23,
   },
 
   author: {

@@ -1,30 +1,30 @@
 {
-  "generatedAt": "2026-08-03T21:29:57.200Z",
-  "sourceFingerprint": "49e04b2bfa1811a81a3d0af3a7f03efd38bbb012e35d1e6312425168e902cba4",
+  "generatedAt": "2026-08-04T04:36:40.797Z",
+  "sourceFingerprint": "23865fef2578225e51a96f93b3e32cf6a8aadbceaf60af07ad1a40b1bc0ce56d",
   "language": "de",
-  "summary": "Die Wissensbasis des Nutzers umfasst nun sieben Hauptdomänen: Sicherheits- und Risikomanagement mit Fokus auf menschliches Versagen und Cybersicherheit; Ernährung mit Kenntnissen zu Kohlenhydraten und Proteinen; Lifestyle, vor allem Kochen, Haustiere und digitale Unterhaltung (TikTok); Wissenschaft im Bereich Umwelt und Klima; Technologie und Verteidigung mit Schwerpunkt auf moderner militärischer Luftfahrt sowie Drohnenabwehr; Wirtschaft und internationale Beziehungen, speziell EU- und UN-Unterstützung für die Ukraine; sowie Nachrichten und Medien mit Schwerpunkt Schweiz und Welt. Neu hinzugefügt wurden stabile, klar strukturierte Knoten für Paragleiten und Gleitschirmfliegen im Bereich Freizeit, und detaillierte Knoten zu Drohnen in militärischem Kontext, wobei autonome Abfangdrohnen und",
+  "summary": "Die Wissensbasis des Nutzers umfasst neun klar strukturierte Hauptdomänen. Im Bereich Sicherheits- und Risikomanagement steht menschliches Versagen als zentraler Faktor bei Arbeits- und Industrieunfällen sowie in der Cybersicherheit im Fokus. Ernährung wird durch differenzierte Kenntnisse zu gesundheitsrelevanten Kohlenhydraten und Proteinen abgedeckt. Lebensstilthemen gliedern sich in Kochen mit Schwerpunkt auf Heißluftfritteusen-Rezepte, Haustiere mit besonderem Fokus auf Katzenverhalten und digitale Unterhaltung via TikTok. Wissenschaftliche Inhalte befassen sich mit Umwelt- und Erdwissenschaften, insbesondere Klimawandel. Technologie und Verteidigung thematisieren moderne militärische Luftfahrt und Drohnenabwehr. Wirtschaft und internationale Beziehungen dokumentieren EU- und UN-Unter­",
   "rootNodeIds": [
     "node-safety-and-risk-management",
     "node-nutrition",
-    "node-lifestyle",
+    "node-cooking-and-recipes",
+    "node-pets",
+    "node-entertainment",
     "node-culture",
     "node-science-environmental-and-earth",
     "node-technology-and-defense",
     "node-business-and-international-relations",
     "node-news-and-media",
-    "node-exchange-traded-fund-etf-302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
-    "node-stock-comprehensive-overview-0a407377-28d6-416d-8cb6-4b469ce78782",
-    "node-discover-italy-your-official-guide-to-planning-a-trip-c6267e81-aee0-48bd-95b9-851227b31ea5",
-    "node-explore-the-vibrant-beauty-and-adventures-of-croatia-b3878eac-8bfc-429d-8eec-906e5f8ba150",
-    "node-balearic-islands-top-tourism-experiences-and-attractions-cceb57b1-9115-4966-9086-d3c2e405482e",
-    "node-travel-guide-to-the-cyclades-islands-in-greece-a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+    "node-paragliding",
+    "node-root-einrichtung",
+    "node-root-investing",
+    "node-root-travel"
   ],
   "nodes": [
     {
       "id": "node-safety-and-risk-management",
       "title": "Sicherheits- und Risikomanagement",
       "kind": "domain",
-      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit sowie statistischer Risikoanalyse.",
+      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit.",
       "parentId": null,
       "childIds": [
         "node-human-error",
@@ -209,45 +209,11 @@
       "confidence": 0.9
     },
     {
-      "id": "node-lifestyle",
-      "title": "Lifestyle",
-      "kind": "domain",
-      "description": "Freizeit, Hobbys und alltägliche Interessen, vor allem Kochen, Haustiere und Unterhaltung durch kurze Videoformate.",
-      "parentId": null,
-      "childIds": [
-        "node-cooking-and-recipes",
-        "node-pets",
-        "node-entertainment",
-        "node-paragliding"
-      ],
-      "discoveryIds": [
-        "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
-        "2b5dfe97-ff9c-4847-a286-c339d24aedf3",
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c",
-        "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
-        "3b471827-69b2-4d22-ad51-f4fa8888e991",
-        "cb37f305-ff8f-4635-bd44-8c6469548484",
-        "eac0675f-6b73-4cad-a187-68b02eeba64a"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Kochen",
-        "Haustiere",
-        "Lebensstil",
-        "Unterhaltung",
-        "TikTok"
-      ],
-      "confidence": 0.9
-    },
-    {
       "id": "node-cooking-and-recipes",
       "title": "Kochen und Rezepte",
       "kind": "topic",
       "description": "Rezepte und Kochideen mit Fokus auf schnellen, leckeren Gerichten und der Nutzung von Heißluftfritteusen.",
-      "parentId": "node-lifestyle",
+      "parentId": null,
       "childIds": [
         "node-airfryer-recipes"
       ],
@@ -333,7 +299,7 @@
       "title": "Haustiere",
       "kind": "topic",
       "description": "Informationen über Haustiere mit Schwerpunkt auf Katzen, Kätzchen und deren Verhalten und Kommunikation.",
-      "parentId": "node-lifestyle",
+      "parentId": null,
       "childIds": [
         "node-cats"
       ],
@@ -424,7 +390,7 @@
       "title": "Unterhaltung",
       "kind": "topic",
       "description": "Kurze, unterhaltsame Videoformate, insbesondere auf TikTok, die schnelle Freude und Interaktion bieten.",
-      "parentId": "node-lifestyle",
+      "parentId": null,
       "childIds": [
         "node-short-videos"
       ],
@@ -556,8 +522,7 @@
       ],
       "discoveryIds": [
         "39a36c46-5aa6-4111-a75f-adba6f78262f",
-        "89df7ae0-1f83-497c-8066-bb39090b8a46",
-        "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
       ],
       "aliases": [
         "Umweltwissenschaften",
@@ -638,6 +603,33 @@
       "confidence": 0.95
     },
     {
+      "id": "node-technology-defense-drones",
+      "title": "Drohnen in Verteidigung und Militär",
+      "kind": "topic",
+      "description": "Der Einsatz moderner Drohnentechnologien in der militärischen Luftabwehr, inklusive autonomer Abfangdrohnen und FPV-Systeme in der Ukraine.",
+      "parentId": "node-technology-and-defense",
+      "childIds": [],
+      "discoveryIds": [
+        "f006971e-f706-455d-bad7-d8b13a0c109c",
+        "156e6465-ca35-4363-8054-9c54736b498d"
+      ],
+      "aliases": [
+        "Militärdrohnen",
+        "unbemannte Luftfahrzeuge"
+      ],
+      "keywords": [
+        "Abfangdrohnen",
+        "autonome Systeme",
+        "Luftverteidigung",
+        "unbemannte Luftfahrzeuge",
+        "militärische Anwendung",
+        "FPV",
+        "Drohnenkrieg",
+        "Ukraine"
+      ],
+      "confidence": 0.95
+    },
+    {
       "id": "node-business-and-international-relations",
       "title": "Wirtschaft und internationale Beziehungen",
       "kind": "domain",
@@ -710,17 +702,20 @@
     },
     {
       "id": "node-paragliding",
-      "title": "Paragleiten und Gleitschirmfliegen",
+      "title": "Paragliding",
       "kind": "subtopic",
       "description": "Intensive Erfahrungen des Fliegens mit Paragleiten in den Alpen, speziell in Mayrhofen als Beispiel für Extremsport und Freizeitaktivität.",
-      "parentId": "node-lifestyle",
+      "parentId": null,
       "childIds": [],
       "discoveryIds": [
-        "cb37f305-ff8f-4635-bd44-8c6469548484"
+        "cb37f305-ff8f-4635-bd44-8c6469548484",
+        "03361564-75f6-47a8-ba9c-d69218313422",
+        "6054cf4b-a1bd-408f-908d-3ee05a1ebb33"
       ],
       "aliases": [
         "Extremsport",
-        "Freizeit in den Alpen"
+        "Freizeit in den Alpen",
+        "Gleitschirmfliegen"
       ],
       "keywords": [
         "Paragleiten",
@@ -729,43 +724,110 @@
         "Mayrhofen",
         "Extremsport",
         "Freizeit",
-        "Flugerlebnis"
+        "Flugerlebnis",
+        "Thermikprognose",
+        "Thermikmodell",
+        "Windprognose"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-technology-defense-drones",
-      "title": "Drohnen in Verteidigung und Militär",
+      "id": "node-root-einrichtung",
+      "title": "Einrichtung",
+      "kind": "domain",
+      "description": "Knowledge about Einrichtung.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-einrichtung-mobel"
+      ],
+      "discoveryIds": [
+        "f753a3cc-4216-4e76-b79f-d182c2b9413a"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-einrichtung-mobel",
+      "title": "Möbel",
       "kind": "topic",
-      "description": "Der Einsatz moderner Drohnentechnologien in der militärischen Luftabwehr, inklusive autonomer Abfangdrohnen und FPV-Systeme in der Ukraine.",
-      "parentId": "node-technology-and-defense",
+      "description": "Knowledge about Möbel.",
+      "parentId": "node-root-einrichtung",
+      "childIds": [
+        "node-node-node-root-einrichtung-mobel-kuchenwagen"
+      ],
+      "discoveryIds": [
+        "f753a3cc-4216-4e76-b79f-d182c2b9413a"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-einrichtung-mobel-kuchenwagen",
+      "title": "Küchenwagen",
+      "kind": "subtopic",
+      "description": "Der Küchenwagen vereint Vintage-Design mit robustem Holzwerkstoff und Stahlrahmen für Stabilität und Feuchtigkeitsbeständigkeit.  Er bietet viel Stauraum und flexible Mobilität durch vier Rollen (zwei feststellbar) sowie verstellbare Füße, was ihn vielseitig in Küche, Wohnzimmer oder Bad einsetzbar macht.",
+      "parentId": "node-node-root-einrichtung-mobel",
       "childIds": [],
       "discoveryIds": [
-        "f006971e-f706-455d-bad7-d8b13a0c109c",
-        "156e6465-ca35-4363-8054-9c54736b498d"
+        "f753a3cc-4216-4e76-b79f-d182c2b9413a"
       ],
-      "aliases": [
-        "Militärdrohnen",
-        "unbemannte Luftfahrzeuge"
-      ],
+      "aliases": [],
       "keywords": [
-        "Abfangdrohnen",
-        "autonome Systeme",
-        "Luftverteidigung",
-        "unbemannte Luftfahrzeuge",
-        "militärische Anwendung",
-        "FPV",
-        "Drohnenkrieg",
-        "Ukraine"
+        "Küchenwagen",
+        "Holzwerkstoff",
+        "Stahlrahmen",
+        "Vintage",
+        "Stauraum",
+        "Rollen",
+        "verstellbare Füße",
+        "mobiles Möbel",
+        "Kücheneinrichtung",
+        "vidaXL"
       ],
       "confidence": 0.95
     },
     {
-      "id": "node-exchange-traded-fund-etf-302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
-      "title": "Exchange-Traded Fund (ETF)",
-      "kind": "concept",
-      "description": "An exchange-traded fund (ETF) is a type of investment fund traded on stock exchanges, similar to stocks. ETFs hold assets such as stocks, commodities, or bonds and generally operate with an arbitrage mechanism designed to keep trading close to its net asset value, though deviations can occasionally occur.",
+      "id": "node-root-investing",
+      "title": "Investing",
+      "kind": "domain",
+      "description": "Knowledge about Investing.",
       "parentId": null,
+      "childIds": [
+        "node-node-root-investing-funds-and-investment-vehicles",
+        "node-node-root-investing-stocks"
+      ],
+      "discoveryIds": [
+        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91",
+        "0a407377-28d6-416d-8cb6-4b469ce78782"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-investing-funds-and-investment-vehicles",
+      "title": "Funds and Investment Vehicles",
+      "kind": "topic",
+      "description": "Knowledge about Funds and Investment Vehicles.",
+      "parentId": "node-root-investing",
+      "childIds": [
+        "node-node-node-root-investing-funds-and-investment-vehicles-exchange-traded-funds"
+      ],
+      "discoveryIds": [
+        "302a4db0-e00d-4d84-8bf8-17fdbcf50e91"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-investing-funds-and-investment-vehicles-exchange-traded-funds",
+      "title": "Exchange-Traded Funds",
+      "kind": "subtopic",
+      "description": "An exchange-traded fund (ETF) is a type of investment fund traded on stock exchanges, similar to stocks. ETFs hold assets such as stocks, commodities, or bonds and generally operate with an arbitrage mechanism designed to keep trading close to its net asset value, though deviations can occasionally occur.",
+      "parentId": "node-node-root-investing-funds-and-investment-vehicles",
       "childIds": [],
       "discoveryIds": [
         "302a4db0-e00d-4d84-8bf8-17fdbcf50e91"
@@ -785,11 +847,27 @@
       "confidence": 0.95
     },
     {
-      "id": "node-stock-comprehensive-overview-0a407377-28d6-416d-8cb6-4b469ce78782",
-      "title": "Stock - Comprehensive Overview",
-      "kind": "concept",
+      "id": "node-node-root-investing-stocks",
+      "title": "Stocks",
+      "kind": "topic",
+      "description": "Knowledge about Stocks.",
+      "parentId": "node-root-investing",
+      "childIds": [
+        "node-node-node-root-investing-stocks-types-of-stocks"
+      ],
+      "discoveryIds": [
+        "0a407377-28d6-416d-8cb6-4b469ce78782"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-investing-stocks-types-of-stocks",
+      "title": "Types of Stocks",
+      "kind": "subtopic",
       "description": "This Wikipedia article provides a detailed overview of stocks, which represent ownership shares in a corporation. It covers the definition, types, issuance, and role of stocks in financial markets, offering foundational knowledge about equity securities.",
-      "parentId": null,
+      "parentId": "node-node-root-investing-stocks",
       "childIds": [],
       "discoveryIds": [
         "0a407377-28d6-416d-8cb6-4b469ce78782"
@@ -807,11 +885,51 @@
       "confidence": 0.95
     },
     {
-      "id": "node-discover-italy-your-official-guide-to-planning-a-trip-c6267e81-aee0-48bd-95b9-851227b31ea5",
-      "title": "Discover Italy: Your Official Guide to Planning a Trip",
-      "kind": "concept",
-      "description": "Explore Italy by browsing the official tourism website, where you can plan your holidays, discover top destinations, and find activities for your next Italian trip.",
+      "id": "node-root-travel",
+      "title": "travel",
+      "kind": "domain",
+      "description": "Knowledge about travel.",
       "parentId": null,
+      "childIds": [
+        "node-node-root-travel-tourism",
+        "node-node-root-travel-destinations"
+      ],
+      "discoveryIds": [
+        "c6267e81-aee0-48bd-95b9-851227b31ea5",
+        "b3878eac-8bfc-429d-8eec-906e5f8ba150",
+        "cceb57b1-9115-4966-9086-d3c2e405482e",
+        "a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-root-travel-tourism",
+      "title": "tourism",
+      "kind": "topic",
+      "description": "Knowledge about tourism.",
+      "parentId": "node-root-travel",
+      "childIds": [
+        "node-node-node-root-travel-tourism-trip-planning",
+        "node-node-node-root-travel-tourism-adventure-travel",
+        "node-node-node-root-travel-tourism-mediterranean-destinations"
+      ],
+      "discoveryIds": [
+        "c6267e81-aee0-48bd-95b9-851227b31ea5",
+        "b3878eac-8bfc-429d-8eec-906e5f8ba150",
+        "cceb57b1-9115-4966-9086-d3c2e405482e"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-root-travel-tourism-trip-planning",
+      "title": "trip planning",
+      "kind": "subtopic",
+      "description": "Explore Italy by browsing the official tourism website, where you can plan your holidays, discover top destinations, and find activities for your next Italian trip.",
+      "parentId": "node-node-root-travel-tourism",
       "childIds": [],
       "discoveryIds": [
         "c6267e81-aee0-48bd-95b9-851227b31ea5"
@@ -828,11 +946,11 @@
       "confidence": 0.9
     },
     {
-      "id": "node-explore-the-vibrant-beauty-and-adventures-of-croatia-b3878eac-8bfc-429d-8eec-906e5f8ba150",
-      "title": "Explore the Vibrant Beauty and Adventures of Croatia",
-      "kind": "concept",
+      "id": "node-node-node-root-travel-tourism-adventure-travel",
+      "title": "adventure travel",
+      "kind": "subtopic",
       "description": "Discover why Croatia is full of life, offering a rich variety of experiences from the Adriatic Sea and its islands to mountains and historic cities. Enjoy adventures and memorable experiences throughout the country.",
-      "parentId": null,
+      "parentId": "node-node-root-travel-tourism",
       "childIds": [],
       "discoveryIds": [
         "b3878eac-8bfc-429d-8eec-906e5f8ba150"
@@ -851,11 +969,11 @@
       "confidence": 0.9
     },
     {
-      "id": "node-balearic-islands-top-tourism-experiences-and-attractions-cceb57b1-9115-4966-9086-d3c2e405482e",
-      "title": "Balearic Islands: Top Tourism Experiences and Attractions",
-      "kind": "concept",
+      "id": "node-node-node-root-travel-tourism-mediterranean-destinations",
+      "title": "Mediterranean destinations",
+      "kind": "subtopic",
       "description": "Discover key experiences and travel recommendations for the Mediterranean islands of Majorca, Minorca, Ibiza, and Formentera in the Balearic Islands. This guide highlights the best tourism plans to enjoy the beauty and culture of these popular destinations.",
-      "parentId": null,
+      "parentId": "node-node-root-travel-tourism",
       "childIds": [],
       "discoveryIds": [
         "cceb57b1-9115-4966-9086-d3c2e405482e"
@@ -875,11 +993,27 @@
       "confidence": 0.9
     },
     {
-      "id": "node-travel-guide-to-the-cyclades-islands-in-greece-a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d",
-      "title": "Travel Guide to the Cyclades Islands in Greece",
-      "kind": "concept",
+      "id": "node-node-root-travel-destinations",
+      "title": "destinations",
+      "kind": "topic",
+      "description": "Knowledge about destinations.",
+      "parentId": "node-root-travel",
+      "childIds": [
+        "node-node-node-root-travel-destinations-cyclades-islands"
+      ],
+      "discoveryIds": [
+        "a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-root-travel-destinations-cyclades-islands",
+      "title": "Cyclades Islands",
+      "kind": "subtopic",
       "description": "This resource provides comprehensive travel inspiration and information about the Cyclades islands in Greece, including travel ideas, events, guides, and recommendations on activities and destinations.",
-      "parentId": null,
+      "parentId": "node-node-root-travel-destinations",
       "childIds": [],
       "discoveryIds": [
         "a2851b1d-c3f5-4cf6-8cac-cd8ca14fb63d"
@@ -989,18 +1123,6 @@
       ]
     },
     {
-      "id": "relation-node-cooking-and-recipes-node-lifestyle-part-of",
-      "sourceId": "node-cooking-and-recipes",
-      "targetId": "node-lifestyle",
-      "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Kochen ist wichtiger Lifestyle-Aspekt.",
-      "evidenceDiscoveryIds": [
-        "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
-        "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
-      ]
-    },
-    {
       "id": "relation-node-airfryer-recipes-node-cooking-and-recipes-part-of",
       "sourceId": "node-airfryer-recipes",
       "targetId": "node-cooking-and-recipes",
@@ -1033,19 +1155,6 @@
       "reason": "Schnelle Gerichte sind Beispiele für Airfryer-Rezepte.",
       "evidenceDiscoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f"
-      ]
-    },
-    {
-      "id": "relation-node-pets-node-lifestyle-part-of",
-      "sourceId": "node-pets",
-      "targetId": "node-lifestyle",
-      "kind": "part-of",
-      "strength": 0.85,
-      "reason": "Haustiere sind zentral für Lifestyle-Themen.",
-      "evidenceDiscoveryIds": [
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
       ]
     },
     {
@@ -1083,17 +1192,6 @@
       "reason": "Statistische Risikoanalyse ist Bestandteil des Risikomanagements.",
       "evidenceDiscoveryIds": [
         "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
-      ]
-    },
-    {
-      "id": "relation-node-entertainment-node-lifestyle-part-of",
-      "sourceId": "node-entertainment",
-      "targetId": "node-lifestyle",
-      "kind": "part-of",
-      "strength": 0.75,
-      "reason": "Kurze Unterhaltungsvideos sind Teil des Lifestyles.",
-      "evidenceDiscoveryIds": [
-        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
       ]
     },
     {

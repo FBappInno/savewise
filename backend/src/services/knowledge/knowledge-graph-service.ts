@@ -12,6 +12,8 @@ import {
 import { buildKnowledgeGraphWithAI } from "../ai/openai-knowledge-architect";
 import { applyKnowledgeGraphOverrides } from "./knowledge-graph-overrides";
 
+const KNOWLEDGE_ARCHITECTURE_VERSION = "flat-clustered-v3";
+
 export type KnowledgeGraphBuildOptions = {
   forceRebuild?: boolean;
 };
@@ -37,7 +39,10 @@ export async function getOrBuildKnowledgeGraph(
     storedGraph.sourceFingerprint ===
       sourceFingerprint
   ) {
-    return applyKnowledgeGraphOverrides(storedGraph);
+    return normalizeKnowledgeHierarchy(
+      await applyKnowledgeGraphOverrides(storedGraph),
+      discoveries,
+    );
   }
 
   if (!options.forceRebuild) {
@@ -54,7 +59,7 @@ export async function getOrBuildKnowledgeGraph(
       immediateGraph,
     );
 
-    return immediateGraph;
+    return normalizeKnowledgeHierarchy(immediateGraph, discoveries);
   }
 
   try {
@@ -68,7 +73,7 @@ export async function getOrBuildKnowledgeGraph(
     const graph = await applyKnowledgeGraphOverrides(generatedGraph);
     await saveKnowledgeGraph(graph);
 
-    return graph;
+    return normalizeKnowledgeHierarchy(graph, discoveries);
   } catch (error) {
     console.error(
       "AI knowledge graph build failed:",
@@ -80,11 +85,111 @@ export async function getOrBuildKnowledgeGraph(
         "Using the previously stored knowledge graph.",
       );
 
-      return applyKnowledgeGraphOverrides(storedGraph);
+      return normalizeKnowledgeHierarchy(
+        await applyKnowledgeGraphOverrides(storedGraph),
+        discoveries,
+      );
     }
 
     return null;
   }
+}
+
+function normalizeKnowledgeHierarchy(
+  graph: KnowledgeGraph,
+  discoveries: Discovery[],
+): KnowledgeGraph {
+  const discoveryMap = new Map(discoveries.map((discovery) => [discovery.id, discovery]));
+  const nodes = graph.nodes.map((node) => ({
+    ...node,
+    childIds: [...node.childIds],
+    discoveryIds: [...node.discoveryIds],
+    aliases: [...node.aliases],
+    keywords: [...node.keywords],
+  }));
+
+  const removableRootIds = new Set<string>();
+  for (const node of nodes) {
+    if (node.parentId !== null || node.kind !== "concept" || node.discoveryIds.length !== 1) continue;
+    const discovery = discoveryMap.get(node.discoveryIds[0]);
+    const classification = discovery?.classification;
+    if (!discovery || !classification) continue;
+
+    const path = uniqueLabels([
+      classification.secondaryCategory,
+      classification.topic,
+      ...classification.subtopics,
+    ]).slice(0, 3);
+    if (path.length === 0) continue;
+
+    let parentId: string | null = null;
+    path.forEach((rawLabel, depth) => {
+      const label = formatLabel(rawLabel);
+      let target = nodes.find((candidate) =>
+        candidate.parentId === parentId && matchesLabel(candidate, label),
+      );
+      if (!target) {
+        target = {
+          id: createProvisionalNodeId(parentId, label),
+          title: label,
+          kind: getNodeKind(depth),
+          description: depth === path.length - 1
+            ? discovery.summary || discovery.description || label
+            : `Knowledge about ${label}.`,
+          parentId,
+          childIds: [],
+          discoveryIds: [],
+          aliases: [],
+          keywords: depth === path.length - 1 ? [...discovery.keywords] : [],
+          confidence: discovery.confidence ?? 0.5,
+        };
+        nodes.push(target);
+      }
+      if (depth === path.length - 1 && !target.discoveryIds.includes(discovery.id)) {
+        target.discoveryIds.push(discovery.id);
+      }
+      parentId = target.id;
+    });
+    removableRootIds.add(node.id);
+  }
+
+  let normalizedNodes = nodes.filter((node) => !removableRootIds.has(node.id));
+  normalizedNodes.forEach((node) => {
+    node.title = formatLabel(node.title);
+  });
+  rebuildHierarchyChildren(normalizedNodes);
+
+  const broadRootIds = new Set(
+    normalizedNodes
+      .filter((node) => node.parentId === null && node.childIds.length >= 4)
+      .map((node) => node.id),
+  );
+  for (const node of normalizedNodes) {
+    if (node.parentId && broadRootIds.has(node.parentId)) node.parentId = null;
+  }
+  normalizedNodes = normalizedNodes.filter((node) => !broadRootIds.has(node.id));
+  rebuildHierarchyChildren(normalizedNodes);
+
+  const nodeIds = new Set(normalizedNodes.map((node) => node.id));
+  return {
+    ...graph,
+    rootNodeIds: normalizedNodes.filter((node) => node.parentId === null).map((node) => node.id),
+    nodes: normalizedNodes,
+    relations: graph.relations.filter((relation) =>
+      nodeIds.has(relation.sourceId) && nodeIds.has(relation.targetId),
+    ),
+  };
+}
+
+function rebuildHierarchyChildren(nodes: KnowledgeGraph["nodes"]): void {
+  const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+  nodes.forEach((node) => { node.childIds = []; });
+  nodes.forEach((node) => {
+    if (!node.parentId) return;
+    const parent = nodeMap.get(node.parentId);
+    if (!parent) node.parentId = null;
+    else if (!parent.childIds.includes(node.id)) parent.childIds.push(node.id);
+  });
 }
 
 function buildImmediateKnowledgeGraph(
@@ -149,11 +254,10 @@ function addDiscoveryHierarchy(
 ): void {
   const classification = discovery.classification;
   const rawLabels = [
-    classification?.primaryCategory,
     classification?.secondaryCategory,
     classification?.topic,
     ...(classification?.subtopics ?? []),
-  ];
+  ].slice(0, 3);
   const labels = uniqueLabels(
     rawLabels.filter(
       (value): value is string => Boolean(value?.trim()),
@@ -389,7 +493,7 @@ function createDiscoveryFingerprint(
   return createHash("sha256")
     .update(
       JSON.stringify(
-        normalizedDiscoveries,
+        { architectureVersion: KNOWLEDGE_ARCHITECTURE_VERSION, discoveries: normalizedDiscoveries },
       ),
     )
     .digest("hex");

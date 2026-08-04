@@ -40,6 +40,11 @@ import {
   isResearchDue,
   updateResearchCandidateStatus,
 } from "./services/research/research-service";
+import {
+  buildPersonalIntelligenceOverview,
+  recordLearningCycle,
+} from "./services/intelligence/personal-intelligence-service";
+import { createPersonalWorkProduct } from "./services/intelligence/personal-work-assistant";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -109,6 +114,7 @@ app.use(
 const ImportRequestSchema = z.object({
   url: z.string().trim().url(),
   preferredLanguage: z.enum(["de", "en", "fr", "it", "es"]).optional(),
+  preferredKnowledgePath: z.array(z.string().trim().min(2).max(60)).min(1).max(3).optional(),
 });
 
 const KnowledgeQuestionSchema = z.object({
@@ -129,6 +135,19 @@ const KnowledgeDocumentRequestSchema = z.object({
     "checklist", "project-overview",
   ]),
   instruction: z.string().trim().min(3).max(500),
+});
+
+const WorkAssistantRequestSchema = z.object({
+  type: z.enum([
+    "meeting-brief",
+    "presentation",
+    "project-summary",
+    "learning-plan",
+    "talk-outline",
+    "business-case",
+  ]),
+  instruction: z.string().trim().min(3).max(1000),
+  includeVerifiedResearch: z.boolean().default(false),
 });
 
 const ResearchCandidateStatusSchema = z.object({
@@ -209,6 +228,8 @@ app.post(
             {
               preferredLanguage:
                 parsedRequest.data.preferredLanguage,
+              preferredKnowledgePath:
+                parsedRequest.data.preferredKnowledgePath,
             },
           ),
           90_000,
@@ -224,6 +245,14 @@ app.post(
         await buildCurrentKnowledgeLibrary(
           discoveryRepository,
         );
+
+      if (library.graph) {
+        await recordLearningCycle(
+          library.graph,
+          "discovery-added",
+          storedDiscovery.id,
+        );
+      }
 
       response.status(201).json({
         ...importResult,
@@ -407,6 +436,13 @@ app.patch(
       }
 
       const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (library.graph) {
+        await recordLearningCycle(
+          library.graph,
+          "discovery-updated",
+          discovery.id,
+        );
+      }
       response.json({
         discovery,
         knowledgeUpdate: {
@@ -458,6 +494,15 @@ app.delete(
         });
 
         return;
+      }
+
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (library.graph) {
+        await recordLearningCycle(
+          library.graph,
+          "discovery-deleted",
+          parsedDiscoveryId.data,
+        );
       }
 
       response.status(204).send();
@@ -1024,6 +1069,59 @@ app.post(
 );
 
 app.get(
+  "/api/intelligence",
+  async (_request, response) => {
+    try {
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (!library.graph) {
+        response.status(503).json({ error: "The AI knowledge graph is currently unavailable." });
+        return;
+      }
+      response.json(await buildPersonalIntelligenceOverview(
+        library.graph,
+        await getResearchState(),
+        await loadPersonalAssistantProfile(),
+      ));
+    } catch (error) {
+      response.status(500).json({
+        error: error instanceof Error ? error.message : "Personal intelligence could not be generated.",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/intelligence/work",
+  async (request, response) => {
+    const parsedRequest = WorkAssistantRequestSchema.safeParse(request.body);
+    if (!parsedRequest.success) {
+      response.status(400).json({ error: "A valid work task and instruction are required." });
+      return;
+    }
+    try {
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (!library.graph) {
+        response.status(503).json({ error: "The AI knowledge graph is currently unavailable." });
+        return;
+      }
+      const research = await getResearchState();
+      const result = await withTimeout(createPersonalWorkProduct(
+        parsedRequest.data,
+        library.discoveries,
+        library.graph,
+        await loadPersonalAssistantProfile(),
+        research.candidates,
+      ), 105_000);
+      response.status(201).json(result);
+    } catch (error) {
+      response.status(500).json({
+        error: error instanceof Error ? error.message : "The work product could not be generated.",
+      });
+    }
+  },
+);
+
+app.get(
   "/api/research",
   async (_request, response) => {
     try {
@@ -1057,6 +1155,11 @@ app.post(
       const research = await withTimeout(
         runPersonalResearch(library.discoveries, library.graph),
         140_000,
+      );
+
+      await recordLearningCycle(
+        library.graph,
+        "research-completed",
       );
 
       response.json(research);
@@ -1130,6 +1233,14 @@ app.post(
         discoveryRepository,
         imported.discovery,
       );
+      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      if (library.graph) {
+        await recordLearningCycle(
+          library.graph,
+          "discovery-added",
+          discovery.id,
+        );
+      }
       const updatedResearch = await updateResearchCandidateStatus(
         candidate.id,
         "saved",

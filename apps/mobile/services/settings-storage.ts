@@ -73,6 +73,10 @@ function mergeSettings(
       ...DEFAULT_APP_SETTINGS.language,
       ...settings.language,
     },
+    dateTime: {
+      ...DEFAULT_APP_SETTINGS.dateTime,
+      ...settings.dateTime,
+    },
     storage: {
       ...DEFAULT_APP_SETTINGS.storage,
       ...settings.storage,

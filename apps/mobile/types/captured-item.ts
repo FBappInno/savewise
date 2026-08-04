@@ -6,4 +6,5 @@ export type CapturedItem = {
   url: string;
   source: DiscoverySource;
   capturedAt: string;
+  preferredKnowledgePath?: string[];
 };

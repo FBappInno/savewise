@@ -9,9 +9,12 @@ import type {
   KnowledgeDocumentType,
   KnowledgeLibrary,
   KnowledgeGraph,
+  PersonalIntelligenceOverview,
   ResearchCandidateStatus,
   ResearchState,
   SecondBrainOverview,
+  WorkAssistantRequest,
+  WorkAssistantResult,
 } from "@savewise/shared";
 import { loadAppSettings } from "@/services/settings-storage";
 import { getLocales } from "expo-localization";
@@ -222,6 +225,7 @@ export function isValidDiscoveryUrl(
 
 export async function importContent(
   rawUrl: string,
+  preferredKnowledgePath?: string[],
 ): Promise<ImportResponse> {
   const url =
     normalizeDiscoveryUrl(rawUrl);
@@ -248,10 +252,17 @@ export async function importContent(
       body: JSON.stringify({
         url,
         preferredLanguage: resolveAnalysisLanguage(settings),
+        preferredKnowledgePath: normalizeKnowledgePath(preferredKnowledgePath),
       }),
     },
     90_000,
   );
+}
+
+function normalizeKnowledgePath(path: string[] | undefined): string[] | undefined {
+  if (!path) return undefined;
+  const normalized = path.map((part) => part.trim()).filter(Boolean).slice(0, 3);
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 function resolveAnalysisLanguage(
@@ -391,6 +402,20 @@ export function getSecondBrainOverview(): Promise<SecondBrainOverview> {
 
 export function getResearchState(): Promise<ResearchState> {
   return apiRequest<ResearchState>("/api/research");
+}
+
+export function getPersonalIntelligenceOverview(): Promise<PersonalIntelligenceOverview> {
+  return apiRequest<PersonalIntelligenceOverview>("/api/intelligence");
+}
+
+export function createPersonalWorkProduct(
+  request: WorkAssistantRequest,
+): Promise<WorkAssistantResult> {
+  return apiRequest<WorkAssistantResult>(
+    "/api/intelligence/work",
+    { method: "POST", body: JSON.stringify(request) },
+    110_000,
+  );
 }
 
 export function runPersonalResearch(): Promise<ResearchState> {

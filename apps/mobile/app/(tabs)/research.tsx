@@ -235,7 +235,7 @@ function getInsightIcon(kind: string): keyof typeof Ionicons.glyphMap {
 
 const styles = StyleSheet.create({
   screen: { backgroundColor: theme.colors.background },
-  content: { paddingBottom: theme.spacing.xxxl, paddingHorizontal: theme.spacing.xl, paddingTop: theme.spacing.xxxl },
+  content: { paddingBottom: theme.spacing.xxxl, paddingHorizontal: theme.spacing.xl, paddingTop: theme.spacing.xxxl + theme.spacing.sm },
   header: { marginBottom: theme.spacing.xxl },
   eyebrow: { ...theme.typography.caption, color: theme.colors.primary, letterSpacing: 1.2 },
   title: { ...theme.typography.screenTitle, color: theme.colors.text, marginTop: theme.spacing.sm },

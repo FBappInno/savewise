@@ -143,7 +143,7 @@ export function KnowledgeTree({
                       index === path.length - 1 && styles.activeBreadcrumb,
                     ]}
                   >
-                    {node.title}
+                    {formatNodeTitle(node.title)}
                   </Text>
                 </Pressable>
               </View>
@@ -154,9 +154,6 @@ export function KnowledgeTree({
 
       {visibleNodes.length > 0 ? (
         <View style={styles.treeLevel}>
-          <View style={styles.trunkTop} />
-          <View style={styles.branchBar} />
-
           <View style={styles.nodeGrid}>
             {visibleNodes.map((node) => (
               <View key={node.id} style={styles.nodeWrapper}>
@@ -170,8 +167,11 @@ export function KnowledgeTree({
                     pressed && styles.nodeCardPressed,
                   ]}
                 >
-                  <Text numberOfLines={3} style={styles.nodeTitle}>
-                    {node.title}
+                  <Text
+                    numberOfLines={6}
+                    style={styles.nodeTitle}
+                  >
+                    {formatNodeTitle(node.title)}
                   </Text>
                   <Text style={styles.discoveryCount}>
                     {countDiscoveries(node, nodesById)}
@@ -203,6 +203,18 @@ export function KnowledgeTree({
       ) : null}
     </View>
   );
+}
+
+function formatNodeTitle(value: string): string {
+  return value
+    .replace(/-/g, "-\u200B")
+    .split(/(\s+)/)
+    .map((part) => part.length > 18 ? insertSoftBreaks(part) : part)
+    .join("");
+}
+
+function insertSoftBreaks(value: string): string {
+  return value.match(/.{1,12}/gu)?.join("\u00ad") ?? value;
 }
 
 function collectDiscoveryIds(
@@ -264,28 +276,15 @@ const styles = StyleSheet.create({
   breadcrumbText: { ...theme.typography.caption, color: theme.colors.primary },
   activeBreadcrumb: { color: theme.colors.text, fontWeight: "700" },
   treeLevel: { paddingTop: theme.spacing.xs, position: "relative" },
-  trunkTop: {
-    alignSelf: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: 99,
-    height: 18,
-    width: 3,
-  },
-  branchBar: {
-    alignSelf: "center",
+  nodeGrid: { borderLeftColor: theme.colors.border, borderLeftWidth: 2, gap: theme.spacing.sm },
+  nodeWrapper: { paddingLeft: 28, position: "relative", width: "100%" },
+  branchStem: {
     backgroundColor: theme.colors.border,
     height: 2,
-    width: "52%",
-  },
-  nodeGrid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.md },
-  nodeWrapper: { paddingTop: 14, position: "relative", width: "47.5%" },
-  branchStem: {
-    alignSelf: "center",
-    backgroundColor: theme.colors.border,
-    height: 14,
+    left: 0,
     position: "absolute",
-    top: 0,
-    width: 2,
+    top: 43,
+    width: 28,
   },
   nodeCard: {
     alignItems: "center",
@@ -294,9 +293,9 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     justifyContent: "center",
-    minHeight: 132,
+    minHeight: 86,
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
   },
   nodeCardPressed: {
     backgroundColor: theme.colors.background,
@@ -307,14 +306,14 @@ const styles = StyleSheet.create({
     ...theme.typography.body,
     color: theme.colors.text,
     fontWeight: "700",
-    lineHeight: 21,
-    minHeight: 42,
+    flexShrink: 1,
+    lineHeight: 22,
     textAlign: "center",
   },
   discoveryCount: {
     ...theme.typography.sectionTitle,
     color: theme.colors.primary,
-    marginTop: theme.spacing.sm,
+    marginTop: theme.spacing.xs,
   },
   leafSection: { gap: theme.spacing.md },
   leafHeader: { alignItems: "center", flexDirection: "row", gap: theme.spacing.sm },

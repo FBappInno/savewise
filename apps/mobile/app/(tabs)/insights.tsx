@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { useSecondBrain } from "@/hooks/use-second-brain";
+import { PersonalIntelligencePanel } from "@/components/intelligence/personal-intelligence-panel";
 import { useAppSettings } from "@/providers/app-settings-provider";
 import { theme } from "@/theme";
 import type {
@@ -141,6 +142,8 @@ export default function SecondBrainScreen() {
           ))}
         </ScrollView>
 
+        <PersonalIntelligencePanel />
+
         {conversation.length > 0 ? (
           <View style={styles.chatHeader}>
             <Text style={styles.sectionTitle}>{t("brain.chat")}</Text>
@@ -193,6 +196,7 @@ export default function SecondBrainScreen() {
 
         {overviewError ? <ErrorCard message={overviewError} /> : null}
         {overview ? <OverviewContent overview={overview} /> : null}
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -482,7 +486,7 @@ function ErrorCard({ message }: { message: string }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.background },
-  content: { paddingHorizontal: theme.spacing.xl, paddingTop: theme.spacing.xxxl, paddingBottom: theme.spacing.xxxl },
+  content: { paddingHorizontal: theme.spacing.xl, paddingTop: theme.spacing.xxxl + theme.spacing.sm, paddingBottom: theme.spacing.xxxl },
   header: { marginBottom: theme.spacing.xxl },
   eyebrow: { ...theme.typography.caption, color: theme.colors.primary, letterSpacing: 1.2 },
   title: { ...theme.typography.screenTitle, color: theme.colors.text, marginTop: theme.spacing.sm },

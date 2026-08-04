@@ -88,6 +88,7 @@ export function useDiscoveries() {
     useCallback(
       async (
         url: string,
+        preferredKnowledgePath?: string[],
       ): Promise<Discovery> => {
         setError(null);
         setIsImporting(true);
@@ -96,6 +97,7 @@ export function useDiscoveries() {
           const discovery =
             await apiDiscoveryRepository.importFromUrl(
               url,
+              preferredKnowledgePath,
             );
 
           setDiscoveries(

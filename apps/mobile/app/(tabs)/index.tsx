@@ -107,6 +107,7 @@ export default function HomeScreen() {
     try {
       await importDiscovery(
         capturedItem.url,
+        capturedItem.preferredKnowledgePath,
       );
 
       setCaptureModalVisible(
@@ -261,6 +262,7 @@ export default function HomeScreen() {
       </View>
 
       <CaptureModal
+        existingKnowledgePaths={buildKnowledgePaths(discoveries)}
         visible={
           isCaptureModalVisible
         }
@@ -277,6 +279,20 @@ export default function HomeScreen() {
   );
 }
 
+function buildKnowledgePaths(discoveries: Discovery[]): string[][] {
+  const paths = discoveries.flatMap((discovery) => {
+    const classification = discovery.classification;
+    if (!classification) return [];
+    return [[
+      classification.secondaryCategory,
+      classification.topic,
+    ].filter(Boolean)];
+  });
+
+  const unique = new Map(paths.map((path) => [path.join(" › ").toLocaleLowerCase(), path]));
+  return [...unique.values()].sort((left, right) => left.join(" › ").localeCompare(right.join(" › ")));
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -288,7 +304,7 @@ const styles = StyleSheet.create({
     paddingHorizontal:
       theme.spacing.xl,
     paddingTop:
-      theme.spacing.xxxl,
+      theme.spacing.xxxl + theme.spacing.sm,
     paddingBottom: 120,
   },
 
