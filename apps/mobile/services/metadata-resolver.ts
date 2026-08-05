@@ -4,14 +4,15 @@ import type { DiscoverySource } from "@/types/discovery";
 export type ResolvedMetadata = {
   title: string;
   source: DiscoverySource;
-
   description?: string;
   thumbnailUrl?: string;
   author?: string;
   publishedAt?: string;
 };
 
-export function resolveMetadata(url: string): ResolvedMetadata {
+export function resolveMetadata(
+  url: string,
+): ResolvedMetadata {
   const source = detectSource(url);
 
   switch (source) {
@@ -19,40 +20,31 @@ export function resolveMetadata(url: string): ResolvedMetadata {
       return {
         title: "YouTube Video",
         source,
-        description: undefined,
-        thumbnailUrl: undefined,
-        author: undefined,
-        publishedAt: undefined,
       };
 
     case "instagram":
       return {
-        title: "Instagram Post",
+        title: "Instagram Beitrag",
         source,
-        description: undefined,
-        thumbnailUrl: undefined,
-        author: undefined,
-        publishedAt: undefined,
+      };
+
+    case "facebook":
+      return {
+        title: "Facebook Beitrag",
+        source,
       };
 
     case "tiktok":
       return {
         title: "TikTok Video",
         source,
-        description: undefined,
-        thumbnailUrl: undefined,
-        author: undefined,
-        publishedAt: undefined,
       };
 
+    case "web":
     default:
       return {
         title: "Website",
         source: "web",
-        description: undefined,
-        thumbnailUrl: undefined,
-        author: undefined,
-        publishedAt: undefined,
       };
   }
 }

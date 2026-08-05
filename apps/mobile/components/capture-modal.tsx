@@ -1235,6 +1235,7 @@ function formatSource(
   > = {
     youtube: "YouTube",
     instagram: "Instagram",
+    facebook: "Facebook",
     tiktok: "TikTok",
     web: "Web",
   };

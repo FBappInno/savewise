@@ -1,6 +1,7 @@
 export type DiscoverySource =
   | "youtube"
   | "instagram"
+  | "facebook"
   | "tiktok"
   | "web";
 

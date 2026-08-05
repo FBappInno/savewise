@@ -31,6 +31,7 @@ const sourceLabels: Record<
 > = {
   youtube: "YouTube",
   instagram: "Instagram",
+  facebook: "Facebook",
   tiktok: "TikTok",
   web: "Web",
 };
@@ -41,6 +42,7 @@ const sourceIcons: Record<
 > = {
   youtube: "logo-youtube",
   instagram: "logo-instagram",
+  facebook: "logo-facebook",
   tiktok: "musical-notes-outline",
   web: "globe-outline",
 };

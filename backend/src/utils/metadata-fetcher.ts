@@ -4,6 +4,7 @@ import { PDFParse } from "pdf-parse";
 import { ContentFetchError } from "../types/content-fetch-error";
 import type { PageMetadata } from "../types/page-metadata";
 import { validatePublicUrl } from "./url-validator";
+import { resolveMetaMetadata } from "./meta-metadata-resolver";
 import { resolveVideoMetadata } from "./video-metadata-resolver";
 
 const FETCH_TIMEOUT_MS = 15_000;
@@ -45,7 +46,15 @@ export async function fetchPageMetadata(
     );
   }
 
-  const videoMetadataPromise = resolveVideoMetadata(url);
+  const metaMetadata =
+    await resolveMetaMetadata(url);
+
+  if (metaMetadata) {
+    return metaMetadata;
+  }
+
+  const videoMetadataPromise =
+    resolveVideoMetadata(url);
 
   let pageMetadata: PageMetadata;
   try {

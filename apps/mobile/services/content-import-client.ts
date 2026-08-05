@@ -525,10 +525,11 @@ export function detectDiscoverySource(
     normalizeDiscoveryUrl(rawUrl);
 
   try {
-    const hostname = new URL(url)
-      .hostname
-      .toLowerCase()
-      .replace(/^www\./, "");
+    const hostname =
+      new URL(url)
+        .hostname
+        .toLowerCase()
+        .replace(/^www\./, "");
 
     if (
       hostname === "youtube.com" ||
@@ -544,9 +545,24 @@ export function detectDiscoverySource(
       hostname === "instagram.com" ||
       hostname.endsWith(
         ".instagram.com",
-      )
+      ) ||
+      hostname === "ig.me"
     ) {
       return "instagram";
+    }
+
+    if (
+      hostname === "facebook.com" ||
+      hostname.endsWith(
+        ".facebook.com",
+      ) ||
+      hostname === "fb.com" ||
+      hostname.endsWith(
+        ".fb.com",
+      ) ||
+      hostname === "fb.watch"
+    ) {
+      return "facebook";
     }
 
     if (
