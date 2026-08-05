@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-
 import {
   useEffect,
   useMemo,
@@ -118,30 +117,21 @@ export default function HomeScreen() {
       search,
     ]);
 
-  const topicCount =
-    useMemo(() => {
-      const topics =
-        new Set<string>();
-
-      discoveries.forEach(
-        (discovery) => {
-          discovery.topics.forEach(
-            (topic) => {
-              topics.add(topic);
-            },
-          );
-        },
-      );
-
-      return topics.size;
-    }, [discoveries]);
+  const mainTopics =
+    useMemo(
+      () =>
+        buildMainTopics(
+          discoveries,
+        ),
+      [discoveries],
+    );
 
   function handleDiscoveryPress(
     discovery: Discovery,
   ) {
     router.push({
-      pathname: "/discovery/[id]",
-
+      pathname:
+        "/discovery/[id]",
       params: {
         id: discovery.id,
       },
@@ -158,11 +148,12 @@ export default function HomeScreen() {
           .preferredKnowledgePath,
       );
 
-      setCaptureModalVisible(false);
+      setCaptureModalVisible(
+        false,
+      );
     } catch (importError) {
       Alert.alert(
         t("home.importFailed"),
-
         importError instanceof Error
           ? importError.message
           : "Der Inhalt konnte nicht importiert werden.",
@@ -181,7 +172,9 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
+            refreshing={
+              isRefreshing
+            }
             tintColor={
               universeTheme.colors
                 .primaryBright
@@ -196,8 +189,12 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.header}>
-          <View style={styles.brandRow}>
-            <View style={styles.logoMark}>
+          <View
+            style={styles.brandRow}
+          >
+            <View
+              style={styles.logoMark}
+            >
               <Text
                 style={
                   styles.logoMarkText
@@ -208,7 +205,9 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.flex}>
-              <Text style={styles.eyebrow}>
+              <Text
+                style={styles.eyebrow}
+              >
                 PERSONAL KNOWLEDGE OS
               </Text>
 
@@ -223,7 +222,9 @@ export default function HomeScreen() {
               }
             >
               <View
-                style={styles.statusDot}
+                style={
+                  styles.statusDot
+                }
               />
 
               <Text
@@ -236,14 +237,18 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <Text style={styles.subtitle}>
+          <Text
+            style={styles.subtitle}
+          >
             Dein intelligenter Feed für
             neue Erkenntnisse,
             Zusammenhänge und Ideen.
           </Text>
         </View>
 
-        <View style={styles.metricRow}>
+        <View
+          style={styles.metricRow}
+        >
           <Metric
             icon="documents-outline"
             label="Entdeckungen"
@@ -254,8 +259,10 @@ export default function HomeScreen() {
 
           <Metric
             icon="git-network-outline"
-            label="Themen"
-            value={topicCount}
+            label="Hauptthemen"
+            value={
+              mainTopics.length
+            }
           />
 
           <Metric
@@ -275,7 +282,9 @@ export default function HomeScreen() {
         />
 
         {error ? (
-          <View style={styles.errorBox}>
+          <View
+            style={styles.errorBox}
+          >
             <Ionicons
               color={
                 universeTheme.colors
@@ -286,7 +295,9 @@ export default function HomeScreen() {
             />
 
             <Text
-              style={styles.errorText}
+              style={
+                styles.errorText
+              }
             >
               {error}
             </Text>
@@ -294,7 +305,11 @@ export default function HomeScreen() {
         ) : null}
 
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+          <View
+            style={
+              styles.sectionHeader
+            }
+          >
             <View>
               <Text
                 style={
@@ -314,7 +329,9 @@ export default function HomeScreen() {
             </View>
 
             <View
-              style={styles.countBadge}
+              style={
+                styles.countBadge
+              }
             >
               <Text
                 style={
@@ -343,7 +360,9 @@ export default function HomeScreen() {
               />
 
               <Text
-                style={styles.loadingText}
+                style={
+                  styles.loadingText
+                }
               >
                 SaveWise synchronisiert
                 dein Wissen …
@@ -354,7 +373,11 @@ export default function HomeScreen() {
           {!isLoading &&
           filteredDiscoveries.length ===
             0 ? (
-            <View style={styles.emptyState}>
+            <View
+              style={
+                styles.emptyState
+              }
+            >
               <View
                 style={
                   styles.emptyIcon
@@ -371,13 +394,17 @@ export default function HomeScreen() {
               </View>
 
               <Text
-                style={styles.emptyTitle}
+                style={
+                  styles.emptyTitle
+                }
               >
                 Dein Universum wartet
               </Text>
 
               <Text
-                style={styles.emptyText}
+                style={
+                  styles.emptyText
+                }
               >
                 Speichere einen Link,
                 damit SaveWise dein
@@ -387,7 +414,11 @@ export default function HomeScreen() {
             </View>
           ) : null}
 
-          <View style={styles.discoveryList}>
+          <View
+            style={
+              styles.discoveryList
+            }
+          >
             {filteredDiscoveries.map(
               (discovery) => (
                 <DiscoveryCard
@@ -409,7 +440,9 @@ export default function HomeScreen() {
           icon="add"
           label={
             isImporting
-              ? t("home.analyzing")
+              ? t(
+                  "home.analyzing",
+                )
               : "Neue Discovery"
           }
           loading={isImporting}
@@ -422,10 +455,8 @@ export default function HomeScreen() {
       </View>
 
       <CaptureModal
-        existingKnowledgePaths={
-          buildKnowledgePaths(
-            discoveries,
-          )
+        existingMainTopics={
+          mainTopics
         }
         visible={
           isCaptureModalVisible
@@ -450,10 +481,9 @@ function Metric({
   label,
   value,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
-
+  icon:
+    keyof typeof Ionicons.glyphMap;
   label: string;
-
   value: number | string;
 }) {
   return (
@@ -466,61 +496,60 @@ function Metric({
         size={17}
       />
 
-      <Text style={styles.metricValue}>
+      <Text
+        style={styles.metricValue}
+      >
         {value}
       </Text>
 
-      <Text style={styles.metricLabel}>
+      <Text
+        style={styles.metricLabel}
+      >
         {label}
       </Text>
     </View>
   );
 }
 
-function buildKnowledgePaths(
+function buildMainTopics(
   discoveries: Discovery[],
-): string[][] {
-  const paths =
-    discoveries.flatMap(
-      (discovery) => {
-        const classification =
-          discovery.classification;
+): string[] {
+  const topics =
+    new Map<string, string>();
 
-        if (!classification) {
-          return [];
-        }
+  discoveries.forEach(
+    (discovery) => {
+      const mainTopic =
+        discovery.classification
+          ?.secondaryCategory
+          ?.replace(/\s+/g, " ")
+          .trim();
 
-        return [
-          [
-            classification
-              .secondaryCategory,
+      if (!mainTopic) {
+        return;
+      }
 
-            classification.topic,
-          ].filter(Boolean),
-        ];
-      },
-    );
+      const key =
+        mainTopic.toLocaleLowerCase();
 
-  const unique =
-    new Map(
-      paths.map((path) => [
-        path
-          .join(" › ")
-          .toLocaleLowerCase(),
+      if (!topics.has(key)) {
+        topics.set(
+          key,
+          mainTopic,
+        );
+      }
+    },
+  );
 
-        path,
-      ]),
-    );
-
-  return [
-    ...unique.values(),
-  ].sort(
-    (left, right) =>
-      left
-        .join(" › ")
-        .localeCompare(
-          right.join(" › "),
-        ),
+  return [...topics.values()].sort(
+    (first, second) =>
+      first.localeCompare(
+        second,
+        undefined,
+        {
+          sensitivity: "base",
+        },
+      ),
   );
 }
 
@@ -528,15 +557,12 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor:
       universeTheme.colors.background,
-
     flex: 1,
   },
 
   scrollContent: {
     paddingBottom: 145,
-
     paddingHorizontal: 18,
-
     paddingTop: 58,
   },
 
@@ -546,9 +572,7 @@ const styles = StyleSheet.create({
 
   brandRow: {
     alignItems: "center",
-
     flexDirection: "row",
-
     gap: 12,
   },
 
@@ -558,34 +582,23 @@ const styles = StyleSheet.create({
 
   logoMark: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(56, 189, 248, 0.1)",
-
     borderColor:
       universeTheme.colors
         .primaryBright,
-
     borderRadius: 16,
-
     borderWidth: 1.5,
-
     height: 50,
-
     justifyContent: "center",
-
     shadowColor:
       universeTheme.colors.primary,
-
     shadowOffset: {
       height: 0,
       width: 0,
     },
-
     shadowOpacity: 0.55,
-
     shadowRadius: 15,
-
     width: 50,
   },
 
@@ -593,31 +606,23 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .primaryBright,
-
     fontSize: 27,
-
     fontWeight: "900",
   },
 
   eyebrow: {
     color:
       universeTheme.colors.primary,
-
     fontSize: 9,
-
     fontWeight: "800",
-
     letterSpacing: 1.5,
   },
 
   logo: {
     color:
       universeTheme.colors.text,
-
     fontSize: 29,
-
     fontWeight: "900",
-
     lineHeight: 35,
   },
 
@@ -625,93 +630,65 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textSecondary,
-
     fontSize: 14,
-
     lineHeight: 21,
-
     marginTop: 13,
-
     maxWidth: 350,
   },
 
   statusIndicator: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(74, 222, 128, 0.06)",
-
     borderColor:
       "rgba(74, 222, 128, 0.22)",
-
     borderRadius: 999,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
     gap: 5,
-
     paddingHorizontal: 9,
-
     paddingVertical: 6,
   },
 
   statusDot: {
     backgroundColor:
       universeTheme.colors.green,
-
     borderRadius: 999,
-
     height: 6,
-
     width: 6,
   },
 
   statusText: {
     color:
       universeTheme.colors.green,
-
     fontSize: 8,
-
     fontWeight: "900",
-
     letterSpacing: 0.7,
   },
 
   metricRow: {
     backgroundColor:
       "rgba(6, 20, 36, 0.72)",
-
     borderColor:
       universeTheme.colors.border,
-
     borderRadius:
       universeTheme.radius.lg,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
     marginBottom: 17,
-
     paddingVertical: 14,
   },
 
   metric: {
     alignItems: "center",
-
     flex: 1,
   },
 
   metricValue: {
     color:
       universeTheme.colors.text,
-
     fontSize: 15,
-
     fontWeight: "900",
-
     marginTop: 4,
   },
 
@@ -719,32 +696,22 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textMuted,
-
     fontSize: 9,
-
     marginTop: 2,
   },
 
   errorBox: {
     alignItems: "flex-start",
-
     backgroundColor:
       "rgba(248, 113, 113, 0.07)",
-
     borderColor:
       "rgba(248, 113, 113, 0.28)",
-
     borderRadius:
       universeTheme.radius.md,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
     gap: 10,
-
     marginTop: 14,
-
     padding: 14,
   },
 
@@ -752,11 +719,8 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textSecondary,
-
     flex: 1,
-
     fontSize: 13,
-
     lineHeight: 19,
   },
 
@@ -766,56 +730,39 @@ const styles = StyleSheet.create({
 
   sectionHeader: {
     alignItems: "center",
-
     flexDirection: "row",
-
     justifyContent:
       "space-between",
-
     marginBottom: 16,
   },
 
   sectionEyebrow: {
     color:
       universeTheme.colors.primary,
-
     fontSize: 9,
-
     fontWeight: "800",
-
     letterSpacing: 1.4,
   },
 
   sectionTitle: {
     color:
       universeTheme.colors.text,
-
     fontSize: 23,
-
     fontWeight: "900",
-
     marginTop: 3,
   },
 
   countBadge: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(56, 189, 248, 0.08)",
-
     borderColor:
       universeTheme.colors.border,
-
     borderRadius: 999,
-
     borderWidth: 1,
-
     height: 34,
-
     justifyContent: "center",
-
     minWidth: 34,
-
     paddingHorizontal: 10,
   },
 
@@ -823,9 +770,7 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .primaryBright,
-
     fontSize: 12,
-
     fontWeight: "900",
   },
 
@@ -835,7 +780,6 @@ const styles = StyleSheet.create({
 
   loadingContainer: {
     alignItems: "center",
-
     paddingVertical: 70,
   },
 
@@ -843,62 +787,43 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textSecondary,
-
     fontSize: 13,
-
     marginTop: 14,
   },
 
   emptyState: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(6, 20, 36, 0.74)",
-
     borderColor:
       universeTheme.colors.border,
-
     borderRadius:
       universeTheme.radius.lg,
-
     borderWidth: 1,
-
     paddingHorizontal: 24,
-
     paddingVertical: 46,
   },
 
   emptyIcon: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(56, 189, 248, 0.09)",
-
     borderColor:
       universeTheme.colors
         .borderStrong,
-
     borderRadius: 999,
-
     borderWidth: 1,
-
     height: 68,
-
     justifyContent: "center",
-
     marginBottom: 16,
-
     width: 68,
   },
 
   emptyTitle: {
     color:
       universeTheme.colors.text,
-
     fontSize: 19,
-
     fontWeight: "900",
-
     textAlign: "center",
   },
 
@@ -906,35 +831,24 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textSecondary,
-
     fontSize: 13,
-
     lineHeight: 20,
-
     marginTop: 8,
-
     textAlign: "center",
   },
 
   footer: {
     bottom: 102,
-
     left: 18,
-
     position: "absolute",
-
     right: 18,
-
     shadowColor:
       universeTheme.colors.primary,
-
     shadowOffset: {
       height: 0,
       width: 0,
     },
-
     shadowOpacity: 0.32,
-
     shadowRadius: 18,
   },
 });

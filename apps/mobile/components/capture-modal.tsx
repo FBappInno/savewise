@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import {
   useEffect,
   useMemo,
@@ -13,6 +12,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -31,12 +31,8 @@ import type { CapturedItem } from "@/types/captured-item";
 
 type CaptureModalProps = {
   visible: boolean;
-
-  existingKnowledgePaths:
-    string[][];
-
+  existingMainTopics: string[];
   onClose: () => void;
-
   onSave: (
     capturedItem: CapturedItem,
   ) => void;
@@ -44,40 +40,49 @@ type CaptureModalProps = {
 
 export function CaptureModal({
   visible,
-  existingKnowledgePaths,
+  existingMainTopics,
   onClose,
   onSave,
 }: CaptureModalProps) {
   const { locale } =
     useAppSettings();
 
+  const labels =
+    captureLabels[locale];
+
   const [url, setUrl] =
     useState("");
 
   const [
-    isPathPickerOpen,
-    setPathPickerOpen,
+    automaticClassification,
+    setAutomaticClassification,
+  ] = useState(true);
+
+  const [
+    isTopicPickerOpen,
+    setTopicPickerOpen,
   ] = useState(false);
 
   const [
-    selectedPath,
-    setSelectedPath,
-  ] =
-    useState<string[] | null>(
-      null,
-    );
+    selectedMainTopic,
+    setSelectedMainTopic,
+  ] = useState<string | null>(
+    null,
+  );
 
   const [
-    customPath,
-    setCustomPath,
+    customMainTopic,
+    setCustomMainTopic,
   ] = useState("");
 
-  const labels =
-    captureLabels[locale];
+  const [
+    topicSearch,
+    setTopicSearch,
+  ] = useState("");
 
   useEffect(() => {
     if (!visible) {
-      setPathPickerOpen(false);
+      resetForm();
     }
   }, [visible]);
 
@@ -113,39 +118,99 @@ export function CaptureModal({
       ],
     );
 
+  const normalizedMainTopics =
+    useMemo(
+      () =>
+        normalizeMainTopics(
+          existingMainTopics,
+        ),
+      [existingMainTopics],
+    );
+
+  const filteredMainTopics =
+    useMemo(() => {
+      const query =
+        topicSearch
+          .trim()
+          .toLocaleLowerCase();
+
+      if (!query) {
+        return normalizedMainTopics;
+      }
+
+      return normalizedMainTopics.filter(
+        (topic) =>
+          topic
+            .toLocaleLowerCase()
+            .includes(query),
+      );
+    }, [
+      normalizedMainTopics,
+      topicSearch,
+    ]);
+
+  const resolvedManualTopic =
+    resolveManualMainTopic(
+      selectedMainTopic,
+      customMainTopic,
+    );
+
+  const canSave =
+    isValidUrl &&
+    Boolean(metadata) &&
+    (automaticClassification ||
+      Boolean(resolvedManualTopic));
+
   function resetForm() {
     setUrl("");
-    setSelectedPath(null);
-    setCustomPath("");
-    setPathPickerOpen(false);
+    setAutomaticClassification(
+      true,
+    );
+    setTopicPickerOpen(false);
+    setSelectedMainTopic(null);
+    setCustomMainTopic("");
+    setTopicSearch("");
+  }
+
+  function handleAutomaticChange(
+    value: boolean,
+  ) {
+    setAutomaticClassification(
+      value,
+    );
+
+    if (value) {
+      setTopicPickerOpen(false);
+      setSelectedMainTopic(null);
+      setCustomMainTopic("");
+      setTopicSearch("");
+    }
   }
 
   function handleSave() {
     if (
-      !isValidUrl ||
+      !canSave ||
       !metadata
     ) {
       return;
     }
 
+    const preferredKnowledgePath =
+      automaticClassification
+        ? undefined
+        : resolvedManualTopic
+          ? [resolvedManualTopic]
+          : undefined;
+
     const capturedItem:
       CapturedItem = {
       id: Date.now().toString(),
-
       title: metadata.title,
-
       url: normalizedUrl,
-
       source: metadata.source,
-
       capturedAt:
         new Date().toISOString(),
-
-      preferredKnowledgePath:
-        resolvePreferredPath(
-          selectedPath,
-          customPath,
-        ),
+      preferredKnowledgePath,
     };
 
     onSave(capturedItem);
@@ -155,6 +220,15 @@ export function CaptureModal({
   function handleClose() {
     resetForm();
     onClose();
+  }
+
+  function selectMainTopic(
+    topic: string,
+  ) {
+    setSelectedMainTopic(topic);
+    setCustomMainTopic("");
+    setTopicSearch("");
+    setTopicPickerOpen(false);
   }
 
   return (
@@ -178,12 +252,14 @@ export function CaptureModal({
 
         <View style={styles.header}>
           <Pressable
+            accessibilityLabel={
+              labels.cancel
+            }
             accessibilityRole="button"
             hitSlop={10}
             onPress={handleClose}
             style={({ pressed }) => [
               styles.closeButton,
-
               pressed &&
                 styles.pressed,
             ]}
@@ -198,7 +274,11 @@ export function CaptureModal({
             />
           </Pressable>
 
-          <View style={styles.headerCenter}>
+          <View
+            style={
+              styles.headerCenter
+            }
+          >
             <Text style={styles.eyebrow}>
               CAPTURE
             </Text>
@@ -213,7 +293,9 @@ export function CaptureModal({
           </View>
 
           <View
-            style={styles.headerSpacer}
+            style={
+              styles.headerSpacer
+            }
           />
         </View>
 
@@ -226,8 +308,12 @@ export function CaptureModal({
             false
           }
         >
-          <View style={styles.introCard}>
-            <View style={styles.introIcon}>
+          <View
+            style={styles.introCard}
+          >
+            <View
+              style={styles.introIcon}
+            >
               <Ionicons
                 color={
                   universeTheme.colors
@@ -244,7 +330,7 @@ export function CaptureModal({
                   styles.introTitle
                 }
               >
-                Neues Wissen erfassen
+                {labels.captureTitle}
               </Text>
 
               <Text
@@ -252,9 +338,7 @@ export function CaptureModal({
                   styles.introText
                 }
               >
-                SaveWise analysiert,
-                ordnet und verbindet
-                deinen Link automatisch.
+                {labels.captureText}
               </Text>
             </View>
           </View>
@@ -263,7 +347,11 @@ export function CaptureModal({
             {labels.link}
           </Text>
 
-          <View style={styles.inputWrapper}>
+          <View
+            style={
+              styles.inputWrapper
+            }
+          >
             <Ionicons
               color={
                 universeTheme.colors
@@ -377,13 +465,17 @@ export function CaptureModal({
             </View>
           ) : null}
 
-          <View style={styles.sectionHeader}>
+          <View
+            style={
+              styles.sectionHeader
+            }
+          >
             <Text
               style={
                 styles.sectionEyebrow
               }
             >
-              KNOWLEDGE PATH
+              KNOWLEDGE UNIVERSE
             </Text>
 
             <Text
@@ -391,7 +483,7 @@ export function CaptureModal({
                 styles.sectionTitle
               }
             >
-              {labels.path}
+              {labels.universe}
             </Text>
 
             <Text
@@ -399,163 +491,374 @@ export function CaptureModal({
                 styles.sectionHint
               }
             >
-              {labels.pathHint}
+              {labels.universeHint}
             </Text>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            onPress={() =>
-              setPathPickerOpen(
-                (open) => !open,
-              )
+          <View
+            style={
+              styles.automaticCard
             }
-            style={({ pressed }) => [
-              styles.pathSelect,
-
-              pressed &&
-                styles.pressed,
-            ]}
           >
-            <View style={styles.pathLeft}>
+            <View
+              style={
+                styles.automaticIcon
+              }
+            >
               <Ionicons
                 color={
-                  universeTheme.colors
-                    .primary
+                  automaticClassification
+                    ? universeTheme
+                        .colors
+                        .primaryBright
+                    : universeTheme
+                        .colors
+                        .textMuted
                 }
-                name="git-network-outline"
-                size={18}
+                name="sparkles-outline"
+                size={20}
               />
+            </View>
 
+            <View style={styles.flex}>
               <Text
-                numberOfLines={2}
                 style={
-                  styles.pathSelectText
+                  styles.automaticTitle
                 }
               >
-                {selectedPath
-                  ? selectedPath.join(
-                      " › ",
-                    )
-                  : labels.automatic}
+                {labels.automatic}
+              </Text>
+
+              <Text
+                style={
+                  styles.automaticText
+                }
+              >
+                {
+                  labels.automaticDescription
+                }
               </Text>
             </View>
 
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .textSecondary
+            <Switch
+              ios_backgroundColor="rgba(148, 163, 184, 0.18)"
+              onValueChange={
+                handleAutomaticChange
               }
-              name={
-                isPathPickerOpen
-                  ? "chevron-up"
-                  : "chevron-down"
-              }
-              size={18}
-            />
-          </Pressable>
-
-          {isPathPickerOpen ? (
-            <ScrollView
-              nestedScrollEnabled
-              style={
-                styles.pathOptions
-              }
-            >
-              <PathOption
-                label={
-                  labels.automatic
-                }
-                onPress={() => {
-                  setSelectedPath(
-                    null,
-                  );
-
-                  setCustomPath("");
-
-                  setPathPickerOpen(
-                    false,
-                  );
-                }}
-                selected={
-                  !selectedPath &&
-                  !customPath.trim()
-                }
-              />
-
-              {existingKnowledgePaths.map(
-                (path) => (
-                  <PathOption
-                    key={path.join("/")}
-                    label={path.join(
-                      " › ",
-                    )}
-                    onPress={() => {
-                      setSelectedPath(
-                        path,
-                      );
-
-                      setCustomPath(
-                        "",
-                      );
-
-                      setPathPickerOpen(
-                        false,
-                      );
-                    }}
-                    selected={
-                      selectedPath?.join(
-                        "/",
-                      ) ===
-                      path.join("/")
-                    }
-                  />
-                ),
-              )}
-            </ScrollView>
-          ) : null}
-
-          <View
-            style={[
-              styles.inputWrapper,
-              styles.customPathWrapper,
-            ]}
-          >
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .violet
-              }
-              name="create-outline"
-              size={18}
-            />
-
-            <TextInput
-              autoCapitalize="sentences"
-              onChangeText={(value) => {
-                setCustomPath(value);
-
-                if (value.trim()) {
-                  setSelectedPath(
-                    null,
-                  );
-                }
+              thumbColor="#F8FAFC"
+              trackColor={{
+                false:
+                  "rgba(148, 163, 184, 0.18)",
+                true:
+                  universeTheme.colors
+                    .primary,
               }}
-              placeholder={
-                labels.customPlaceholder
+              value={
+                automaticClassification
               }
-              placeholderTextColor={
-                universeTheme.colors
-                  .textMuted
-              }
-              selectionColor={
-                universeTheme.colors
-                  .primaryBright
-              }
-              style={styles.input}
-              value={customPath}
             />
           </View>
+
+          {!automaticClassification ? (
+            <View
+              style={
+                styles.manualArea
+              }
+            >
+              <Text
+                style={
+                  styles.manualEyebrow
+                }
+              >
+                {labels.manual}
+              </Text>
+
+              <Text
+                style={
+                  styles.manualTitle
+                }
+              >
+                {labels.mainTopic}
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  setTopicPickerOpen(
+                    (open) => !open,
+                  );
+                }}
+                style={({ pressed }) => [
+                  styles.topicSelect,
+                  pressed &&
+                    styles.pressed,
+                ]}
+              >
+                <View
+                  style={
+                    styles.topicSelectLeft
+                  }
+                >
+                  <Ionicons
+                    color={
+                      universeTheme
+                        .colors.primary
+                    }
+                    name="planet-outline"
+                    size={18}
+                  />
+
+                  <Text
+                    numberOfLines={1}
+                    style={
+                      selectedMainTopic
+                        ? styles.topicSelectValue
+                        : styles.topicSelectPlaceholder
+                    }
+                  >
+                    {selectedMainTopic ??
+                      labels.chooseMainTopic}
+                  </Text>
+                </View>
+
+                <Ionicons
+                  color={
+                    universeTheme.colors
+                      .textSecondary
+                  }
+                  name={
+                    isTopicPickerOpen
+                      ? "chevron-up"
+                      : "chevron-down"
+                  }
+                  size={18}
+                />
+              </Pressable>
+
+              {isTopicPickerOpen ? (
+                <View
+                  style={
+                    styles.topicPicker
+                  }
+                >
+                  <View
+                    style={
+                      styles.topicSearchWrapper
+                    }
+                  >
+                    <Ionicons
+                      color={
+                        universeTheme
+                          .colors
+                          .primary
+                      }
+                      name="search-outline"
+                      size={17}
+                    />
+
+                    <TextInput
+                      autoCapitalize="sentences"
+                      autoCorrect={false}
+                      onChangeText={
+                        setTopicSearch
+                      }
+                      placeholder={
+                        labels.searchTopics
+                      }
+                      placeholderTextColor={
+                        universeTheme
+                          .colors
+                          .textMuted
+                      }
+                      selectionColor={
+                        universeTheme
+                          .colors
+                          .primaryBright
+                      }
+                      style={
+                        styles.topicSearchInput
+                      }
+                      value={topicSearch}
+                    />
+                  </View>
+
+                  <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    nestedScrollEnabled
+                    style={
+                      styles.topicOptions
+                    }
+                  >
+                    {filteredMainTopics.length >
+                    0 ? (
+                      filteredMainTopics.map(
+                        (topic) => (
+                          <TopicOption
+                            key={topic}
+                            label={topic}
+                            onPress={() => {
+                              selectMainTopic(
+                                topic,
+                              );
+                            }}
+                            selected={
+                              selectedMainTopic ===
+                              topic
+                            }
+                          />
+                        ),
+                      )
+                    ) : (
+                      <Text
+                        style={
+                          styles.noTopicText
+                        }
+                      >
+                        {
+                          labels.noMatchingTopics
+                        }
+                      </Text>
+                    )}
+                  </ScrollView>
+                </View>
+              ) : null}
+
+              <View
+                style={
+                  styles.orDivider
+                }
+              >
+                <View
+                  style={
+                    styles.orLine
+                  }
+                />
+
+                <Text
+                  style={
+                    styles.orText
+                  }
+                >
+                  {labels.or}
+                </Text>
+
+                <View
+                  style={
+                    styles.orLine
+                  }
+                />
+              </View>
+
+              <Text
+                style={
+                  styles.customTopicLabel
+                }
+              >
+                {labels.newMainTopic}
+              </Text>
+
+              <View
+                style={[
+                  styles.inputWrapper,
+                  styles.customTopicWrapper,
+                ]}
+              >
+                <Ionicons
+                  color={
+                    universeTheme.colors
+                      .violet
+                  }
+                  name="add-circle-outline"
+                  size={19}
+                />
+
+                <TextInput
+                  autoCapitalize="sentences"
+                  autoCorrect
+                  maxLength={60}
+                  onChangeText={(value) => {
+                    setCustomMainTopic(
+                      value,
+                    );
+
+                    if (value.trim()) {
+                      setSelectedMainTopic(
+                        null,
+                      );
+                      setTopicPickerOpen(
+                        false,
+                      );
+                    }
+                  }}
+                  placeholder={
+                    labels.newMainTopicPlaceholder
+                  }
+                  placeholderTextColor={
+                    universeTheme.colors
+                      .textMuted
+                  }
+                  selectionColor={
+                    universeTheme.colors
+                      .primaryBright
+                  }
+                  style={styles.input}
+                  value={customMainTopic}
+                />
+              </View>
+
+              <View
+                style={
+                  styles.aiHierarchyHint
+                }
+              >
+                <Ionicons
+                  color={
+                    universeTheme.colors
+                      .green
+                  }
+                  name="git-network-outline"
+                  size={17}
+                />
+
+                <Text
+                  style={
+                    styles.aiHierarchyText
+                  }
+                >
+                  {
+                    labels.aiHierarchyHint
+                  }
+                </Text>
+              </View>
+
+              {!resolvedManualTopic ? (
+                <View
+                  style={
+                    styles.validationRow
+                  }
+                >
+                  <Ionicons
+                    color={
+                      universeTheme.colors
+                        .orange
+                    }
+                    name="information-circle-outline"
+                    size={16}
+                  />
+
+                  <Text
+                    style={
+                      styles.manualValidationText
+                    }
+                  >
+                    {
+                      labels.mainTopicRequired
+                    }
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
 
           <View
             style={
@@ -563,7 +866,7 @@ export function CaptureModal({
             }
           >
             <SaveWiseButton
-              disabled={!isValidUrl}
+              disabled={!canSave}
               icon="sparkles"
               label={labels.save}
               onPress={handleSave}
@@ -575,33 +878,49 @@ export function CaptureModal({
   );
 }
 
-function PathOption({
+function TopicOption({
   label,
   onPress,
   selected,
 }: {
   label: string;
-
   onPress: () => void;
-
   selected: boolean;
 }) {
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
-        styles.pathOption,
-
+        styles.topicOption,
+        selected &&
+          styles.topicOptionSelected,
         pressed &&
           styles.pressed,
       ]}
     >
+      <View
+        style={
+          styles.topicOptionIcon
+        }
+      >
+        <Ionicons
+          color={
+            selected
+              ? universeTheme.colors
+                  .primaryBright
+              : universeTheme.colors
+                  .textMuted
+          }
+          name="planet-outline"
+          size={16}
+        />
+      </View>
+
       <Text
         style={[
-          styles.pathOptionText,
-
+          styles.topicOptionText,
           selected &&
-            styles.pathOptionTextSelected,
+            styles.topicOptionTextSelected,
         ]}
       >
         {label}
@@ -621,179 +940,289 @@ function PathOption({
   );
 }
 
-function resolvePreferredPath(
-  selectedPath: string[] | null,
-  customPath: string,
-): string[] | undefined {
-  if (selectedPath) {
-    return selectedPath;
+function resolveManualMainTopic(
+  selectedMainTopic: string | null,
+  customMainTopic: string,
+): string | undefined {
+  const custom =
+    normalizeTopicName(
+      customMainTopic,
+    );
+
+  if (custom) {
+    return custom;
   }
 
-  const parts =
-    customPath
-      .split(
-        /\s*(?:›|>|\/|;)\s*/,
+  return selectedMainTopic
+    ? normalizeTopicName(
+        selectedMainTopic,
       )
-      .map((part) =>
-        part.trim(),
-      )
-      .filter(Boolean)
-      .slice(0, 3);
-
-  return parts.length > 0
-    ? parts
     : undefined;
+}
+
+function normalizeMainTopics(
+  topics: string[],
+): string[] {
+  const unique =
+    new Map<string, string>();
+
+  topics.forEach((topic) => {
+    const normalized =
+      normalizeTopicName(topic);
+
+    if (!normalized) {
+      return;
+    }
+
+    const key =
+      normalized.toLocaleLowerCase();
+
+    if (!unique.has(key)) {
+      unique.set(
+        key,
+        normalized,
+      );
+    }
+  });
+
+  return [...unique.values()].sort(
+    (first, second) =>
+      first.localeCompare(
+        second,
+        undefined,
+        {
+          sensitivity: "base",
+        },
+      ),
+  );
+}
+
+function normalizeTopicName(
+  value: string,
+): string {
+  return value
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 60);
 }
 
 const captureLabels = {
   de: {
     cancel: "Abbrechen",
-
     newDiscovery:
       "Neue Discovery",
-
+    captureTitle:
+      "Neues Wissen erfassen",
+    captureText:
+      "SaveWise analysiert, ordnet und verbindet deinen Link.",
     link: "Link",
-
     invalidUrl:
       "Bitte gib eine gültige Webadresse ein.",
-
     detected:
       "SaveWise erkannt",
-
     save:
       "Analysieren und speichern",
-
-    path:
-      "Pfad im Wissensuniversum",
-
-    pathHint:
-      "Optional: Bestehenden Pfad wählen oder selbst eingeben.",
-
+    universe:
+      "Wissensuniversum",
+    universeHint:
+      "Lass SaveWise das Hauptthema bestimmen oder ordne den Beitrag selbst einer Hauptebene zu.",
     automatic:
       "Automatisch durch KI",
-
-    customPlaceholder:
-      "Eigener Pfad, z. B. Reisen › Mittelmeer",
+    automaticDescription:
+      "SaveWise bestimmt Hauptthema, Topic und Unterthemen selbstständig.",
+    manual:
+      "MANUELLE EINORDNUNG",
+    mainTopic: "Hauptthema",
+    chooseMainTopic:
+      "Bestehendes Hauptthema auswählen",
+    searchTopics:
+      "Hauptthemen durchsuchen …",
+    noMatchingTopics:
+      "Keine passenden Hauptthemen gefunden.",
+    or: "oder",
+    newMainTopic:
+      "Neues Hauptthema",
+    newMainTopicPlaceholder:
+      "z. B. Robotik, Finanzen oder Reisen",
+    aiHierarchyHint:
+      "Die KI erstellt innerhalb des gewählten Hauptthemas weiterhin das passende Topic und die Unterthemen.",
+    mainTopicRequired:
+      "Wähle ein Hauptthema oder erfasse ein neues.",
   },
 
   en: {
     cancel: "Cancel",
-
     newDiscovery:
       "New discovery",
-
+    captureTitle:
+      "Capture new knowledge",
+    captureText:
+      "SaveWise analyzes, organizes and connects your link.",
     link: "Link",
-
     invalidUrl:
       "Please enter a valid web address.",
-
     detected:
       "SaveWise detected",
-
     save:
       "Analyze and save",
-
-    path:
-      "Knowledge universe path",
-
-    pathHint:
-      "Optional: choose an existing path or enter your own.",
-
+    universe:
+      "Knowledge universe",
+    universeHint:
+      "Let SaveWise determine the main topic or assign the contribution yourself.",
     automatic:
       "Automatic by AI",
-
-    customPlaceholder:
-      "Custom path, e.g. Travel › Mediterranean",
+    automaticDescription:
+      "SaveWise determines the main topic, topic and subtopics.",
+    manual:
+      "MANUAL CLASSIFICATION",
+    mainTopic: "Main topic",
+    chooseMainTopic:
+      "Select an existing main topic",
+    searchTopics:
+      "Search main topics …",
+    noMatchingTopics:
+      "No matching main topics found.",
+    or: "or",
+    newMainTopic:
+      "New main topic",
+    newMainTopicPlaceholder:
+      "e.g. Robotics, Finance or Travel",
+    aiHierarchyHint:
+      "AI will still create the appropriate topic and subtopics inside the selected main topic.",
+    mainTopicRequired:
+      "Select a main topic or create a new one.",
   },
 
   fr: {
     cancel: "Annuler",
-
     newDiscovery:
       "Nouvelle découverte",
-
+    captureTitle:
+      "Capturer de nouvelles connaissances",
+    captureText:
+      "SaveWise analyse, organise et relie votre lien.",
     link: "Lien",
-
     invalidUrl:
       "Saisissez une adresse web valide.",
-
     detected:
       "SaveWise a détecté",
-
     save:
       "Analyser et enregistrer",
-
-    path:
-      "Chemin de connaissance",
-
-    pathHint:
-      "Facultatif : choisissez un chemin ou saisissez le vôtre.",
-
+    universe:
+      "Univers des connaissances",
+    universeHint:
+      "Laissez SaveWise choisir le thème principal ou attribuez-le vous-même.",
     automatic:
       "Automatique par IA",
-
-    customPlaceholder:
-      "Chemin, p. ex. Voyages › Méditerranée",
+    automaticDescription:
+      "SaveWise détermine le thème principal, le sujet et les sous-thèmes.",
+    manual:
+      "CLASSEMENT MANUEL",
+    mainTopic:
+      "Thème principal",
+    chooseMainTopic:
+      "Sélectionner un thème principal",
+    searchTopics:
+      "Rechercher les thèmes …",
+    noMatchingTopics:
+      "Aucun thème correspondant.",
+    or: "ou",
+    newMainTopic:
+      "Nouveau thème principal",
+    newMainTopicPlaceholder:
+      "p. ex. Robotique, Finance ou Voyages",
+    aiHierarchyHint:
+      "L’IA crée toujours le sujet et les sous-thèmes appropriés.",
+    mainTopicRequired:
+      "Sélectionnez ou créez un thème principal.",
   },
 
   it: {
     cancel: "Annulla",
-
     newDiscovery:
       "Nuova scoperta",
-
+    captureTitle:
+      "Acquisisci nuova conoscenza",
+    captureText:
+      "SaveWise analizza, organizza e collega il tuo link.",
     link: "Link",
-
     invalidUrl:
       "Inserisci un indirizzo web valido.",
-
     detected:
       "SaveWise ha rilevato",
-
     save:
       "Analizza e salva",
-
-    path:
-      "Percorso della conoscenza",
-
-    pathHint:
-      "Facoltativo: scegli un percorso o inseriscine uno.",
-
+    universe:
+      "Universo della conoscenza",
+    universeHint:
+      "Lascia scegliere a SaveWise il tema principale oppure assegnalo manualmente.",
     automatic:
       "Automatico con IA",
-
-    customPlaceholder:
-      "Percorso, es. Viaggi › Mediterraneo",
+    automaticDescription:
+      "SaveWise determina il tema principale, l’argomento e i sottoargomenti.",
+    manual:
+      "CLASSIFICAZIONE MANUALE",
+    mainTopic:
+      "Tema principale",
+    chooseMainTopic:
+      "Seleziona un tema principale",
+    searchTopics:
+      "Cerca temi principali …",
+    noMatchingTopics:
+      "Nessun tema corrispondente.",
+    or: "oppure",
+    newMainTopic:
+      "Nuovo tema principale",
+    newMainTopicPlaceholder:
+      "es. Robotica, Finanza o Viaggi",
+    aiHierarchyHint:
+      "L’IA crea comunque l’argomento e i sottoargomenti appropriati.",
+    mainTopicRequired:
+      "Seleziona o crea un tema principale.",
   },
 
   es: {
     cancel: "Cancelar",
-
     newDiscovery:
       "Nuevo descubrimiento",
-
+    captureTitle:
+      "Capturar nuevo conocimiento",
+    captureText:
+      "SaveWise analiza, organiza y conecta tu enlace.",
     link: "Enlace",
-
     invalidUrl:
       "Introduce una dirección web válida.",
-
     detected:
       "SaveWise detectó",
-
     save:
       "Analizar y guardar",
-
-    path:
-      "Ruta de conocimiento",
-
-    pathHint:
-      "Opcional: elige una ruta o introduce una propia.",
-
+    universe:
+      "Universo de conocimiento",
+    universeHint:
+      "Deja que SaveWise determine el tema principal o asígnalo manualmente.",
     automatic:
       "Automático por IA",
-
-    customPlaceholder:
-      "Ruta, p. ej. Viajes › Mediterráneo",
+    automaticDescription:
+      "SaveWise determina el tema principal, el tema y los subtemas.",
+    manual:
+      "CLASIFICACIÓN MANUAL",
+    mainTopic:
+      "Tema principal",
+    chooseMainTopic:
+      "Seleccionar un tema principal",
+    searchTopics:
+      "Buscar temas principales …",
+    noMatchingTopics:
+      "No se encontraron temas.",
+    or: "o",
+    newMainTopic:
+      "Nuevo tema principal",
+    newMainTopicPlaceholder:
+      "p. ej. Robótica, Finanzas o Viajes",
+    aiHierarchyHint:
+      "La IA seguirá creando el tema y los subtemas apropiados.",
+    mainTopicRequired:
+      "Selecciona o crea un tema principal.",
   },
 } as const;
 
@@ -817,42 +1246,29 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor:
       universeTheme.colors.background,
-
     flex: 1,
   },
 
   header: {
     alignItems: "center",
-
     borderBottomColor:
       universeTheme.colors.border,
-
     borderBottomWidth: 1,
-
     flexDirection: "row",
-
     justifyContent:
       "space-between",
-
     minHeight: 88,
-
     paddingHorizontal: 20,
-
     paddingTop: 18,
   },
 
   closeButton: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(148, 163, 184, 0.08)",
-
     borderRadius: 999,
-
     height: 40,
-
     justifyContent: "center",
-
     width: 40,
   },
 
@@ -863,22 +1279,16 @@ const styles = StyleSheet.create({
   eyebrow: {
     color:
       universeTheme.colors.primary,
-
     fontSize: 9,
-
     fontWeight: "800",
-
     letterSpacing: 1.5,
   },
 
   headerTitle: {
     color:
       universeTheme.colors.text,
-
     fontSize: 17,
-
     fontWeight: "900",
-
     marginTop: 3,
   },
 
@@ -888,51 +1298,35 @@ const styles = StyleSheet.create({
 
   content: {
     padding: 20,
-
     paddingBottom: 50,
   },
 
   introCard: {
     alignItems: "flex-start",
-
     backgroundColor:
       "rgba(6, 20, 36, 0.88)",
-
     borderColor:
       universeTheme.colors.border,
-
     borderRadius:
       universeTheme.radius.lg,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
     gap: 13,
-
     marginBottom: 25,
-
     padding: 17,
   },
 
   introIcon: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(56, 189, 248, 0.1)",
-
     borderColor:
       universeTheme.colors
         .borderStrong,
-
     borderRadius: 14,
-
     borderWidth: 1,
-
     height: 46,
-
     justifyContent: "center",
-
     width: 46,
   },
 
@@ -943,9 +1337,7 @@ const styles = StyleSheet.create({
   introTitle: {
     color:
       universeTheme.colors.text,
-
     fontSize: 15,
-
     fontWeight: "900",
   },
 
@@ -953,11 +1345,8 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textSecondary,
-
     fontSize: 12,
-
     lineHeight: 18,
-
     marginTop: 4,
   },
 
@@ -965,122 +1354,92 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .primaryBright,
-
     fontSize: 11,
-
     fontWeight: "800",
-
     letterSpacing: 0.9,
-
     marginBottom: 8,
-
     textTransform: "uppercase",
   },
 
   inputWrapper: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(6, 20, 36, 0.94)",
-
     borderColor:
       universeTheme.colors
         .borderStrong,
-
     borderRadius:
       universeTheme.radius.lg,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
     gap: 10,
-
     minHeight: 56,
-
     paddingHorizontal: 15,
   },
 
   input: {
     color:
       universeTheme.colors.text,
-
     flex: 1,
-
     fontSize: 14,
-
     lineHeight: 20,
-
     paddingVertical: 15,
   },
 
   validationRow: {
     alignItems: "center",
-
     flexDirection: "row",
-
     gap: 7,
-
     marginTop: 9,
   },
 
   validationText: {
     color:
       universeTheme.colors.danger,
-
     flex: 1,
+    fontSize: 12,
+  },
 
+  manualValidationText: {
+    color:
+      universeTheme.colors.orange,
+    flex: 1,
     fontSize: 12,
   },
 
   preview: {
     backgroundColor:
       "rgba(6, 20, 36, 0.94)",
-
     borderColor:
       "rgba(74, 222, 128, 0.28)",
-
     borderRadius:
       universeTheme.radius.lg,
-
     borderWidth: 1,
-
     marginTop: 18,
-
     padding: 17,
   },
 
   previewHeader: {
     alignItems: "center",
-
     flexDirection: "row",
-
     gap: 7,
   },
 
   previewLabel: {
     color:
       universeTheme.colors.green,
-
     fontSize: 10,
-
     fontWeight: "800",
-
     letterSpacing: 0.8,
-
     textTransform: "uppercase",
   },
 
   previewTitle: {
     color:
       universeTheme.colors.text,
-
     fontSize: 18,
-
     fontWeight: "900",
-
     lineHeight: 24,
-
     marginTop: 13,
   },
 
@@ -1088,11 +1447,8 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .primaryBright,
-
     fontSize: 12,
-
     fontWeight: "700",
-
     marginTop: 7,
   },
 
@@ -1100,39 +1456,29 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textMuted,
-
     fontSize: 11,
-
     lineHeight: 16,
-
     marginTop: 8,
   },
 
   sectionHeader: {
     marginBottom: 11,
-
     marginTop: 30,
   },
 
   sectionEyebrow: {
     color:
       universeTheme.colors.violet,
-
     fontSize: 9,
-
     fontWeight: "800",
-
     letterSpacing: 1.4,
   },
 
   sectionTitle: {
     color:
       universeTheme.colors.text,
-
     fontSize: 18,
-
     fontWeight: "900",
-
     marginTop: 3,
   },
 
@@ -1140,124 +1486,265 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textSecondary,
-
     fontSize: 12,
-
     lineHeight: 18,
-
     marginTop: 5,
   },
 
-  pathSelect: {
+  automaticCard: {
     alignItems: "center",
-
     backgroundColor:
       "rgba(6, 20, 36, 0.94)",
-
     borderColor:
-      universeTheme.colors.border,
-
+      universeTheme.colors
+        .borderStrong,
     borderRadius:
       universeTheme.radius.lg,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
-    justifyContent:
-      "space-between",
-
-    minHeight: 56,
-
-    paddingHorizontal: 15,
+    gap: 11,
+    padding: 14,
   },
 
-  pathLeft: {
+  automaticIcon: {
     alignItems: "center",
-
-    flex: 1,
-
-    flexDirection: "row",
-
-    gap: 10,
+    backgroundColor:
+      "rgba(56, 189, 248, 0.09)",
+    borderRadius: 12,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
   },
 
-  pathSelectText: {
+  automaticTitle: {
     color:
       universeTheme.colors.text,
-
-    flex: 1,
-
     fontSize: 13,
-
-    lineHeight: 18,
-
-    marginRight: 8,
+    fontWeight: "900",
   },
 
-  pathOptions: {
-    backgroundColor:
-      "rgba(6, 20, 36, 0.98)",
-
-    borderColor:
-      universeTheme.colors.border,
-
-    borderRadius:
-      universeTheme.radius.lg,
-
-    borderWidth: 1,
-
-    marginTop: 7,
-
-    maxHeight: 240,
-
-    overflow: "hidden",
-  },
-
-  pathOption: {
-    alignItems: "center",
-
-    borderBottomColor:
-      universeTheme.colors.border,
-
-    borderBottomWidth:
-      StyleSheet.hairlineWidth,
-
-    flexDirection: "row",
-
-    justifyContent:
-      "space-between",
-
-    minHeight: 50,
-
-    paddingHorizontal: 15,
-  },
-
-  pathOptionText: {
+  automaticText: {
     color:
       universeTheme.colors
         .textSecondary,
-
-    flex: 1,
-
-    fontSize: 12,
-
-    lineHeight: 17,
+    fontSize: 10,
+    lineHeight: 15,
+    marginTop: 3,
   },
 
-  pathOptionTextSelected: {
+  manualArea: {
+    backgroundColor:
+      "rgba(6, 20, 36, 0.8)",
+    borderColor:
+      "rgba(139, 92, 246, 0.25)",
+    borderRadius:
+      universeTheme.radius.lg,
+    borderWidth: 1,
+    marginTop: 12,
+    padding: 14,
+  },
+
+  manualEyebrow: {
+    color:
+      universeTheme.colors.violet,
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+
+  manualTitle: {
+    color:
+      universeTheme.colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+    marginBottom: 10,
+    marginTop: 3,
+  },
+
+  topicSelect: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(3, 12, 24, 0.72)",
+    borderColor:
+      universeTheme.colors.border,
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent:
+      "space-between",
+    minHeight: 54,
+    paddingHorizontal: 13,
+  },
+
+  topicSelectLeft: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: 9,
+  },
+
+  topicSelectValue: {
+    color:
+      universeTheme.colors.text,
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
+  topicSelectPlaceholder: {
+    color:
+      universeTheme.colors
+        .textMuted,
+    flex: 1,
+    fontSize: 13,
+  },
+
+  topicPicker: {
+    backgroundColor:
+      "rgba(3, 12, 24, 0.95)",
+    borderColor:
+      universeTheme.colors.border,
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    marginTop: 7,
+    overflow: "hidden",
+  },
+
+  topicSearchWrapper: {
+    alignItems: "center",
+    borderBottomColor:
+      universeTheme.colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    minHeight: 48,
+    paddingHorizontal: 12,
+  },
+
+  topicSearchInput: {
+    color:
+      universeTheme.colors.text,
+    flex: 1,
+    fontSize: 12,
+    paddingVertical: 11,
+  },
+
+  topicOptions: {
+    maxHeight: 220,
+  },
+
+  topicOption: {
+    alignItems: "center",
+    borderBottomColor:
+      universeTheme.colors.border,
+    borderBottomWidth:
+      StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 9,
+    minHeight: 49,
+    paddingHorizontal: 12,
+  },
+
+  topicOptionSelected: {
+    backgroundColor:
+      "rgba(56, 189, 248, 0.08)",
+  },
+
+  topicOptionIcon: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(56, 189, 248, 0.06)",
+    borderRadius: 8,
+    height: 29,
+    justifyContent: "center",
+    width: 29,
+  },
+
+  topicOptionText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    flex: 1,
+    fontSize: 12,
+  },
+
+  topicOptionTextSelected: {
     color:
       universeTheme.colors
         .primaryBright,
-
     fontWeight: "800",
   },
 
-  customPathWrapper: {
-    borderColor:
-      "rgba(139, 92, 246, 0.28)",
+  noTopicText: {
+    color:
+      universeTheme.colors
+        .textMuted,
+    fontSize: 11,
+    padding: 15,
+    textAlign: "center",
+  },
 
-    marginTop: 10,
+  orDivider: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 9,
+    marginVertical: 14,
+  },
+
+  orLine: {
+    backgroundColor:
+      universeTheme.colors.border,
+    flex: 1,
+    height: 1,
+  },
+
+  orText: {
+    color:
+      universeTheme.colors
+        .textMuted,
+    fontSize: 9,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+
+  customTopicLabel: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 10,
+    fontWeight: "800",
+    marginBottom: 7,
+  },
+
+  customTopicWrapper: {
+    borderColor:
+      "rgba(139, 92, 246, 0.32)",
+  },
+
+  aiHierarchyHint: {
+    alignItems: "flex-start",
+    backgroundColor:
+      "rgba(74, 222, 128, 0.05)",
+    borderColor:
+      "rgba(74, 222, 128, 0.18)",
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 11,
+    padding: 11,
+  },
+
+  aiHierarchyText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    flex: 1,
+    fontSize: 10,
+    lineHeight: 15,
   },
 
   buttonContainer: {
