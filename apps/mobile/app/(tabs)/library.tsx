@@ -1,32 +1,30 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect } from "react";
 
 import {
   ActivityIndicator,
-  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  type LayoutChangeEvent,
 } from "react-native";
 
-import { KnowledgeTree } from "@/components/library/knowledge-tree";
-import { TopicManagementModal } from "@/components/library/topic-management-modal";
+import type {
+  Discovery,
+} from "@savewise/shared";
+
+import { KnowledgeUniverse } from "@/components/universe/knowledge-universe";
 import { useKnowledgeLibrary } from "@/hooks/use-knowledge-library";
 import { useAppSettings } from "@/providers/app-settings-provider";
-import { theme } from "@/theme";
-import type { Discovery } from "@/types/discovery";
-import { updateKnowledgeTopic } from "@/services/content-import-client";
 import { trackAnonymousEvent } from "@/services/anonymous-analytics";
+import { universeTheme } from "@/theme/universe-theme";
 
 export default function LibraryScreen() {
-  const { settings, t } = useAppSettings();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const treePosition = useRef(0);
-  const [isManagingTopics, setIsManagingTopics] = useState(false);
+  const { settings } =
+    useAppSettings();
+
   const {
     library,
     isLoading,
@@ -35,82 +33,95 @@ export default function LibraryScreen() {
     refresh,
   } = useKnowledgeLibrary();
 
-  const graph = library?.graph ?? null;
-  const activity = useMemo(
-    () => calculateActivity(library?.discoveries ?? []),
-    [library?.discoveries],
-  );
-
   useEffect(() => {
-    void trackAnonymousEvent("LibraryOpened", { operation: "library" });
+    void trackAnonymousEvent(
+      "LibraryOpened",
+      {
+        operation: "library",
+      },
+    );
   }, []);
 
   function openDiscovery(
     discovery: Discovery,
   ) {
-    router.push(
-      `/discovery/${discovery.id}`,
-    );
-  }
-
-  function openDiscoveries() {
-    router.push("/");
-  }
-
-  function scrollToTopics() {
-    scrollViewRef.current?.scrollTo({
-      animated: true,
-      y: Math.max(0, treePosition.current - 24),
+    router.push({
+      pathname: "/discovery/[id]",
+      params: {
+        id: discovery.id,
+      },
     });
   }
 
-  function saveTreePosition(event: LayoutChangeEvent) {
-    treePosition.current = event.nativeEvent.layout.y;
-  }
-
-  async function saveTopicChanges(
-    nodeId: string,
-    update: { title: string; parentId: string | null },
-  ) {
-    await updateKnowledgeTopic(nodeId, update);
-    await refresh();
-  }
+  const graph =
+    library?.graph ?? null;
 
   return (
     <ScrollView
-      contentContainerStyle={styles.content}
-      ref={scrollViewRef}
+      contentContainerStyle={
+        styles.content
+      }
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
+          tintColor={
+            universeTheme.colors
+              .primaryBright
+          }
           onRefresh={() => {
             void refresh();
           }}
         />
       }
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={
+        false
+      }
       style={styles.screen}
     >
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>
-          {t("library.eyebrow")}
-        </Text>
+        <View>
+          <Text style={styles.eyebrow}>
+            DEIN ZWEITES GEHIRN
+          </Text>
 
-        <Text style={styles.title}>
-          {t("library.title")}
-        </Text>
+          <Text style={styles.title}>
+            Wissensuniversum
+          </Text>
 
-        <Text style={styles.subtitle}>
-          {t("library.subtitle")}
-        </Text>
+          <Text style={styles.subtitle}>
+            Entdecke Themen,
+            Verbindungen und wachsende
+            Wissensgebiete.
+          </Text>
+        </View>
+
+        <View style={styles.headerIcon}>
+          <Ionicons
+            color={
+              universeTheme.colors
+                .primaryBright
+            }
+            name="planet-outline"
+            size={24}
+          />
+        </View>
       </View>
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator />
+          <ActivityIndicator
+            color={
+              universeTheme.colors
+                .primaryBright
+            }
+            size="large"
+          />
 
-          <Text style={styles.loadingText}>
-            {t("library.loading")}
+          <Text
+            style={styles.loadingText}
+          >
+            SaveWise ordnet dein
+            Wissensuniversum …
           </Text>
         </View>
       ) : null}
@@ -118,14 +129,14 @@ export default function LibraryScreen() {
       {!isLoading && error ? (
         <MessageCard
           message={error}
-          title={t("library.unavailable")}
+          title="Universum nicht erreichbar"
         />
       ) : null}
 
       {!settings.ai.knowledgeGraph ? (
         <MessageCard
-          message={t("library.disabled")}
-          title={t("library.unavailable")}
+          message="Aktiviere den KI-Wissensgraphen in den Einstellungen, damit SaveWise dein Universum aufbauen kann."
+          title="Wissensgraph deaktiviert"
         />
       ) : null}
 
@@ -135,8 +146,8 @@ export default function LibraryScreen() {
       !graph &&
       settings.ai.knowledgeGraph ? (
         <MessageCard
-          message="Pull down to let SaveWise build the AI knowledge tree."
-          title="Knowledge tree unavailable"
+          message="Ziehe die Ansicht nach unten, damit SaveWise deinen Wissensgraphen neu lädt."
+          title="Noch kein Universum vorhanden"
         />
       ) : null}
 
@@ -145,156 +156,17 @@ export default function LibraryScreen() {
       !error &&
       graph &&
       settings.ai.knowledgeGraph ? (
-        <>
-          <View>
-            <Text style={styles.mapLabel}>
-              {t("library.map")}
-            </Text>
-
-            <View style={styles.metricGrid}>
-              <MetricCard
-                icon="documents-outline"
-                label={t("library.savedEntries")}
-                onPress={openDiscoveries}
-                value={library.discoveries.length}
-              />
-
-              <MetricCard
-                icon="folder-open-outline"
-                label={t("library.topics")}
-                onPress={scrollToTopics}
-                value={
-                  graph.nodes.filter(
-                    (node) => node.kind === "topic",
-                  ).length
-                }
-              />
-
-              <MetricCard
-                icon="today-outline"
-                label={t("library.today")}
-                onPress={openDiscoveries}
-                value={activity.today}
-              />
-
-              <MetricCard
-                icon="calendar-outline"
-                label={t("library.last7Days")}
-                onPress={openDiscoveries}
-                value={activity.last7Days}
-              />
-            </View>
-          </View>
-
-          <View
-            onLayout={saveTreePosition}
-            style={styles.treeSection}
-          >
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                {t("library.knowledge")}
-              </Text>
-
-              <Text style={styles.language}>
-                {graph.language.toUpperCase()}
-              </Text>
-            </View>
-
-            <KnowledgeTree
-              discoveries={library.discoveries}
-              graph={graph}
-              onOpenDiscovery={openDiscovery}
-            />
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setIsManagingTopics(true)}
-              style={({ pressed }) => [
-                styles.manageTopicsButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Ionicons color={theme.colors.primary} name="options-outline" size={19} />
-              <Text style={styles.manageTopicsText}>{t("library.manageTopics")}</Text>
-            </Pressable>
-          </View>
-
-          <TopicManagementModal
-            graph={graph}
-            onClose={() => setIsManagingTopics(false)}
-            onSave={saveTopicChanges}
-            visible={isManagingTopics}
-          />
-
-        </>
+        <KnowledgeUniverse
+          discoveries={
+            library.discoveries
+          }
+          graph={graph}
+          onOpenDiscovery={
+            openDiscovery
+          }
+        />
       ) : null}
     </ScrollView>
-  );
-}
-
-function MetricCard({
-  icon,
-  label,
-  value,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value: number;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityLabel={`${label}: ${value}`}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.metricCard,
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.metricIcon}>
-        <Ionicons
-          color={theme.colors.primary}
-          name={icon}
-          size={20}
-        />
-      </View>
-
-      <Text style={styles.metricValue}>{value}</Text>
-      <Text style={styles.metricLabel}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function calculateActivity(discoveries: Discovery[]) {
-  const now = new Date();
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  ).getTime();
-  const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
-
-  return discoveries.reduce(
-    (counts, discovery) => {
-      const createdAt = new Date(discovery.createdAt).getTime();
-
-      if (!Number.isFinite(createdAt)) {
-        return counts;
-      }
-
-      if (createdAt >= startOfToday) {
-        counts.today += 1;
-      }
-
-      if (createdAt >= sevenDaysAgo) {
-        counts.last7Days += 1;
-      }
-
-      return counts;
-    },
-    { today: 0, last7Days: 0 },
   );
 }
 
@@ -307,146 +179,152 @@ function MessageCard({
 }) {
   return (
     <View style={styles.messageCard}>
-      <Text style={styles.messageTitle}>
-        {title}
-      </Text>
+      <View style={styles.messageIcon}>
+        <Ionicons
+          color={
+            universeTheme.colors
+              .primaryBright
+          }
+          name="sparkles-outline"
+          size={22}
+        />
+      </View>
 
-      <Text style={styles.messageText}>
-        {message}
-      </Text>
+      <View style={styles.flex}>
+        <Text style={styles.messageTitle}>
+          {title}
+        </Text>
+
+        <Text style={styles.messageText}>
+          {message}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: theme.colors.background,
+    backgroundColor:
+      universeTheme.colors.background,
   },
+
   content: {
-    paddingBottom: theme.spacing.xxxl,
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.xxxl + theme.spacing.sm,
+    backgroundColor:
+      universeTheme.colors.background,
+    flexGrow: 1,
+    paddingBottom: 110,
   },
+
   header: {
-    marginBottom: theme.spacing.xxl,
-  },
-  eyebrow: {
-    ...theme.typography.caption,
-    color: theme.colors.primary,
-    letterSpacing: 1.2,
-  },
-  title: {
-    ...theme.typography.screenTitle,
-    color: theme.colors.text,
-    marginTop: theme.spacing.sm,
-  },
-  subtitle: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    lineHeight: 22,
-    marginTop: theme.spacing.sm,
-  },
-  centered: {
-    alignItems: "center",
-    paddingVertical: theme.spacing.xxxl,
-  },
-  loadingText: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.md,
-    textAlign: "center",
-  },
-  mapLabel: {
-    ...theme.typography.caption,
-    color: theme.colors.primary,
-    letterSpacing: 1,
-    marginBottom: theme.spacing.md,
-  },
-  metricGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing.md,
-  },
-  metricCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    minHeight: 132,
-    padding: theme.spacing.lg,
-    width: "47%",
-  },
-  metricIcon: {
-    alignItems: "center",
-    backgroundColor: theme.colors.background,
-    borderRadius: 999,
-    height: 38,
-    justifyContent: "center",
-    width: 38,
-  },
-  metricValue: {
-    ...theme.typography.screenTitle,
-    color: theme.colors.text,
-    marginTop: theme.spacing.sm,
-  },
-  metricLabel: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.xs,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  treeSection: {
-    marginTop: theme.spacing.xxxl,
-  },
-  sectionHeader: {
-    alignItems: "center",
+    alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: theme.spacing.lg,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    paddingTop: 58,
   },
-  sectionTitle: {
-    ...theme.typography.sectionTitle,
-    color: theme.colors.text,
+
+  eyebrow: {
+    color:
+      universeTheme.colors.primary,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.6,
   },
-  language: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
+
+  title: {
+    color:
+      universeTheme.colors.text,
+    fontSize: 28,
+    fontWeight: "800",
+    lineHeight: 34,
+    marginTop: 5,
   },
-  messageCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    padding: theme.spacing.lg,
+
+  subtitle: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 6,
+    maxWidth: 280,
   },
-  messageTitle: {
-    ...theme.typography.sectionTitle,
-    color: theme.colors.text,
-  },
-  messageText: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    lineHeight: 21,
-    marginTop: theme.spacing.sm,
-  },
-  manageTopicsButton: {
+
+  headerIcon: {
     alignItems: "center",
-    alignSelf: "center",
-    borderColor: theme.colors.primary,
-    borderRadius: theme.radius.md,
+    backgroundColor:
+      "rgba(56, 189, 248, 0.09)",
+    borderColor:
+      universeTheme.colors
+        .borderStrong,
+    borderRadius: 16,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+
+  centered: {
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 100,
+  },
+
+  loadingText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 16,
+    textAlign: "center",
+  },
+
+  messageCard: {
+    alignItems: "flex-start",
+    backgroundColor:
+      universeTheme.colors.surface,
+    borderColor:
+      universeTheme.colors.border,
+    borderRadius:
+      universeTheme.radius.lg,
     borderWidth: 1,
     flexDirection: "row",
-    gap: theme.spacing.sm,
-    justifyContent: "center",
-    marginTop: theme.spacing.xl,
-    minHeight: 48,
-    paddingHorizontal: theme.spacing.xl,
+    gap: 13,
+    marginHorizontal: 18,
+    marginTop: 30,
+    padding: 18,
   },
-  manageTopicsText: {
-    ...theme.typography.body,
-    color: theme.colors.primary,
-    fontWeight: "700",
+
+  messageIcon: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(56, 189, 248, 0.1)",
+    borderRadius: 13,
+    height: 42,
+    justifyContent: "center",
+    width: 42,
+  },
+
+  flex: {
+    flex: 1,
+  },
+
+  messageTitle: {
+    color:
+      universeTheme.colors.text,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+
+  messageText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 5,
   },
 });

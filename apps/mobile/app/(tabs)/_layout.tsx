@@ -1,21 +1,46 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
-import { theme } from "@/theme";
 import { useAppSettings } from "@/providers/app-settings-provider";
+import { universeTheme } from "@/theme/universe-theme";
 
 export default function TabLayout() {
   const { t } = useAppSettings();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
 
+        sceneStyle: {
+          backgroundColor:
+            universeTheme.colors
+              .background,
+        },
+
         tabBarActiveTintColor:
-          theme.colors.primary,
+          universeTheme.colors
+            .primaryBright,
 
         tabBarInactiveTintColor:
-          theme.colors.textSecondary,
+          universeTheme.colors
+            .textSecondary,
+
+        tabBarStyle: {
+          backgroundColor: "#050D19",
+          borderTopColor:
+            universeTheme.colors
+              .border,
+          borderTopWidth: 1,
+          height: 86,
+          paddingBottom: 20,
+          paddingTop: 8,
+        },
+
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+        },
       }}
     >
       <Tabs.Screen
@@ -39,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="library"
         options={{
-          title: t("tabs.library"),
+          title: "Universum",
 
           tabBarIcon: ({
             color,
@@ -47,7 +72,7 @@ export default function TabLayout() {
           }) => (
             <Ionicons
               color={color}
-              name="library-outline"
+              name="git-network-outline"
               size={size}
             />
           ),
@@ -94,7 +119,11 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: t("tabs.settings"),
-          tabBarIcon: ({ color, size }) => (
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Ionicons
               color={color}
               name="settings-outline"

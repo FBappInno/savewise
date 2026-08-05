@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+
 import {
   useMemo,
   useRef,
@@ -16,16 +17,17 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 
-import { ResearchCandidateCard } from "@/components/research/research-candidate-card";
-import { useResearchAgent } from "@/hooks/use-research-agent";
-import { useAppSettings } from "@/providers/app-settings-provider";
-import { theme } from "@/theme";
-
 import type {
   ResearchCandidate,
   ResearchInsight,
   ResearchSourceType,
 } from "@savewise/shared";
+
+import { ResearchCandidateCard } from "@/components/research/research-candidate-card";
+import { StarBackground } from "@/components/universe-ui/star-background";
+import { useResearchAgent } from "@/hooks/use-research-agent";
+import { useAppSettings } from "@/providers/app-settings-provider";
+import { universeTheme } from "@/theme/universe-theme";
 
 type BriefingFilter =
   | "all"
@@ -36,8 +38,10 @@ type BriefingFilter =
   | "knowledge-gaps";
 
 export default function ResearchScreen() {
-  const { settings, t } =
-    useAppSettings();
+  const {
+    settings,
+    t,
+  } = useAppSettings();
 
   const scrollViewRef =
     useRef<ScrollView>(null);
@@ -115,11 +119,14 @@ export default function ResearchScreen() {
       () =>
         getFilteredCandidates({
           activeFilter,
+
           candidates:
             suggestedCandidates,
+
           briefingCandidateIds:
             briefing?.candidateIds ??
             [],
+
           insights:
             research?.insights ?? [],
         }),
@@ -166,9 +173,7 @@ export default function ResearchScreen() {
         ? null
         : filter;
 
-    setActiveFilter(
-      nextFilter,
-    );
+    setActiveFilter(nextFilter);
 
     if (nextFilter) {
       requestAnimationFrame(() => {
@@ -188,625 +193,856 @@ export default function ResearchScreen() {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={
-        styles.content
-      }
-      ref={scrollViewRef}
-      refreshControl={
-        <RefreshControl
-          refreshing={
-            isResearching
-          }
-          onRefresh={() => {
-            if (
-              settings.ai
-                .autonomousResearch
-            ) {
-              void run();
-            }
-          }}
-        />
-      }
-      showsVerticalScrollIndicator={
-        false
-      }
-      style={styles.screen}
-    >
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>
-          {t("research.eyebrow")}
-        </Text>
+    <View style={styles.screen}>
+      <StarBackground density={105} />
 
-        <Text style={styles.title}>
-          {t("research.title")}
-        </Text>
-
-        <Text style={styles.subtitle}>
-          {t("research.subtitle")}
-        </Text>
-      </View>
-
-      <Pressable
-        disabled={
-          isResearching ||
-          !settings.ai
-            .autonomousResearch
+      <ScrollView
+        contentContainerStyle={
+          styles.content
         }
-        onPress={() => {
-          void run();
-        }}
-        style={({ pressed }) => [
-          styles.runButton,
-
-          pressed &&
-            styles.pressed,
-
-          (!settings.ai
-            .autonomousResearch ||
-            isResearching) &&
-            styles.disabled,
-        ]}
-      >
-        {isResearching ? (
-          <ActivityIndicator
-            color="#ffffff"
+        ref={scrollViewRef}
+        refreshControl={
+          <RefreshControl
+            refreshing={isResearching}
+            tintColor={
+              universeTheme.colors
+                .primaryBright
+            }
+            onRefresh={() => {
+              if (
+                settings.ai
+                  .autonomousResearch
+              ) {
+                void run();
+              }
+            }}
           />
-        ) : (
-          <>
-            <Ionicons
-              color="#ffffff"
-              name="telescope"
-              size={20}
+        }
+        showsVerticalScrollIndicator={
+          false
+        }
+      >
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <View
+              style={styles.scoutIcon}
+            >
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .primaryBright
+                }
+                name="telescope"
+                size={25}
+              />
+            </View>
+
+            <View style={styles.flex}>
+              <Text style={styles.eyebrow}>
+                AUTONOMOUS INTELLIGENCE
+              </Text>
+
+              <Text style={styles.title}>
+                SaveWise Scout
+              </Text>
+            </View>
+
+            <View style={styles.statusBadge}>
+              <View
+                style={styles.statusDot}
+              />
+
+              <Text
+                style={
+                  styles.statusText
+                }
+              >
+                ONLINE
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.subtitle}>
+            Scout durchsucht neue
+            Quellen, erkennt Trends und
+            ergänzt dein Wissen
+            selbstständig.
+          </Text>
+        </View>
+
+        <View style={styles.missionCard}>
+          <View
+            style={
+              styles.missionHeader
+            }
+          >
+            <View>
+              <Text
+                style={
+                  styles.sectionEyebrow
+                }
+              >
+                RESEARCH MISSION
+              </Text>
+
+              <Text
+                style={
+                  styles.missionTitle
+                }
+              >
+                Autonome Recherche
+              </Text>
+            </View>
+
+            <View
+              style={
+                styles.missionStatus
+              }
+            >
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .green
+                }
+                name="pulse-outline"
+                size={16}
+              />
+
+              <Text
+                style={
+                  styles.missionStatusText
+                }
+              >
+                READY
+              </Text>
+            </View>
+          </View>
+
+          <Text
+            style={
+              styles.missionText
+            }
+          >
+            Starte eine neue Mission.
+            SaveWise analysiert deine
+            Interessen, Wissenslücken und
+            relevante externe Quellen.
+          </Text>
+
+          <Pressable
+            accessibilityRole="button"
+            disabled={
+              isResearching ||
+              !settings.ai
+                .autonomousResearch
+            }
+            onPress={() => {
+              void run();
+            }}
+            style={({ pressed }) => [
+              styles.runButton,
+
+              pressed &&
+                styles.pressed,
+
+              (!settings.ai
+                .autonomousResearch ||
+                isResearching) &&
+                styles.disabled,
+            ]}
+          >
+            {isResearching ? (
+              <>
+                <ActivityIndicator
+                  color="#03111E"
+                />
+
+                <Text
+                  style={
+                    styles.runButtonText
+                  }
+                >
+                  Mission läuft …
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons
+                  color="#03111E"
+                  name="telescope"
+                  size={20}
+                />
+
+                <Text
+                  style={
+                    styles.runButtonText
+                  }
+                >
+                  {t("research.run")}
+                </Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+
+        {!settings.ai
+          .autonomousResearch ? (
+          <MessageCard
+            icon="pause-circle-outline"
+            message={t(
+              "research.disabled",
+            )}
+            title="Scout deaktiviert"
+            tone="warning"
+          />
+        ) : null}
+
+        {error ? (
+          <MessageCard
+            icon="alert-circle-outline"
+            message={error}
+            title="Recherchefehler"
+            tone="error"
+          />
+        ) : null}
+
+        {isLoading ? (
+          <View style={styles.loading}>
+            <ActivityIndicator
+              color={
+                universeTheme.colors
+                  .primaryBright
+              }
+              size="large"
             />
 
             <Text
               style={
-                styles.runButtonText
+                styles.loadingText
               }
             >
-              {t("research.run")}
+              Scout lädt den aktuellen
+              Forschungsstand …
             </Text>
-          </>
-        )}
-      </Pressable>
+          </View>
+        ) : null}
 
-      {!settings.ai
-        .autonomousResearch ? (
-        <View
-          style={
-            styles.messageCard
-          }
-        >
-          <Text
-            style={
-              styles.messageText
-            }
-          >
-            {t("research.disabled")}
-          </Text>
-        </View>
-      ) : null}
-
-      {error ? (
-        <View
-          style={
-            styles.messageCard
-          }
-        >
-          <Text
-            style={
-              styles.messageText
-            }
-          >
-            {error}
-          </Text>
-        </View>
-      ) : null}
-
-      {isLoading ? (
-        <View style={styles.loading}>
-          <ActivityIndicator />
-        </View>
-      ) : null}
-
-      {briefing ? (
-        <View style={styles.section}>
-          <Text
-            style={
-              styles.sectionLabel
-            }
-          >
-            {t(
-              "research.dailyBriefing",
-            )}
-          </Text>
-
-          <View
-            style={
-              styles.briefingCard
-            }
-          >
+        {briefing ? (
+          <View style={styles.section}>
             <View
               style={
-                styles.briefingHeader
+                styles.sectionHeading
+              }
+            >
+              <View>
+                <Text
+                  style={
+                    styles.sectionEyebrow
+                  }
+                >
+                  TODAY&apos;S INTELLIGENCE
+                </Text>
+
+                <Text
+                  style={
+                    styles.sectionTitle
+                  }
+                >
+                  {t(
+                    "research.dailyBriefing",
+                  )}
+                </Text>
+              </View>
+
+              <View
+                style={
+                  styles.briefingSignal
+                }
+              >
+                <View
+                  style={
+                    styles.signalDot
+                  }
+                />
+
+                <Text
+                  style={
+                    styles.signalText
+                  }
+                >
+                  LIVE
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={
+                styles.briefingCard
               }
             >
               <View
                 style={
-                  styles.briefingIcon
+                  styles.briefingTopGlow
+                }
+              />
+
+              <View
+                style={
+                  styles.briefingHeader
                 }
               >
-                <Ionicons
-                  color={
-                    theme.colors
-                      .primary
-                  }
-                  name="sunny-outline"
-                  size={22}
-                />
-              </View>
-
-              <View style={styles.flex}>
-                <Text
+                <View
                   style={
-                    styles.messageTitle
+                    styles.briefingIcon
                   }
                 >
-                  {briefing.title}
-                </Text>
+                  <Ionicons
+                    color={
+                      universeTheme.colors
+                        .yellow
+                    }
+                    name="sunny-outline"
+                    size={22}
+                  />
+                </View>
 
-                <Text
-                  style={
-                    styles.briefingDate
-                  }
-                >
-                  {briefing.date}
-                </Text>
+                <View style={styles.flex}>
+                  <Text
+                    style={
+                      styles.briefingTitle
+                    }
+                  >
+                    {briefing.title}
+                  </Text>
+
+                  <Text
+                    style={
+                      styles.briefingDate
+                    }
+                  >
+                    {briefing.date}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <Text
-              style={
-                styles.messageText
-              }
-            >
-              {briefing.summary}
-            </Text>
-
-            <Text
-              style={
-                styles.metricHint
-              }
-            >
-              Tippe auf eine Kennzahl,
-              um die zugehörigen
-              Vorschläge und Erkenntnisse
-              anzuzeigen.
-            </Text>
-
-            <View
-              style={
-                styles.metricsGrid
-              }
-            >
-              <InteractiveMetric
-                active={
-                  activeFilter ===
-                  "all"
-                }
-                icon="search-outline"
-                label={t(
-                  "research.found",
-                )}
-                onPress={() =>
-                  selectFilter("all")
-                }
-                value={
-                  briefing.counts
-                    .totalFound
-                }
-              />
-
-              <InteractiveMetric
-                active={
-                  activeFilter ===
-                  "science"
-                }
-                icon="flask-outline"
-                label={t(
-                  "research.science",
-                )}
-                onPress={() =>
-                  selectFilter(
-                    "science",
-                  )
-                }
-                value={
-                  briefing.counts
-                    .papers +
-                  briefing.counts
-                    .studies
-                }
-              />
-
-              <InteractiveMetric
-                active={
-                  activeFilter ===
-                  "videos"
-                }
-                icon="videocam-outline"
-                label={t(
-                  "research.videos",
-                )}
-                onPress={() =>
-                  selectFilter(
-                    "videos",
-                  )
-                }
-                value={
-                  briefing.counts
-                    .videos
-                }
-              />
-
-              <InteractiveMetric
-                active={
-                  activeFilter ===
-                  "startups"
-                }
-                icon="rocket-outline"
-                label={t(
-                  "research.startups",
-                )}
-                onPress={() =>
-                  selectFilter(
-                    "startups",
-                  )
-                }
-                value={
-                  briefing.counts
-                    .startups
-                }
-              />
-
-              <InteractiveMetric
-                active={
-                  activeFilter ===
-                  "trends"
-                }
-                icon="trending-up-outline"
-                label={t(
-                  "research.trends",
-                )}
-                onPress={() =>
-                  selectFilter(
-                    "trends",
-                  )
-                }
-                value={
-                  briefing.counts
-                    .trends
-                }
-              />
-
-              <InteractiveMetric
-                active={
-                  activeFilter ===
-                  "knowledge-gaps"
-                }
-                icon="bulb-outline"
-                label={t(
-                  "research.gaps",
-                )}
-                onPress={() =>
-                  selectFilter(
-                    "knowledge-gaps",
-                  )
-                }
-                value={
-                  briefing.counts
-                    .knowledgeGaps
-                }
-              />
-            </View>
-
-            {briefing.counts
-              .discarded > 0 ? (
               <Text
                 style={
-                  styles.discarded
+                  styles.briefingSummary
                 }
               >
-                {
-                  briefing.counts
-                    .discarded
-                }{" "}
-                {t(
-                  "research.discarded",
-                )}
+                {briefing.summary}
               </Text>
-            ) : null}
-          </View>
-        </View>
-      ) : null}
 
-      <View
-        onLayout={
-          saveDetailPosition
-        }
-      >
-        {activeFilter ? (
-          <BriefingDetail
-            activeFilter={
-              activeFilter
-            }
-            candidates={
-              filteredCandidates
-            }
-            insights={
-              selectedInsights
-            }
-            knowledgeGaps={
-              knowledgeGaps
-            }
-            onClear={() => {
-              setActiveFilter(null);
-            }}
-          />
-        ) : null}
-      </View>
+              <Text
+                style={
+                  styles.metricHint
+                }
+              >
+                Tippe auf ein Signal, um
+                die zugehörigen
+                Vorschläge anzuzeigen.
+              </Text>
 
-      {research &&
-      research.interests.length >
-        0 ? (
-        <View style={styles.section}>
-          <Text
-            style={
-              styles.sectionLabel
-            }
-          >
-            {t(
-              "research.interests",
-            )}
-          </Text>
+              <View
+                style={
+                  styles.metricsGrid
+                }
+              >
+                <InteractiveMetric
+                  active={
+                    activeFilter ===
+                    "all"
+                  }
+                  icon="search-outline"
+                  label={t(
+                    "research.found",
+                  )}
+                  onPress={() =>
+                    selectFilter("all")
+                  }
+                  value={
+                    briefing.counts
+                      .totalFound
+                  }
+                />
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={
-              false
-            }
-          >
-            {research.interests.map(
-              (interest) => (
+                <InteractiveMetric
+                  active={
+                    activeFilter ===
+                    "science"
+                  }
+                  icon="flask-outline"
+                  label={t(
+                    "research.science",
+                  )}
+                  onPress={() =>
+                    selectFilter(
+                      "science",
+                    )
+                  }
+                  value={
+                    briefing.counts
+                      .papers +
+                    briefing.counts
+                      .studies
+                  }
+                />
+
+                <InteractiveMetric
+                  active={
+                    activeFilter ===
+                    "videos"
+                  }
+                  icon="videocam-outline"
+                  label={t(
+                    "research.videos",
+                  )}
+                  onPress={() =>
+                    selectFilter(
+                      "videos",
+                    )
+                  }
+                  value={
+                    briefing.counts
+                      .videos
+                  }
+                />
+
+                <InteractiveMetric
+                  active={
+                    activeFilter ===
+                    "startups"
+                  }
+                  icon="rocket-outline"
+                  label={t(
+                    "research.startups",
+                  )}
+                  onPress={() =>
+                    selectFilter(
+                      "startups",
+                    )
+                  }
+                  value={
+                    briefing.counts
+                      .startups
+                  }
+                />
+
+                <InteractiveMetric
+                  active={
+                    activeFilter ===
+                    "trends"
+                  }
+                  icon="trending-up-outline"
+                  label={t(
+                    "research.trends",
+                  )}
+                  onPress={() =>
+                    selectFilter(
+                      "trends",
+                    )
+                  }
+                  value={
+                    briefing.counts
+                      .trends
+                  }
+                />
+
+                <InteractiveMetric
+                  active={
+                    activeFilter ===
+                    "knowledge-gaps"
+                  }
+                  icon="bulb-outline"
+                  label={t(
+                    "research.gaps",
+                  )}
+                  onPress={() =>
+                    selectFilter(
+                      "knowledge-gaps",
+                    )
+                  }
+                  value={
+                    briefing.counts
+                      .knowledgeGaps
+                  }
+                />
+              </View>
+
+              {briefing.counts
+                .discarded > 0 ? (
                 <View
-                  key={interest.id}
                   style={
-                    styles.interestCard
+                    styles.discardedRow
                   }
                 >
-                  <Text
-                    style={
-                      styles.interestTitle
+                  <Ionicons
+                    color={
+                      universeTheme.colors
+                        .textMuted
                     }
-                  >
-                    {interest.title}
-                  </Text>
+                    name="trash-outline"
+                    size={13}
+                  />
 
                   <Text
                     style={
-                      styles.interestStrength
+                      styles.discarded
                     }
                   >
-                    {Math.round(
-                      interest.strength *
-                        100,
-                    )}
-                    % ·{" "}
                     {
-                      interest.discoveryCount
+                      briefing.counts
+                        .discarded
                     }{" "}
                     {t(
-                      "research.entries",
+                      "research.discarded",
                     )}
                   </Text>
-
-                  <View
-                    style={
-                      styles.trendRow
-                    }
-                  >
-                    <Ionicons
-                      color={getTrendColor(
-                        interest.trend,
-                      )}
-                      name={getTrendIcon(
-                        interest.trend,
-                      )}
-                      size={15}
-                    />
-
-                    <Text
-                      style={[
-                        styles.trend,
-
-                        {
-                          color:
-                            getTrendColor(
-                              interest.trend,
-                            ),
-                        },
-                      ]}
-                    >
-                      {t(
-                        `research.trend.${interest.trend}`,
-                      )}
-                    </Text>
-                  </View>
-
-                  <Text
-                    style={
-                      styles.trendExplanation
-                    }
-                  >
-                    {
-                      interest.trendExplanation
-                    }
-                  </Text>
-
-                  {interest.knowledgeGaps
-                    .slice(0, 3)
-                    .map((gap) => (
-                      <Text
-                        key={gap}
-                        style={
-                          styles.gap
-                        }
-                      >
-                        • {gap}
-                      </Text>
-                    ))}
                 </View>
-              ),
-            )}
-          </ScrollView>
-        </View>
-      ) : null}
-
-      {latestInsights.length >
-      0 ? (
-        <View style={styles.section}>
-          <Text
-            style={
-              styles.sectionLabel
-            }
-          >
-            {t(
-              "research.newInsights",
-            )}
-          </Text>
-
-          <View
-            style={
-              styles.insightList
-            }
-          >
-            {latestInsights.map(
-              (insight) => (
-                <ResearchInsightCard
-                  insight={insight}
-                  key={insight.id}
-                />
-              ),
-            )}
+              ) : null}
+            </View>
           </View>
-        </View>
-      ) : null}
+        ) : null}
 
-      <View style={styles.section}>
         <View
-          style={
-            styles.sectionHeader
+          onLayout={
+            saveDetailPosition
           }
         >
-          <View>
+          {activeFilter ? (
+            <BriefingDetail
+              activeFilter={
+                activeFilter
+              }
+              candidates={
+                filteredCandidates
+              }
+              insights={
+                selectedInsights
+              }
+              knowledgeGaps={
+                knowledgeGaps
+              }
+              onClear={() => {
+                setActiveFilter(null);
+              }}
+            />
+          ) : null}
+        </View>
+
+        {research &&
+        research.interests.length >
+          0 ? (
+          <View style={styles.section}>
+            <Text
+              style={
+                styles.sectionEyebrow
+              }
+            >
+              KNOWLEDGE SIGNALS
+            </Text>
+
             <Text
               style={
                 styles.sectionTitle
               }
             >
-              {activeFilter
-                ? getFilterTitle(
-                    activeFilter,
-                    t,
-                  )
-                : t(
-                    "research.inbox",
-                  )}
+              {t(
+                "research.interests",
+              )}
             </Text>
 
-            {activeFilter ? (
-              <Text
-                style={
-                  styles.filterSubtitle
-                }
-              >
-                Gefilterte
-                Recherchevorschläge
-              </Text>
-            ) : null}
-          </View>
-
-          <Text style={styles.count}>
-            {
-              visibleCandidates.length
-            }
-          </Text>
-        </View>
-
-        {visibleCandidates.length >
-        0 ? (
-          <View
-            style={
-              styles.candidateList
-            }
-          >
-            {visibleCandidates.map(
-              (candidate) => (
-                <ResearchCandidateCard
-                  candidate={
-                    candidate
-                  }
-                  isBusy={
-                    activeCandidateId ===
-                    candidate.id
-                  }
-                  key={
-                    candidate.id
-                  }
-                  onDismiss={(id) => {
-                    void dismiss(id);
-                  }}
-                  onSave={(id) => {
-                    void save(id);
-                  }}
-                />
-              ),
-            )}
-          </View>
-        ) : !isLoading ? (
-          <View
-            style={
-              styles.messageCard
-            }
-          >
-            <Text
+            <ScrollView
+              contentContainerStyle={
+                styles.interestContent
+              }
+              horizontal
+              showsHorizontalScrollIndicator={
+                false
+              }
               style={
-                styles.messageTitle
+                styles.interestScroll
               }
             >
-              {activeFilter
-                ? "Keine passenden Vorschläge"
-                : t(
-                    "research.noSuggestions",
-                  )}
-            </Text>
+              {research.interests.map(
+                (interest) => (
+                  <View
+                    key={interest.id}
+                    style={
+                      styles.interestCard
+                    }
+                  >
+                    <View
+                      style={
+                        styles.interestHeader
+                      }
+                    >
+                      <View
+                        style={
+                          styles.interestIcon
+                        }
+                      >
+                        <Ionicons
+                          color={
+                            universeTheme
+                              .colors
+                              .violet
+                          }
+                          name="radio-outline"
+                          size={18}
+                        />
+                      </View>
 
-            <Text
-              style={
-                styles.messageText
-              }
-            >
-              {activeFilter
-                ? "Für diese Kategorie liegen momentan keine offenen Recherchevorschläge vor."
-                : t(
-                    "research.noSuggestionsText",
-                  )}
-            </Text>
+                      <Text
+                        style={
+                          styles.interestStrength
+                        }
+                      >
+                        {Math.round(
+                          interest.strength *
+                            100,
+                        )}
+                        %
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={
+                        styles.interestTitle
+                      }
+                    >
+                      {interest.title}
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.interestEntries
+                      }
+                    >
+                      {
+                        interest.discoveryCount
+                      }{" "}
+                      {t(
+                        "research.entries",
+                      )}
+                    </Text>
+
+                    <View
+                      style={
+                        styles.trendRow
+                      }
+                    >
+                      <Ionicons
+                        color={getTrendColor(
+                          interest.trend,
+                        )}
+                        name={getTrendIcon(
+                          interest.trend,
+                        )}
+                        size={15}
+                      />
+
+                      <Text
+                        style={[
+                          styles.trend,
+
+                          {
+                            color:
+                              getTrendColor(
+                                interest.trend,
+                              ),
+                          },
+                        ]}
+                      >
+                        {t(
+                          `research.trend.${interest.trend}`,
+                        )}
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={
+                        styles.trendExplanation
+                      }
+                    >
+                      {
+                        interest.trendExplanation
+                      }
+                    </Text>
+
+                    {interest.knowledgeGaps
+                      .slice(0, 3)
+                      .map((gap) => (
+                        <View
+                          key={gap}
+                          style={
+                            styles.gapRow
+                          }
+                        >
+                          <View
+                            style={
+                              styles.gapDot
+                            }
+                          />
+
+                          <Text
+                            style={
+                              styles.gap
+                            }
+                          >
+                            {gap}
+                          </Text>
+                        </View>
+                      ))}
+                  </View>
+                ),
+              )}
+            </ScrollView>
           </View>
         ) : null}
-      </View>
-    </ScrollView>
+
+        {latestInsights.length >
+        0 ? (
+          <View style={styles.section}>
+            <Text
+              style={
+                styles.sectionEyebrow
+              }
+            >
+              AI CONNECTIONS
+            </Text>
+
+            <Text
+              style={
+                styles.sectionTitle
+              }
+            >
+              {t(
+                "research.newInsights",
+              )}
+            </Text>
+
+            <View
+              style={
+                styles.insightList
+              }
+            >
+              {latestInsights.map(
+                (insight) => (
+                  <ResearchInsightCard
+                    insight={insight}
+                    key={insight.id}
+                  />
+                ),
+              )}
+            </View>
+          </View>
+        ) : null}
+
+        <View style={styles.section}>
+          <View
+            style={
+              styles.sectionHeader
+            }
+          >
+            <View>
+              <Text
+                style={
+                  styles.sectionEyebrow
+                }
+              >
+                MISSION INBOX
+              </Text>
+
+              <Text
+                style={
+                  styles.sectionTitle
+                }
+              >
+                {activeFilter
+                  ? getFilterTitle(
+                      activeFilter,
+                      t,
+                    )
+                  : t(
+                      "research.inbox",
+                    )}
+              </Text>
+
+              {activeFilter ? (
+                <Text
+                  style={
+                    styles.filterSubtitle
+                  }
+                >
+                  Gefilterte
+                  Recherchevorschläge
+                </Text>
+              ) : null}
+            </View>
+
+            <View
+              style={styles.countBadge}
+            >
+              <Text
+                style={styles.count}
+              >
+                {
+                  visibleCandidates.length
+                }
+              </Text>
+            </View>
+          </View>
+
+          {visibleCandidates.length >
+          0 ? (
+            <View
+              style={
+                styles.candidateList
+              }
+            >
+              {visibleCandidates.map(
+                (candidate) => (
+                  <ResearchCandidateCard
+                    candidate={candidate}
+                    isBusy={
+                      activeCandidateId ===
+                      candidate.id
+                    }
+                    key={candidate.id}
+                    onDismiss={(id) => {
+                      void dismiss(id);
+                    }}
+                    onSave={(id) => {
+                      void save(id);
+                    }}
+                  />
+                ),
+              )}
+            </View>
+          ) : !isLoading ? (
+            <MessageCard
+              icon="planet-outline"
+              message={
+                activeFilter
+                  ? "Für diese Kategorie liegen momentan keine offenen Recherchevorschläge vor."
+                  : t(
+                      "research.noSuggestionsText",
+                    )
+              }
+              title={
+                activeFilter
+                  ? "Keine passenden Vorschläge"
+                  : t(
+                      "research.noSuggestions",
+                    )
+              }
+              tone="neutral"
+            />
+          ) : null}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -818,7 +1054,8 @@ function InteractiveMetric({
   onPress,
 }: {
   active: boolean;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon:
+    keyof typeof Ionicons.glyphMap;
   label: string;
   value: number;
   onPress: () => void;
@@ -843,24 +1080,33 @@ function InteractiveMetric({
           styles.metricHeader
         }
       >
-        <Ionicons
-          color={
-            active
-              ? theme.colors
-                  .textOnPrimary
-              : theme.colors.primary
-          }
-          name={icon}
-          size={17}
-        />
+        <View
+          style={[
+            styles.metricIcon,
+
+            active &&
+              styles.metricIconActive,
+          ]}
+        >
+          <Ionicons
+            color={
+              active
+                ? "#03111E"
+                : universeTheme
+                    .colors.primary
+            }
+            name={icon}
+            size={17}
+          />
+        </View>
 
         <Ionicons
           color={
             active
-              ? theme.colors
-                  .textOnPrimary
-              : theme.colors
-                  .placeholder
+              ? universeTheme.colors
+                  .primaryBright
+              : universeTheme.colors
+                  .textMuted
           }
           name={
             active
@@ -904,9 +1150,12 @@ function BriefingDetail({
   knowledgeGaps,
   onClear,
 }: {
-  activeFilter: BriefingFilter;
-  candidates: ResearchCandidate[];
-  insights: ResearchInsight[];
+  activeFilter:
+    BriefingFilter;
+  candidates:
+    ResearchCandidate[];
+  insights:
+    ResearchInsight[];
   knowledgeGaps: string[];
   onClear: () => void;
 }) {
@@ -936,10 +1185,10 @@ function BriefingDetail({
         <View style={styles.flex}>
           <Text
             style={
-              styles.sectionLabel
+              styles.sectionEyebrow
             }
           >
-            AUSGEWÄHLTER BEREICH
+            SELECTED SIGNAL
           </Text>
 
           <Text
@@ -967,7 +1216,7 @@ function BriefingDetail({
         >
           <Ionicons
             color={
-              theme.colors
+              universeTheme.colors
                 .textSecondary
             }
             name="close"
@@ -1017,8 +1266,8 @@ function BriefingDetail({
                 >
                   <Ionicons
                     color={
-                      theme.colors
-                        .primary
+                      universeTheme
+                        .colors.orange
                     }
                     name="bulb-outline"
                     size={17}
@@ -1061,12 +1310,8 @@ function BriefingDetail({
             {insights.map(
               (insight) => (
                 <ResearchInsightCard
-                  insight={
-                    insight
-                  }
-                  key={
-                    insight.id
-                  }
+                  insight={insight}
+                  key={insight.id}
                 />
               ),
             )}
@@ -1081,7 +1326,8 @@ function BriefingDetail({
       >
         <Ionicons
           color={
-            theme.colors.primary
+            universeTheme.colors
+              .primaryBright
           }
           name="sparkles-outline"
           size={18}
@@ -1113,21 +1359,52 @@ function ResearchInsightCard({
 }: {
   insight: ResearchInsight;
 }) {
+  const color =
+    getInsightColor(
+      insight.kind,
+    );
+
   return (
     <View
-      style={styles.insightCard}
+      style={[
+        styles.insightCard,
+
+        {
+          borderColor:
+            `${color}44`,
+        },
+      ]}
     >
-      <Ionicons
-        color={
-          theme.colors.primary
-        }
-        name={getInsightIcon(
-          insight.kind,
-        )}
-        size={20}
-      />
+      <View
+        style={[
+          styles.insightIcon,
+
+          {
+            backgroundColor:
+              `${color}16`,
+          },
+        ]}
+      >
+        <Ionicons
+          color={color}
+          name={getInsightIcon(
+            insight.kind,
+          )}
+          size={20}
+        />
+      </View>
 
       <View style={styles.flex}>
+        <Text
+          style={
+            styles.insightEyebrow
+          }
+        >
+          {formatInsightKind(
+            insight.kind,
+          )}
+        </Text>
+
         <Text
           style={
             styles.insightTitle
@@ -1148,6 +1425,80 @@ function ResearchInsightCard({
   );
 }
 
+function MessageCard({
+  title,
+  message,
+  icon,
+  tone,
+}: {
+  title: string;
+  message: string;
+  icon:
+    keyof typeof Ionicons.glyphMap;
+  tone:
+    | "warning"
+    | "error"
+    | "neutral";
+}) {
+  const color =
+    tone === "error"
+      ? universeTheme.colors
+          .danger
+      : tone === "warning"
+        ? universeTheme.colors
+            .orange
+        : universeTheme.colors
+            .primaryBright;
+
+  return (
+    <View
+      style={[
+        styles.messageCard,
+
+        {
+          borderColor:
+            `${color}44`,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.messageIcon,
+
+          {
+            backgroundColor:
+              `${color}14`,
+          },
+        ]}
+      >
+        <Ionicons
+          color={color}
+          name={icon}
+          size={21}
+        />
+      </View>
+
+      <View style={styles.flex}>
+        <Text
+          style={
+            styles.messageTitle
+          }
+        >
+          {title}
+        </Text>
+
+        <Text
+          style={
+            styles.messageText
+          }
+        >
+          {message}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 function getFilteredCandidates({
   activeFilter,
   candidates,
@@ -1157,9 +1508,12 @@ function getFilteredCandidates({
   activeFilter:
     | BriefingFilter
     | null;
-  candidates: ResearchCandidate[];
-  briefingCandidateIds: string[];
-  insights: ResearchInsight[];
+  candidates:
+    ResearchCandidate[];
+  briefingCandidateIds:
+    string[];
+  insights:
+    ResearchInsight[];
 }): ResearchCandidate[] {
   if (!activeFilter) {
     return candidates;
@@ -1322,7 +1676,9 @@ function getFilterTitle(
 ): string {
   switch (filter) {
     case "all":
-      return t("research.found");
+      return t(
+        "research.found",
+      );
 
     case "science":
       return t(
@@ -1360,19 +1716,19 @@ function getFilterDescription(
       return `${candidateCount} offene Vorschläge gehören zum aktuellen täglichen Briefing.`;
 
     case "science":
-      return `SaveWise zeigt hier relevante Studien, wissenschaftliche Arbeiten und Whitepaper.`;
+      return "SaveWise zeigt hier relevante Studien, wissenschaftliche Arbeiten und Whitepaper.";
 
     case "videos":
-      return `Hier erscheinen gefundene Videos und Podcasts, die dein Wissen ergänzen können.`;
+      return "Hier erscheinen gefundene Videos und Podcasts, die dein Wissen ergänzen können.";
 
     case "startups":
-      return `Hier zeigt SaveWise neue Startups, Unternehmen und Produkte passend zu deinen Interessen.`;
+      return "Hier zeigt SaveWise neue Startups, Unternehmen und Produkte passend zu deinen Interessen.";
 
     case "trends":
-      return `Diese Erkenntnisse und Quellen weisen auf neue oder steigende Themen hin.`;
+      return "Diese Erkenntnisse und Quellen weisen auf neue oder steigende Themen hin.";
 
     case "knowledge-gaps":
-      return `SaveWise hat Bereiche erkannt, in denen dein bisheriges Wissen noch ergänzt werden könnte.`;
+      return "SaveWise hat Bereiche erkannt, in denen dein bisheriges Wissen noch ergänzt werden könnte.";
   }
 }
 
@@ -1383,7 +1739,9 @@ function getTrendIcon(
     return "trending-up";
   }
 
-  if (trend === "declining") {
+  if (
+    trend === "declining"
+  ) {
     return "trending-down";
   }
 
@@ -1391,7 +1749,9 @@ function getTrendIcon(
     return "sparkles-outline";
   }
 
-  if (trend === "long-term") {
+  if (
+    trend === "long-term"
+  ) {
     return "time-outline";
   }
 
@@ -1405,16 +1765,18 @@ function getTrendColor(
     trend === "rising" ||
     trend === "new"
   ) {
-    return "#147D64";
+    return universeTheme.colors
+      .green;
   }
 
   if (
     trend === "declining"
   ) {
-    return "#B45B35";
+    return universeTheme.colors
+      .orange;
   }
 
-  return theme.colors
+  return universeTheme.colors
     .textSecondary;
 }
 
@@ -1440,6 +1802,43 @@ function getInsightIcon(
   }
 
   return "trending-up-outline";
+}
+
+function getInsightColor(
+  kind: string,
+): string {
+  if (
+    kind === "contradiction"
+  ) {
+    return universeTheme.colors
+      .orange;
+  }
+
+  if (
+    kind === "confirmation"
+  ) {
+    return universeTheme.colors
+      .green;
+  }
+
+  if (
+    kind === "knowledge-gap"
+  ) {
+    return universeTheme.colors
+      .violet;
+  }
+
+  return universeTheme.colors
+    .primaryBright;
+}
+
+function formatInsightKind(
+  kind: string,
+): string {
+  return kind
+    .split("-")
+    .join(" ")
+    .toUpperCase();
 }
 
 function uniqueStrings(
@@ -1468,672 +1867,1147 @@ function uniqueStrings(
       normalizedValue.toLocaleLowerCase(),
     );
 
-    result.push(
-      normalizedValue,
-    );
+    result.push(normalizedValue);
   }
 
   return result;
 }
 
-const styles =
-  StyleSheet.create({
-    screen: {
-      backgroundColor:
-        theme.colors.background,
+const styles = StyleSheet.create({
+  screen: {
+    backgroundColor:
+      universeTheme.colors
+        .background,
+
+    flex: 1,
+  },
+
+  content: {
+    paddingBottom: 130,
+
+    paddingHorizontal: 18,
+
+    paddingTop: 58,
+  },
+
+  flex: {
+    flex: 1,
+  },
+
+  header: {
+    marginBottom: 22,
+  },
+
+  headerRow: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    gap: 12,
+  },
+
+  scoutIcon: {
+    alignItems: "center",
+
+    backgroundColor:
+      "rgba(56, 189, 248, 0.1)",
+
+    borderColor:
+      universeTheme.colors
+        .primaryBright,
+
+    borderRadius: 17,
+
+    borderWidth: 1.5,
+
+    height: 52,
+
+    justifyContent: "center",
+
+    shadowColor:
+      universeTheme.colors.primary,
+
+    shadowOffset: {
+      height: 0,
+      width: 0,
     },
 
-    content: {
-      paddingBottom:
-        theme.spacing.xxxl,
+    shadowOpacity: 0.55,
 
-      paddingHorizontal:
-        theme.spacing.xl,
+    shadowRadius: 16,
 
-      paddingTop:
-        theme.spacing.xxxl +
-        theme.spacing.sm,
+    width: 52,
+  },
+
+  eyebrow: {
+    color:
+      universeTheme.colors.primary,
+
+    fontSize: 9,
+
+    fontWeight: "800",
+
+    letterSpacing: 1.5,
+  },
+
+  title: {
+    color:
+      universeTheme.colors.text,
+
+    fontSize: 27,
+
+    fontWeight: "900",
+
+    lineHeight: 33,
+  },
+
+  subtitle: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+
+    fontSize: 14,
+
+    lineHeight: 21,
+
+    marginTop: 13,
+
+    maxWidth: 355,
+  },
+
+  statusBadge: {
+    alignItems: "center",
+
+    backgroundColor:
+      "rgba(74, 222, 128, 0.06)",
+
+    borderColor:
+      "rgba(74, 222, 128, 0.22)",
+
+    borderRadius: 999,
+
+    borderWidth: 1,
+
+    flexDirection: "row",
+
+    gap: 5,
+
+    paddingHorizontal: 9,
+
+    paddingVertical: 6,
+  },
+
+  statusDot: {
+    backgroundColor:
+      universeTheme.colors.green,
+
+    borderRadius: 999,
+
+    height: 6,
+
+    width: 6,
+  },
+
+  statusText: {
+    color:
+      universeTheme.colors.green,
+
+    fontSize: 8,
+
+    fontWeight: "900",
+
+    letterSpacing: 0.7,
+  },
+
+  missionCard: {
+    backgroundColor:
+      "rgba(6, 20, 36, 0.94)",
+
+    borderColor:
+      universeTheme.colors
+        .borderStrong,
+
+    borderRadius:
+      universeTheme.radius.lg,
+
+    borderWidth: 1,
+
+    padding: 17,
+
+    shadowColor:
+      universeTheme.colors.primary,
+
+    shadowOffset: {
+      height: 0,
+      width: 0,
     },
 
-    header: {
-      marginBottom:
-        theme.spacing.xxl,
+    shadowOpacity: 0.17,
+
+    shadowRadius: 16,
+  },
+
+  missionHeader: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
+  },
+
+  sectionEyebrow: {
+    color:
+      universeTheme.colors.primary,
+
+    fontSize: 9,
+
+    fontWeight: "800",
+
+    letterSpacing: 1.3,
+  },
+
+  missionTitle: {
+    color:
+      universeTheme.colors.text,
+
+    fontSize: 19,
+
+    fontWeight: "900",
+
+    marginTop: 3,
+  },
+
+  missionStatus: {
+    alignItems: "center",
+
+    backgroundColor:
+      "rgba(74, 222, 128, 0.06)",
+
+    borderColor:
+      "rgba(74, 222, 128, 0.2)",
+
+    borderRadius: 999,
+
+    borderWidth: 1,
+
+    flexDirection: "row",
+
+    gap: 6,
+
+    paddingHorizontal: 9,
+
+    paddingVertical: 7,
+  },
+
+  missionStatusText: {
+    color:
+      universeTheme.colors.green,
+
+    fontSize: 8,
+
+    fontWeight: "900",
+
+    letterSpacing: 0.8,
+  },
+
+  missionText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+
+    fontSize: 12,
+
+    lineHeight: 19,
+
+    marginTop: 12,
+  },
+
+  runButton: {
+    alignItems: "center",
+
+    backgroundColor:
+      universeTheme.colors
+        .primaryBright,
+
+    borderRadius:
+      universeTheme.radius.md,
+
+    flexDirection: "row",
+
+    gap: 8,
+
+    justifyContent: "center",
+
+    marginTop: 15,
+
+    minHeight: 52,
+
+    shadowColor:
+      universeTheme.colors.primary,
+
+    shadowOffset: {
+      height: 0,
+      width: 0,
     },
 
-    eyebrow: {
-      ...theme.typography.caption,
+    shadowOpacity: 0.42,
 
-      color:
-        theme.colors.primary,
+    shadowRadius: 14,
+  },
 
-      letterSpacing: 1.2,
+  runButtonText: {
+    color: "#03111E",
+
+    fontSize: 14,
+
+    fontWeight: "900",
+  },
+
+  disabled: {
+    opacity: 0.42,
+  },
+
+  pressed: {
+    opacity: 0.7,
+  },
+
+  loading: {
+    alignItems: "center",
+
+    paddingVertical: 70,
+  },
+
+  loadingText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+
+    fontSize: 12,
+
+    marginTop: 13,
+  },
+
+  section: {
+    marginTop: 34,
+  },
+
+  sectionHeading: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
+
+    marginBottom: 12,
+  },
+
+  sectionTitle: {
+    color:
+      universeTheme.colors.text,
+
+    fontSize: 21,
+
+    fontWeight: "900",
+
+    marginTop: 3,
+  },
+
+  briefingSignal: {
+    alignItems: "center",
+
+    backgroundColor:
+      "rgba(74, 222, 128, 0.06)",
+
+    borderColor:
+      "rgba(74, 222, 128, 0.2)",
+
+    borderRadius: 999,
+
+    borderWidth: 1,
+
+    flexDirection: "row",
+
+    gap: 5,
+
+    paddingHorizontal: 8,
+
+    paddingVertical: 6,
+  },
+
+  signalDot: {
+    backgroundColor:
+      universeTheme.colors.green,
+
+    borderRadius: 999,
+
+    height: 5,
+
+    width: 5,
+  },
+
+  signalText: {
+    color:
+      universeTheme.colors.green,
+
+    fontSize: 8,
+
+    fontWeight: "900",
+
+    letterSpacing: 0.8,
+  },
+
+  briefingCard: {
+    backgroundColor:
+      "rgba(6, 20, 36, 0.96)",
+
+    borderColor:
+      universeTheme.colors.border,
+
+    borderRadius:
+      universeTheme.radius.lg,
+
+    borderWidth: 1,
+
+    overflow: "hidden",
+
+    padding: 17,
+  },
+
+  briefingTopGlow: {
+    backgroundColor:
+      universeTheme.colors.yellow,
+
+    height: 2,
+
+    left: 0,
+
+    opacity: 0.75,
+
+    position: "absolute",
+
+    right: 0,
+
+    top: 0,
+  },
+
+  briefingHeader: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    gap: 11,
+  },
+
+  briefingIcon: {
+    alignItems: "center",
+
+    backgroundColor:
+      "rgba(250, 204, 21, 0.08)",
+
+    borderRadius: 13,
+
+    height: 44,
+
+    justifyContent: "center",
+
+    width: 44,
+  },
+
+  briefingTitle: {
+    color:
+      universeTheme.colors.text,
+
+    fontSize: 17,
+
+    fontWeight: "900",
+
+    lineHeight: 22,
+  },
+
+  briefingDate: {
+    color:
+      universeTheme.colors
+        .textMuted,
+
+    fontSize: 10,
+
+    marginTop: 3,
+  },
+
+  briefingSummary: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+
+    fontSize: 13,
+
+    lineHeight: 20,
+
+    marginTop: 15,
+  },
+
+  metricHint: {
+    color:
+      universeTheme.colors
+        .textMuted,
+
+    fontSize: 10,
+
+    lineHeight: 16,
+
+    marginTop: 16,
+  },
+
+  metricsGrid: {
+    flexDirection: "row",
+
+    flexWrap: "wrap",
+
+    gap: 8,
+
+    marginTop: 12,
+  },
+
+  metric: {
+    backgroundColor:
+      "rgba(3, 12, 24, 0.7)",
+
+    borderColor:
+      universeTheme.colors.border,
+
+    borderRadius:
+      universeTheme.radius.md,
+
+    borderWidth: 1,
+
+    minHeight: 112,
+
+    padding: 11,
+
+    width: "31.7%",
+  },
+
+  metricActive: {
+    backgroundColor:
+      "rgba(56, 189, 248, 0.13)",
+
+    borderColor:
+      universeTheme.colors
+        .primaryBright,
+
+    shadowColor:
+      universeTheme.colors.primary,
+
+    shadowOffset: {
+      height: 0,
+      width: 0,
     },
 
-    title: {
-      ...theme.typography
-        .screenTitle,
+    shadowOpacity: 0.28,
 
-      color:
-        theme.colors.text,
+    shadowRadius: 10,
+  },
 
-      marginTop:
-        theme.spacing.sm,
+  metricPressed: {
+    opacity: 0.7,
+
+    transform: [
+      {
+        scale: 0.98,
+      },
+    ],
+  },
+
+  metricHeader: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    justifyContent:
+      "space-between",
+  },
+
+  metricIcon: {
+    alignItems: "center",
+
+    backgroundColor:
+      "rgba(56, 189, 248, 0.08)",
+
+    borderRadius: 9,
+
+    height: 30,
+
+    justifyContent: "center",
+
+    width: 30,
+  },
+
+  metricIconActive: {
+    backgroundColor:
+      universeTheme.colors
+        .primaryBright,
+  },
+
+  metricValue: {
+    color:
+      universeTheme.colors.text,
+
+    fontSize: 20,
+
+    fontWeight: "900",
+
+    marginTop: 9,
+  },
+
+  metricValueActive: {
+    color:
+      universeTheme.colors
+        .primaryBright,
+  },
+
+  metricLabel: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+
+    fontSize: 9,
+
+    lineHeight: 13,
+
+    marginTop: 2,
+  },
+
+  metricLabelActive: {
+    color:
+      universeTheme.colors.text,
+  },
+
+  discardedRow: {
+    alignItems: "center",
+
+    flexDirection: "row",
+
+    gap: 6,
+
+    marginTop: 13,
+  },
+
+  discarded: {
+    color:
+      universeTheme.colors
+        .textMuted,
+
+    fontSize: 10,
+  },
+
+  briefingDetail: {
+    backgroundColor:
+      "rgba(6, 20, 36, 0.96)",
+
+    borderColor:
+      universeTheme.colors
+        .primaryBright,
+
+    borderRadius:
+      universeTheme.radius.lg,
+
+    borderWidth: 1,
+
+    marginTop: 22,
+
+    padding: 16,
+
+    shadowColor:
+      universeTheme.colors.primary,
+
+    shadowOffset: {
+      height: 0,
+      width: 0,
     },
 
-    subtitle: {
-      ...theme.typography.body,
+    shadowOpacity: 0.16,
 
-      color:
-        theme.colors
-          .textSecondary,
+    shadowRadius: 13,
+  },
 
-      lineHeight: 22,
+  briefingDetailHeader: {
+    alignItems: "flex-start",
 
-      marginTop:
-        theme.spacing.sm,
-    },
+    flexDirection: "row",
 
-    runButton: {
-      alignItems: "center",
+    justifyContent:
+      "space-between",
+  },
 
-      backgroundColor:
-        theme.colors.primary,
+  clearFilterButton: {
+    alignItems: "center",
 
-      borderRadius:
-        theme.radius.lg,
+    backgroundColor:
+      "rgba(148, 163, 184, 0.07)",
 
-      flexDirection: "row",
+    borderColor:
+      universeTheme.colors.border,
 
-      gap:
-        theme.spacing.sm,
+    borderRadius: 999,
 
-      justifyContent:
-        "center",
+    borderWidth: 1,
 
-      minHeight: 54,
-    },
+    height: 36,
 
-    runButtonText: {
-      ...theme.typography
-        .bodyStrong,
+    justifyContent: "center",
 
-      color: "#ffffff",
-    },
+    width: 36,
+  },
 
-    disabled: {
-      opacity: 0.45,
-    },
+  detailExplanation: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-    pressed: {
-      opacity: 0.72,
-    },
+    fontSize: 12,
 
-    loading: {
-      padding:
-        theme.spacing.xxxl,
-    },
+    lineHeight: 19,
 
-    flex: {
-      flex: 1,
-    },
+    marginTop: 12,
+  },
 
-    section: {
-      marginTop:
-        theme.spacing.xxxl,
-    },
+  knowledgeGapList: {
+    gap: 8,
 
-    sectionLabel: {
-      ...theme.typography.caption,
+    marginTop: 16,
+  },
 
-      color:
-        theme.colors.primary,
+  detailSmallTitle: {
+    color:
+      universeTheme.colors.text,
 
-      letterSpacing: 1,
+    fontSize: 12,
 
-      marginBottom:
-        theme.spacing.md,
-    },
+    fontWeight: "900",
 
-    briefingCard: {
-      backgroundColor:
-        theme.colors.surface,
+    marginBottom: 6,
+  },
 
-      borderColor:
-        theme.colors.border,
+  knowledgeGapRow: {
+    alignItems: "center",
 
-      borderRadius:
-        theme.radius.lg,
+    backgroundColor:
+      "rgba(251, 146, 60, 0.05)",
 
-      borderWidth: 1,
+    borderColor:
+      "rgba(251, 146, 60, 0.18)",
 
-      padding:
-        theme.spacing.lg,
-    },
+    borderRadius:
+      universeTheme.radius.md,
 
-    briefingHeader: {
-      alignItems: "center",
+    borderWidth: 1,
 
-      flexDirection: "row",
+    flexDirection: "row",
 
-      gap:
-        theme.spacing.md,
-    },
+    gap: 9,
 
-    briefingIcon: {
-      alignItems: "center",
+    padding: 11,
+  },
 
-      backgroundColor:
-        theme.colors.background,
+  knowledgeGapIcon: {
+    alignItems: "center",
 
-      borderRadius: 999,
+    backgroundColor:
+      "rgba(251, 146, 60, 0.08)",
 
-      height: 44,
+    borderRadius: 10,
 
-      justifyContent:
-        "center",
+    height: 34,
 
-      width: 44,
-    },
+    justifyContent: "center",
 
-    briefingDate: {
-      ...theme.typography.caption,
+    width: 34,
+  },
 
-      color:
-        theme.colors
-          .textSecondary,
+  knowledgeGapText: {
+    color:
+      universeTheme.colors.text,
 
-      marginTop: 2,
-    },
+    flex: 1,
 
-    metricHint: {
-      ...theme.typography.caption,
+    fontSize: 11,
 
-      color:
-        theme.colors
-          .textSecondary,
+    lineHeight: 17,
+  },
 
-      lineHeight: 18,
+  detailInsightSection: {
+    marginTop: 17,
+  },
 
-      marginTop:
-        theme.spacing.lg,
-    },
+  detailCandidateSummary: {
+    alignItems: "center",
 
-    metricsGrid: {
-      flexDirection: "row",
+    backgroundColor:
+      "rgba(56, 189, 248, 0.05)",
 
-      flexWrap: "wrap",
+    borderColor:
+      universeTheme.colors.border,
 
-      gap:
-        theme.spacing.sm,
+    borderRadius:
+      universeTheme.radius.md,
 
-      marginTop:
-        theme.spacing.md,
-    },
+    borderWidth: 1,
 
-    metric: {
-      backgroundColor:
-        theme.colors.background,
+    flexDirection: "row",
 
-      borderColor:
-        theme.colors.border,
+    gap: 9,
 
-      borderRadius:
-        theme.radius.md,
+    marginTop: 17,
 
-      borderWidth: 1,
+    padding: 12,
+  },
 
-      minHeight: 112,
+  detailCandidateText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-      padding:
-        theme.spacing.md,
+    flex: 1,
 
-      width: "31%",
-    },
+    fontSize: 11,
 
-    metricActive: {
-      backgroundColor:
-        theme.colors.primary,
+    lineHeight: 17,
+  },
 
-      borderColor:
-        theme.colors.primary,
-    },
+  detailCandidateCount: {
+    color:
+      universeTheme.colors
+        .primaryBright,
 
-    metricPressed: {
-      opacity: 0.7,
+    fontWeight: "900",
+  },
 
-      transform: [
-        {
-          scale: 0.98,
-        },
-      ],
-    },
+  interestScroll: {
+    marginHorizontal: -18,
 
-    metricHeader: {
-      alignItems: "center",
+    marginTop: 12,
+  },
 
-      flexDirection: "row",
+  interestContent: {
+    gap: 10,
 
-      justifyContent:
-        "space-between",
-    },
+    paddingHorizontal: 18,
+  },
 
-    metricValue: {
-      ...theme.typography
-        .sectionTitle,
+  interestCard: {
+    backgroundColor:
+      "rgba(6, 20, 36, 0.94)",
 
-      color:
-        theme.colors.text,
+    borderColor:
+      "rgba(139, 92, 246, 0.24)",
 
-      marginTop:
-        theme.spacing.sm,
-    },
+    borderRadius:
+      universeTheme.radius.lg,
 
-    metricValueActive: {
-      color:
-        theme.colors
-          .textOnPrimary,
-    },
+    borderWidth: 1,
 
-    metricLabel: {
-      ...theme.typography.caption,
+    padding: 15,
 
-      color:
-        theme.colors
-          .textSecondary,
+    width: 245,
+  },
 
-      marginTop: 2,
-    },
+  interestHeader: {
+    alignItems: "center",
 
-    metricLabelActive: {
-      color:
-        theme.colors
-          .textOnPrimary,
-    },
+    flexDirection: "row",
 
-    discarded: {
-      ...theme.typography.caption,
+    justifyContent:
+      "space-between",
+  },
 
-      color:
-        theme.colors
-          .textSecondary,
+  interestIcon: {
+    alignItems: "center",
 
-      marginTop:
-        theme.spacing.md,
-    },
+    backgroundColor:
+      "rgba(139, 92, 246, 0.08)",
 
-    briefingDetail: {
-      backgroundColor:
-        theme.colors.surface,
+    borderRadius: 11,
 
-      borderColor:
-        theme.colors.primary,
+    height: 36,
 
-      borderRadius:
-        theme.radius.lg,
+    justifyContent: "center",
 
-      borderWidth: 1,
+    width: 36,
+  },
 
-      marginTop:
-        theme.spacing.xxl,
+  interestTitle: {
+    color:
+      universeTheme.colors.text,
 
-      padding:
-        theme.spacing.lg,
-    },
+    fontSize: 16,
 
-    briefingDetailHeader: {
-      alignItems: "flex-start",
+    fontWeight: "900",
 
-      flexDirection: "row",
+    marginTop: 13,
+  },
 
-      justifyContent:
-        "space-between",
-    },
+  interestStrength: {
+    color:
+      universeTheme.colors.violet,
 
-    clearFilterButton: {
-      alignItems: "center",
+    fontSize: 15,
 
-      backgroundColor:
-        theme.colors.background,
+    fontWeight: "900",
+  },
 
-      borderRadius: 999,
+  interestEntries: {
+    color:
+      universeTheme.colors
+        .textMuted,
 
-      height: 36,
+    fontSize: 10,
 
-      justifyContent:
-        "center",
+    marginTop: 4,
+  },
 
-      width: 36,
-    },
+  trendRow: {
+    alignItems: "center",
 
-    detailExplanation: {
-      ...theme.typography.body,
+    flexDirection: "row",
 
-      color:
-        theme.colors
-          .textSecondary,
+    gap: 6,
 
-      lineHeight: 21,
+    marginTop: 12,
+  },
 
-      marginTop:
-        theme.spacing.md,
-    },
+  trend: {
+    fontSize: 10,
 
-    knowledgeGapList: {
-      gap:
-        theme.spacing.sm,
+    fontWeight: "800",
+  },
 
-      marginTop:
-        theme.spacing.lg,
-    },
+  trendExplanation: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-    detailSmallTitle: {
-      ...theme.typography
-        .bodyStrong,
+    fontSize: 10,
 
-      color:
-        theme.colors.text,
+    lineHeight: 16,
 
-      marginBottom:
-        theme.spacing.sm,
-    },
+    marginTop: 6,
+  },
 
-    knowledgeGapRow: {
-      alignItems: "center",
+  gapRow: {
+    alignItems: "flex-start",
 
-      backgroundColor:
-        theme.colors.background,
+    flexDirection: "row",
 
-      borderRadius:
-        theme.radius.md,
+    gap: 7,
 
-      flexDirection: "row",
+    marginTop: 9,
+  },
 
-      gap:
-        theme.spacing.sm,
+  gapDot: {
+    backgroundColor:
+      universeTheme.colors.orange,
 
-      padding:
-        theme.spacing.md,
-    },
+    borderRadius: 999,
 
-    knowledgeGapIcon: {
-      alignItems: "center",
+    height: 5,
 
-      backgroundColor:
-        theme.colors.surface,
+    marginTop: 5,
 
-      borderRadius: 999,
+    width: 5,
+  },
 
-      height: 34,
+  gap: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-      justifyContent:
-        "center",
+    flex: 1,
 
-      width: 34,
-    },
+    fontSize: 10,
 
-    knowledgeGapText: {
-      ...theme.typography.body,
+    lineHeight: 15,
+  },
 
-      color:
-        theme.colors.text,
+  insightList: {
+    gap: 9,
 
-      flex: 1,
+    marginTop: 12,
+  },
 
-      lineHeight: 20,
-    },
+  insightCard: {
+    alignItems: "flex-start",
 
-    detailInsightSection: {
-      marginTop:
-        theme.spacing.lg,
-    },
+    backgroundColor:
+      "rgba(6, 20, 36, 0.94)",
 
-    detailCandidateSummary: {
-      alignItems: "center",
+    borderRadius:
+      universeTheme.radius.lg,
 
-      backgroundColor:
-        theme.colors.background,
+    borderWidth: 1,
 
-      borderRadius:
-        theme.radius.md,
+    flexDirection: "row",
 
-      flexDirection: "row",
+    gap: 11,
 
-      gap:
-        theme.spacing.sm,
+    padding: 14,
+  },
 
-      marginTop:
-        theme.spacing.lg,
+  insightIcon: {
+    alignItems: "center",
 
-      padding:
-        theme.spacing.md,
-    },
+    borderRadius: 11,
 
-    detailCandidateText: {
-      ...theme.typography.body,
+    height: 38,
 
-      color:
-        theme.colors
-          .textSecondary,
+    justifyContent: "center",
 
-      flex: 1,
-    },
+    width: 38,
+  },
 
-    detailCandidateCount: {
-      color:
-        theme.colors.primary,
+  insightEyebrow: {
+    color:
+      universeTheme.colors
+        .textMuted,
 
-      fontWeight: "800",
-    },
+    fontSize: 8,
 
-    interestCard: {
-      backgroundColor:
-        theme.colors.surface,
+    fontWeight: "800",
 
-      borderColor:
-        theme.colors.border,
+    letterSpacing: 0.9,
+  },
 
-      borderRadius:
-        theme.radius.lg,
+  insightTitle: {
+    color:
+      universeTheme.colors.text,
 
-      borderWidth: 1,
+    fontSize: 13,
 
-      marginRight:
-        theme.spacing.md,
+    fontWeight: "900",
 
-      padding:
-        theme.spacing.lg,
+    marginTop: 3,
+  },
 
-      width: 240,
-    },
+  insightText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-    interestTitle: {
-      ...theme.typography
-        .sectionTitle,
+    fontSize: 11,
 
-      color:
-        theme.colors.text,
-    },
+    lineHeight: 17,
 
-    interestStrength: {
-      ...theme.typography.caption,
+    marginTop: 4,
+  },
 
-      color:
-        theme.colors.primary,
+  sectionHeader: {
+    alignItems: "center",
 
-      marginTop:
-        theme.spacing.xs,
-    },
+    flexDirection: "row",
 
-    trendRow: {
-      alignItems: "center",
+    justifyContent:
+      "space-between",
 
-      flexDirection: "row",
+    marginBottom: 14,
+  },
 
-      gap:
-        theme.spacing.xs,
+  filterSubtitle: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-      marginTop:
-        theme.spacing.md,
-    },
+    fontSize: 10,
 
-    trend: {
-      ...theme.typography.caption,
+    marginTop: 4,
+  },
 
-      fontWeight: "700",
-    },
+  countBadge: {
+    alignItems: "center",
 
-    trendExplanation: {
-      ...theme.typography.caption,
+    backgroundColor:
+      "rgba(56, 189, 248, 0.08)",
 
-      color:
-        theme.colors
-          .textSecondary,
+    borderColor:
+      universeTheme.colors.border,
 
-      lineHeight: 18,
+    borderRadius: 999,
 
-      marginTop:
-        theme.spacing.xs,
-    },
+    borderWidth: 1,
 
-    gap: {
-      ...theme.typography.caption,
+    height: 34,
 
-      color:
-        theme.colors
-          .textSecondary,
+    justifyContent: "center",
 
-      marginTop:
-        theme.spacing.sm,
-    },
+    minWidth: 34,
 
-    sectionHeader: {
-      alignItems: "center",
+    paddingHorizontal: 10,
+  },
 
-      flexDirection: "row",
+  count: {
+    color:
+      universeTheme.colors
+        .primaryBright,
 
-      justifyContent:
-        "space-between",
+    fontSize: 12,
 
-      marginBottom:
-        theme.spacing.lg,
-    },
+    fontWeight: "900",
+  },
 
-    sectionTitle: {
-      ...theme.typography
-        .sectionTitle,
+  candidateList: {
+    gap: 13,
+  },
 
-      color:
-        theme.colors.text,
-    },
+  messageCard: {
+    alignItems: "flex-start",
 
-    filterSubtitle: {
-      ...theme.typography.caption,
+    backgroundColor:
+      "rgba(6, 20, 36, 0.94)",
 
-      color:
-        theme.colors
-          .textSecondary,
+    borderRadius:
+      universeTheme.radius.lg,
 
-      marginTop:
-        theme.spacing.xs,
-    },
+    borderWidth: 1,
 
-    count: {
-      ...theme.typography.caption,
+    flexDirection: "row",
 
-      color:
-        theme.colors
-          .textSecondary,
-    },
+    gap: 11,
 
-    candidateList: {
-      gap:
-        theme.spacing.md,
-    },
+    marginTop: 16,
 
-    messageCard: {
-      backgroundColor:
-        theme.colors.surface,
+    padding: 15,
+  },
 
-      borderColor:
-        theme.colors.border,
+  messageIcon: {
+    alignItems: "center",
 
-      borderRadius:
-        theme.radius.lg,
+    borderRadius: 11,
 
-      borderWidth: 1,
+    height: 40,
 
-      marginTop:
-        theme.spacing.lg,
+    justifyContent: "center",
 
-      padding:
-        theme.spacing.lg,
-    },
+    width: 40,
+  },
 
-    messageTitle: {
-      ...theme.typography
-        .sectionTitle,
+  messageTitle: {
+    color:
+      universeTheme.colors.text,
 
-      color:
-        theme.colors.text,
-    },
+    fontSize: 14,
 
-    messageText: {
-      ...theme.typography.body,
+    fontWeight: "900",
+  },
 
-      color:
-        theme.colors
-          .textSecondary,
+  messageText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
 
-      lineHeight: 21,
+    fontSize: 11,
 
-      marginTop:
-        theme.spacing.xs,
-    },
+    lineHeight: 17,
 
-    insightList: {
-      gap:
-        theme.spacing.sm,
-    },
-
-    insightCard: {
-      backgroundColor:
-        theme.colors.surface,
-
-      borderColor:
-        theme.colors.border,
-
-      borderRadius:
-        theme.radius.lg,
-
-      borderWidth: 1,
-
-      flexDirection: "row",
-
-      gap:
-        theme.spacing.md,
-
-      padding:
-        theme.spacing.lg,
-    },
-
-    insightTitle: {
-      ...theme.typography
-        .bodyStrong,
-
-      color:
-        theme.colors.text,
-    },
-
-    insightText: {
-      ...theme.typography.caption,
-
-      color:
-        theme.colors
-          .textSecondary,
-
-      lineHeight: 18,
-
-      marginTop:
-        theme.spacing.xs,
-    },
-  });
+    marginTop: 4,
+  },
+});
