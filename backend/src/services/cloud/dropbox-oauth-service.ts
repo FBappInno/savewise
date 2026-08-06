@@ -391,6 +391,53 @@ export async function uploadDropboxBundle(
   return syncedAt;
 }
 
+export async function downloadDropboxAttachment(
+  saveWiseAccountId: string,
+  storagePath: string,
+): Promise<Buffer> {
+  const accessToken =
+    await getAccountAccessToken(
+      saveWiseAccountId,
+    );
+
+  const response =
+    await fetch(
+      DROPBOX_DOWNLOAD_URL,
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
+
+          "Dropbox-API-Arg":
+            JSON.stringify({
+              path:
+                storagePath,
+            }),
+        },
+      },
+    );
+
+  if (!response.ok) {
+    const details =
+      await response.text();
+
+    console.error(
+      "Dropbox attachment download failed:",
+      details,
+    );
+
+    throw new Error(
+      `DROPBOX_ATTACHMENT_DOWNLOAD_HTTP_${response.status}`,
+    );
+  }
+
+  return Buffer.from(
+    await response.arrayBuffer(),
+  );
+}
+
 export async function uploadDropboxAttachment(
   saveWiseAccountId: string,
   input: {

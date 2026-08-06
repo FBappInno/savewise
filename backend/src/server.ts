@@ -72,6 +72,7 @@ import {
   completeDropboxAuthorization,
   createDropboxAuthorizationUrl,
   disconnectDropboxAccount,
+  downloadDropboxAttachment,
   downloadDropboxBundle,
   getDropboxStatus,
   uploadDropboxBundle,
@@ -713,6 +714,122 @@ app.post("/api/storage/sync/import", async (request, response) => {
     });
   }
 });
+
+app.get(
+  "/api/capture/attachments/:discoveryId",
+
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    const discoveryId =
+      z.string()
+        .trim()
+        .min(1)
+        .safeParse(
+          request.params.discoveryId,
+        );
+
+    if (!discoveryId.success) {
+      response.status(400).json({
+        error:
+          "DISCOVERY_ID_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      const discovery =
+        await getDiscoveryById(
+          discoveryRepository,
+          discoveryId.data,
+        );
+
+      if (!discovery) {
+        response.status(404).json({
+          error:
+            "DISCOVERY_NOT_FOUND",
+        });
+
+        return;
+      }
+
+      if (!discovery.attachment) {
+        response.status(404).json({
+          error:
+            "DISCOVERY_ATTACHMENT_NOT_FOUND",
+        });
+
+        return;
+      }
+
+      const bytes =
+        await downloadDropboxAttachment(
+          account.id,
+          discovery.attachment.storagePath,
+        );
+
+      const safeFileName =
+        discovery.attachment.fileName.replace(
+          /["\\\r\n]/g,
+          "_",
+        );
+
+      response.setHeader(
+        "Content-Type",
+        discovery.attachment.mimeType,
+      );
+
+      response.setHeader(
+        "Content-Length",
+        String(bytes.byteLength),
+      );
+
+      response.setHeader(
+        "Content-Disposition",
+        `inline; filename*=UTF-8''${encodeURIComponent(
+          safeFileName,
+        )}`,
+      );
+
+      response.setHeader(
+        "Cache-Control",
+        "private, no-store, max-age=0",
+      );
+
+      response.status(200).send(
+        bytes,
+      );
+    } catch (error) {
+      console.error(
+        "Attachment download failed:",
+        error,
+      );
+
+      response.status(502).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "DISCOVERY_ATTACHMENT_DOWNLOAD_FAILED",
+      });
+    }
+  },
+);
 
 app.post(
   "/api/capture/file",
