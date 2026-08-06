@@ -67,6 +67,15 @@ import {
   requestAccountVerification,
   verifyAccountEmail,
 } from "./services/account/account-service";
+import {
+  completeDropboxAuthorization,
+  createDropboxAuthorizationUrl,
+  disconnectDropboxAccount,
+  downloadDropboxBundle,
+  getDropboxStatus,
+  uploadDropboxBundle,
+} from "./services/cloud/dropbox-oauth-service";
+import { runtimeConfig } from "./config/runtime-config";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -368,6 +377,250 @@ app.get("/api/account/session", async (request, response) => {
   }
   response.json({ account: { username: account.username, email: account.email } });
 });
+
+app.get(
+  "/api/cloud/dropbox/connect",
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      response.json({
+        authorizationUrl:
+          createDropboxAuthorizationUrl(
+            account.id,
+          ),
+      });
+    } catch (error) {
+      response.status(503).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "DROPBOX_CONNECT_FAILED",
+      });
+    }
+  },
+);
+
+app.get(
+  "/api/cloud/dropbox/callback",
+  async (
+    request,
+    response,
+  ) => {
+    const code =
+      z.string()
+        .min(10)
+        .safeParse(
+          request.query.code,
+        );
+
+    const state =
+      z.string()
+        .min(20)
+        .safeParse(
+          request.query.state,
+        );
+
+    if (
+      !code.success ||
+      !state.success
+    ) {
+      response.redirect(
+        `${runtimeConfig.mobileAppUrl}?dropbox=error`,
+      );
+
+      return;
+    }
+
+    try {
+      await completeDropboxAuthorization(
+        code.data,
+        state.data,
+      );
+
+      response.redirect(
+        `${runtimeConfig.mobileAppUrl}?dropbox=connected`,
+      );
+    } catch (error) {
+      console.error(
+        "Dropbox OAuth callback failed:",
+        error,
+      );
+
+      response.redirect(
+        `${runtimeConfig.mobileAppUrl}?dropbox=error`,
+      );
+    }
+  },
+);
+
+app.get(
+  "/api/cloud/dropbox/status",
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      response.json({
+        connection:
+          await getDropboxStatus(
+            account.id,
+          ),
+      });
+    } catch (error) {
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "DROPBOX_STATUS_FAILED",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/cloud/dropbox/sync",
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      const remoteBundle =
+        await downloadDropboxBundle(
+          account.id,
+        );
+
+      const importResult =
+        remoteBundle
+          ? await mergePortableSyncBundle(
+              discoveryRepository,
+              remoteBundle,
+            )
+          : null;
+
+      const localBundle =
+        await createPortableSyncBundle(
+          discoveryRepository,
+
+          typeof request.headers[
+            "x-savewise-installation-id"
+          ] === "string"
+            ? request.headers[
+                "x-savewise-installation-id"
+              ]
+            : undefined,
+        );
+
+      const syncedAt =
+        await uploadDropboxBundle(
+          account.id,
+          localBundle,
+        );
+
+      response.json({
+        syncedAt,
+
+        uploadedDiscoveries:
+          localBundle
+            .discoveries.length,
+
+        importResult,
+      });
+    } catch (error) {
+      console.error(
+        "Dropbox sync failed:",
+        error,
+      );
+
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "DROPBOX_SYNC_FAILED",
+      });
+    }
+  },
+);
+
+app.delete(
+  "/api/cloud/dropbox",
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      await disconnectDropboxAccount(
+        account.id,
+      );
+
+      response.status(204).send();
+    } catch (error) {
+      response.status(500).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "DROPBOX_DISCONNECT_FAILED",
+      });
+    }
+  },
+);
 
 app.get("/api/storage/sync/export", async (request, response) => {
   try {
@@ -1592,6 +1845,26 @@ app.use(
     });
   },
 );
+
+async function authenticateRequestAccount(
+  request: Request,
+) {
+  const authorization =
+    request.headers.authorization;
+
+  const token =
+    authorization?.startsWith(
+      "Bearer ",
+    )
+      ? authorization.slice(7)
+      : "";
+
+  return token
+    ? authenticateAccount(
+        token,
+      )
+    : null;
+}
 
 app.listen(
   port,

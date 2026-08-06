@@ -59,4 +59,10 @@ export const storagePaths = {
       runtimeConfig.dataDirectory,
       "accounts.json",
     ),
+  dropboxConnections:
+    path.join(
+      runtimeConfig.dataDirectory,
+      "dropbox-connections.json",
+    ),
+
 } as const;

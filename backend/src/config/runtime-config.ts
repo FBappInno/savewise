@@ -112,4 +112,24 @@ export const runtimeConfig = {
   corsOrigin:
     process.env.CORS_ORIGIN?.trim() ||
     "*",
+
+  dropboxAppKey:
+    process.env.DROPBOX_APP_KEY?.trim() ??
+    "",
+
+  dropboxAppSecret:
+    process.env.DROPBOX_APP_SECRET?.trim() ??
+    "",
+
+  dropboxRedirectUri:
+    process.env.DROPBOX_REDIRECT_URI?.trim() ??
+    "",
+
+  dropboxTokenEncryptionKey:
+    process.env.DROPBOX_TOKEN_ENCRYPTION_KEY?.trim() ??
+    "",
+
+  mobileAppUrl:
+    process.env.MOBILE_APP_URL?.trim() ||
+    "savewise://oauth/dropbox",
 } as const;

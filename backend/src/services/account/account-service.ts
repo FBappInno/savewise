@@ -23,7 +23,7 @@ type AccountSession = {
   expiresAt: string;
 };
 
-type Account = {
+export type Account = {
   id: string;
 
   username: string;
