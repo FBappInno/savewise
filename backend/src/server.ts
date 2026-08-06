@@ -7,6 +7,7 @@ import express, {
   type Response,
 } from "express";
 import { z } from "zod";
+import multer from "multer";
 
 import { FileDiscoveryRepository } from "./repositories/file-discovery-repository";
 import {
@@ -76,6 +77,9 @@ import {
   uploadDropboxBundle,
 } from "./services/cloud/dropbox-oauth-service";
 import { runtimeConfig } from "./config/runtime-config";
+import {
+  captureFile,
+} from "./services/capture/file-capture-service";
 
 function withTimeout<T>(
   promise: Promise<T>,
@@ -113,6 +117,56 @@ const port = Number(
 
 const discoveryRepository =
   new FileDiscoveryRepository();
+
+
+const captureUpload =
+  multer({
+    storage:
+      multer.memoryStorage(),
+
+    limits: {
+      fileSize:
+        25 *
+        1024 *
+        1024,
+
+      files:
+        1,
+    },
+
+    fileFilter(
+      _request,
+      file,
+      callback,
+    ) {
+      const allowed =
+        new Set([
+          "application/pdf",
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+        ]);
+
+      if (
+        allowed.has(
+          file.mimetype,
+        )
+      ) {
+        callback(
+          null,
+          true,
+        );
+
+        return;
+      }
+
+      callback(
+        new Error(
+          "UNSUPPORTED_CAPTURE_FILE",
+        ),
+      );
+    },
+  });
 
 app.disable("x-powered-by");
 
@@ -659,6 +713,228 @@ app.post("/api/storage/sync/import", async (request, response) => {
     });
   }
 });
+
+app.post(
+  "/api/capture/file",
+
+  captureUpload.single(
+    "file",
+  ),
+
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    if (!request.file) {
+      response.status(400).json({
+        error:
+          "CAPTURE_FILE_REQUIRED",
+      });
+
+      return;
+    }
+
+    const fields =
+      z.object({
+        workspaceId:
+          WorkspaceIdSchema
+            .optional()
+            .default("private"),
+
+        captureType:
+          z.enum([
+            "pdf",
+            "image",
+          ]),
+
+        preferredLanguage:
+          z.enum([
+            "de",
+            "en",
+            "fr",
+            "it",
+            "es",
+          ])
+            .optional()
+            .default("de"),
+
+        preferredKnowledgePath:
+          z.string()
+            .optional(),
+      })
+        .safeParse(
+          request.body,
+        );
+
+    if (!fields.success) {
+      response.status(400).json({
+        error:
+          "CAPTURE_INPUT_INVALID",
+
+        details:
+          fields.error.flatten(),
+      });
+
+      return;
+    }
+
+    const expectedType =
+      fields.data
+        .captureType ===
+      "pdf"
+        ? request.file
+            .mimetype ===
+          "application/pdf"
+        : request.file
+            .mimetype
+            .startsWith(
+              "image/",
+            );
+
+    if (!expectedType) {
+      response.status(400).json({
+        error:
+          "CAPTURE_TYPE_MISMATCH",
+      });
+
+      return;
+    }
+
+    let preferredKnowledgePath:
+      string[] | undefined;
+
+    if (
+      fields.data
+        .preferredKnowledgePath
+    ) {
+      try {
+        const parsed:
+          unknown =
+          JSON.parse(
+            fields.data
+              .preferredKnowledgePath,
+          );
+
+        if (
+          Array.isArray(
+            parsed,
+          )
+        ) {
+          preferredKnowledgePath =
+            parsed
+              .filter(
+                (
+                  value,
+                ): value is string =>
+                  typeof value ===
+                    "string",
+              )
+              .map(
+                (value) =>
+                  value.trim(),
+              )
+              .filter(Boolean)
+              .slice(0, 3);
+        }
+      } catch {
+        response.status(400).json({
+          error:
+            "CAPTURE_KNOWLEDGE_PATH_INVALID",
+        });
+
+        return;
+      }
+    }
+
+    try {
+      const result =
+        await withTimeout(
+          captureFile(
+            discoveryRepository,
+            {
+              saveWiseAccountId:
+                account.id,
+
+              workspaceId:
+                fields.data
+                  .workspaceId,
+
+              captureType:
+                fields.data
+                  .captureType,
+
+              preferredLanguage:
+                fields.data
+                  .preferredLanguage,
+
+              preferredKnowledgePath,
+
+              file: {
+                originalName:
+                  request.file
+                    .originalname,
+
+                mimeType:
+                  request.file
+                    .mimetype,
+
+                sizeBytes:
+                  request.file
+                    .size,
+
+                bytes:
+                  request.file
+                    .buffer,
+              },
+            },
+          ),
+          120_000,
+        );
+
+      response.status(201).json(
+        result,
+      );
+    } catch (error) {
+      console.error(
+        "File capture failed:",
+        error,
+      );
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "FILE_CAPTURE_FAILED";
+
+      const status =
+        message ===
+          "PDF_HAS_NO_EXTRACTABLE_TEXT"
+          ? 422
+          : message ===
+              "DROPBOX_NOT_CONNECTED"
+            ? 409
+            : 500;
+
+      response.status(status).json({
+        error:
+          message,
+      });
+    }
+  },
+);
 
 app.post(
   "/api/import",
