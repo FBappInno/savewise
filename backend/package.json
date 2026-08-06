@@ -26,6 +26,7 @@
     "openai": "^6.49.0",
     "pdf-parse": "^2.4.5",
     "resend": "^6.18.1",
+    "unpdf": "^1.8.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
