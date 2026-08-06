@@ -2,6 +2,13 @@ import {
   randomUUID,
 } from "node:crypto";
 
+/*
+ * Muss vor PDFParse geladen werden.
+ * Das stellt den PDF.js-Worker in
+ * Railway und Node korrekt bereit.
+ */
+import "pdf-parse/worker";
+
 import {
   PDFParse,
 } from "pdf-parse";
@@ -263,6 +270,10 @@ export async function captureFile(
       ),
   };
 
+  /*
+   * Zuerst wird die Originaldatei
+   * dauerhaft in Dropbox gesichert.
+   */
   await uploadDropboxAttachment(
     input.saveWiseAccountId,
     {
@@ -323,27 +334,36 @@ async function extractPdf(
 ): Promise<
   ExtractedFileContent
 > {
+  /*
+   * Multer liefert einen Node-Buffer.
+   * Uint8Array.from erstellt einen
+   * eigenständigen, übertragbaren
+   * Speicherbereich für den PDF-Worker.
+   */
+  const pdfData =
+    Uint8Array.from(
+      bytes,
+    );
+
   const parser =
     new PDFParse({
       data:
-        new Uint8Array(
-          bytes,
-        ),
+        pdfData,
     });
 
   try {
-    const [
-      info,
-      text,
-    ] =
-      await Promise.all([
-        parser.getInfo(),
-        parser.getText(),
-      ]);
+    /*
+     * Nicht parallel ausführen.
+     * PDF.js kann denselben Datenpuffer
+     * nicht gleichzeitig an mehrere
+     * Worker-Aufrufe übertragen.
+     */
+    const textResult =
+      await parser.getText();
 
     const normalizedText =
       normalizeText(
-        text.text,
+        textResult.text,
       ).slice(
         0,
         MAX_ANALYSIS_TEXT,
@@ -355,10 +375,44 @@ async function extractPdf(
       );
     }
 
+    let documentTitle:
+      string | undefined;
+
+    let pageCount:
+      number | undefined;
+
+    try {
+      const infoResult =
+        await parser.getInfo();
+
+      documentTitle =
+        infoResult.info?.Title
+          ?.trim() ||
+        undefined;
+
+      pageCount =
+        typeof infoResult.total ===
+          "number"
+          ? infoResult.total
+          : undefined;
+    } catch (
+      infoError
+    ) {
+      /*
+       * Metadaten sind optional.
+       * Ein erfolgreich extrahierter
+       * Text darf deshalb nicht wegen
+       * fehlender PDF-Metadaten scheitern.
+       */
+      console.warn(
+        "PDF metadata could not be read:",
+        infoError,
+      );
+    }
+
     return {
       title:
-        info.info?.Title
-          ?.trim() ||
+        documentTitle ||
         fileName.replace(
           /\.pdf$/i,
           "",
@@ -367,11 +421,7 @@ async function extractPdf(
       text:
         normalizedText,
 
-      pageCount:
-        typeof info.total ===
-          "number"
-          ? info.total
-          : undefined,
+      pageCount,
     };
   } finally {
     await parser.destroy();
