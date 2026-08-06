@@ -417,7 +417,10 @@ function translateFileCaptureError(
       return "Verbinde zuerst Dropbox in den Einstellungen.";
 
     case "PDF_HAS_NO_EXTRACTABLE_TEXT":
-      return "Dieses PDF enthält keinen auslesbaren Text. Ein Scan-PDF wird in einem späteren Schritt per Bilderkennung verarbeitet.";
+      return "Dieses PDF enthält keinen auslesbaren Text. Es handelt sich wahrscheinlich um ein Scan-PDF.";
+
+    case "PDF_PAGE_LIMIT_EXCEEDED":
+      return "Das PDF enthält mehr als 150 Seiten und kann derzeit nicht importiert werden.";
 
     case "UNSUPPORTED_CAPTURE_FILE":
       return "Dieses Dateiformat wird nicht unterstützt.";
