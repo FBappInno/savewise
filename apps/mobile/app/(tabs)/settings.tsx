@@ -22,6 +22,7 @@ import {
   View,
 } from "react-native";
 
+import { AccountCard } from "@/components/settings/account-card";
 import { StorageSettingsPanel } from "@/components/settings/storage-settings-panel";
 import { StarBackground } from "@/components/universe-ui/star-background";
 import { formatAppDateTime } from "@/i18n/date-time";
@@ -30,10 +31,6 @@ import { hybridKnowledgeRepository } from "@/repositories/hybrid-knowledge-repos
 import {
   deleteMyAnonymousAnalytics,
 } from "@/services/anonymous-analytics";
-import {
-  loginAccount,
-  requestAccountVerification,
-} from "@/services/account-client";
 import {
   getKnowledgeLibrary,
 } from "@/services/content-import-client";
@@ -70,45 +67,6 @@ export default function SettingsScreen() {
   } = useAppSettings();
 
   const [
-    username,
-    setUsername,
-  ] = useState(
-    settings.account.username,
-  );
-
-  const [
-    email,
-    setEmail,
-  ] = useState(
-    settings.account.email,
-  );
-
-  const [
-    oldPassword,
-    setOldPassword,
-  ] = useState("");
-
-  const [
-    newPassword,
-    setNewPassword,
-  ] = useState("");
-
-  const [
-    confirmPassword,
-    setConfirmPassword,
-  ] = useState("");
-
-  const [
-    loginPassword,
-    setLoginPassword,
-  ] = useState("");
-
-  const [
-    isSaving,
-    setSaving,
-  ] = useState(false);
-
-  const [
     lastKnowledgeUpdate,
     setLastKnowledgeUpdate,
   ] =
@@ -136,19 +94,6 @@ export default function SettingsScreen() {
   ] = useState(0);
 
   useEffect(() => {
-    setUsername(
-      settings.account.username,
-    );
-
-    setEmail(
-      settings.account.email,
-    );
-  }, [
-    settings.account.email,
-    settings.account.username,
-  ]);
-
-  useEffect(() => {
     void getKnowledgeLibrary()
       .then((library) => {
         setLastKnowledgeUpdate(
@@ -160,115 +105,6 @@ export default function SettingsScreen() {
         setLastKnowledgeUpdate(null);
       });
   }, []);
-
-  async function handleSaveAccount() {
-    if (
-      !username.trim() ||
-      !email.trim() ||
-      newPassword.length < 10
-    ) {
-      Alert.alert(
-        t(
-          "accountAuth.invalidInput",
-        ),
-        t(
-          "accountAuth.passwordRequirements",
-        ),
-      );
-
-      return;
-    }
-
-    if (
-      newPassword !==
-      confirmPassword
-    ) {
-      Alert.alert(
-        t(
-          "accountAuth.passwordMismatch",
-        ),
-        t(
-          "accountAuth.passwordMismatchDescription",
-        ),
-      );
-
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await requestAccountVerification(
-        {
-          username:
-            username.trim(),
-
-          email:
-            email.trim(),
-
-          ...(oldPassword
-            ? {
-                oldPassword,
-              }
-            : {}),
-
-          newPassword,
-        },
-      );
-
-      await updateSettings(
-        (current) => ({
-          ...current,
-
-          account: {
-            ...current.account,
-
-            username:
-              username.trim(),
-
-            email:
-              email.trim(),
-          },
-        }),
-      );
-
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-
-      Alert.alert(
-        t(
-          "accountAuth.emailSent",
-        ),
-        t(
-          "accountAuth.emailSentDescription",
-        ),
-      );
-    } catch (error) {
-      const code =
-        error instanceof Error
-          ? error.message
-          : "ACCOUNT_UPDATE_FAILED";
-
-      Alert.alert(
-        t(
-          "accountAuth.updateFailed",
-        ),
-        code ===
-          "OLD_PASSWORD_REQUIRED" ||
-          code ===
-            "OLD_PASSWORD_INVALID"
-          ? t(
-              "accountAuth.oldPasswordInvalid",
-            )
-          : t(
-              "accountAuth.updateFailedDescription",
-            ),
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
 
   async function handleAnalyticsChange(
     usageAnalytics: boolean,
@@ -289,46 +125,6 @@ export default function SettingsScreen() {
         },
       }),
     );
-  }
-
-  async function handleLogin() {
-    if (
-      !email.trim() ||
-      !loginPassword
-    ) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await loginAccount(
-        email.trim(),
-        loginPassword,
-      );
-
-      setLoginPassword("");
-
-      Alert.alert(
-        t(
-          "accountAuth.loginSuccess",
-        ),
-        t(
-          "accountAuth.loginSuccessDescription",
-        ),
-      );
-    } catch {
-      Alert.alert(
-        t(
-          "accountAuth.loginFailed",
-        ),
-        t(
-          "accountAuth.loginFailedDescription",
-        ),
-      );
-    } finally {
-      setSaving(false);
-    }
   }
 
   async function handleDeleteAnalytics() {
@@ -632,71 +428,14 @@ export default function SettingsScreen() {
           title="Konto"
           tone="cyan"
         >
-          <View style={styles.accountIdentity}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>
-                {getInitials(
-                  settings.account.username,
-                  settings.account.email,
-                )}
-              </Text>
-            </View>
-
-            <View style={styles.flex}>
-              <Text style={styles.identityName}>
-                {settings.account.username.trim() ||
-                  "SaveWise Benutzer"}
-              </Text>
-
-              <Text style={styles.identityEmail}>
-                {settings.account.email.trim() ||
-                  "Noch nicht angemeldet"}
-              </Text>
-            </View>
-          </View>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              router.push({
-                pathname: "/account",
-              } as never);
-            }}
-            style={({ pressed }) => [
-              styles.accountPortalButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <View style={styles.accountPortalIcon}>
-              <Ionicons
-                color={
-                  universeTheme.colors
-                    .primaryBright
-                }
-                name="person-circle-outline"
-                size={21}
-              />
-            </View>
-
-            <View style={styles.flex}>
-              <Text style={styles.accountPortalTitle}>
-                Konto & Anmeldung
-              </Text>
-
-              <Text style={styles.accountPortalDescription}>
-                Konto erstellen, anmelden und Biometrie verwalten.
-              </Text>
-            </View>
-
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .textMuted
-              }
-              name="chevron-forward"
-              size={19}
-            />
-          </Pressable>
+          <AccountCard
+            account={
+              settings.account
+            }
+            activeWorkspaceId={
+              settings.workspace.activeId
+            }
+          />
         </SettingsSection>
 
         <SettingsSection
