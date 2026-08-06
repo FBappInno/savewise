@@ -1,167 +1,250 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import {
+  Tabs,
+  usePathname,
+} from "expo-router";
 
-import { useAppSettings } from "@/providers/app-settings-provider";
-import { universeTheme } from "@/theme/universe-theme";
+import {
+  StyleSheet,
+  View,
+} from "react-native";
+
+import {
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
+import {
+  CompactWorkspaceSwitcher,
+} from "@/components/workspace/compact-workspace-switcher";
+
+import {
+  useAppSettings,
+} from "@/providers/app-settings-provider";
+
+import {
+  universeTheme,
+} from "@/theme/universe-theme";
 
 export default function TabLayout() {
-  const { t } =
-    useAppSettings();
+  const {
+    settings,
+    t,
+    updateSettings,
+  } = useAppSettings();
+
+  const pathname =
+    usePathname();
+
+  const insets =
+    useSafeAreaInsets();
+
+  const isUniverse =
+    pathname === "/" ||
+    pathname === "/index" ||
+    pathname.endsWith(
+      "/(tabs)",
+    );
 
   return (
-    <Tabs
-      initialRouteName="index"
-      screenOptions={{
-        headerShown: false,
+    <View style={styles.screen}>
+      <Tabs
+        initialRouteName="index"
+        screenOptions={{
+          headerShown: false,
 
-        sceneStyle: {
-          backgroundColor:
+          sceneStyle: {
+            backgroundColor:
+              universeTheme.colors
+                .background,
+          },
+
+          tabBarActiveTintColor:
             universeTheme.colors
-              .background,
-        },
+              .primaryBright,
 
-        tabBarActiveTintColor:
-          universeTheme.colors
-            .primaryBright,
-
-        tabBarInactiveTintColor:
-          universeTheme.colors
-            .textMuted,
-
-        tabBarStyle: {
-          backgroundColor:
+          tabBarInactiveTintColor:
             universeTheme.colors
-              .backgroundElevated,
+              .textMuted,
 
-          borderTopColor:
-            universeTheme.colors
-              .border,
+          tabBarStyle: {
+            backgroundColor:
+              universeTheme.colors
+                .backgroundElevated,
 
-          borderTopWidth: 1,
+            borderTopColor:
+              universeTheme.colors
+                .border,
 
-          height: 84,
+            borderTopWidth: 1,
 
-          paddingBottom: 21,
+            height: 84,
 
-          paddingTop: 8,
-        },
+            paddingBottom: 21,
 
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "700",
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Universum",
+            paddingTop: 8,
+          },
 
-          tabBarIcon: ({
-            color,
-            size,
-            focused,
-          }) => (
-            <Ionicons
-              color={color}
-              name={
-                focused
-                  ? "planet"
-                  : "planet-outline"
-              }
-              size={size}
-            />
-          ),
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: "700",
+          },
         }}
-      />
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Universum",
 
-      {/*
-       * Das alte Bibliotheks-/Universumsregister bleibt
-       * technisch als Route vorhanden, wird aber nicht mehr
-       * in der Tab-Navigation angezeigt.
-       *
-       * Dadurch verlieren wir vorerst keinen alten Code.
-       * Später ersetzen wir library.tsx durch eine reine
-       * Discovery-Listenansicht oder löschen die Route.
-       */}
-      <Tabs.Screen
-        name="library"
-        options={{
-          href: null,
-        }}
-      />
+            tabBarIcon: ({
+              color,
+              size,
+              focused,
+            }) => (
+              <Ionicons
+                color={color}
+                name={
+                  focused
+                    ? "planet"
+                    : "planet-outline"
+                }
+                size={size}
+              />
+            ),
+          }}
+        />
 
-      <Tabs.Screen
-        name="insights"
-        options={{
-          title:
-            t("tabs.brain"),
+        <Tabs.Screen
+          name="library"
+          options={{
+            href: null,
+          }}
+        />
 
-          tabBarIcon: ({
-            color,
-            size,
-            focused,
-          }) => (
-            <Ionicons
-              color={color}
-              name={
-                focused
-                  ? "hardware-chip"
-                  : "hardware-chip-outline"
-              }
-              size={size}
-            />
-          ),
-        }}
-      />
+        <Tabs.Screen
+          name="insights"
+          options={{
+            title:
+              t("tabs.brain"),
 
-      <Tabs.Screen
-        name="research"
-        options={{
-          title:
-            t("tabs.research"),
+            tabBarIcon: ({
+              color,
+              size,
+              focused,
+            }) => (
+              <Ionicons
+                color={color}
+                name={
+                  focused
+                    ? "hardware-chip"
+                    : "hardware-chip-outline"
+                }
+                size={size}
+              />
+            ),
+          }}
+        />
 
-          tabBarIcon: ({
-            color,
-            size,
-            focused,
-          }) => (
-            <Ionicons
-              color={color}
-              name={
-                focused
-                  ? "telescope"
-                  : "telescope-outline"
-              }
-              size={size}
-            />
-          ),
-        }}
-      />
+        <Tabs.Screen
+          name="research"
+          options={{
+            title:
+              t("tabs.research"),
 
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title:
-            t("tabs.settings"),
+            tabBarIcon: ({
+              color,
+              size,
+              focused,
+            }) => (
+              <Ionicons
+                color={color}
+                name={
+                  focused
+                    ? "telescope"
+                    : "telescope-outline"
+                }
+                size={size}
+              />
+            ),
+          }}
+        />
 
-          tabBarIcon: ({
-            color,
-            size,
-            focused,
-          }) => (
-            <Ionicons
-              color={color}
-              name={
-                focused
-                  ? "settings"
-                  : "settings-outline"
-              }
-              size={size}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title:
+              t("tabs.settings"),
+
+            tabBarIcon: ({
+              color,
+              size,
+              focused,
+            }) => (
+              <Ionicons
+                color={color}
+                name={
+                  focused
+                    ? "settings"
+                    : "settings-outline"
+                }
+                size={size}
+              />
+            ),
+          }}
+        />
+      </Tabs>
+
+      {!isUniverse ? (
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.workspaceOverlay,
+
+            {
+              top:
+                Math.max(
+                  insets.top,
+                  12,
+                ) + 8,
+            },
+          ]}
+        >
+          <CompactWorkspaceSwitcher
+            activeWorkspaceId={
+              settings.workspace.activeId
+            }
+            onChange={async (
+              activeId,
+            ) => {
+              await updateSettings(
+                (current) => ({
+                  ...current,
+
+                  workspace: {
+                    ...current.workspace,
+                    activeId,
+                  },
+                }),
+              );
+            }}
+          />
+        </View>
+      ) : null}
+    </View>
   );
 }
+
+const styles =
+  StyleSheet.create({
+    screen: {
+      backgroundColor:
+        universeTheme.colors
+          .background,
+      flex: 1,
+    },
+
+    workspaceOverlay: {
+      position: "absolute",
+      right: 17,
+      zIndex: 50,
+    },
+  });
