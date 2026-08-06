@@ -133,7 +133,16 @@ app.use(
   }),
 );
 
+const WorkspaceIdSchema = z.enum([
+  "private",
+  "business",
+]);
+
 const ImportRequestSchema = z.object({
+  workspaceId:
+    WorkspaceIdSchema
+      .optional()
+      .default("private"),
   url: z.string().trim().url(),
   preferredLanguage: z.enum(["de", "en", "fr", "it", "es"]).optional(),
   preferredKnowledgePath: z.array(z.string().trim().min(2).max(60)).min(1).max(3).optional(),
@@ -190,6 +199,11 @@ const AccountLoginSchema = z.object({
 
 const SyncDiscoverySchema = z.object({
   id: z.string().trim().min(1).max(200),
+
+  workspaceId:
+    WorkspaceIdSchema
+      .optional()
+      .default("private"),
   source: z.enum(["youtube", "instagram", "tiktok", "web"]),
   url: z.string().url().optional(),
   title: z.string().min(1).max(5_000),
@@ -412,10 +426,12 @@ app.post(
     }
 
     try {
-      const duplicateDiscovery = await getDiscoveryByUrl(
-        discoveryRepository,
-        parsedRequest.data.url,
-      );
+      const duplicateDiscovery =
+        await getDiscoveryByUrl(
+          discoveryRepository,
+          parsedRequest.data.url,
+          parsedRequest.data.workspaceId,
+        );
       if (duplicateDiscovery) {
         response.status(409).json({
           code: "duplicate_discovery",
@@ -442,10 +458,18 @@ app.post(
           90_000,
         );
 
+      const workspaceDiscovery = {
+        ...importResult.discovery,
+
+        workspaceId:
+          parsedRequest.data
+            .workspaceId,
+      };
+
       const storedDiscovery =
         await saveDiscovery(
           discoveryRepository,
-          importResult.discovery,
+          workspaceDiscovery,
         );
 
       const library =
@@ -745,11 +769,27 @@ app.delete(
 
 app.get(
   "/api/knowledge",
-  async (_request, response) => {
+  async (request, response) => {
+    const parsedWorkspace =
+      WorkspaceIdSchema.safeParse(
+        request.query.workspace ??
+          "private",
+      );
+
+    if (!parsedWorkspace.success) {
+      response.status(400).json({
+        error:
+          "A valid workspace is required.",
+      });
+
+      return;
+    }
+
     try {
       const library =
         await buildCurrentKnowledgeLibrary(
           discoveryRepository,
+          parsedWorkspace.data,
         );
 
       response.json(library);
@@ -771,11 +811,27 @@ app.get(
 
 app.get(
   "/api/knowledge/graph",
-  async (_request, response) => {
+  async (request, response) => {
+    const parsedWorkspace =
+      WorkspaceIdSchema.safeParse(
+        request.query.workspace ??
+          "private",
+      );
+
+    if (!parsedWorkspace.success) {
+      response.status(400).json({
+        error:
+          "A valid workspace is required.",
+      });
+
+      return;
+    }
+
     try {
       const library =
         await buildCurrentKnowledgeLibrary(
           discoveryRepository,
+          parsedWorkspace.data,
         );
 
       if (!library.graph) {
@@ -808,11 +864,27 @@ app.get(
 
 app.post(
   "/api/knowledge/rebuild",
-  async (_request, response) => {
+  async (request, response) => {
+    const parsedWorkspace =
+      WorkspaceIdSchema.safeParse(
+        request.body?.workspaceId ??
+          "private",
+      );
+
+    if (!parsedWorkspace.success) {
+      response.status(400).json({
+        error:
+          "A valid workspace is required.",
+      });
+
+      return;
+    }
+
     try {
       const library =
         await rebuildCurrentKnowledgeLibrary(
           discoveryRepository,
+          parsedWorkspace.data,
         );
 
       response.json({

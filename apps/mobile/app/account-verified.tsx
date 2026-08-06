@@ -1,51 +1,171 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { useAppSettings } from "@/providers/app-settings-provider";
-import { loginAccount, markLoginRequired } from "@/services/account-client";
-import { theme } from "@/theme";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+import { StarBackground } from "@/components/universe-ui/star-background";
+import { universeTheme } from "@/theme/universe-theme";
 
 export default function AccountVerifiedScreen() {
-  const { settings, t } = useAppSettings();
-  const [email, setEmail] = useState(settings.account.email);
-  const [password, setPassword] = useState("");
-  const [isLoggingIn, setLoggingIn] = useState(false);
-
-  useEffect(() => { void markLoginRequired(); }, []);
-
-  async function login() {
-    setLoggingIn(true);
-    try {
-      await loginAccount(email, password);
-      router.replace("/(tabs)/settings");
-    } catch {
-      Alert.alert(t("accountAuth.loginFailed"), t("accountAuth.loginFailedDescription"));
-    } finally {
-      setLoggingIn(false);
-    }
-  }
-
   return (
     <View style={styles.screen}>
-      <Text style={styles.eyebrow}>{t("accountAuth.verified")}</Text>
-      <Text style={styles.title}>{t("accountAuth.loginTitle")}</Text>
-      <Text style={styles.description}>{t("accountAuth.loginDescription")}</Text>
-      <TextInput autoCapitalize="none" keyboardType="email-address" onChangeText={setEmail} placeholder={t("settings.email")} style={styles.input} value={email} />
-      <TextInput onChangeText={setPassword} placeholder={t("settings.password")} secureTextEntry style={styles.input} value={password} />
-      <Pressable disabled={isLoggingIn || !email || !password} onPress={() => void login()} style={styles.button}>
-        <Text style={styles.buttonText}>{isLoggingIn ? t("accountAuth.loggingIn") : t("accountAuth.login")}</Text>
-      </Pressable>
+      <StarBackground density={75} />
+
+      <View style={styles.content}>
+        <View style={styles.icon}>
+          <Ionicons
+            color={universeTheme.colors.green}
+            name="checkmark-circle"
+            size={48}
+          />
+        </View>
+
+        <Text style={styles.eyebrow}>
+          KONTO BESTÄTIGT
+        </Text>
+
+        <Text style={styles.title}>
+          Deine E-Mail ist bestätigt
+        </Text>
+
+        <Text style={styles.description}>
+          Dein SaveWise-Konto wurde erfolgreich aktiviert.
+          Du kannst dich jetzt mit deiner E-Mail-Adresse und
+          deinem Passwort anmelden.
+        </Text>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            router.replace({
+              pathname: "/account",
+              params: {
+                mode: "login",
+              },
+            } as never);
+          }}
+          style={({ pressed }) => [
+            styles.primaryButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Ionicons
+            color="#03111E"
+            name="log-in-outline"
+            size={19}
+          />
+
+          <Text style={styles.primaryButtonText}>
+            Jetzt anmelden
+          </Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            router.replace("/(tabs)" as never);
+          }}
+          style={({ pressed }) => [
+            styles.secondaryButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text style={styles.secondaryButtonText}>
+            Später
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { backgroundColor: theme.colors.background, flex: 1, justifyContent: "center", padding: theme.spacing.xl },
-  eyebrow: { ...theme.typography.caption, color: theme.colors.primary, letterSpacing: 1 },
-  title: { ...theme.typography.screenTitle, color: theme.colors.text, marginTop: theme.spacing.sm },
-  description: { ...theme.typography.body, color: theme.colors.textSecondary, marginBottom: theme.spacing.xl, marginTop: theme.spacing.sm },
-  input: { ...theme.typography.body, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, color: theme.colors.text, marginBottom: theme.spacing.md, minHeight: 50, paddingHorizontal: theme.spacing.md },
-  button: { alignItems: "center", backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, justifyContent: "center", minHeight: 50 },
-  buttonText: { ...theme.typography.button, color: "#ffffff" },
+  screen: {
+    backgroundColor: universeTheme.colors.background,
+    flex: 1,
+  },
+
+  content: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 28,
+  },
+
+  icon: {
+    alignItems: "center",
+    backgroundColor: "rgba(74, 222, 128, 0.10)",
+    borderColor: "rgba(74, 222, 128, 0.35)",
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 88,
+    justifyContent: "center",
+    width: 88,
+  },
+
+  eyebrow: {
+    color: universeTheme.colors.green,
+    fontSize: 9,
+    fontWeight: "900",
+    letterSpacing: 1.4,
+    marginTop: 25,
+  },
+
+  title: {
+    color: universeTheme.colors.text,
+    fontSize: 25,
+    fontWeight: "900",
+    lineHeight: 32,
+    marginTop: 7,
+    textAlign: "center",
+  },
+
+  description: {
+    color: universeTheme.colors.textSecondary,
+    fontSize: 12,
+    lineHeight: 19,
+    marginTop: 12,
+    maxWidth: 340,
+    textAlign: "center",
+  },
+
+  primaryButton: {
+    alignItems: "center",
+    backgroundColor: universeTheme.colors.primaryBright,
+    borderRadius: 16,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginTop: 30,
+    minHeight: 52,
+    width: "100%",
+  },
+
+  primaryButtonText: {
+    color: "#03111E",
+    fontSize: 13,
+    fontWeight: "900",
+  },
+
+  secondaryButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 46,
+    width: "100%",
+  },
+
+  secondaryButtonText: {
+    color: universeTheme.colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+  pressed: {
+    opacity: 0.67,
+  },
 });

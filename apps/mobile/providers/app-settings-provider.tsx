@@ -39,9 +39,25 @@ export function AppSettingsProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     void loadAppSettings().then((stored) => {
-      setSettings(stored);
-      settingsRef.current = stored;
+      const normalizedSettings =
+        normalizeAppSettings(
+          stored,
+        );
+
+      setSettings(
+        normalizedSettings,
+      );
+
+      settingsRef.current =
+        normalizedSettings;
+
       setReady(true);
+
+      if (!stored.workspace) {
+        void saveAppSettings(
+          normalizedSettings,
+        );
+      }
     });
   }, []);
 
@@ -91,4 +107,51 @@ function resolveLocale(display: AppSettings["language"]["display"]): SupportedLa
     language === "es"
     ? language
     : "en";
+}
+
+
+function normalizeAppSettings(
+  stored:
+    Partial<AppSettings> | null |
+    undefined,
+): AppSettings {
+  return {
+    ...DEFAULT_APP_SETTINGS,
+    ...stored,
+
+    account: {
+      ...DEFAULT_APP_SETTINGS.account,
+      ...(stored?.account ?? {}),
+    },
+
+    workspace: {
+      ...DEFAULT_APP_SETTINGS.workspace,
+      ...(stored?.workspace ?? {}),
+    },
+
+    language: {
+      ...DEFAULT_APP_SETTINGS.language,
+      ...(stored?.language ?? {}),
+    },
+
+    dateTime: {
+      ...DEFAULT_APP_SETTINGS.dateTime,
+      ...(stored?.dateTime ?? {}),
+    },
+
+    storage: {
+      ...DEFAULT_APP_SETTINGS.storage,
+      ...(stored?.storage ?? {}),
+    },
+
+    privacy: {
+      ...DEFAULT_APP_SETTINGS.privacy,
+      ...(stored?.privacy ?? {}),
+    },
+
+    ai: {
+      ...DEFAULT_APP_SETTINGS.ai,
+      ...(stored?.ai ?? {}),
+    },
+  };
 }

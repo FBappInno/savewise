@@ -1,6 +1,6 @@
 {
-  "lastRunAt": "2026-08-04T11:08:56.242Z",
-  "nextRecommendedRunAt": "2026-08-05T11:08:56.242Z",
+  "lastRunAt": "2026-08-05T13:02:29.250Z",
+  "nextRecommendedRunAt": "2026-08-06T13:02:29.250Z",
   "interests": [
     {
       "id": "node-nutrition",
@@ -18,7 +18,7 @@
       "trend": "long-term",
       "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T18:25:31.865Z",
-      "observedRuns": 3
+      "observedRuns": 4
     },
     {
       "id": "node-current-events",
@@ -36,7 +36,7 @@
       "trend": "long-term",
       "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T18:25:31.865Z",
-      "observedRuns": 3
+      "observedRuns": 4
     },
     {
       "id": "node-safety-and-risk-management",
@@ -47,11 +47,11 @@
       ],
       "discoveryCount": 5,
       "strength": 0.1282,
-      "previousStrength": 0.1515,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.1282,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -63,11 +63,11 @@
       ],
       "discoveryCount": 5,
       "strength": 0.1282,
-      "previousStrength": 0.1515,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.1282,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -79,11 +79,11 @@
       ],
       "discoveryCount": 4,
       "strength": 0.1026,
-      "previousStrength": 0.1212,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.1026,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -95,11 +95,11 @@
       ],
       "discoveryCount": 4,
       "strength": 0.1026,
-      "previousStrength": 0.1212,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.1026,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -111,11 +111,11 @@
       ],
       "discoveryCount": 3,
       "strength": 0.0769,
-      "previousStrength": 0.0909,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.0769,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -127,11 +127,11 @@
       ],
       "discoveryCount": 3,
       "strength": 0.0769,
-      "previousStrength": 0.0909,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.0769,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -143,11 +143,11 @@
       ],
       "discoveryCount": 2,
       "strength": 0.15,
-      "previousStrength": 0.0909,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "previousStrength": 0.15,
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
       "knowledgeGaps": []
     },
     {
@@ -159,104 +159,104 @@
       ],
       "discoveryCount": 4,
       "strength": 0.1026,
-      "previousStrength": null,
-      "trend": "new",
-      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "previousStrength": 0.1026,
+      "trend": "stable",
+      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
       "firstDetectedAt": "2026-08-04T11:08:18.945Z",
-      "observedRuns": 1,
+      "observedRuns": 2,
       "knowledgeGaps": []
     }
   ],
   "candidates": [
     {
-      "title": "Langfristige Auswirkungen von kalorienreduzierten Diäten auf Gesundheit und Altern",
-      "url": "https://www.becker-stiftung.de/pros-cons-von-kalorienreduzierten-diaeten-auf-das-altern-und-die-gesundheit/",
-      "sourceName": "Becker Stiftung",
-      "sourceType": "study",
-      "publishedAt": "2016-03-29",
-      "summary": "Eine Studie des Leibniz-Instituts für Alternsforschung zeigt, dass kalorienreduzierte Diäten den Erhalt von Stammzellen in Mäusen fördern, jedoch auf Kosten der Immunabwehr, was die lebensverlängernden Effekte beeinträchtigen könnte.",
+      "title": "Auswirkungen von Low-Carb-Di\u0000ten auf die Gesundheit",
+      "url": "https://gesundheitswelt.allianz.de/gesundheit-ernaehrung/abnehmen-diaet/low-carb.html",
+      "sourceName": "Allianz Gesundheitswelt",
+      "sourceType": "article",
+      "publishedAt": "2026-07-15",
+      "summary": "Low-Carb-Di\u0000ten versprechen schnelle Abnehmerfolge, sind jedoch nicht als dauerhafte Ern\u0000hrungsweise geeignet und k\u0000nnen gesundheitssch\u0000dlich sein.",
       "interestId": "node-nutrition",
       "scores": {
         "relevance": 0.9,
         "quality": 0.85,
-        "recency": 0.2,
+        "recency": 0.8,
         "trustworthiness": 0.9,
-        "knowledgeValue": 0.8,
+        "knowledgeValue": 0.85,
         "gapCoverage": 0.9,
-        "overall": 0.85
+        "overall": 0.88
       },
       "relevance": "relevant",
-      "decisionReason": "Die Studie beleuchtet die langfristigen Auswirkungen kalorienreduzierter Diäten auf Gesundheit und Altern.",
+      "decisionReason": "Behandelt die langfristigen Auswirkungen von Low-Carb-Di\u0000ten auf die Gesundheit.",
       "impact": "extends",
-      "impactExplanation": "Erweitert das Verständnis über die komplexen Effekte kalorienreduzierter Diäten auf die Gesundheit.",
-      "relatedDiscoveryIds": [],
-      "id": "research-ab3174cf6c1d6f67",
-      "status": "suggested",
-      "foundAt": "2026-08-04T11:08:56.241Z"
-    },
-    {
-      "title": "Menschliches Versagen als Risikofaktor in Sicherheitsvorf\u0000llen und Unf\u0000llen",
-      "url": "https://www.zh.ch/de/umwelt-tiere/umweltschutz/umweltpraxis/definitionsseite/1995/7/zup007_1995_a0053_risikofaktor-pdf.html",
-      "sourceName": "Kanton Z\u0000rich",
-      "sourceType": "news",
-      "publishedAt": "1995-10-21",
-      "summary": "Dieser Artikel analysiert, dass \u0000ber 80 % der Tankerunf\u0000lle mit \u0000laustritt auf menschliches Fehlverhalten zur\u0000ckzuf\u0000hren sind, w\u0000hrend nur 20 % auf technische M\u0000ngel oder andere Faktoren. Er betont die Notwendigkeit, den Umgang mit gef\u0000hrlichen G\u0000tern im Arbeitsumfeld st\u0000ndig zu verbessern, um Sicherheitsvorf\u0000lle zu reduzieren.",
-      "interestId": "node-human-error",
-      "scores": {
-        "relevance": 0.9,
-        "quality": 0.8,
-        "recency": 0.1,
-        "trustworthiness": 0.9,
-        "knowledgeValue": 0.8,
-        "gapCoverage": 0.9,
-        "overall": 0.8
-      },
-      "relevance": "relevant",
-      "decisionReason": "Bietet eine detaillierte Analyse des Einflusses menschlichen Versagens auf Sicherheitsvorf\u0000lle und Unf\u0000lle.",
-      "impact": "confirms",
-      "impactExplanation": "Best\u0000tigt die Erkenntnis, dass menschliches Versagen ein signifikanter Risikofaktor in Sicherheitsvorf\u0000llen ist.",
+      "impactExplanation": "Erweitert das Wissen \u0000ber die gesundheitlichen Risiken von Low-Carb-Di\u0000ten.",
       "relatedDiscoveryIds": [
         "24ea02ed-81fa-442b-bcca-c5c81942a29e"
       ],
-      "id": "research-997685b448585ec0",
+      "id": "research-3f3ec908270a117b",
       "status": "suggested",
-      "foundAt": "2026-08-04T11:08:56.241Z"
+      "foundAt": "2026-08-05T13:02:29.249Z"
     },
     {
-      "title": "K\u0000rpersprache und Kommunikation von Katzen",
-      "url": "https://www.tfa-wissen.de/koerpersprache-und-kommunikation-von-katzen",
-      "sourceName": "tfa-wissen",
+      "title": "Kultur im Service public: Zwischen Vielfalt und Sichtbarkeit",
+      "url": "https://www.srgd.ch/aktuelles/news/kultur-im-service-public/",
+      "sourceName": "SRG Deutschschweiz",
       "sourceType": "article",
-      "publishedAt": "2025-10-13",
-      "summary": "Dieser Artikel erkl\u0000rt, dass Katzen haupts\u0000chlich nonverbal kommunizieren und ihre Signale wie Ohrenstellung, Schwanzhaltung und Mimik genutzt werden, um ihre Stimmung und Absichten zu vermitteln. Er betont die Bedeutung der Beobachtung dieser Signale, um das Verhalten von Katzen besser zu verstehen.",
-      "interestId": "node-cats",
+      "publishedAt": "2026-07-15",
+      "summary": "Eine neue Studie zeigt, welche kulturellen Themen besonders sichtbar sind und wo L\u0000cken bestehen.",
+      "interestId": "node-current-events",
       "scores": {
-        "relevance": 0.9,
+        "relevance": 0.85,
         "quality": 0.8,
-        "recency": 0.9,
-        "trustworthiness": 0.8,
+        "recency": 0.75,
+        "trustworthiness": 0.85,
         "knowledgeValue": 0.8,
-        "gapCoverage": 0.9,
-        "overall": 0.8
+        "gapCoverage": 0.85,
+        "overall": 0.82
       },
       "relevance": "relevant",
-      "decisionReason": "Bietet umfassende Informationen zur nonverbalen Kommunikation von Katzen.",
-      "impact": "confirms",
-      "impactExplanation": "Best\u0000tigt die Erkenntnis, dass Katzen haupts\u0000chlich nonverbal kommunizieren und ihre Signale genutzt werden, um ihre Stimmung und Absichten zu vermitteln.",
+      "decisionReason": "Behandelt die Sichtbarkeit kultureller Themen in den Medien und identifiziert L\u0000cken in der Berichterstattung.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das Wissen \u0000ber die mediale Sichtbarkeit kultureller Themen und bestehende L\u0000cken.",
       "relatedDiscoveryIds": [
         "d52cffb7-9e98-406a-999e-246414b5d3e1"
       ],
-      "id": "research-89460b48c586f836",
+      "id": "research-11b9f0df8f6e96c7",
       "status": "suggested",
-      "foundAt": "2026-08-04T11:08:56.241Z"
+      "foundAt": "2026-08-05T13:02:29.249Z"
     },
     {
-      "title": "Tipps zur Unfallprävention",
-      "url": "https://www.arbeitsunfaelle.de/praevention",
-      "sourceName": "Arbeitsunfaelle.de",
+      "title": "Der \"Faktor Mensch\" in der Arbeitssicherheit",
+      "url": "https://www.haufe.de/id/beitrag/psychologie-der-arbeitssicherheit-HI4327474.html",
+      "sourceName": "Haufe",
       "sourceType": "article",
-      "publishedAt": "2025-07-15",
-      "summary": "Dieser Artikel bietet praxisnahe Empfehlungen zur Unfallprävention in der Arbeitswelt, einschließlich technischer, organisatorischer und personenbezogener Maßnahmen.",
+      "publishedAt": "2026-08-03",
+      "summary": "Dieser Artikel analysiert, dass menschliches Fehlverhalten in der Arbeitssicherheit eine Hauptursache für Unfälle ist. Es wird diskutiert, dass zwischen 70–90 % aller Unfälle durch menschliches Verhalten verursacht werden und dass technische Mängel seltener die Ursache sind.",
+      "interestId": "node-human-error",
+      "scores": {
+        "relevance": 0.9,
+        "quality": 0.85,
+        "recency": 0.8,
+        "trustworthiness": 0.95,
+        "knowledgeValue": 0.9,
+        "gapCoverage": 0.85,
+        "overall": 0.88
+      },
+      "relevance": "relevant",
+      "decisionReason": "Bietet aktuelle und vertrauenswürdige Informationen über den Einfluss menschlichen Versagens auf die Arbeitssicherheit.",
+      "impact": "confirms",
+      "impactExplanation": "Best\u0000tigt die Bedeutung menschlichen Fehlverhaltens als Hauptursache für Unfälle in der Arbeitssicherheit.",
+      "relatedDiscoveryIds": [],
+      "id": "research-5ea619b9168a8b3c",
+      "status": "suggested",
+      "foundAt": "2026-08-05T13:02:29.249Z"
+    },
+    {
+      "title": "Unfallursachen: Der Faktor Mensch in der Arbeitssicherheit",
+      "url": "https://www.haufe.de/id/beitrag/psychologie-der-arbeitssicherheit-1-der-faktor-mensch-in-der-arbeitssicherheit-HI4722328.html",
+      "sourceName": "Haufe",
+      "sourceType": "article",
+      "publishedAt": "2025-06-15",
+      "summary": "Dieser Artikel beleuchtet die Rolle des menschlichen Faktors bei Arbeitsunfällen und diskutiert, wie menschliches Verhalten die Arbeitssicherheit beeinflusst.",
       "interestId": "node-industrial-and-occupational-safety",
       "scores": {
         "relevance": 0.9,
@@ -268,21 +268,21 @@
         "overall": 0.88
       },
       "relevance": "relevant",
-      "decisionReason": "Bietet umfassende und aktuelle Informationen zur Unfallprävention.",
+      "decisionReason": "Bietet tiefe Einblicke in die menschlichen Faktoren bei Arbeitsunfällen.",
       "impact": "extends",
-      "impactExplanation": "Erweitert das Verständnis von Unfallprävention durch detaillierte Maßnahmen.",
+      "impactExplanation": "Erweitert das Verständnis über die Ursachen von Arbeitsunfällen.",
       "relatedDiscoveryIds": [],
-      "id": "research-16a21957b69e6800",
+      "id": "research-2772a6a1e78c1600",
       "status": "suggested",
-      "foundAt": "2026-08-04T11:08:56.241Z"
+      "foundAt": "2026-08-05T13:02:29.249Z"
     },
     {
-      "title": "Die 25 besten Reiseziele 2026",
-      "url": "https://www.lonelyplanet.de/best-in-travel/best-in-travel-2026",
-      "sourceName": "Lonely Planet",
-      "sourceType": "article",
-      "publishedAt": "2025-10-25",
-      "summary": "Lonely Planet präsentiert die 25 besten Reiseziele für 2026, darunter Peru, Réunion und Botswana.",
+      "title": "Forbes Travel Guide’s Top Destinations For 2026",
+      "url": "https://www.forbes.com/sites/forbestravelguide/2025/12/28/forbes-travel-guides-top-destinations-for-2026/",
+      "sourceName": "Forbes",
+      "sourceType": "news",
+      "publishedAt": "2025-12-28",
+      "summary": "Forbes Travel Guide präsentiert eine Liste der 20 besten Reiseziele für 2026, darunter Abu Dhabi, Antalya und Zanzibar.",
       "interestId": "node-root-travel",
       "scores": {
         "relevance": 0.9,
@@ -294,16 +294,42 @@
         "overall": 0.9
       },
       "relevance": "relevant",
-      "decisionReason": "Aktuelle und vertrauenswürdige Quelle mit umfassenden Reiseempfehlungen.",
+      "decisionReason": "Aktuelle und vertrauenswürdige Quelle mit umfassenden Reiseempfehlungen für 2026.",
       "impact": "new-perspective",
-      "impactExplanation": "Bietet neue Perspektiven auf weniger bekannte Reiseziele.",
+      "impactExplanation": "Bietet neue Perspektiven auf aufstrebende Reiseziele für 2026.",
       "relatedDiscoveryIds": [],
-      "id": "research-a1a3e1aa38404e6c",
+      "id": "research-1c4b8d2ffa85c085",
       "status": "suggested",
-      "foundAt": "2026-08-04T11:08:56.241Z"
+      "foundAt": "2026-08-05T13:02:29.249Z"
     }
   ],
   "insights": [
+    {
+      "id": "insight-confirms-research-5ea619b9168a8b3c",
+      "kind": "confirmation",
+      "title": "Bestehendes Wissen bestätigt",
+      "description": "Best\u0000tigt die Bedeutung menschlichen Fehlverhaltens als Hauptursache für Unfälle in der Arbeitssicherheit.",
+      "candidateIds": [
+        "research-5ea619b9168a8b3c"
+      ],
+      "discoveryIds": [],
+      "createdAt": "2026-08-05T13:02:29.250Z"
+    },
+    {
+      "id": "insight-gaps-2026-08-05",
+      "kind": "knowledge-gap",
+      "title": "Gezielte Wissenslücken",
+      "description": "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit · Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz",
+      "candidateIds": [
+        "research-3f3ec908270a117b",
+        "research-11b9f0df8f6e96c7",
+        "research-5ea619b9168a8b3c",
+        "research-2772a6a1e78c1600",
+        "research-1c4b8d2ffa85c085"
+      ],
+      "discoveryIds": [],
+      "createdAt": "2026-08-05T13:02:29.250Z"
+    },
     {
       "id": "insight-confirms-research-997685b448585ec0",
       "kind": "confirmation",
@@ -379,6 +405,34 @@
     }
   ],
   "briefings": [
+    {
+      "id": "briefing-2026-08-05",
+      "date": "2026-08-05",
+      "title": "Dein tägliches Research-Briefing",
+      "summary": "5 relevante Quellen gefunden, 0 ungeeignete Treffer verworfen und 2 Wissenslücken berücksichtigt.",
+      "counts": {
+        "totalFound": 5,
+        "papers": 0,
+        "videos": 0,
+        "startups": 0,
+        "studies": 0,
+        "trends": 0,
+        "knowledgeGaps": 2,
+        "discarded": 0
+      },
+      "candidateIds": [
+        "research-3f3ec908270a117b",
+        "research-11b9f0df8f6e96c7",
+        "research-5ea619b9168a8b3c",
+        "research-2772a6a1e78c1600",
+        "research-1c4b8d2ffa85c085"
+      ],
+      "insightIds": [
+        "insight-confirms-research-5ea619b9168a8b3c",
+        "insight-gaps-2026-08-05"
+      ],
+      "createdAt": "2026-08-05T13:02:29.250Z"
+    },
     {
       "id": "briefing-2026-08-04",
       "date": "2026-08-04",

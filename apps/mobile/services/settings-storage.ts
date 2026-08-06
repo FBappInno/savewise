@@ -60,6 +60,10 @@ function mergeSettings(
       ...settings.account,
       hasPassword,
     },
+    workspace: {
+      ...DEFAULT_APP_SETTINGS.workspace,
+      ...settings.workspace,
+    },
     language: {
       ...DEFAULT_APP_SETTINGS.language,
       ...settings.language,

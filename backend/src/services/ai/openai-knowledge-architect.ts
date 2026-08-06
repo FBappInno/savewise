@@ -205,14 +205,14 @@ export async function buildKnowledgeGraphWithAI(
         "Unify synonyms, translations and closely related multilingual terms under one canonical node and retain useful alternatives as aliases.",
         "Create new broader parent concepts when several existing or new nodes share a meaningful umbrella concept.",
         "Organize the knowledge as a coherent hierarchy.",
-        "Prefer a shallow, easy-to-scan hierarchy with two levels; use at most three semantic levels when the content truly requires it.",
+        "Use exactly three semantic hierarchy levels whenever the supplied classification supports them: domain, topic and subtopic.",
         "Root nodes must be clear, specific areas of knowledge rather than generic containers.",
         "Do not place a strong coherent area below a vague umbrella such as Lifestyle, Other, General or Miscellaneous.",
         "When a branch contains several distinct themes or many discoveries, promote that coherent branch to its own root topic.",
         "For example, multiple travel themes previously below a generic lifestyle node should become one canonical Travel root with useful children.",
         "Apply this promotion principle dynamically to every subject area; the example does not prescribe a fixed Travel topic.",
         "Prefer more clear root topics over deep navigation, while still merging roots that are true synonyms or the same subject in different languages.",
-        "Only create levels that are useful for the supplied library.",
+        "Never use Other, General, Miscellaneous, Unknown, Uncategorized, Sonstiges or Allgemein as a normal domain.",
         "Assign discovery IDs directly only to the lowest meaningful nodes.",
         "Parent nodes must receive discoveries indirectly through their descendants, never as duplicate direct assignments.",
         "Every discovery must be assigned to at least one meaningful node.",
@@ -685,10 +685,20 @@ function assignMissingDiscoveries(
       discovery.title;
     const classification = discovery.classification;
     const path = uniqueStrings([
-      classification?.secondaryCategory ?? "",
+      classification
+        ? resolveDomainLabel(
+            classification.primaryCategory,
+            classification.secondaryCategory,
+          )
+        : "",
+
       classification?.topic ?? "",
+
       ...(classification?.subtopics ?? []),
-    ].map((part) => part.trim()).filter(Boolean)).slice(0, 3);
+    ]
+      .map((part) => part.trim())
+      .filter(Boolean))
+      .slice(0, 3);
     const labels = path.length > 0 ? path : [title];
     let parentId: string | null = null;
 
@@ -939,6 +949,66 @@ function normalizeScore(
       ),
     ).toFixed(4),
   );
+}
+
+function resolveDomainLabel(
+  primaryCategory: string,
+  secondaryCategory: string,
+): string {
+  const normalizedSecondary =
+    secondaryCategory.trim();
+
+  if (
+    normalizedSecondary &&
+    !isGenericDomainLabel(
+      normalizedSecondary,
+    )
+  ) {
+    return normalizedSecondary;
+  }
+
+  const normalizedPrimary =
+    primaryCategory.trim();
+
+  if (
+    normalizedPrimary &&
+    !isGenericDomainLabel(
+      normalizedPrimary,
+    )
+  ) {
+    return normalizedPrimary;
+  }
+
+  return "Noch nicht eingeordnet";
+}
+
+function isGenericDomainLabel(
+  value: string,
+): boolean {
+  const normalized =
+    value
+      .trim()
+      .toLocaleLowerCase()
+      .replace(
+        /[\s_-]+/g,
+        " ",
+      );
+
+  return [
+    "other",
+    "others",
+    "general",
+    "miscellaneous",
+    "misc",
+    "unknown",
+    "uncategorized",
+    "unclassified",
+    "sonstiges",
+    "andere",
+    "allgemein",
+    "noch nicht eingeordnet",
+    "nicht eingeordnet",
+  ].includes(normalized);
 }
 
 function uniqueStrings(

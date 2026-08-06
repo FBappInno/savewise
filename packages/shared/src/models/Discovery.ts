@@ -1,3 +1,7 @@
+export type WorkspaceId =
+  | "private"
+  | "business";
+
 export type DiscoverySource =
   | "youtube"
   | "instagram"
@@ -27,6 +31,13 @@ export interface DiscoveryClassification {
 
 export interface Discovery {
   id: string;
+
+  /**
+   * Noch optional, solange ältere lokale und entfernte
+   * Discoveries migriert werden. Fehlt der Wert, wird die
+   * Discovery als privater Workspace behandelt.
+   */
+  workspaceId?: WorkspaceId;
 
   source: DiscoverySource;
 

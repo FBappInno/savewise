@@ -11,6 +11,10 @@ import type {
   DiscoveryUpdate,
 } from "@/types/discovery";
 
+import type {
+  WorkspaceId,
+} from "@/types/app-settings";
+
 import type { DiscoveryRepository } from "./discovery-repository";
 
 export class HybridDiscoveryRepository
@@ -80,6 +84,7 @@ export class HybridDiscoveryRepository
   async importFromUrl(
     url: string,
     preferredKnowledgePath?: string[],
+    workspaceId: WorkspaceId = "private",
   ): Promise<Discovery> {
     await this.initialize();
 
@@ -89,12 +94,19 @@ export class HybridDiscoveryRepository
         preferredKnowledgePath,
       );
 
+    const workspaceDiscovery: Discovery = {
+      ...response.discovery,
+      workspaceId,
+      updatedAt:
+        new Date().toISOString(),
+    };
+
     await sqliteDiscoveryRepository.save(
-      response.discovery,
+      workspaceDiscovery,
       "synced",
     );
 
-    return response.discovery;
+    return workspaceDiscovery;
   }
 
   async update(

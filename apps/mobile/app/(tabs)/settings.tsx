@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import { router } from "expo-router";
 import {
   useEffect,
   useState,
@@ -7,6 +8,7 @@ import {
 } from "react";
 
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -24,6 +26,7 @@ import { StorageSettingsPanel } from "@/components/settings/storage-settings-pan
 import { StarBackground } from "@/components/universe-ui/star-background";
 import { formatAppDateTime } from "@/i18n/date-time";
 import { useAppSettings } from "@/providers/app-settings-provider";
+import { hybridKnowledgeRepository } from "@/repositories/hybrid-knowledge-repository";
 import {
   deleteMyAnonymousAnalytics,
 } from "@/services/anonymous-analytics";
@@ -42,6 +45,21 @@ import type {
   InputLanguage,
   TimeFormat,
 } from "@/types/app-settings";
+
+const OPTIMIZATION_STAGES = [
+  "Discoveries analysieren",
+  "Domänen überprüfen",
+  "Topics neu gruppieren",
+  "Unterthemen strukturieren",
+  "Verbindungen berechnen",
+] as const;
+
+type OptimizationResult = {
+  discoveries: number;
+  domains: number;
+  topics: number;
+  subtopics: number;
+};
 
 export default function SettingsScreen() {
   const {
@@ -100,6 +118,22 @@ export default function SettingsScreen() {
     isDeletingAnalytics,
     setDeletingAnalytics,
   ] = useState(false);
+
+
+  const [
+    isOptimizationModalVisible,
+    setOptimizationModalVisible,
+  ] = useState(false);
+
+  const [
+    isOptimizingUniverse,
+    setOptimizingUniverse,
+  ] = useState(false);
+
+  const [
+    optimizationStageIndex,
+    setOptimizationStageIndex,
+  ] = useState(0);
 
   useEffect(() => {
     setUsername(
@@ -346,6 +380,141 @@ export default function SettingsScreen() {
     }
   }
 
+  function requestUniverseOptimization() {
+    if (
+      !settings.ai
+        .knowledgeGraph
+    ) {
+      Alert.alert(
+        "Wissensgraph deaktiviert",
+        "Aktiviere zuerst den dynamischen Wissensgraphen.",
+      );
+
+      return;
+    }
+
+    setOptimizationStageIndex(0);
+    setOptimizationModalVisible(
+      true,
+    );
+  }
+
+  async function handleOptimizeUniverse() {
+    if (isOptimizingUniverse) {
+      return;
+    }
+
+    setOptimizingUniverse(true);
+    setOptimizationStageIndex(0);
+
+    const stageTimer =
+      setInterval(() => {
+        setOptimizationStageIndex(
+          (current) =>
+            Math.min(
+              current + 1,
+              OPTIMIZATION_STAGES.length -
+                1,
+            ),
+        );
+      }, 12_000);
+
+    try {
+      const rebuiltLibrary =
+        await hybridKnowledgeRepository.rebuild();
+
+      const graph =
+        rebuiltLibrary.graph;
+
+      const nodes =
+        graph?.nodes ?? [];
+
+      const result:
+        OptimizationResult = {
+        discoveries:
+          rebuiltLibrary
+            .discoveries.length,
+
+        domains:
+          nodes.filter(
+            (node) =>
+              node.kind ===
+              "domain",
+          ).length,
+
+        topics:
+          nodes.filter(
+            (node) =>
+              node.kind ===
+              "topic",
+          ).length,
+
+        subtopics:
+          nodes.filter(
+            (node) =>
+              node.kind ===
+                "subtopic" ||
+              node.kind ===
+                "concept",
+          ).length,
+      };
+
+      setLastKnowledgeUpdate(
+        graph?.generatedAt ??
+          rebuiltLibrary.generatedAt,
+      );
+
+      setOptimizationModalVisible(
+        false,
+      );
+
+      Alert.alert(
+        "Optimierung abgeschlossen",
+        [
+          `${result.discoveries} Discoveries analysiert`,
+          `${result.domains} Domänen`,
+          `${result.topics} Topics`,
+          `${result.subtopics} Unterthemen`,
+          "",
+          "Die neue Struktur wurde lokal gespeichert.",
+        ].join("\n"),
+        [
+          {
+            text: "Schließen",
+            style: "cancel",
+          },
+
+          {
+            text:
+              "Universum öffnen",
+
+            onPress: () => {
+              router.replace(
+                "/(tabs)",
+              );
+            },
+          },
+        ],
+      );
+    } catch (optimizationError) {
+      setOptimizationModalVisible(
+        false,
+      );
+
+      Alert.alert(
+        "Optimierung fehlgeschlagen",
+        optimizationError instanceof Error
+          ? optimizationError.message
+          : "Das Wissensuniversum konnte nicht optimiert werden. Die bestehende Struktur bleibt erhalten.",
+      );
+    } finally {
+      clearInterval(stageTimer);
+
+      setOptimizingUniverse(false);
+      setOptimizationStageIndex(0);
+    }
+  }
+
   const enabledAiSystems = [
     settings.ai.contentAnalysis,
     settings.ai.knowledgeGraph,
@@ -458,204 +627,76 @@ export default function SettingsScreen() {
         </View>
 
         <SettingsSection
-          description={t(
-            "settings.accountDescription",
-          )}
+          description="Verwalte Anmeldung, Registrierung und den Schutz deines Kontos."
           icon="person-circle-outline"
-          title={t(
-            "settings.account",
-          )}
+          title="Konto"
           tone="cyan"
         >
-          <View
-            style={
-              styles.accountIdentity
-            }
-          >
-            <View
-              style={
-                styles.avatarCircle
-              }
-            >
-              <Text
-                style={
-                  styles.avatarText
-                }
-              >
+          <View style={styles.accountIdentity}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
                 {getInitials(
-                  username,
-                  email,
+                  settings.account.username,
+                  settings.account.email,
                 )}
               </Text>
             </View>
 
             <View style={styles.flex}>
-              <Text
-                style={
-                  styles.identityName
-                }
-              >
-                {username.trim() ||
-                  "SaveWise User"}
+              <Text style={styles.identityName}>
+                {settings.account.username.trim() ||
+                  "SaveWise Benutzer"}
               </Text>
 
-              <Text
-                style={
-                  styles.identityEmail
+              <Text style={styles.identityEmail}>
+                {settings.account.email.trim() ||
+                  "Noch nicht angemeldet"}
+              </Text>
+            </View>
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              router.push({
+                pathname: "/account",
+              } as never);
+            }}
+            style={({ pressed }) => [
+              styles.accountPortalButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <View style={styles.accountPortalIcon}>
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .primaryBright
                 }
-              >
-                {email.trim() ||
-                  "Kein Konto verbunden"}
+                name="person-circle-outline"
+                size={21}
+              />
+            </View>
+
+            <View style={styles.flex}>
+              <Text style={styles.accountPortalTitle}>
+                Konto & Anmeldung
+              </Text>
+
+              <Text style={styles.accountPortalDescription}>
+                Konto erstellen, anmelden und Biometrie verwalten.
               </Text>
             </View>
 
-            <StatusBadge
-              label={
-                settings.account
-                  .hasPassword
-                  ? "VERIFIED"
-                  : "SETUP"
+            <Ionicons
+              color={
+                universeTheme.colors
+                  .textMuted
               }
-              tone={
-                settings.account
-                  .hasPassword
-                  ? "success"
-                  : "warning"
-              }
+              name="chevron-forward"
+              size={19}
             />
-          </View>
-
-          <Field
-            autoCapitalize="words"
-            icon="person-outline"
-            label={t(
-              "settings.username",
-            )}
-            onChangeText={
-              setUsername
-            }
-            value={username}
-          />
-
-          <Field
-            autoCapitalize="none"
-            icon="mail-outline"
-            keyboardType="email-address"
-            label={t(
-              "settings.email",
-            )}
-            onChangeText={setEmail}
-            value={email}
-          />
-
-          <Field
-            autoCapitalize="none"
-            icon="lock-open-outline"
-            label={t(
-              "accountAuth.oldPassword",
-            )}
-            onChangeText={
-              setOldPassword
-            }
-            placeholder={t(
-              "accountAuth.oldPasswordOptional",
-            )}
-            secureTextEntry
-            value={oldPassword}
-          />
-
-          <Field
-            autoCapitalize="none"
-            icon="key-outline"
-            label={t(
-              "accountAuth.newPassword",
-            )}
-            onChangeText={
-              setNewPassword
-            }
-            placeholder={t(
-              "accountAuth.passwordRequirements",
-            )}
-            secureTextEntry
-            value={newPassword}
-          />
-
-          <Field
-            autoCapitalize="none"
-            icon="checkmark-done-outline"
-            label={t(
-              "accountAuth.confirmPassword",
-            )}
-            onChangeText={
-              setConfirmPassword
-            }
-            secureTextEntry
-            value={confirmPassword}
-          />
-
-          <PrimaryButton
-            disabled={isSaving}
-            icon="save-outline"
-            label={t(
-              "settings.saveAccount",
-            )}
-            loading={isSaving}
-            onPress={() => {
-              void handleSaveAccount();
-            }}
-          />
-
-          <View
-            style={
-              styles.accountDivider
-            }
-          />
-
-          <Text
-            style={
-              styles.controlEyebrow
-            }
-          >
-            EXISTING ACCOUNT
-          </Text>
-
-          <Text
-            style={
-              styles.controlTitle
-            }
-          >
-            {t(
-              "accountAuth.existingAccount",
-            )}
-          </Text>
-
-          <Field
-            autoCapitalize="none"
-            icon="lock-closed-outline"
-            label={t(
-              "settings.password",
-            )}
-            onChangeText={
-              setLoginPassword
-            }
-            secureTextEntry
-            value={loginPassword}
-          />
-
-          <SecondaryButton
-            disabled={
-              isSaving ||
-              !email.trim() ||
-              !loginPassword
-            }
-            icon="log-in-outline"
-            label={t(
-              "accountAuth.login",
-            )}
-            onPress={() => {
-              void handleLogin();
-            }}
-          />
+          </Pressable>
         </SettingsSection>
 
         <SettingsSection
@@ -741,6 +782,18 @@ export default function SettingsScreen() {
             value={
               settings.ai
                 .autonomousResearch
+            }
+          />
+
+
+          <UniverseOptimizationPanel
+            disabled={
+              !settings.ai
+                .knowledgeGraph ||
+              isOptimizingUniverse
+            }
+            onPress={
+              requestUniverseOptimization
             }
           />
         </SettingsSection>
@@ -1168,7 +1221,391 @@ export default function SettingsScreen() {
           />
         </SettingsSection>
       </ScrollView>
+
+      <UniverseOptimizationModal
+        currentStage={
+          OPTIMIZATION_STAGES[
+            optimizationStageIndex
+          ]
+        }
+        onCancel={() => {
+          if (
+            !isOptimizingUniverse
+          ) {
+            setOptimizationModalVisible(
+              false,
+            );
+          }
+        }}
+        onConfirm={() => {
+          void handleOptimizeUniverse();
+        }}
+        running={
+          isOptimizingUniverse
+        }
+        visible={
+          isOptimizationModalVisible
+        }
+      />
     </KeyboardAvoidingView>
+  );
+}
+
+function UniverseOptimizationPanel({
+  disabled,
+  onPress,
+}: {
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <View
+      style={
+        styles.optimizationPanel
+      }
+    >
+      <View
+        style={
+          styles.optimizationHeader
+        }
+      >
+        <View
+          style={
+            styles.optimizationIcon
+          }
+        >
+          <Ionicons
+            color={
+              universeTheme.colors
+                .violet
+            }
+            name="sparkles"
+            size={22}
+          />
+        </View>
+
+        <View style={styles.flex}>
+          <Text
+            style={
+              styles.optimizationEyebrow
+            }
+          >
+            KNOWLEDGE ARCHITECT
+          </Text>
+
+          <Text
+            style={
+              styles.optimizationTitle
+            }
+          >
+            Wissensuniversum optimieren
+          </Text>
+        </View>
+      </View>
+
+      <Text
+        style={
+          styles.optimizationDescription
+        }
+      >
+        Die KI analysiert alle
+        Discoveries erneut und verbessert
+        Domänen, Topics, Unterthemen und
+        deren Beziehungen.
+      </Text>
+
+      <View
+        style={
+          styles.optimizationFacts
+        }
+      >
+        <OptimizationFact
+          text="Domänen konsolidieren"
+        />
+
+        <OptimizationFact
+          text="Topics neu gruppieren"
+        />
+
+        <OptimizationFact
+          text="Unterthemen strukturieren"
+        />
+
+        <OptimizationFact
+          text="Verbindungen aktualisieren"
+        />
+      </View>
+
+      <Pressable
+        accessibilityLabel="Wissensuniversum optimieren"
+        accessibilityRole="button"
+        disabled={disabled}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.optimizeButton,
+
+          pressed &&
+            styles.pressed,
+
+          disabled &&
+            styles.disabled,
+        ]}
+      >
+        <Ionicons
+          color="#F8FAFC"
+          name="sparkles-outline"
+          size={18}
+        />
+
+        <Text
+          style={
+            styles.optimizeButtonText
+          }
+        >
+          Jetzt optimieren
+        </Text>
+      </Pressable>
+
+      {disabled ? (
+        <Text
+          style={
+            styles.optimizationDisabledText
+          }
+        >
+          Der dynamische Wissensgraph muss
+          aktiviert sein.
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function OptimizationFact({
+  text,
+}: {
+  text: string;
+}) {
+  return (
+    <View
+      style={
+        styles.optimizationFact
+      }
+    >
+      <Ionicons
+        color={
+          universeTheme.colors.green
+        }
+        name="checkmark-circle-outline"
+        size={15}
+      />
+
+      <Text
+        style={
+          styles.optimizationFactText
+        }
+      >
+        {text}
+      </Text>
+    </View>
+  );
+}
+
+function UniverseOptimizationModal({
+  currentStage,
+  onCancel,
+  onConfirm,
+  running,
+  visible,
+}: {
+  currentStage: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+  running: boolean;
+  visible: boolean;
+}) {
+  return (
+    <Modal
+      animationType="fade"
+      onRequestClose={onCancel}
+      transparent
+      visible={visible}
+    >
+      <View
+        style={
+          styles.optimizationModalBackdrop
+        }
+      >
+        <View
+          style={
+            styles.optimizationModal
+          }
+        >
+          <View
+            style={
+              styles.optimizationModalIcon
+            }
+          >
+            {running ? (
+              <ActivityIndicator
+                color={
+                  universeTheme.colors
+                    .primaryBright
+                }
+                size="large"
+              />
+            ) : (
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .primaryBright
+                }
+                name="planet-outline"
+                size={31}
+              />
+            )}
+          </View>
+
+          <Text
+            style={
+              styles.optimizationModalEyebrow
+            }
+          >
+            SAVEWISE KNOWLEDGE ARCHITECT
+          </Text>
+
+          <Text
+            style={
+              styles.optimizationModalTitle
+            }
+          >
+            {running
+              ? "Wissensuniversum wird optimiert …"
+              : "Wissensuniversum optimieren?"}
+          </Text>
+
+          {running ? (
+            <>
+              <Text
+                style={
+                  styles.optimizationStage
+                }
+              >
+                {currentStage}
+              </Text>
+
+              <View
+                style={
+                  styles.optimizationProgressTrack
+                }
+              >
+                <View
+                  style={
+                    styles.optimizationProgressFill
+                  }
+                />
+              </View>
+
+              <Text
+                style={
+                  styles.optimizationModalText
+                }
+              >
+                Bitte SaveWise geöffnet
+                lassen. Der Vorgang kann
+                je nach Bibliothek bis zu
+                drei Minuten dauern.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text
+                style={
+                  styles.optimizationModalText
+                }
+              >
+                Alle Discoveries werden
+                erneut strukturiert. Die
+                bestehende Bibliothek
+                bleibt erhalten, falls der
+                Vorgang fehlschlägt.
+              </Text>
+
+              <View
+                style={
+                  styles.optimizationModalFacts
+                }
+              >
+                <OptimizationFact
+                  text="Domänen werden überprüft"
+                />
+
+                <OptimizationFact
+                  text="Topics werden neu gruppiert"
+                />
+
+                <OptimizationFact
+                  text="Unterthemen werden strukturiert"
+                />
+
+                <OptimizationFact
+                  text="Beziehungen werden aktualisiert"
+                />
+              </View>
+
+              <View
+                style={
+                  styles.optimizationModalActions
+                }
+              >
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={onCancel}
+                  style={({ pressed }) => [
+                    styles.optimizationCancelButton,
+
+                    pressed &&
+                      styles.pressed,
+                  ]}
+                >
+                  <Text
+                    style={
+                      styles.optimizationCancelText
+                    }
+                  >
+                    Abbrechen
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={onConfirm}
+                  style={({ pressed }) => [
+                    styles.optimizationConfirmButton,
+
+                    pressed &&
+                      styles.pressed,
+                  ]}
+                >
+                  <Ionicons
+                    color="#03111E"
+                    name="sparkles"
+                    size={17}
+                  />
+
+                  <Text
+                    style={
+                      styles.optimizationConfirmText
+                    }
+                  >
+                    Optimieren
+                  </Text>
+                </Pressable>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -2118,6 +2555,49 @@ const styles = StyleSheet.create({
     marginTop: 17,
   },
 
+  accountPortalButton: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(56, 189, 248, 0.07)",
+    borderColor:
+      universeTheme.colors
+        .borderStrong,
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 16,
+    minHeight: 62,
+    paddingHorizontal: 12,
+  },
+
+  accountPortalIcon: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(56, 189, 248, 0.11)",
+    borderRadius: 11,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+
+  accountPortalTitle: {
+    color:
+      universeTheme.colors.text,
+    fontSize: 12,
+    fontWeight: "900",
+  },
+
+  accountPortalDescription: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 9,
+    lineHeight: 14,
+    marginTop: 3,
+  },
+
   accountIdentity: {
     alignItems: "center",
     backgroundColor:
@@ -2552,6 +3032,272 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     lineHeight: 16,
     textAlign: "right",
+  },
+
+  optimizationPanel: {
+    backgroundColor:
+      "rgba(50, 34, 86, 0.44)",
+    borderColor:
+      "rgba(167, 139, 250, 0.34)",
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    marginTop: 18,
+    padding: 15,
+  },
+
+  optimizationHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 11,
+  },
+
+  optimizationIcon: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(139, 92, 246, 0.14)",
+    borderColor:
+      "rgba(167, 139, 250, 0.30)",
+    borderRadius: 13,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+
+  optimizationEyebrow: {
+    color:
+      universeTheme.colors.violet,
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
+
+  optimizationTitle: {
+    color:
+      universeTheme.colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+    marginTop: 3,
+  },
+
+  optimizationDescription: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 11,
+    lineHeight: 17,
+    marginTop: 13,
+  },
+
+  optimizationFacts: {
+    gap: 8,
+    marginTop: 13,
+  },
+
+  optimizationFact: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+
+  optimizationFactText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    flex: 1,
+    fontSize: 10,
+    lineHeight: 15,
+  },
+
+  optimizeButton: {
+    alignItems: "center",
+    backgroundColor:
+      universeTheme.colors.violet,
+    borderRadius:
+      universeTheme.radius.md,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginTop: 16,
+    minHeight: 48,
+    shadowColor:
+      universeTheme.colors.violet,
+    shadowOffset: {
+      height: 0,
+      width: 0,
+    },
+    shadowOpacity: 0.36,
+    shadowRadius: 12,
+  },
+
+  optimizeButtonText: {
+    color: "#F8FAFC",
+    fontSize: 12,
+    fontWeight: "900",
+  },
+
+  optimizationDisabledText: {
+    color:
+      universeTheme.colors
+        .textMuted,
+    fontSize: 9,
+    marginTop: 8,
+    textAlign: "center",
+  },
+
+  optimizationModalBackdrop: {
+    alignItems: "center",
+    backgroundColor:
+      "rgba(1, 6, 15, 0.84)",
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+
+  optimizationModal: {
+    backgroundColor: "#071426",
+    borderColor:
+      universeTheme.colors
+        .borderStrong,
+    borderRadius:
+      universeTheme.radius.lg,
+    borderWidth: 1,
+    maxWidth: 430,
+    padding: 20,
+    width: "100%",
+  },
+
+  optimizationModalIcon: {
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor:
+      "rgba(56, 189, 248, 0.10)",
+    borderColor:
+      universeTheme.colors
+        .borderStrong,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 68,
+    justifyContent: "center",
+    width: 68,
+  },
+
+  optimizationModalEyebrow: {
+    color:
+      universeTheme.colors.primary,
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1.1,
+    marginTop: 17,
+    textAlign: "center",
+  },
+
+  optimizationModalTitle: {
+    color:
+      universeTheme.colors.text,
+    fontSize: 20,
+    fontWeight: "900",
+    lineHeight: 26,
+    marginTop: 5,
+    textAlign: "center",
+  },
+
+  optimizationModalText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 11,
+    lineHeight: 18,
+    marginTop: 12,
+    textAlign: "center",
+  },
+
+  optimizationModalFacts: {
+    backgroundColor:
+      "rgba(3, 12, 24, 0.64)",
+    borderColor:
+      universeTheme.colors.border,
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    gap: 9,
+    marginTop: 17,
+    padding: 13,
+  },
+
+  optimizationStage: {
+    color:
+      universeTheme.colors
+        .primaryBright,
+    fontSize: 13,
+    fontWeight: "900",
+    marginTop: 20,
+    textAlign: "center",
+  },
+
+  optimizationProgressTrack: {
+    backgroundColor:
+      "rgba(148, 163, 184, 0.12)",
+    borderRadius: 999,
+    height: 7,
+    marginTop: 13,
+    overflow: "hidden",
+  },
+
+  optimizationProgressFill: {
+    backgroundColor:
+      universeTheme.colors
+        .primaryBright,
+    borderRadius: 999,
+    height: "100%",
+    width: "72%",
+  },
+
+  optimizationModalActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 20,
+  },
+
+  optimizationCancelButton: {
+    alignItems: "center",
+    borderColor:
+      universeTheme.colors.border,
+    borderRadius:
+      universeTheme.radius.md,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+
+  optimizationCancelText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+  optimizationConfirmButton: {
+    alignItems: "center",
+    backgroundColor:
+      universeTheme.colors
+        .primaryBright,
+    borderRadius:
+      universeTheme.radius.md,
+    flex: 1.25,
+    flexDirection: "row",
+    gap: 7,
+    justifyContent: "center",
+    minHeight: 48,
+  },
+
+  optimizationConfirmText: {
+    color: "#03111E",
+    fontSize: 12,
+    fontWeight: "900",
   },
 
   disabled: {

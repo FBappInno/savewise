@@ -1,185 +1,215 @@
 {
-  "generatedAt": "2026-08-04T04:36:40.797Z",
-  "sourceFingerprint": "23865fef2578225e51a96f93b3e32cf6a8aadbceaf60af07ad1a40b1bc0ce56d",
+  "generatedAt": "2026-08-06T05:04:40.184Z",
+  "sourceFingerprint": "a5797fab3e588a894428c9d3c2d31b27fcb6abbc9bf885aa9cc48dde18251bdb",
   "language": "de",
-  "summary": "Die Wissensbasis des Nutzers umfasst neun klar strukturierte Hauptdomänen. Im Bereich Sicherheits- und Risikomanagement steht menschliches Versagen als zentraler Faktor bei Arbeits- und Industrieunfällen sowie in der Cybersicherheit im Fokus. Ernährung wird durch differenzierte Kenntnisse zu gesundheitsrelevanten Kohlenhydraten und Proteinen abgedeckt. Lebensstilthemen gliedern sich in Kochen mit Schwerpunkt auf Heißluftfritteusen-Rezepte, Haustiere mit besonderem Fokus auf Katzenverhalten und digitale Unterhaltung via TikTok. Wissenschaftliche Inhalte befassen sich mit Umwelt- und Erdwissenschaften, insbesondere Klimawandel. Technologie und Verteidigung thematisieren moderne militärische Luftfahrt und Drohnenabwehr. Wirtschaft und internationale Beziehungen dokumentieren EU- und UN-Unter­",
+  "summary": "Die Wissensbasis des Nutzers spiegelt eine vielfältige Interessenlandschaft wider. Im Bereich Haustiere liegt ein besonderer Fokus auf Katzen und deren Verhalten sowie der allgemeinen Haustierpflege, inklusive ungewöhnlicher Themen wie das Baden von Enten. Kochen und Ernährung sind präsent mit Schwerpunkt auf Heißluftfritteusen-Rezepten sowie ernährungswissenschaftlichen Erkenntnissen zu Kohlenhydraten und Proteinen. Outdoor- und Freizeitaktivitäten sind durch Gleitschirmfliegen und Paragliding in den Alpen vertreten. Technologisches Interesse zeigt sich in Drohnenanwendungen für Militär und Verteidigung sowie Elektroinstallation. Der Lifestyle-Bereich umfasst 3D-Druck-Projekte und Einrichtungslösungen wie Küchenwagen. Internationale Politik und Wirtschaft sind durch die EU-Unterstützung,",
   "rootNodeIds": [
-    "node-safety-and-risk-management",
-    "node-nutrition",
-    "node-cooking-and-recipes",
-    "node-pets",
-    "node-entertainment",
-    "node-culture",
-    "node-science-environmental-and-earth",
-    "node-technology-and-defense",
-    "node-business-and-international-relations",
-    "node-news-and-media",
-    "node-paragliding",
-    "node-root-einrichtung",
+    "node-haustiere-und-tierpflege",
+    "node-kochen-und-ernaehrung",
+    "node-freizeit-und-extremsport",
+    "node-technologie-und-verteidigung",
+    "node-design-und-einrichtung",
+    "node-3d-druck",
+    "node-internationales-und-politik",
+    "node-root-heim-garten",
+    "node-root-comedy",
+    "node-root-freizeit-unterhaltung",
+    "node-root-pets",
+    "node-root-environmental-science",
+    "node-root-cybersecurity",
+    "node-root-statistics",
+    "node-root-arbeitswelt",
+    "node-root-occupational-safety",
     "node-root-investing",
-    "node-root-travel"
+    "node-root-travel",
+    "node-root-earth-science",
+    "node-root-general-news",
+    "node-root-news-media"
   ],
   "nodes": [
     {
-      "id": "node-safety-and-risk-management",
-      "title": "Sicherheits- und Risikomanagement",
+      "id": "node-haustiere-und-tierpflege",
+      "title": "Haustiere und Tierpflege",
       "kind": "domain",
-      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit.",
+      "description": "Umfassende Themen rund um Haustiere, deren Verhalten und Pflege, insbesondere Katzen und spezielle Pflegeaspekte wie Baden von Tieren.",
       "parentId": null,
       "childIds": [
-        "node-human-error",
-        "node-statistics-and-risk-analysis"
+        "node-haustierpflege",
+        "node-katzen-und-verhalten"
       ],
       "discoveryIds": [
-        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
-        "1f4e8525-9de2-432d-a284-06faaa910206",
-        "09b41da5-33f3-4826-9f99-af9aa429b36c",
-        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d",
-        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+        "813a117a-45fa-4fab-b479-83b77688de3c",
+        "eac0675f-6b73-4cad-a187-68b02eeba64a",
+        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
+        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
       ],
       "aliases": [
-        "Risikomanagement",
-        "Arbeits- und Industriesicherheit",
-        "Fehlerprävention"
+        "Pets and Animal Care"
       ],
       "keywords": [
-        "menschliches Versagen",
-        "Unfälle",
-        "Sicherheitsverhalten",
-        "Risikoanalyse",
-        "Arbeitssicherheit",
-        "Cybersicherheit"
-      ],
-      "confidence": 0.98
-    },
-    {
-      "id": "node-human-error",
-      "title": "Menschliches Versagen",
-      "kind": "topic",
-      "description": "Der zentrale Risikofaktor in Sicherheitsvorfällen, Unfällen und Störfällen, beeinflusst Arbeits-, Industrie- und Cybersicherheit.",
-      "parentId": "node-safety-and-risk-management",
-      "childIds": [
-        "node-industrial-and-occupational-safety",
-        "node-cybersecurity-human-factors"
-      ],
-      "discoveryIds": [
-        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
-        "1f4e8525-9de2-432d-a284-06faaa910206",
-        "09b41da5-33f3-4826-9f99-af9aa429b36c",
-        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf",
-        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
-      ],
-      "aliases": [
-        "Human Factors"
-      ],
-      "keywords": [
-        "Fehlerprävention",
-        "Verhaltensrisiken",
-        "Sicherheitsorganisation",
-        "Cybersicherheit"
-      ],
-      "confidence": 0.98
-    },
-    {
-      "id": "node-industrial-and-occupational-safety",
-      "title": "Industrie- und Arbeitssicherheit",
-      "kind": "subtopic",
-      "description": "Analyse von Unfallursachen, organisatorischen Fehlern und Präventionsmaßnahmen im Arbeits- und Industrieumfeld.",
-      "parentId": "node-human-error",
-      "childIds": [],
-      "discoveryIds": [
-        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
-        "1f4e8525-9de2-432d-a284-06faaa910206",
-        "09b41da5-33f3-4826-9f99-af9aa429b36c"
-      ],
-      "aliases": [
-        "Arbeitsschutz",
-        "Safety at Work"
-      ],
-      "keywords": [
-        "Unfallstatistik",
-        "organisatorische Fehler",
-        "Sicherheitsverhalten",
-        "Arbeitsunfälle"
-      ],
-      "confidence": 0.97
-    },
-    {
-      "id": "node-cybersecurity-human-factors",
-      "title": "Menschliche Faktoren in der Cybersicherheit",
-      "kind": "subtopic",
-      "description": "Der Einfluss menschlichen Verhaltens auf Cybersicherheitsvorfälle und die Bedeutung von Awareness und Prävention.",
-      "parentId": "node-human-error",
-      "childIds": [],
-      "discoveryIds": [
-        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Cybersicherheit",
-        "Verhaltensrisiken",
-        "Awareness",
-        "Incident Prevention"
+        "Haustiere",
+        "Katzen",
+        "Kätzchen",
+        "Tierpflege",
+        "Baden von Haustieren",
+        "Enten"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-statistics-and-risk-analysis",
-      "title": "Statistik und Risikoanalyse",
+      "id": "node-haustierpflege",
+      "title": "Haustierpflege",
       "kind": "topic",
-      "description": "Quantitative Analyse und Bewertung der Risiken und Wahrscheinlichkeiten menschlichen Versagens in Sicherheitskontexten.",
-      "parentId": "node-safety-and-risk-management",
+      "description": "Pflege von Haustieren mit Schwerpunkt auf speziellen Verhaltens- und Pflegesituationen.",
+      "parentId": "node-haustiere-und-tierpflege",
       "childIds": [],
       "discoveryIds": [
-        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+        "813a117a-45fa-4fab-b479-83b77688de3c"
       ],
       "aliases": [],
       "keywords": [
-        "Statistik",
-        "Risikoanalyse",
-        "Wahrscheinlichkeit",
-        "Vorfall"
+        "Badezeit",
+        "Haustierpflege",
+        "Enten als Haustiere"
       ],
-      "confidence": 0.75
+      "confidence": 0.85
     },
     {
-      "id": "node-nutrition",
-      "title": "Ernährung",
+      "id": "node-katzen-und-verhalten",
+      "title": "Katzen und Verhalten",
+      "kind": "topic",
+      "description": "Verhaltensbeobachtungen und Kommunikation von Katzen und Kätzchen inklusive Lautäußerungen und Schlafverhalten.",
+      "parentId": "node-haustiere-und-tierpflege",
+      "childIds": [
+        "node-katzchen-verhalten",
+        "node-schlafverhalten-katzen"
+      ],
+      "discoveryIds": [
+        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
+        "eac0675f-6b73-4cad-a187-68b02eeba64a",
+        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
+      ],
+      "aliases": [
+        "Cats and Behavior"
+      ],
+      "keywords": [
+        "Kätzchen",
+        "Miauen",
+        "Schlafverhalten",
+        "Tierliebe"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-katzchen-verhalten",
+      "title": "Kätzchen Verhalten",
+      "kind": "subtopic",
+      "description": "Spielerisches Erkunden und kommunikatives Miauen junger Katzen als Teil ihres Verhaltens.",
+      "parentId": "node-katzen-und-verhalten",
+      "childIds": [],
+      "discoveryIds": [
+        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
+        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
+      ],
+      "aliases": [
+        "Kitten Behavior"
+      ],
+      "keywords": [
+        "Kätzchen",
+        "Kommunikation",
+        "Miauen"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-schlafverhalten-katzen",
+      "title": "Schlafverhalten von Katzen",
+      "kind": "subtopic",
+      "description": "Typische Schlafpositionen und entspannte Haltung von Katzen.",
+      "parentId": "node-katzen-und-verhalten",
+      "childIds": [],
+      "discoveryIds": [
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
+      ],
+      "aliases": [
+        "Tierliebe"
+      ],
+      "keywords": [
+        "Katze",
+        "Schlaf",
+        "Kuscheln",
+        "Entspannung"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-kochen-und-ernaehrung",
+      "title": "Kochen und Ernährung",
       "kind": "domain",
-      "description": "Wissenschaftliche Betrachtung von Nährstoffen mit Fokus auf Kohlenhydrate, Proteine und deren Bedeutung für Gesundheit und Gewichtsmanagement.",
+      "description": "Ernährungswissenschaft und praktische Kochrezepte mit Fokus auf schnelle Airfryer-Gerichte sowie Nährstoffwissen zu Kohlenhydraten und Proteinen.",
       "parentId": null,
       "childIds": [
-        "node-carbohydrates",
-        "node-proteins"
+        "node-ernaehrungswissenschaft",
+        "node-kochen-mit-airfryer"
+      ],
+      "discoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4",
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122",
+        "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
+        "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
+      ],
+      "aliases": [
+        "Cooking and Nutrition"
+      ],
+      "keywords": [
+        "Kohlenhydrate",
+        "Proteine",
+        "Heißluftfritteuse",
+        "Rezepte",
+        "Low Carb",
+        "Eiweiß"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-ernaehrungswissenschaft",
+      "title": "Ernährungswissenschaft",
+      "kind": "topic",
+      "description": "Unterscheidung gesunder und ungesunder Kohlenhydrate, Proteinzufuhr und deren Bedeutung für Gesundheit und Gewichtsmanagement.",
+      "parentId": "node-kochen-und-ernaehrung",
+      "childIds": [
+        "node-kohlenhydrate",
+        "node-proteinaufnahme"
       ],
       "discoveryIds": [
         "0b87718a-19c3-4f08-9712-5adc9913a5f4",
         "a56b02d3-e199-4393-8fcb-c6f5596f8122"
       ],
       "aliases": [
-        "Ernährungswissenschaft"
+        "Nutrition Science"
       ],
       "keywords": [
         "Kohlenhydrate",
         "Proteine",
         "Low Carb",
-        "Blutzucker",
-        "Eiweißzufuhr",
-        "Diät"
+        "Blutzuckerspiegel",
+        "Eiweißbedarf"
       ],
-      "confidence": 0.95
+      "confidence": 0.9
     },
     {
-      "id": "node-carbohydrates",
+      "id": "node-kohlenhydrate",
       "title": "Kohlenhydrate",
-      "kind": "topic",
-      "description": "Unterscheidung und Bewertung gesunder und ungesunder Kohlenhydrate hinsichtlich Energieversorgung und Blutzuckerwirkung.",
-      "parentId": "node-nutrition",
+      "kind": "subtopic",
+      "description": "Bewertung komplexer Kohlenhydrate wie Kartoffeln im Vergleich zu schnell blutzuckersteigernden Varianten im Kontext von Diäten.",
+      "parentId": "node-ernaehrungswissenschaft",
       "childIds": [],
       "discoveryIds": [
         "0b87718a-19c3-4f08-9712-5adc9913a5f4"
       ],
-      "aliases": [],
+      "aliases": [
+        "Carbohydrates"
+      ],
       "keywords": [
         "Low Carb",
         "Blutzuckerspiegel",
@@ -189,98 +219,55 @@
       "confidence": 0.9
     },
     {
-      "id": "node-proteins",
-      "title": "Proteine",
-      "kind": "topic",
-      "description": "Bedeutung proteinreicher Lebensmittel und Empfehlungen zur angemessenen Eiweißzufuhr im Alltag.",
-      "parentId": "node-nutrition",
+      "id": "node-proteinaufnahme",
+      "title": "Proteinaufnahme",
+      "kind": "subtopic",
+      "description": "Empfehlungen zur täglichen Eiweißzufuhr und Beschreibung proteinreicher Lebensmittel für den Alltag.",
+      "parentId": "node-ernaehrungswissenschaft",
       "childIds": [],
       "discoveryIds": [
         "a56b02d3-e199-4393-8fcb-c6f5596f8122"
       ],
       "aliases": [
-        "Eiweiß"
+        "Protein Intake"
       ],
       "keywords": [
+        "Eiweiß",
         "proteinreiche Lebensmittel",
-        "Eiweißbedarf",
         "Ernährung"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-cooking-and-recipes",
-      "title": "Kochen und Rezepte",
+      "id": "node-kochen-mit-airfryer",
+      "title": "Kochen mit Airfryer",
       "kind": "topic",
-      "description": "Rezepte und Kochideen mit Fokus auf schnellen, leckeren Gerichten und der Nutzung von Heißluftfritteusen.",
-      "parentId": null,
+      "description": "Rezepte und Anleitungen für schnelle und leichte Gerichte mit der Heißluftfritteuse.",
+      "parentId": "node-kochen-und-ernaehrung",
       "childIds": [
-        "node-airfryer-recipes"
+        "node-rezept-ei-im-airfryer"
       ],
       "discoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
       ],
       "aliases": [
-        "Airfryer Rezepte"
+        "Heißluftfritteuse Rezepte"
       ],
       "keywords": [
-        "Heißluftfritteuse",
-        "schnelle Gerichte",
-        "Airfryer",
-        "Rezepte"
-      ],
-      "confidence": 0.9
-    },
-    {
-      "id": "node-airfryer-recipes",
-      "title": "Heißluftfritteuse Rezepte",
-      "kind": "subtopic",
-      "description": "Spezielle Kochrezepte für die Zubereitung mit der Heißluftfritteuse, inklusive schneller Gerichte und Beispielrezept für Ei.",
-      "parentId": "node-cooking-and-recipes",
-      "childIds": [
-        "node-quick-meals",
-        "node-egg-preparation-airfryer"
-      ],
-      "discoveryIds": [
-        "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
-        "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
-      ],
-      "aliases": [
-        "Airfryer Kochen"
-      ],
-      "keywords": [
-        "Rezepte",
         "Airfryer",
         "schnelle Rezepte",
+        "leichte Gerichte",
         "Ei"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-quick-meals",
-      "title": "Schnelle Gerichte",
-      "kind": "concept",
-      "description": "Beispiele für schnelle Lieblingsrezepte aus der Heißluftfritteuse.",
-      "parentId": "node-airfryer-recipes",
-      "childIds": [],
-      "discoveryIds": [
-        "e4aefa21-2e6b-404e-bc01-2828ce1d665f"
-      ],
-      "aliases": [],
-      "keywords": [
-        "schnelle Rezepte",
-        "leichte Gerichte",
-        "Airfryer"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-egg-preparation-airfryer",
+      "id": "node-rezept-ei-im-airfryer",
       "title": "Ei im Airfryer zubereiten",
-      "kind": "concept",
-      "description": "Anleitung und Rezept für die optimale Zubereitung von Eiern in der Heißluftfritteuse, vorgestellt von Steffen Henssler.",
-      "parentId": "node-airfryer-recipes",
+      "kind": "subtopic",
+      "description": "Schnelles Rezept und praktische Anleitung zur Zubereitung von Eiern im Airfryer vorgestellt von Steffen Henssler.",
+      "parentId": "node-kochen-mit-airfryer",
       "childIds": [],
       "discoveryIds": [
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
@@ -295,300 +282,118 @@
       "confidence": 0.95
     },
     {
-      "id": "node-pets",
-      "title": "Haustiere",
-      "kind": "topic",
-      "description": "Informationen über Haustiere mit Schwerpunkt auf Katzen, Kätzchen und deren Verhalten und Kommunikation.",
+      "id": "node-freizeit-und-extremsport",
+      "title": "Freizeit und Extremsport",
+      "kind": "domain",
+      "description": "Aktivitäten zur Freizeitgestaltung mit Schwerpunkt auf Gleitschirm- und Paragliding in den Alpen inklusive Thermikprognosen.",
       "parentId": null,
       "childIds": [
-        "node-cats"
+        "node-gleitschirmfliegen"
       ],
       "discoveryIds": [
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c",
-        "eac0675f-6b73-4cad-a187-68b02eeba64a"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Katzen",
-        "Kätzchen",
-        "Tierverhalten",
-        "Haustiere"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-cats",
-      "title": "Katzen",
-      "kind": "subtopic",
-      "description": "Verhalten und Lautäußerungen von Katzen und Kätzchen mit Fokus auf spielerisches Erkunden und Kommunikation.",
-      "parentId": "node-pets",
-      "childIds": [
-        "node-kitten-behavior",
-        "node-sleeping-cats"
-      ],
-      "discoveryIds": [
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c",
-        "eac0675f-6b73-4cad-a187-68b02eeba64a"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Kätzchen",
-        "miauen",
-        "Tierverhalten"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-kitten-behavior",
-      "title": "Verhalten von Kätzchen",
-      "kind": "concept",
-      "description": "Beobachtungen zum spielerischen Entdecken und kommunikativen Miauen junger Kätzchen.",
-      "parentId": "node-cats",
-      "childIds": [],
-      "discoveryIds": [
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Kätzchen",
-        "miauen",
-        "Kommunikation",
-        "Tierverhalten"
-      ],
-      "confidence": 0.85
-    },
-    {
-      "id": "node-sleeping-cats",
-      "title": "Schlafverhalten von Katzen",
-      "kind": "concept",
-      "description": "Typische Schlafpositionen von Katzen und ihre entspannte Haltung, illustriert durch ein Video mit tierenahen Momenten.",
-      "parentId": "node-cats",
-      "childIds": [],
-      "discoveryIds": [
-        "eac0675f-6b73-4cad-a187-68b02eeba64a"
+        "cb37f305-ff8f-4635-bd44-8c6469548484",
+        "03361564-75f6-47a8-ba9c-d69218313422",
+        "6054cf4b-a1bd-408f-908d-3ee05a1ebb33"
       ],
       "aliases": [
-        "Tierliebe"
+        "Leisure and Extreme Sports"
       ],
       "keywords": [
-        "Katze",
-        "Schlaf",
-        "Kuscheln",
-        "Haustier",
-        "Entspannung"
+        "Gleitschirmfliegen",
+        "Paragliding",
+        "Alpen",
+        "Thermik",
+        "Extremsport",
+        "Flugerlebnis"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-entertainment",
-      "title": "Unterhaltung",
+      "id": "node-gleitschirmfliegen",
+      "title": "Gleitschirmfliegen",
       "kind": "topic",
-      "description": "Kurze, unterhaltsame Videoformate, insbesondere auf TikTok, die schnelle Freude und Interaktion bieten.",
-      "parentId": null,
+      "description": "Beschreibung und Ausrüstung für Paragliding und Gleitschirmfliegen sowie Sicherheitsaspekte und Wetterprognosen für alpine Startplätze.",
+      "parentId": "node-freizeit-und-extremsport",
       "childIds": [
-        "node-short-videos"
+        "node-sportausruestung"
       ],
       "discoveryIds": [
-        "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
-      ],
-      "aliases": [],
-      "keywords": [
-        "TikTok",
-        "kurze Videos",
-        "soziale Medien",
-        "Unterhaltung"
-      ],
-      "confidence": 0.75
-    },
-    {
-      "id": "node-short-videos",
-      "title": "Kurze Videos",
-      "kind": "subtopic",
-      "description": "Schnelle und unterhaltsame Videoclips, typisch für Plattformen wie TikTok, die Nutzer schnell ansprechen und unterhalten.",
-      "parentId": "node-entertainment",
-      "childIds": [
-        "node-digital-engagement"
-      ],
-      "discoveryIds": [
-        "e4e805e8-bb92-43a4-bbef-92ebf71ac885",
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+        "cb37f305-ff8f-4635-bd44-8c6469548484",
+        "03361564-75f6-47a8-ba9c-d69218313422",
+        "6054cf4b-a1bd-408f-908d-3ee05a1ebb33"
       ],
       "aliases": [
-        "Short-Form Videos"
+        "Paragliding"
       ],
       "keywords": [
-        "TikTok",
-        "Video",
-        "Unterhaltung",
-        "soziale Medien",
-        "kurze Clips"
+        "Paragleiten",
+        "Gleitschirmfliegen",
+        "Thermik",
+        "Windprognose",
+        "Sicherheit",
+        "Gurtzeug"
       ],
-      "confidence": 0.7
+      "confidence": 0.9
     },
     {
-      "id": "node-digital-engagement",
-      "title": "Digitale Nutzerinteraktion",
-      "kind": "concept",
-      "description": "Die dynamische Nutzung und Interaktion in sozialen Medien, z.B. durch TikTok-Videos, die Kreativität und soziales Engagement fördern.",
-      "parentId": "node-short-videos",
-      "childIds": [],
-      "discoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
-      ],
-      "aliases": [],
-      "keywords": [
-        "TikTok",
-        "Kurzvideos",
-        "soziale Medien",
-        "Engagement"
-      ],
-      "confidence": 0.7
-    },
-    {
-      "id": "node-culture",
-      "title": "Kultur",
-      "kind": "domain",
-      "description": "Breiter Bereich zu kulturellen Phänomenen mit Fokus auf soziale Medien als Teil moderner Kultur.",
-      "parentId": null,
-      "childIds": [
-        "node-social-media"
-      ],
-      "discoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
-        "3b471827-69b2-4d22-ad51-f4fa8888e991"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Soziale Medien",
-        "Videoformate",
-        "Digitale Kultur"
-      ],
-      "confidence": 0.7
-    },
-    {
-      "id": "node-social-media",
-      "title": "Soziale Medien",
-      "kind": "topic",
-      "description": "Digitale Plattformen für Nutzerinteraktion und Content-Sharing, mit Schwerpunkt auf kurzen Videoinhalten.",
-      "parentId": "node-culture",
-      "childIds": [
-        "node-video-content"
-      ],
-      "discoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
-        "3b471827-69b2-4d22-ad51-f4fa8888e991"
-      ],
-      "aliases": [],
-      "keywords": [
-        "TikTok",
-        "Video-Content",
-        "soziale Interaktion"
-      ],
-      "confidence": 0.7
-    },
-    {
-      "id": "node-video-content",
-      "title": "Video-Content",
+      "id": "node-sportausruestung",
+      "title": "Sportausrüstung",
       "kind": "subtopic",
-      "description": "Digitale, kurze und unterhaltsame Videos zur schnellen Nutzeransprache, typisch für Plattformen wie TikTok.",
-      "parentId": "node-social-media",
+      "description": "Leichtes, reversibles Gleitschirm-Gurtzeug mit Airbag, RECCO-System und abnehmbarem Rucksack speziell für Bergsteiger und Gleitschirmpiloten.",
+      "parentId": "node-gleitschirmfliegen",
       "childIds": [],
       "discoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
-        "3b471827-69b2-4d22-ad51-f4fa8888e991"
-      ],
-      "aliases": [],
-      "keywords": [
-        "Kurzvideos",
-        "soziale Medien"
-      ],
-      "confidence": 0.7
-    },
-    {
-      "id": "node-science-environmental-and-earth",
-      "title": "Wissenschaft: Umwelt- und Erdwissenschaften",
-      "kind": "domain",
-      "description": "Wissenschaftliche Erkenntnisse zum Klimawandel, historischen Klimazyklen sowie Strategien zur Minderung und Anpassung.",
-      "parentId": null,
-      "childIds": [
-        "node-climate-change"
-      ],
-      "discoveryIds": [
-        "39a36c46-5aa6-4111-a75f-adba6f78262f",
-        "89df7ae0-1f83-497c-8066-bb39090b8a46"
+        "6054cf4b-a1bd-408f-908d-3ee05a1ebb33"
       ],
       "aliases": [
-        "Umweltwissenschaften",
-        "Erdwissenschaften"
+        "Gleitschirm-Gurtzeuge",
+        "Sicherheitsausrüstung"
       ],
       "keywords": [
-        "Klimawandel",
-        "IPCC",
-        "AR6",
-        "historische Klimazykliken",
-        "Adaptation",
-        "Mitigation"
+        "Gurtzeug",
+        "Airbag",
+        "RECCO-System",
+        "Rucksack",
+        "Sicherheit"
       ],
-      "confidence": 0.92
+      "confidence": 0.9
     },
     {
-      "id": "node-climate-change",
-      "title": "Klimawandel",
-      "kind": "topic",
-      "description": "Konsolidierter Überblick über Ursachen, Auswirkungen und Anpassungsmaßnahmen des globalen Klimawandels.",
-      "parentId": "node-science-environmental-and-earth",
-      "childIds": [],
-      "discoveryIds": [
-        "39a36c46-5aa6-4111-a75f-adba6f78262f",
-        "89df7ae0-1f83-497c-8066-bb39090b8a46"
-      ],
-      "aliases": [],
-      "keywords": [
-        "IPCC",
-        "Eiszeiten",
-        "Klimawissenschaft",
-        "global warming"
-      ],
-      "confidence": 0.95
-    },
-    {
-      "id": "node-technology-and-defense",
+      "id": "node-technologie-und-verteidigung",
       "title": "Technologie und Verteidigung",
       "kind": "domain",
-      "description": "Technologiewissen zu militärischer Luftfahrt, modernisierten Kampfjets und deren Einsatz gegen Kampfdrohnen.",
+      "description": "Technologische Entwicklungen im Bereich militärischer Luftfahrt, Drohnenabwehr und elektronischer Installationen für den Innenbereich.",
       "parentId": null,
       "childIds": [
-        "node-military-aviation",
-        "node-technology-defense-drones"
+        "node-militaerische-luftfahrt",
+        "node-drohnen-und-luftabwehr",
+        "node-elektroinstallation"
       ],
       "discoveryIds": [
         "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea",
         "f006971e-f706-455d-bad7-d8b13a0c109c",
-        "156e6465-ca35-4363-8054-9c54736b498d"
+        "156e6465-ca35-4363-8054-9c54736b498d",
+        "d52cffb7-9e98-406a-999e-246414b5d3e1"
       ],
-      "aliases": [],
+      "aliases": [
+        "Technology and Defense"
+      ],
       "keywords": [
-        "Kampfjet",
+        "Kampfjets",
+        "Drohnen",
         "Avionik",
-        "Drohnenabwehr",
-        "Jettrainer",
-        "Jak-130M"
+        "Luftabwehr",
+        "Elektroinstallation",
+        "IP21"
       ],
-      "confidence": 0.93
+      "confidence": 0.9
     },
     {
-      "id": "node-military-aviation",
+      "id": "node-militaerische-luftfahrt",
       "title": "Militärische Luftfahrt",
       "kind": "topic",
-      "description": "Details zu modernen Kampfjets wie der Jak-130M mit verbesserter Avionik und erweitertem Waffenarsenal für die Drohnenbekämpfung.",
-      "parentId": "node-technology-and-defense",
+      "description": "Moderne Kampfjets mit verbesserter Avionik und neuen Waffensystemen zur Bekämpfung von Kampfdrohnen.",
+      "parentId": "node-technologie-und-verteidigung",
       "childIds": [],
       "discoveryIds": [
         "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
@@ -596,18 +401,18 @@
       "aliases": [],
       "keywords": [
         "Jak-130M",
-        "Jettrainer",
+        "Kampfjet",
         "Avionik",
         "Drohnenabwehr"
       ],
       "confidence": 0.95
     },
     {
-      "id": "node-technology-defense-drones",
-      "title": "Drohnen in Verteidigung und Militär",
+      "id": "node-drohnen-und-luftabwehr",
+      "title": "Drohnen und Luftabwehr",
       "kind": "topic",
-      "description": "Der Einsatz moderner Drohnentechnologien in der militärischen Luftabwehr, inklusive autonomer Abfangdrohnen und FPV-Systeme in der Ukraine.",
-      "parentId": "node-technology-and-defense",
+      "description": "Einsatz autonomer und manuell gesteuerter Drohnen in der Militärtechnik, insbesondere in der Ukraine zur Luftverteidigung und Kampfunterstützung.",
+      "parentId": "node-technologie-und-verteidigung",
       "childIds": [],
       "discoveryIds": [
         "f006971e-f706-455d-bad7-d8b13a0c109c",
@@ -615,162 +420,96 @@
       ],
       "aliases": [
         "Militärdrohnen",
-        "unbemannte Luftfahrzeuge"
+        "Unbemannte Luftfahrzeuge"
       ],
       "keywords": [
         "Abfangdrohnen",
         "autonome Systeme",
-        "Luftverteidigung",
-        "unbemannte Luftfahrzeuge",
-        "militärische Anwendung",
-        "FPV",
-        "Drohnenkrieg",
-        "Ukraine"
+        "Luftabwehr",
+        "FPV-Drohnen",
+        "Militärische Anwendung"
       ],
       "confidence": 0.95
     },
     {
-      "id": "node-business-and-international-relations",
-      "title": "Wirtschaft und internationale Beziehungen",
-      "kind": "domain",
-      "description": "Internationale wirtschaftliche Hilfsmaßnahmen, EU-Unterstützung für die Ukraine, UN-Friedensappelle und globale politische Konflikte.",
-      "parentId": null,
-      "childIds": [
-        "node-international-support-and-conflict"
-      ],
-      "discoveryIds": [
-        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
-        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
-      ],
-      "aliases": [],
-      "keywords": [
-        "EU-Unterstützung",
-        "Ukraine",
-        "Sanktionen",
-        "UN",
-        "Frieden",
-        "Rekonstruktion"
-      ],
-      "confidence": 0.9
-    },
-    {
-      "id": "node-international-support-and-conflict",
-      "title": "Internationale Unterstützung und Konflikte",
+      "id": "node-elektroinstallation",
+      "title": "Elektroinstallation",
       "kind": "topic",
-      "description": "Programme und Aufrufe der Europäischen Union und der Vereinten Nationen zur Unterstützung der Ukraine und zur Friedensförderung.",
-      "parentId": "node-business-and-international-relations",
+      "description": "Sichere und praktische Steckdosentechnologien mit Feuchtigkeitsschutz für Innenräume.",
+      "parentId": "node-technologie-und-verteidigung",
       "childIds": [],
       "discoveryIds": [
-        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
-        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
+        "d52cffb7-9e98-406a-999e-246414b5d3e1"
       ],
       "aliases": [],
       "keywords": [
-        "Rekonstruktion",
-        "Waffenembargo",
-        "Frieden",
-        "humanitäre Hilfe",
-        "Kriegsfolgen"
+        "Feller Nevo",
+        "IP21",
+        "Nass-Steckdose",
+        "Innenbereich",
+        "Feuchtigkeitsschutz",
+        "Elektroinstallation"
       ],
       "confidence": 0.9
     },
     {
-      "id": "node-news-and-media",
-      "title": "Nachrichten und Medien",
+      "id": "node-design-und-einrichtung",
+      "title": "Design und Einrichtung",
       "kind": "domain",
-      "description": "Aktuelle Nachrichtenquellen mit Fokus auf Schweizer und internationale Themen aus Politik, Wirtschaft, Kultur und Gesellschaft.",
-      "parentId": null,
-      "childIds": [],
-      "discoveryIds": [
-        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
-        "489f404d-a8f4-495c-b09a-7fcf2221312e",
-        "de797c05-5dea-47ae-a48d-6ef5559e526e"
-      ],
-      "aliases": [
-        "Aktuelle Nachrichten"
-      ],
-      "keywords": [
-        "Schweiz",
-        "Politik",
-        "Wirtschaft",
-        "Kultur",
-        "Gesellschaft",
-        "Sport",
-        "Internationale Konflikte"
-      ],
-      "confidence": 0.95
-    },
-    {
-      "id": "node-paragliding",
-      "title": "Paragliding",
-      "kind": "subtopic",
-      "description": "Intensive Erfahrungen des Fliegens mit Paragleiten in den Alpen, speziell in Mayrhofen als Beispiel für Extremsport und Freizeitaktivität.",
-      "parentId": null,
-      "childIds": [],
-      "discoveryIds": [
-        "cb37f305-ff8f-4635-bd44-8c6469548484",
-        "03361564-75f6-47a8-ba9c-d69218313422",
-        "6054cf4b-a1bd-408f-908d-3ee05a1ebb33"
-      ],
-      "aliases": [
-        "Extremsport",
-        "Freizeit in den Alpen",
-        "Gleitschirmfliegen"
-      ],
-      "keywords": [
-        "Paragleiten",
-        "Gleitschirmfliegen",
-        "Alpen",
-        "Mayrhofen",
-        "Extremsport",
-        "Freizeit",
-        "Flugerlebnis",
-        "Thermikprognose",
-        "Thermikmodell",
-        "Windprognose"
-      ],
-      "confidence": 0.9
-    },
-    {
-      "id": "node-root-einrichtung",
-      "title": "Einrichtung",
-      "kind": "domain",
-      "description": "Knowledge about Einrichtung.",
+      "description": "Möbelstücke und praktische Haushaltseinrichtungen mit Fokus auf flexible Stauraumlösungen und Mobilität.",
       "parentId": null,
       "childIds": [
-        "node-node-root-einrichtung-mobel"
+        "node-moebel"
       ],
       "discoveryIds": [
+        "79fc9e0b-52f7-42cd-a473-a59119127b44",
         "f753a3cc-4216-4e76-b79f-d182c2b9413a"
       ],
-      "aliases": [],
-      "keywords": [],
+      "aliases": [
+        "Interior and Furniture"
+      ],
+      "keywords": [
+        "Küchenwagen",
+        "Holzwerkstoff",
+        "Stahlrahmen",
+        "Stauraum",
+        "Mobilität",
+        "vidaXL"
+      ],
       "confidence": 0.95
     },
     {
-      "id": "node-node-root-einrichtung-mobel",
+      "id": "node-moebel",
       "title": "Möbel",
       "kind": "topic",
-      "description": "Knowledge about Möbel.",
-      "parentId": "node-root-einrichtung",
+      "description": "Haushaltsmöbel mit robustem Design und vielseitigem Einsatz in Küche, Wohnzimmer und Bad.",
+      "parentId": "node-design-und-einrichtung",
       "childIds": [
-        "node-node-node-root-einrichtung-mobel-kuchenwagen"
+        "node-kuechenwagen"
       ],
       "discoveryIds": [
+        "79fc9e0b-52f7-42cd-a473-a59119127b44",
         "f753a3cc-4216-4e76-b79f-d182c2b9413a"
       ],
       "aliases": [],
-      "keywords": [],
+      "keywords": [
+        "Vintage",
+        "Stauraum",
+        "Servierwagen",
+        "Rollen",
+        "Hausmöbel"
+      ],
       "confidence": 0.95
     },
     {
-      "id": "node-node-node-root-einrichtung-mobel-kuchenwagen",
+      "id": "node-kuechenwagen",
       "title": "Küchenwagen",
       "kind": "subtopic",
-      "description": "Der Küchenwagen vereint Vintage-Design mit robustem Holzwerkstoff und Stahlrahmen für Stabilität und Feuchtigkeitsbeständigkeit.  Er bietet viel Stauraum und flexible Mobilität durch vier Rollen (zwei feststellbar) sowie verstellbare Füße, was ihn vielseitig in Küche, Wohnzimmer oder Bad einsetzbar macht.",
-      "parentId": "node-node-root-einrichtung-mobel",
+      "description": "Ein mobiler Küchenwagen mit robustem Holzwerkstoff und Stahlrahmen, ausgestattet mit feststellbaren Rollen und verstellbaren Füßen für flexible Nutzung.",
+      "parentId": "node-moebel",
       "childIds": [],
       "discoveryIds": [
+        "79fc9e0b-52f7-42cd-a473-a59119127b44",
         "f753a3cc-4216-4e76-b79f-d182c2b9413a"
       ],
       "aliases": [],
@@ -778,15 +517,591 @@
         "Küchenwagen",
         "Holzwerkstoff",
         "Stahlrahmen",
-        "Vintage",
         "Stauraum",
-        "Rollen",
-        "verstellbare Füße",
-        "mobiles Möbel",
-        "Kücheneinrichtung",
-        "vidaXL"
+        "Mobilität"
       ],
       "confidence": 0.95
+    },
+    {
+      "id": "node-3d-druck",
+      "title": "3D-Druck",
+      "kind": "domain",
+      "description": "Anwendungen und kreative Projekte im Bereich 3D-Druck für personalisierte Geschenke und Dekorationen.",
+      "parentId": null,
+      "childIds": [
+        "node-muttertag"
+      ],
+      "discoveryIds": [
+        "24ea02ed-81fa-442b-bcca-c5c81942a29e"
+      ],
+      "aliases": [],
+      "keywords": [
+        "3D-Druck",
+        "personalisierte Geschenke",
+        "Muttertag",
+        "Dekoration"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-muttertag",
+      "title": "Muttertag",
+      "kind": "topic",
+      "description": "Personalisierbare Geschenkideen wie 3D-gedruckte Dekorationen zum Muttertag zur Wertschätzung und Feier.",
+      "parentId": "node-3d-druck",
+      "childIds": [],
+      "discoveryIds": [
+        "24ea02ed-81fa-442b-bcca-c5c81942a29e"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Beste Mama",
+        "3D-Druck",
+        "Geschenk"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "node-internationales-und-politik",
+      "title": "Internationales und Politik",
+      "kind": "domain",
+      "description": "Globale politische Entwicklungen, Friedensappelle und wirtschaftliche Unterstützung mit Fokus auf Ukraine-Konflikt und europäische Union.",
+      "parentId": null,
+      "childIds": [
+        "node-eu-support-and-reconstruction",
+        "node-un-friedensappelle"
+      ],
+      "discoveryIds": [
+        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
+        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
+      ],
+      "aliases": [
+        "International Affairs and Politics"
+      ],
+      "keywords": [
+        "Ukraine",
+        "EU-Unterstützung",
+        "United Nations",
+        "Frieden",
+        "Rekonstruktion",
+        "Sanktionen"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-eu-support-and-reconstruction",
+      "title": "EU-Unterstützung und Rekonstruktion",
+      "kind": "topic",
+      "description": "Maßnahmen der Europäischen Union zur wirtschaftlichen und sozialen Unterstützung sowie Rekonstruktion in der Ukraine.",
+      "parentId": "node-internationales-und-politik",
+      "childIds": [],
+      "discoveryIds": [
+        "0cb6e053-095a-44db-aca4-1433f2a6c1a3"
+      ],
+      "aliases": [],
+      "keywords": [
+        "EU-Unterstützung",
+        "wirtschaftliche Hilfe",
+        "sozialer Support",
+        "Ukraine",
+        "Rekonstruktion"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-un-friedensappelle",
+      "title": "UN-Friedensappelle",
+      "kind": "topic",
+      "description": "Aufrufe der Vereinten Nationen zur Unterstützung des Friedens in der Ukraine und zur Verstärkung internationaler Sicherheit.",
+      "parentId": "node-internationales-und-politik",
+      "childIds": [],
+      "discoveryIds": [
+        "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "United Nations",
+        "Frieden",
+        "Ukraine-Konflikt",
+        "humanitäre Hilfe"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-root-heim-garten",
+      "title": "Heim & Garten",
+      "kind": "domain",
+      "description": "Knowledge about Heim & Garten.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-heim-garten-garten"
+      ],
+      "discoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.6
+    },
+    {
+      "id": "node-node-root-heim-garten-garten",
+      "title": "Garten",
+      "kind": "topic",
+      "description": "Knowledge about Garten.",
+      "parentId": "node-root-heim-garten",
+      "childIds": [
+        "node-node-node-root-heim-garten-garten-pools"
+      ],
+      "discoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.6
+    },
+    {
+      "id": "node-node-node-root-heim-garten-garten-pools",
+      "title": "Pools",
+      "kind": "subtopic",
+      "description": "Eine Frau wünschte sich einen Pool, der erfolgreich hinter einer Terrasse installiert wurde. Diese kompakte Pool-Lösung zeigt, wie man auf engstem Raum eine Wasserstelle schaffen kann.",
+      "parentId": "node-node-root-heim-garten-garten",
+      "childIds": [],
+      "discoveryIds": [
+        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
+      ],
+      "aliases": [],
+      "keywords": [
+        "TikTok",
+        "video",
+        "entertainment",
+        "short clip",
+        "social media"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "id": "node-root-comedy",
+      "title": "comedy",
+      "kind": "domain",
+      "description": "Knowledge about comedy.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-comedy-streetcomedy"
+      ],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-node-root-comedy-streetcomedy",
+      "title": "Streetcomedy",
+      "kind": "topic",
+      "description": "Knowledge about Streetcomedy.",
+      "parentId": "node-root-comedy",
+      "childIds": [
+        "node-node-node-root-comedy-streetcomedy-tiktok"
+      ],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-node-node-root-comedy-streetcomedy-tiktok",
+      "title": "TikTok",
+      "kind": "subtopic",
+      "description": "Das Video zeigt eine Streetcomedy-Szene, produziert von @SmileBright und geteilt von DerAgent🕵️‍♂️. Es ist viral auf TikTok verbreitet und nutzt humorvolle Elemente zur Unterhaltung.",
+      "parentId": "node-node-root-comedy-streetcomedy",
+      "childIds": [],
+      "discoveryIds": [
+        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
+      ],
+      "aliases": [],
+      "keywords": [
+        "TikTok",
+        "short-form video",
+        "social media",
+        "engagement",
+        "digital content"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-root-freizeit-unterhaltung",
+      "title": "Freizeit & Unterhaltung",
+      "kind": "domain",
+      "description": "Knowledge about Freizeit & Unterhaltung.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-freizeit-unterhaltung-haustiere"
+      ],
+      "discoveryIds": [
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.6
+    },
+    {
+      "id": "node-node-root-freizeit-unterhaltung-haustiere",
+      "title": "Haustiere",
+      "kind": "topic",
+      "description": "Knowledge about Haustiere.",
+      "parentId": "node-root-freizeit-unterhaltung",
+      "childIds": [
+        "node-node-node-root-freizeit-unterhaltung-haustiere-hundeverhalten"
+      ],
+      "discoveryIds": [
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.6
+    },
+    {
+      "id": "node-node-node-root-freizeit-unterhaltung-haustiere-hundeverhalten",
+      "title": "Hundeverhalten",
+      "kind": "subtopic",
+      "description": "Ein TikTok-Video zeigt einen Hund, der als Blogger dargestellt wird und im Fokus eines aktuellen Trends steht. Das Video verwendet Hashtags wie #собака (Hund) und #тренд (Trend), was die wachsende Beliebtheit von Haustieren in sozialen Medien unterstreicht.",
+      "parentId": "node-node-root-freizeit-unterhaltung-haustiere",
+      "childIds": [],
+      "discoveryIds": [
+        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+      ],
+      "aliases": [],
+      "keywords": [
+        "TikTok",
+        "video",
+        "entertainment",
+        "social media",
+        "short video"
+      ],
+      "confidence": 0.6
+    },
+    {
+      "id": "node-root-pets",
+      "title": "pets",
+      "kind": "domain",
+      "description": "Knowledge about pets.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-pets-cats"
+      ],
+      "discoveryIds": [
+        "3048920b-c274-42f8-8025-5360a982ab4c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.8
+    },
+    {
+      "id": "node-node-root-pets-cats",
+      "title": "cats",
+      "kind": "topic",
+      "description": "Knowledge about cats.",
+      "parentId": "node-root-pets",
+      "childIds": [
+        "node-node-node-root-pets-cats-kitten-behavior"
+      ],
+      "discoveryIds": [
+        "3048920b-c274-42f8-8025-5360a982ab4c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.8
+    },
+    {
+      "id": "node-node-node-root-pets-cats-kitten-behavior",
+      "title": "kitten behavior",
+      "kind": "subtopic",
+      "description": "Dieses Video zeigt sieben Kätzchen, die gleichzeitig miauen und \"sprechen\" – ein überaus niedliches Schauspiel. Die Kätzchen stammen von zwei Geschwister-Mutterkatzen und leben im Garten der Großmutter des Uploaders.",
+      "parentId": "node-node-root-pets-cats",
+      "childIds": [],
+      "discoveryIds": [
+        "3048920b-c274-42f8-8025-5360a982ab4c"
+      ],
+      "aliases": [],
+      "keywords": [
+        "kittens",
+        "meowing",
+        "cats",
+        "cute animals",
+        "animal behavior"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "node-root-environmental-science",
+      "title": "environmental science",
+      "kind": "domain",
+      "description": "Knowledge about environmental science.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-environmental-science-safety-and-risk-management",
+        "node-node-root-environmental-science-climate-change"
+      ],
+      "discoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
+        "39a36c46-5aa6-4111-a75f-adba6f78262f"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-environmental-science-safety-and-risk-management",
+      "title": "safety and risk management",
+      "kind": "topic",
+      "description": "Knowledge about safety and risk management.",
+      "parentId": "node-root-environmental-science",
+      "childIds": [
+        "node-node-node-root-environmental-science-safety-and-risk-management-human-error"
+      ],
+      "discoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-environmental-science-safety-and-risk-management-human-error",
+      "title": "human error",
+      "kind": "subtopic",
+      "description": "Der Artikel analysiert umfassend die Ursachen von Unfällen und Störfällen in verschiedenen Industriebereichen, wobei menschliches Fehlverhalten als der zentrale Risikofaktor hervorgehoben wird. Statistiken zeigen, dass über 50 % der Unfälle auf menschliches Versagen zurückzuführen sind, während technische Mängel seltener verantwortlich sind. Besonders in Bereichen wie Luftfahrt, Chemie, Transport und Lagerung wird die Bedeutung der Sicherheit durch bewussten Umgang mit gefährlichen Gütern betont. Der Bericht beschreibt zudem konkrete Beispiele wie die Piper Alpha-Katastrophe und den Chemieunfall in Schweizerhalle, welche gravierende Umwelt- und Sachschäden durch menschliches Fehlverhalten verursachten. Abschließend werden Forderungen für präventive Maßnahmen, Organisationsstrukturen und Überprüfungen zur Verbesserung der Sicherheit in Industriebetrieben diskutiert.",
+      "parentId": "node-node-root-environmental-science-safety-and-risk-management",
+      "childIds": [],
+      "discoveryIds": [
+        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244"
+      ],
+      "aliases": [],
+      "keywords": [
+        "menschliches Versagen",
+        "Unfälle",
+        "Störfälle",
+        "Sicherheitsorganisation",
+        "Piper Alpha",
+        "Schweizerhalle",
+        "Umweltschäden",
+        "Industriesicherheit",
+        "Fehlerprävention",
+        "Risikofaktor"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-root-cybersecurity",
+      "title": "Cybersecurity",
+      "kind": "domain",
+      "description": "Knowledge about Cybersecurity.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-cybersecurity-human-factors-in-security"
+      ],
+      "discoveryIds": [
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-root-cybersecurity-human-factors-in-security",
+      "title": "Human Factors in Security",
+      "kind": "topic",
+      "description": "Knowledge about Human Factors in Security.",
+      "parentId": "node-root-cybersecurity",
+      "childIds": [
+        "node-node-node-root-cybersecurity-human-factors-in-security-awareness"
+      ],
+      "discoveryIds": [
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-root-cybersecurity-human-factors-in-security-awareness",
+      "title": "Awareness",
+      "kind": "subtopic",
+      "description": "Menschliches Verhalten zählt zu den wichtigsten Risiken der Cybersicherheit. Awareness und gezielte Prävention reduzieren vermeidbare Sicherheitsvorfälle.",
+      "parentId": "node-node-root-cybersecurity-human-factors-in-security",
+      "childIds": [],
+      "discoveryIds": [
+        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+      ],
+      "aliases": [],
+      "keywords": [
+        "menschlicher Faktor",
+        "Cybersicherheit",
+        "Swiss Cyber Storm 2023",
+        "Verhaltensrisiken",
+        "Cybersicherheitsprobleme"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-root-statistics",
+      "title": "statistics",
+      "kind": "domain",
+      "description": "Knowledge about statistics.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-statistics-risk-analysis"
+      ],
+      "discoveryIds": [
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-node-root-statistics-risk-analysis",
+      "title": "risk analysis",
+      "kind": "topic",
+      "description": "Knowledge about risk analysis.",
+      "parentId": "node-root-statistics",
+      "childIds": [
+        "node-node-node-root-statistics-risk-analysis-human-error"
+      ],
+      "discoveryIds": [
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-node-node-root-statistics-risk-analysis-human-error",
+      "title": "human error",
+      "kind": "subtopic",
+      "description": "Diese Suchanfrage bei Google beschäftigt sich mit der Statistik von Risiken im Zusammenhang mit Vorfällen, die durch menschliches Versagen verursacht werden, sowie deren Wahrscheinlichkeiten.",
+      "parentId": "node-node-root-statistics-risk-analysis",
+      "childIds": [],
+      "discoveryIds": [
+        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Statistik",
+        "Risiko",
+        "menschliches Versagen",
+        "Vorfall",
+        "Wahrscheinlichkeit",
+        "Risikoanalyse"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "node-root-arbeitswelt",
+      "title": "Arbeitswelt",
+      "kind": "domain",
+      "description": "Knowledge about Arbeitswelt.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-arbeitswelt-arbeitssicherheit"
+      ],
+      "discoveryIds": [
+        "1f4e8525-9de2-432d-a284-06faaa910206"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-arbeitswelt-arbeitssicherheit",
+      "title": "Arbeitssicherheit",
+      "kind": "topic",
+      "description": "Knowledge about Arbeitssicherheit.",
+      "parentId": "node-root-arbeitswelt",
+      "childIds": [
+        "node-node-node-root-arbeitswelt-arbeitssicherheit-menschliches-versagen"
+      ],
+      "discoveryIds": [
+        "1f4e8525-9de2-432d-a284-06faaa910206"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-arbeitswelt-arbeitssicherheit-menschliches-versagen",
+      "title": "menschliches Versagen",
+      "kind": "subtopic",
+      "description": "Dieser Artikel thematisiert die Bedeutung des menschlichen Faktors in der Arbeitssicherheit. Es wird aufgezeigt, dass zwischen 75 und 95 % aller Arbeitsunfälle durch menschliches Versagen verursacht werden. Die Analyse zeigt, dass technische Mängel oder risikoreiches Arbeitsumfeld seltener die Ursache sind, während organisatorische Fehler und unsicheres Verhalten deutlich häufiger zu Unfällen führen. Diese Erkenntnisse werden auch statistisch untermauert.",
+      "parentId": "node-node-root-arbeitswelt-arbeitssicherheit",
+      "childIds": [],
+      "discoveryIds": [
+        "1f4e8525-9de2-432d-a284-06faaa910206"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Arbeitssicherheit",
+        "menschliches Versagen",
+        "Unfallursachen",
+        "Sicherheitsverhalten",
+        "organisatorische Fehler"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-root-occupational-safety",
+      "title": "Occupational Safety",
+      "kind": "domain",
+      "description": "Knowledge about Occupational Safety.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-occupational-safety-workplace-accidents"
+      ],
+      "discoveryIds": [
+        "09b41da5-33f3-4826-9f99-af9aa429b36c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-root-occupational-safety-workplace-accidents",
+      "title": "Workplace Accidents",
+      "kind": "topic",
+      "description": "Knowledge about Workplace Accidents.",
+      "parentId": "node-root-occupational-safety",
+      "childIds": [
+        "node-node-node-root-occupational-safety-workplace-accidents-human-error"
+      ],
+      "discoveryIds": [
+        "09b41da5-33f3-4826-9f99-af9aa429b36c"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-root-occupational-safety-workplace-accidents-human-error",
+      "title": "Human Error",
+      "kind": "subtopic",
+      "description": "Menschliches Versagen verursacht 80–90 % der Arbeitsunfälle. Der Artikel präsentiert wichtige Statistiken und beleuchtet die Ursachen dieser sicherheitsrelevanten Probleme.",
+      "parentId": "node-node-root-occupational-safety-workplace-accidents",
+      "childIds": [],
+      "discoveryIds": [
+        "09b41da5-33f3-4826-9f99-af9aa429b36c"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Arbeitsunfälle",
+        "menschliches Versagen",
+        "Unfallstatistik",
+        "Sicherheit",
+        "Arbeitsplatzunfälle"
+      ],
+      "confidence": 0.9
     },
     {
       "id": "node-root-investing",
@@ -1029,215 +1344,444 @@
         "travel ideas"
       ],
       "confidence": 0.9
+    },
+    {
+      "id": "node-node-root-environmental-science-climate-change",
+      "title": "climate change",
+      "kind": "topic",
+      "description": "Knowledge about climate change.",
+      "parentId": "node-root-environmental-science",
+      "childIds": [
+        "node-node-node-root-environmental-science-climate-change-climate-science"
+      ],
+      "discoveryIds": [
+        "39a36c46-5aa6-4111-a75f-adba6f78262f"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-environmental-science-climate-change-climate-science",
+      "title": "climate science",
+      "kind": "subtopic",
+      "description": "Le rapport de synthèse AR6 de 2023, publié par le Groupe d'experts intergouvernemental sur l'évolution du climat (GIEC), présente un résumé consolidé des connaissances scientifiques actuelles sur le changement climatique, ses impacts, et les stratégies possibles pour atténuer ses effets ainsi que pour s'adapter aux transformations en cours.",
+      "parentId": "node-node-root-environmental-science-climate-change",
+      "childIds": [],
+      "discoveryIds": [
+        "39a36c46-5aa6-4111-a75f-adba6f78262f"
+      ],
+      "aliases": [],
+      "keywords": [
+        "climate change",
+        "IPCC",
+        "AR6 report",
+        "environment",
+        "mitigation",
+        "adaptation",
+        "2023"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-root-earth-science",
+      "title": "Earth Science",
+      "kind": "domain",
+      "description": "Knowledge about Earth Science.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-earth-science-climate-change"
+      ],
+      "discoveryIds": [
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-earth-science-climate-change",
+      "title": "Climate Change",
+      "kind": "topic",
+      "description": "Knowledge about Climate Change.",
+      "parentId": "node-root-earth-science",
+      "childIds": [
+        "node-node-node-root-earth-science-climate-change-historical-climate-cycles"
+      ],
+      "discoveryIds": [
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-earth-science-climate-change-historical-climate-cycles",
+      "title": "Historical Climate Cycles",
+      "kind": "subtopic",
+      "description": "Earth's climate has experienced changes throughout history, including eight cycles of ice ages and warmer periods in the last 800,000 years. This article presents scientific evidence illustrating these climate variations.",
+      "parentId": "node-node-root-earth-science-climate-change",
+      "childIds": [],
+      "discoveryIds": [
+        "89df7ae0-1f83-497c-8066-bb39090b8a46"
+      ],
+      "aliases": [],
+      "keywords": [
+        "climate change",
+        "Earth",
+        "ice ages",
+        "global warming",
+        "historical climate cycles",
+        "NASA"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-root-general-news",
+      "title": "general news",
+      "kind": "domain",
+      "description": "Knowledge about general news.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-general-news-current-events"
+      ],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-root-general-news-current-events",
+      "title": "current events",
+      "kind": "topic",
+      "description": "Knowledge about current events.",
+      "parentId": "node-root-general-news",
+      "childIds": [
+        "node-node-node-root-general-news-current-events-economy",
+        "node-node-node-root-general-news-current-events-politics"
+      ],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3",
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-node-node-root-general-news-current-events-economy",
+      "title": "economy",
+      "kind": "subtopic",
+      "description": "BILD.de bietet die neuesten Nachrichten, Bilder und Videos aus verschiedenen Bereichen wie Nachrichten, Wirtschaft, Politik, Unterhaltung, Sport und Prominente.",
+      "parentId": "node-node-root-general-news-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "b072daa0-eea2-4e0d-a562-203fb318b5e3"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Nachrichten",
+        "Wirtschaft",
+        "Politik",
+        "Show",
+        "Sport",
+        "Promis"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "node-root-news-media",
+      "title": "news media",
+      "kind": "domain",
+      "description": "Knowledge about news media.",
+      "parentId": null,
+      "childIds": [
+        "node-node-root-news-media-regional-news"
+      ],
+      "discoveryIds": [
+        "489f404d-a8f4-495c-b09a-7fcf2221312e"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-root-news-media-regional-news",
+      "title": "regional news",
+      "kind": "topic",
+      "description": "Knowledge about regional news.",
+      "parentId": "node-root-news-media",
+      "childIds": [
+        "node-node-node-root-news-media-regional-news-switzerland"
+      ],
+      "discoveryIds": [
+        "489f404d-a8f4-495c-b09a-7fcf2221312e"
+      ],
+      "aliases": [],
+      "keywords": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-root-news-media-regional-news-switzerland",
+      "title": "Switzerland",
+      "kind": "subtopic",
+      "description": "watson ist eine Nachrichtenplattform für die Schweiz, die aktuelle Nachrichten, spannende Hintergründe und unterhaltsame Storys bietet. Nutzer erhalten hier die neuesten News und Trends, um stets informiert zu bleiben.",
+      "parentId": "node-node-root-news-media-regional-news",
+      "childIds": [],
+      "discoveryIds": [
+        "489f404d-a8f4-495c-b09a-7fcf2221312e"
+      ],
+      "aliases": [],
+      "keywords": [
+        "News",
+        "Schweiz",
+        "Nachrichten",
+        "Hintergründe",
+        "Storys",
+        "Trends"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "node-node-node-root-general-news-current-events-politics",
+      "title": "politics",
+      "kind": "subtopic",
+      "description": "Blick bietet aktuelle Nachrichten, Kommentare und Berichte aus verschiedenen Bereichen wie Wirtschaft, Politik, Sport, Kultur, Gesellschaft, Wissen und Lifestyle. Die Plattform hält Leser über wichtige Ereignisse in der Schweiz und international auf dem Laufenden.",
+      "parentId": "node-node-root-general-news-current-events",
+      "childIds": [],
+      "discoveryIds": [
+        "de797c05-5dea-47ae-a48d-6ef5559e526e"
+      ],
+      "aliases": [],
+      "keywords": [
+        "Nachrichten",
+        "Schweiz",
+        "Welt",
+        "Wirtschaft",
+        "Politik",
+        "Sport",
+        "Kultur",
+        "Gesellschaft",
+        "Wissen",
+        "Lifestyle"
+      ],
+      "confidence": 0.9
     }
   ],
   "relations": [
     {
-      "id": "relation-node-human-error-node-safety-and-risk-management-part-of",
-      "sourceId": "node-human-error",
-      "targetId": "node-safety-and-risk-management",
-      "kind": "part-of",
-      "strength": 0.98,
-      "reason": "Menschliches Versagen ist zentraler Risikofaktor im Sicherheitsmanagement.",
-      "evidenceDiscoveryIds": [
-        "77bdf4c1-49f8-46ae-b2ba-c7d5faf1d244",
-        "1f4e8525-9de2-432d-a284-06faaa910206"
-      ]
-    },
-    {
-      "id": "relation-node-industrial-and-occupational-safety-node-human-error-part-of",
-      "sourceId": "node-industrial-and-occupational-safety",
-      "targetId": "node-human-error",
-      "kind": "part-of",
-      "strength": 0.97,
-      "reason": "Arbeitssicherheit fokussiert auf menschliche Fehler und Organisation.",
-      "evidenceDiscoveryIds": [
-        "1f4e8525-9de2-432d-a284-06faaa910206"
-      ]
-    },
-    {
-      "id": "relation-node-egg-preparation-airfryer-node-airfryer-recipes-part-of",
-      "sourceId": "node-egg-preparation-airfryer",
-      "targetId": "node-airfryer-recipes",
+      "id": "relation-node-ernaehrungswissenschaft-node-kochen-und-ernaehrung-part-of",
+      "sourceId": "node-ernaehrungswissenschaft",
+      "targetId": "node-kochen-und-ernaehrung",
       "kind": "part-of",
       "strength": 0.95,
-      "reason": "Ei-Rezept ist spezifischer Teil der Airfryer-Küche.",
+      "reason": "Ernährungswissenschaft ist Teil der Koch- und Ernährungsdomäne.",
+      "evidenceDiscoveryIds": [
+        "0b87718a-19c3-4f08-9712-5adc9913a5f4",
+        "a56b02d3-e199-4393-8fcb-c6f5596f8122"
+      ]
+    },
+    {
+      "id": "relation-node-rezept-ei-im-airfryer-node-kochen-mit-airfryer-part-of",
+      "sourceId": "node-rezept-ei-im-airfryer",
+      "targetId": "node-kochen-mit-airfryer",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Das Ei-Rezept ist ein spezialisiertes Beispiel für Airfryer-Küche.",
       "evidenceDiscoveryIds": [
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
       ]
     },
     {
-      "id": "relation-node-climate-change-node-science-environmental-and-earth-part-of",
-      "sourceId": "node-climate-change",
-      "targetId": "node-science-environmental-and-earth",
+      "id": "relation-node-militaerische-luftfahrt-node-technologie-und-verteidigung-part-of",
+      "sourceId": "node-militaerische-luftfahrt",
+      "targetId": "node-technologie-und-verteidigung",
       "kind": "part-of",
       "strength": 0.95,
-      "reason": "Klimawandel ist Kernbereich der Umwelt- und Erdwissenschaften.",
-      "evidenceDiscoveryIds": [
-        "39a36c46-5aa6-4111-a75f-adba6f78262f",
-        "89df7ae0-1f83-497c-8066-bb39090b8a46"
-      ]
-    },
-    {
-      "id": "relation-node-military-aviation-node-technology-and-defense-part-of",
-      "sourceId": "node-military-aviation",
-      "targetId": "node-technology-and-defense",
-      "kind": "part-of",
-      "strength": 0.95,
-      "reason": "Militärische Luftfahrt ist Kernbereich der Technologie und Verteidigung.",
+      "reason": "Militärische Luftfahrt ist Teil der Technologie- und Verteidigungsdomäne.",
       "evidenceDiscoveryIds": [
         "b7d4c515-f2df-4dc5-81bf-5d08f845c4ea"
       ]
     },
     {
-      "id": "relation-node-cybersecurity-human-factors-node-human-error-part-of",
-      "sourceId": "node-cybersecurity-human-factors",
-      "targetId": "node-human-error",
+      "id": "relation-node-drohnen-und-luftabwehr-node-technologie-und-verteidigung-part-of",
+      "sourceId": "node-drohnen-und-luftabwehr",
+      "targetId": "node-technologie-und-verteidigung",
       "kind": "part-of",
-      "strength": 0.9,
-      "reason": "Menschliches Verhalten beeinflusst Cybersicherheit wesentlich.",
+      "strength": 0.95,
+      "reason": "Drohnenanwendungen sind ein wichtiger Bestandteil moderner Verteidigungstechnologie.",
       "evidenceDiscoveryIds": [
-        "2e4e0fc0-f2da-47b6-845c-e3e4c2924ddf"
+        "f006971e-f706-455d-bad7-d8b13a0c109c",
+        "156e6465-ca35-4363-8054-9c54736b498d"
       ]
     },
     {
-      "id": "relation-node-carbohydrates-node-nutrition-part-of",
-      "sourceId": "node-carbohydrates",
-      "targetId": "node-nutrition",
+      "id": "relation-node-moebel-node-design-und-einrichtung-part-of",
+      "sourceId": "node-moebel",
+      "targetId": "node-design-und-einrichtung",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Möbel sind Kernbestandteil der Einrichtung.",
+      "evidenceDiscoveryIds": [
+        "79fc9e0b-52f7-42cd-a473-a59119127b44"
+      ]
+    },
+    {
+      "id": "relation-node-kuechenwagen-node-moebel-part-of",
+      "sourceId": "node-kuechenwagen",
+      "targetId": "node-moebel",
+      "kind": "part-of",
+      "strength": 0.95,
+      "reason": "Küchenwagen sind spezialisierte Möbelstücke.",
+      "evidenceDiscoveryIds": [
+        "f753a3cc-4216-4e76-b79f-d182c2b9413a"
+      ]
+    },
+    {
+      "id": "relation-node-haustierpflege-node-haustiere-und-tierpflege-part-of",
+      "sourceId": "node-haustierpflege",
+      "targetId": "node-haustiere-und-tierpflege",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Kohlenhydrate sind wesentlicher Bestandteil der Ernährungswissenschaft.",
+      "reason": "Haustierpflege ist ein Teilbereich des Haustiere und Tierpflege Domains.",
+      "evidenceDiscoveryIds": [
+        "813a117a-45fa-4fab-b479-83b77688de3c"
+      ]
+    },
+    {
+      "id": "relation-node-katzen-und-verhalten-node-haustiere-und-tierpflege-part-of",
+      "sourceId": "node-katzen-und-verhalten",
+      "targetId": "node-haustiere-und-tierpflege",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Katzenverhalten ist ein zentrales Thema innerhalb der Haustier-Kenntnisse.",
+      "evidenceDiscoveryIds": [
+        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95"
+      ]
+    },
+    {
+      "id": "relation-node-katzchen-verhalten-node-katzen-und-verhalten-part-of",
+      "sourceId": "node-katzchen-verhalten",
+      "targetId": "node-katzen-und-verhalten",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Das Verhalten von Kätzchen ist ein spezifischer Unterbereich der Katzenkunde.",
+      "evidenceDiscoveryIds": [
+        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95"
+      ]
+    },
+    {
+      "id": "relation-node-schlafverhalten-katzen-node-katzen-und-verhalten-part-of",
+      "sourceId": "node-schlafverhalten-katzen",
+      "targetId": "node-katzen-und-verhalten",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Schlafverhalten ist ein weiteres spezielles Thema bei Katzen.",
+      "evidenceDiscoveryIds": [
+        "eac0675f-6b73-4cad-a187-68b02eeba64a"
+      ]
+    },
+    {
+      "id": "relation-node-kohlenhydrate-node-ernaehrungswissenschaft-part-of",
+      "sourceId": "node-kohlenhydrate",
+      "targetId": "node-ernaehrungswissenschaft",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Kohlenhydrate als Nährstoffthema sind Unterbereich von Ernährung.",
       "evidenceDiscoveryIds": [
         "0b87718a-19c3-4f08-9712-5adc9913a5f4"
       ]
     },
     {
-      "id": "relation-node-proteins-node-nutrition-part-of",
-      "sourceId": "node-proteins",
-      "targetId": "node-nutrition",
+      "id": "relation-node-proteinaufnahme-node-ernaehrungswissenschaft-part-of",
+      "sourceId": "node-proteinaufnahme",
+      "targetId": "node-ernaehrungswissenschaft",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Proteine gehören zu den zentralen Nährstoffen.",
+      "reason": "Proteinzufuhr ist ein weiterer Fokus der Ernährungswissenschaft.",
       "evidenceDiscoveryIds": [
         "a56b02d3-e199-4393-8fcb-c6f5596f8122"
       ]
     },
     {
-      "id": "relation-node-airfryer-recipes-node-cooking-and-recipes-part-of",
-      "sourceId": "node-airfryer-recipes",
-      "targetId": "node-cooking-and-recipes",
+      "id": "relation-node-kochen-mit-airfryer-node-kochen-und-ernaehrung-part-of",
+      "sourceId": "node-kochen-mit-airfryer",
+      "targetId": "node-kochen-und-ernaehrung",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Airfryer-Rezepte sind Teilbereich vom Kochen.",
+      "reason": "Rezepte aus der Heißluftfritteuse sind ein praktischer Teil der Kochthematik.",
       "evidenceDiscoveryIds": [
         "e4aefa21-2e6b-404e-bc01-2828ce1d665f",
         "2b5dfe97-ff9c-4847-a286-c339d24aedf3"
       ]
     },
     {
-      "id": "relation-node-international-support-and-conflict-node-business-and-international-relations-part-of",
-      "sourceId": "node-international-support-and-conflict",
-      "targetId": "node-business-and-international-relations",
+      "id": "relation-node-gleitschirmfliegen-node-freizeit-und-extremsport-part-of",
+      "sourceId": "node-gleitschirmfliegen",
+      "targetId": "node-freizeit-und-extremsport",
       "kind": "part-of",
       "strength": 0.9,
-      "reason": "Internationale Unterstützung und Konflikte sind Teil von Wirtschaft und internationalen Beziehungen.",
+      "reason": "Gleitschirmfliegen ist ein beliebter Extremsport und Freizeitaktivität.",
       "evidenceDiscoveryIds": [
-        "0cb6e053-095a-44db-aca4-1433f2a6c1a3",
+        "cb37f305-ff8f-4635-bd44-8c6469548484"
+      ]
+    },
+    {
+      "id": "relation-node-sportausruestung-node-gleitschirmfliegen-part-of",
+      "sourceId": "node-sportausruestung",
+      "targetId": "node-gleitschirmfliegen",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Die Ausrüstung ist essenziell für sicheres Gleitschirmfliegen.",
+      "evidenceDiscoveryIds": [
+        "6054cf4b-a1bd-408f-908d-3ee05a1ebb33"
+      ]
+    },
+    {
+      "id": "relation-node-elektroinstallation-node-technologie-und-verteidigung-part-of",
+      "sourceId": "node-elektroinstallation",
+      "targetId": "node-technologie-und-verteidigung",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "Elektroinstallationskomponenten erweitern den Technikbereich.",
+      "evidenceDiscoveryIds": [
+        "d52cffb7-9e98-406a-999e-246414b5d3e1"
+      ]
+    },
+    {
+      "id": "relation-node-eu-support-and-reconstruction-node-internationales-und-politik-part-of",
+      "sourceId": "node-eu-support-and-reconstruction",
+      "targetId": "node-internationales-und-politik",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "EU-Hilfen sind Teil internationaler Politik bezüglich Ukraine.",
+      "evidenceDiscoveryIds": [
+        "0cb6e053-095a-44db-aca4-1433f2a6c1a3"
+      ]
+    },
+    {
+      "id": "relation-node-un-friedensappelle-node-internationales-und-politik-part-of",
+      "sourceId": "node-un-friedensappelle",
+      "targetId": "node-internationales-und-politik",
+      "kind": "part-of",
+      "strength": 0.9,
+      "reason": "UN-Aufrufe sind essenziell im internationalen Konfliktmanagement.",
+      "evidenceDiscoveryIds": [
         "c0c3d18d-9efb-42de-b910-1ad03aadc93d"
       ]
     },
     {
-      "id": "relation-node-quick-meals-node-airfryer-recipes-part-of",
-      "sourceId": "node-quick-meals",
-      "targetId": "node-airfryer-recipes",
-      "kind": "part-of",
-      "strength": 0.85,
-      "reason": "Schnelle Gerichte sind Beispiele für Airfryer-Rezepte.",
-      "evidenceDiscoveryIds": [
-        "e4aefa21-2e6b-404e-bc01-2828ce1d665f"
-      ]
-    },
-    {
-      "id": "relation-node-cats-node-pets-part-of",
-      "sourceId": "node-cats",
-      "targetId": "node-pets",
-      "kind": "part-of",
-      "strength": 0.85,
-      "reason": "Katzen sind eine wichtige Haustierkategorie.",
-      "evidenceDiscoveryIds": [
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
-      ]
-    },
-    {
-      "id": "relation-node-kitten-behavior-node-cats-part-of",
-      "sourceId": "node-kitten-behavior",
-      "targetId": "node-cats",
-      "kind": "part-of",
-      "strength": 0.85,
-      "reason": "Kätzchen-Verhalten ist Spezialgebiet innerhalb Katzenkunde.",
-      "evidenceDiscoveryIds": [
-        "dfc2afab-e97a-4e1c-9376-55d8f85d6e95",
-        "3048920b-c274-42f8-8025-5360a982ab4c",
-        "2e9e5d14-0259-4567-92aa-51ae573ac96c"
-      ]
-    },
-    {
-      "id": "relation-node-statistics-and-risk-analysis-node-safety-and-risk-management-part-of",
-      "sourceId": "node-statistics-and-risk-analysis",
-      "targetId": "node-safety-and-risk-management",
+      "id": "relation-node-muttertag-node-3d-druck-part-of",
+      "sourceId": "node-muttertag",
+      "targetId": "node-3d-druck",
       "kind": "part-of",
       "strength": 0.75,
-      "reason": "Statistische Risikoanalyse ist Bestandteil des Risikomanagements.",
+      "reason": "Muttertags-Dekorationen sind Anwendungsbeispiele für 3D-Druck.",
       "evidenceDiscoveryIds": [
-        "deddc4df-5ba3-476e-9c65-f6507fa0cb2d"
-      ]
-    },
-    {
-      "id": "relation-node-short-videos-node-entertainment-part-of",
-      "sourceId": "node-short-videos",
-      "targetId": "node-entertainment",
-      "kind": "part-of",
-      "strength": 0.7,
-      "reason": "Kurze Videos sind ein Unterthema der Unterhaltung.",
-      "evidenceDiscoveryIds": [
-        "e4e805e8-bb92-43a4-bbef-92ebf71ac885"
-      ]
-    },
-    {
-      "id": "relation-node-digital-engagement-node-short-videos-part-of",
-      "sourceId": "node-digital-engagement",
-      "targetId": "node-short-videos",
-      "kind": "part-of",
-      "strength": 0.7,
-      "reason": "Digitale Interaktion ist Bestandteil kurzer Videoformate.",
-      "evidenceDiscoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc"
-      ]
-    },
-    {
-      "id": "relation-node-video-content-node-social-media-part-of",
-      "sourceId": "node-video-content",
-      "targetId": "node-social-media",
-      "kind": "part-of",
-      "strength": 0.7,
-      "reason": "Videoinhalte sind ein Teilbereich sozialer Medien.",
-      "evidenceDiscoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
-        "3b471827-69b2-4d22-ad51-f4fa8888e991"
-      ]
-    },
-    {
-      "id": "relation-node-social-media-node-culture-part-of",
-      "sourceId": "node-social-media",
-      "targetId": "node-culture",
-      "kind": "part-of",
-      "strength": 0.7,
-      "reason": "Soziale Medien sind Teil moderner Kultur.",
-      "evidenceDiscoveryIds": [
-        "3ec73c34-f5b3-4332-8a6a-1e1f5eaa27cc",
-        "3b471827-69b2-4d22-ad51-f4fa8888e991"
+        "24ea02ed-81fa-442b-bcca-c5c81942a29e"
       ]
     }
   ]

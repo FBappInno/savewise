@@ -5,10 +5,12 @@ import { useAppSettings } from "@/providers/app-settings-provider";
 import { universeTheme } from "@/theme/universe-theme";
 
 export default function TabLayout() {
-  const { t } = useAppSettings();
+  const { t } =
+    useAppSettings();
 
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
 
@@ -24,73 +26,89 @@ export default function TabLayout() {
 
         tabBarInactiveTintColor:
           universeTheme.colors
-            .textSecondary,
+            .textMuted,
 
         tabBarStyle: {
-          backgroundColor: "#050D19",
+          backgroundColor:
+            universeTheme.colors
+              .backgroundElevated,
+
           borderTopColor:
             universeTheme.colors
               .border,
+
           borderTopWidth: 1,
-          height: 86,
-          paddingBottom: 20,
+
+          height: 84,
+
+          paddingBottom: 21,
+
           paddingTop: 8,
         },
 
         tabBarLabelStyle: {
           fontSize: 10,
-          fontWeight: "600",
+          fontWeight: "700",
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: t("tabs.home"),
+          title: "Universum",
 
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Ionicons
               color={color}
-              name="home-outline"
+              name={
+                focused
+                  ? "planet"
+                  : "planet-outline"
+              }
               size={size}
             />
           ),
         }}
       />
 
+      {/*
+       * Das alte Bibliotheks-/Universumsregister bleibt
+       * technisch als Route vorhanden, wird aber nicht mehr
+       * in der Tab-Navigation angezeigt.
+       *
+       * Dadurch verlieren wir vorerst keinen alten Code.
+       * Später ersetzen wir library.tsx durch eine reine
+       * Discovery-Listenansicht oder löschen die Route.
+       */}
       <Tabs.Screen
         name="library"
         options={{
-          title: "Universum",
-
-          tabBarIcon: ({
-            color,
-            size,
-          }) => (
-            <Ionicons
-              color={color}
-              name="git-network-outline"
-              size={size}
-            />
-          ),
+          href: null,
         }}
       />
 
       <Tabs.Screen
         name="insights"
         options={{
-          title: t("tabs.brain"),
+          title:
+            t("tabs.brain"),
 
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Ionicons
               color={color}
-              name="hardware-chip-outline"
+              name={
+                focused
+                  ? "hardware-chip"
+                  : "hardware-chip-outline"
+              }
               size={size}
             />
           ),
@@ -100,15 +118,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="research"
         options={{
-          title: t("tabs.research"),
+          title:
+            t("tabs.research"),
 
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Ionicons
               color={color}
-              name="telescope-outline"
+              name={
+                focused
+                  ? "telescope"
+                  : "telescope-outline"
+              }
               size={size}
             />
           ),
@@ -118,15 +142,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: t("tabs.settings"),
+          title:
+            t("tabs.settings"),
 
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Ionicons
               color={color}
-              name="settings-outline"
+              name={
+                focused
+                  ? "settings"
+                  : "settings-outline"
+              }
               size={size}
             />
           ),
