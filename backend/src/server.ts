@@ -130,8 +130,10 @@ app.use(
     ],
 
     allowedHeaders: [
-      "Content-Type",
+      "Accept",
       "Authorization",
+      "Content-Type",
+      "X-SaveWise-Installation-Id",
     ],
   }),
 );
