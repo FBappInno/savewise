@@ -9,6 +9,36 @@ export type DiscoverySource =
   | "tiktok"
   | "web";
 
+export type DiscoveryCaptureType =
+  | "link"
+  | "note"
+  | "pdf"
+  | "image"
+  | "audio";
+
+export type DiscoveryAttachment = {
+  id: string;
+
+  captureType:
+    | "pdf"
+    | "image"
+    | "audio";
+
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+
+  /*
+   * Pfad innerhalb des privaten
+   * Dropbox-App-Ordners.
+   */
+  storagePath: string;
+
+  pageCount?: number;
+  width?: number;
+  height?: number;
+};
+
 export type DiscoveryCategory =
   | "technology"
   | "finance"
@@ -23,7 +53,9 @@ export type DiscoveryCategory =
   | "other";
 
 export interface DiscoveryClassification {
-  primaryCategory: DiscoveryCategory;
+  primaryCategory:
+    DiscoveryCategory;
+
   secondaryCategory: string;
   topic: string;
   subtopics: string[];
@@ -32,51 +64,55 @@ export interface DiscoveryClassification {
 export interface Discovery {
   id: string;
 
-  /**
-   * Noch optional, solange ältere lokale und entfernte
-   * Discoveries migriert werden. Fehlt der Wert, wird die
-   * Discovery als privater Workspace behandelt.
-   */
   workspaceId?: WorkspaceId;
+
+  /*
+   * Bestehende Discoveries ohne Wert
+   * werden als Link behandelt.
+   */
+  captureType?:
+    DiscoveryCaptureType;
+
+  attachment?:
+    DiscoveryAttachment;
 
   source: DiscoverySource;
 
   url?: string;
 
   title: string;
-
   improvedTitle?: string;
-
   description?: string;
-
   summary?: string;
-
   thumbnailUrl?: string;
-
   author?: string;
-
   publishedAt?: string;
 
-  classification?: DiscoveryClassification;
+  classification?:
+    DiscoveryClassification;
 
   keywords: string[];
-
   language?: string;
-
   confidence?: number;
-
   topics: string[];
 
   createdAt: string;
-
   updatedAt: string;
-
   savedAtLabel: string;
 }
 
 export type DiscoveryUpdate = {
   title: string;
+
   summary: string;
-  classification: DiscoveryClassification;
-  language?: "de" | "en" | "fr" | "it" | "es";
+
+  classification:
+    DiscoveryClassification;
+
+  language?:
+    | "de"
+    | "en"
+    | "fr"
+    | "it"
+    | "es";
 };

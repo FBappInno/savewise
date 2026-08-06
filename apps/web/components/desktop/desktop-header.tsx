@@ -13,20 +13,16 @@ import {
   useAccount,
 } from "@/providers/account-provider";
 
-import {
-  useCapture,
-} from "@/providers/capture-provider";
-
 const pageInformation = {
   "/universe": {
     eyebrow:
-      "WISSENSNETZWERK",
+      "WISSENSUNIVERSUM",
 
     title:
       "Universum",
 
     description:
-      "Deine Inhalte, Domänen und Verbindungen.",
+      "Erkunde deine Domänen, Themen und gespeicherten Inhalte.",
   },
 
   "/knowledge": {
@@ -75,11 +71,6 @@ export function DesktopHeader() {
     logout,
   } =
     useAccount();
-
-  const {
-    openCapture,
-  } =
-    useCapture();
 
   const information =
     Object.entries(
@@ -133,20 +124,6 @@ export function DesktopHeader() {
 
       <div className="header-actions">
         <WorkspaceSwitcher />
-
-        <button
-          className="capture-button"
-          onClick={
-            openCapture
-          }
-          type="button"
-        >
-          <span>
-            +
-          </span>
-
-          Erfassen
-        </button>
 
         <div className="account-menu">
           <div className="account-avatar">

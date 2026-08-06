@@ -10,6 +10,10 @@ import {
 } from "@/components/capture/capture-type-grid";
 
 import {
+  FileCaptureForm,
+} from "@/components/capture/file-capture-form";
+
+import {
   LinkCaptureForm,
 } from "@/components/capture/link-capture-form";
 
@@ -42,13 +46,16 @@ export function CaptureModal() {
 
   useEffect(() => {
     if (!isOpen) {
-      setSelectedType(null);
+      setSelectedType(
+        null,
+      );
     }
   }, [isOpen]);
 
   useEffect(() => {
     function handleKeyDown(
-      event: KeyboardEvent,
+      event:
+        KeyboardEvent,
     ) {
       if (
         event.key ===
@@ -82,6 +89,12 @@ export function CaptureModal() {
 
   function handleComplete() {
     closeCapture();
+  }
+
+  function handleBack() {
+    setSelectedType(
+      null,
+    );
   }
 
   return (
@@ -140,11 +153,9 @@ export function CaptureModal() {
         {selectedType ===
         "note" ? (
           <QuickNoteForm
-            onBack={() => {
-              setSelectedType(
-                null,
-              );
-            }}
+            onBack={
+              handleBack
+            }
             onComplete={
               handleComplete
             }
@@ -154,11 +165,35 @@ export function CaptureModal() {
         {selectedType ===
         "link" ? (
           <LinkCaptureForm
-            onBack={() => {
-              setSelectedType(
-                null,
-              );
-            }}
+            onBack={
+              handleBack
+            }
+            onComplete={
+              handleComplete
+            }
+          />
+        ) : null}
+
+        {selectedType ===
+        "pdf" ? (
+          <FileCaptureForm
+            captureType="pdf"
+            onBack={
+              handleBack
+            }
+            onComplete={
+              handleComplete
+            }
+          />
+        ) : null}
+
+        {selectedType ===
+        "image" ? (
+          <FileCaptureForm
+            captureType="image"
+            onBack={
+              handleBack
+            }
             onComplete={
               handleComplete
             }

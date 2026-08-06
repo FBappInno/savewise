@@ -8,44 +8,88 @@ import type {
 const options:
 CaptureOption[] = [
   {
-    type: "link",
-    title: "Link speichern",
+    type:
+      "link",
+
+    title:
+      "Link speichern",
+
     description:
       "Webseiten, Videos, Beiträge und Online-Quellen analysieren.",
-    icon: "↗",
-    available: true,
+
+    icon:
+      "↗",
+
+    available:
+      true,
   },
+
   {
-    type: "note",
-    title: "Schnellnotiz",
+    type:
+      "note",
+
+    title:
+      "Schnellnotiz",
+
     description:
       "Gedanken, Ideen und Beobachtungen sofort festhalten.",
-    icon: "✎",
-    available: true,
+
+    icon:
+      "✎",
+
+    available:
+      true,
   },
+
   {
-    type: "pdf",
-    title: "PDF importieren",
+    type:
+      "pdf",
+
+    title:
+      "PDF importieren",
+
     description:
       "Dokumente analysieren und mit deinem Wissen verbinden.",
-    icon: "▤",
-    available: false,
+
+    icon:
+      "▤",
+
+    available:
+      true,
   },
+
   {
-    type: "image",
-    title: "Bild importieren",
+    type:
+      "image",
+
+    title:
+      "Bild importieren",
+
     description:
       "Fotos, Screenshots und Whiteboards erfassen.",
-    icon: "▧",
-    available: false,
+
+    icon:
+      "▧",
+
+    available:
+      true,
   },
+
   {
-    type: "audio",
-    title: "Sprache aufnehmen",
+    type:
+      "audio",
+
+    title:
+      "Sprache aufnehmen",
+
     description:
       "Gedanken einsprechen und automatisch strukturieren.",
-    icon: "◉",
-    available: false,
+
+    icon:
+      "◉",
+
+    available:
+      false,
   },
 ];
 
@@ -68,7 +112,9 @@ export function CaptureTypeGrid({
             disabled={
               !option.available
             }
-            key={option.type}
+            key={
+              option.type
+            }
             onClick={() => {
               onSelect(
                 option.type,

@@ -5,6 +5,10 @@ import {
 } from "react";
 
 import {
+  useDiscoveries,
+} from "@/providers/discovery-provider";
+
+import {
   useWorkspace,
 } from "@/providers/workspace-provider";
 
@@ -20,6 +24,12 @@ export function LinkCaptureForm({
   } =
     useWorkspace();
 
+  const {
+    importLink,
+    isImporting,
+  } =
+    useDiscoveries();
+
   const [
     url,
     setUrl,
@@ -27,44 +37,50 @@ export function LinkCaptureForm({
     useState("");
 
   const [
-    notes,
-    setNotes,
+    knowledgePath,
+    setKnowledgePath,
   ] =
     useState("");
 
   const [
-    isImporting,
-    setImporting,
+    error,
+    setError,
   ] =
-    useState(false);
+    useState<string | null>(
+      null,
+    );
 
   async function handleImport() {
     if (!url.trim()) {
       return;
     }
 
-    setImporting(true);
+    setError(null);
 
     try {
-      /*
-       * Im nächsten Schritt wird hier
-       * dieselbe Railway-Import-API wie
-       * auf dem iPhone angeschlossen.
-       */
-      console.log({
-        type: "link",
-        url:
-          url.trim(),
-        notes:
-          notes.trim() ||
-          undefined,
-        workspaceId:
-          activeWorkspaceId,
+      await importLink({
+        url,
+
+        preferredKnowledgePath:
+          knowledgePath
+            .split(">")
+            .map(
+              (part) =>
+                part.trim(),
+            )
+            .filter(Boolean)
+            .slice(0, 3),
       });
 
       onComplete();
-    } finally {
-      setImporting(false);
+    } catch (
+      importError
+    ) {
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : "Der Import ist fehlgeschlagen.",
+      );
     }
   }
 
@@ -90,7 +106,7 @@ export function LinkCaptureForm({
 
           <p>
             SaveWise liest die Quelle,
-            analysiert den Inhalt und
+            analysiert ihren Inhalt und
             ordnet sie deinem Wissen zu.
           </p>
         </div>
@@ -103,6 +119,9 @@ export function LinkCaptureForm({
 
         <input
           autoFocus
+          disabled={
+            isImporting
+          }
           onChange={(event) => {
             setUrl(
               event.target.value,
@@ -116,23 +135,37 @@ export function LinkCaptureForm({
 
       <label className="form-field">
         <span>
-          Eigene Notizen
+          Gewünschter Wissenspfad
           <small>
             optional
           </small>
         </span>
 
-        <textarea
+        <input
+          disabled={
+            isImporting
+          }
           onChange={(event) => {
-            setNotes(
+            setKnowledgePath(
               event.target.value,
             );
           }}
-          placeholder="Warum ist diese Quelle für dich relevant?"
-          rows={5}
-          value={notes}
+          placeholder="Zum Beispiel: Technologie > KI > Agenten"
+          value={knowledgePath}
         />
+
+        <small className="field-help">
+          Die KI verwendet diesen Pfad
+          als Orientierung und prüft
+          dennoch die fachliche Zuordnung.
+        </small>
       </label>
+
+      {error ? (
+        <div className="capture-error">
+          {error}
+        </div>
+      ) : null}
 
       <div className="capture-form-footer">
         <span className="workspace-hint">
@@ -155,7 +188,7 @@ export function LinkCaptureForm({
           type="button"
         >
           {isImporting
-            ? "Analysiere …"
+            ? "Quelle wird analysiert …"
             : "Link analysieren"}
         </button>
       </div>

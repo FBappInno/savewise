@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
+
 import {
   usePathname,
+  useRouter,
 } from "next/navigation";
+
+import {
+  useCapture,
+} from "@/providers/capture-provider";
+
+import {
+  useGlobalSearch,
+} from "@/providers/search-provider";
 
 const navigation = [
   {
@@ -32,6 +42,38 @@ export function DesktopSidebar() {
   const pathname =
     usePathname();
 
+  const router =
+    useRouter();
+
+  const {
+    openCapture,
+  } =
+    useCapture();
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+  } =
+    useGlobalSearch();
+
+  function handleSearchChange(
+    value: string,
+  ) {
+    setSearchQuery(value);
+
+    if (
+      value.trim() &&
+      !pathname.startsWith(
+        "/universe",
+      )
+    ) {
+      router.push(
+        "/universe?view=discoveries",
+      );
+    }
+  }
+
   return (
     <aside className="desktop-sidebar">
       <div className="brand-area">
@@ -48,6 +90,53 @@ export function DesktopSidebar() {
             Personal Intelligence
           </div>
         </div>
+      </div>
+
+      <button
+        className="sidebar-capture-button"
+        onClick={
+          openCapture
+        }
+        type="button"
+      >
+        <span>
+          +
+        </span>
+
+        Neues Wissen erfassen
+      </button>
+
+      <label className="sidebar-search">
+        <span className="sidebar-search-icon">
+          ⌕
+        </span>
+
+        <input
+          onChange={(event) => {
+            handleSearchChange(
+              event.target.value,
+            );
+          }}
+          placeholder="Wissen durchsuchen …"
+          type="search"
+          value={searchQuery}
+        />
+
+        {searchQuery ? (
+          <button
+            aria-label="Suche löschen"
+            onClick={
+              clearSearch
+            }
+            type="button"
+          >
+            ×
+          </button>
+        ) : null}
+      </label>
+
+      <div className="sidebar-navigation-label">
+        WORKSPACE
       </div>
 
       <nav className="desktop-navigation">
@@ -83,7 +172,7 @@ export function DesktopSidebar() {
 
       <div className="sidebar-footer">
         <div className="sidebar-version">
-          SaveWise Desktop
+          SaveWise Workspace
         </div>
 
         <div className="sidebar-environment">

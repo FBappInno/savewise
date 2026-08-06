@@ -13,6 +13,14 @@ import {
 } from "@/providers/capture-provider";
 
 import {
+  DiscoveryProvider,
+} from "@/providers/discovery-provider";
+
+import {
+  SearchProvider,
+} from "@/providers/search-provider";
+
+import {
   SyncProvider,
 } from "@/providers/sync-provider";
 
@@ -29,9 +37,13 @@ export function AppProviders({
     <AccountProvider>
       <WorkspaceProvider>
         <SyncProvider>
-          <CaptureProvider>
-            {children}
-          </CaptureProvider>
+          <DiscoveryProvider>
+            <CaptureProvider>
+              <SearchProvider>
+                {children}
+              </SearchProvider>
+            </CaptureProvider>
+          </DiscoveryProvider>
         </SyncProvider>
       </WorkspaceProvider>
     </AccountProvider>

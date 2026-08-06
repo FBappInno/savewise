@@ -391,6 +391,72 @@ export async function uploadDropboxBundle(
   return syncedAt;
 }
 
+export async function uploadDropboxAttachment(
+  saveWiseAccountId: string,
+  input: {
+    path: string;
+    bytes: Buffer;
+  },
+): Promise<void> {
+  const accessToken =
+    await getAccountAccessToken(
+      saveWiseAccountId,
+    );
+
+  const response =
+    await fetch(
+      DROPBOX_UPLOAD_URL,
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
+
+          "Content-Type":
+            "application/octet-stream",
+
+          "Dropbox-API-Arg":
+            JSON.stringify({
+              path:
+                input.path,
+
+              mode:
+                "overwrite",
+
+              autorename:
+                false,
+
+              mute:
+                true,
+
+              strict_conflict:
+                false,
+            }),
+        },
+
+        body:
+          new Uint8Array(
+            input.bytes,
+          ),
+      },
+    );
+
+  if (!response.ok) {
+    const details =
+      await response.text();
+
+    console.error(
+      "Dropbox attachment upload failed:",
+      details,
+    );
+
+    throw new Error(
+      `DROPBOX_ATTACHMENT_UPLOAD_HTTP_${response.status}`,
+    );
+  }
+}
+
 async function getAccountAccessToken(
   saveWiseAccountId: string,
 ): Promise<string> {
