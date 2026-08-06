@@ -40,8 +40,13 @@ Record<string, string> = {
 
 export function DiscoveryCard({
   discovery,
+  onOpen,
 }: {
   discovery: Discovery;
+
+  onOpen: (
+    discovery: Discovery,
+  ) => void;
 }) {
   const {
     removeDiscovery,
@@ -78,7 +83,12 @@ export function DiscoveryCard({
       discovery.url,
     );
 
-  async function handleDelete() {
+  async function handleDelete(
+    event:
+      React.MouseEvent<HTMLButtonElement>,
+  ) {
+    event.stopPropagation();
+
     const confirmed =
       window.confirm(
         `"${title}" wirklich löschen?`,
@@ -100,7 +110,30 @@ export function DiscoveryCard({
   }
 
   return (
-    <article className="discovery-card">
+    <article
+      className="discovery-card discovery-card-clickable"
+      onClick={() => {
+        onOpen(
+          discovery,
+        );
+      }}
+      onKeyDown={(event) => {
+        if (
+          event.key ===
+            "Enter" ||
+          event.key ===
+            " "
+        ) {
+          event.preventDefault();
+
+          onOpen(
+            discovery,
+          );
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       {discovery.thumbnailUrl ? (
         <div className="discovery-thumbnail">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -114,8 +147,8 @@ export function DiscoveryCard({
       ) : (
         <div className="discovery-thumbnail discovery-thumbnail-placeholder">
           <span>
-            {sourceIcon(
-              discovery.source,
+            {captureIcon(
+              discovery,
             )}
           </span>
         </div>
@@ -124,7 +157,9 @@ export function DiscoveryCard({
       <div className="discovery-card-body">
         <div className="discovery-card-meta">
           <span className="discovery-source">
-            {hostname ||
+            {discovery.attachment
+              ?.fileName ||
+              hostname ||
               sourceLabel(
                 discovery.source,
               )}
@@ -212,25 +247,17 @@ export function DiscoveryCard({
           </span>
 
           <div className="discovery-card-actions">
-            {discovery.url ? (
-              <a
-                href={
-                  discovery.url
-                }
-                rel="noreferrer"
-                target="_blank"
-              >
-                Quelle öffnen
-              </a>
-            ) : null}
+            <span className="discovery-open-label">
+              Öffnen
+            </span>
 
             <button
               disabled={
                 isDeleting
               }
-              onClick={() => {
-                void handleDelete();
-              }}
+              onClick={
+                handleDelete
+              }
               type="button"
             >
               {isDeleting
@@ -241,6 +268,30 @@ export function DiscoveryCard({
         </footer>
       </div>
     </article>
+  );
+}
+
+function captureIcon(
+  discovery: Discovery,
+): string {
+  if (
+    discovery.attachment
+      ?.captureType ===
+    "pdf"
+  ) {
+    return "PDF";
+  }
+
+  if (
+    discovery.attachment
+      ?.captureType ===
+    "image"
+  ) {
+    return "IMG";
+  }
+
+  return sourceIcon(
+    discovery.source,
   );
 }
 
@@ -264,7 +315,8 @@ function getHostname(
 }
 
 function sourceLabel(
-  source: Discovery["source"],
+  source:
+    Discovery["source"],
 ): string {
   return {
     youtube:
@@ -281,7 +333,8 @@ function sourceLabel(
 }
 
 function sourceIcon(
-  source: Discovery["source"],
+  source:
+    Discovery["source"],
 ): string {
   return {
     youtube:
@@ -305,9 +358,12 @@ function formatDate(
   ).toLocaleDateString(
     "de-CH",
     {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
+      day:
+        "2-digit",
+      month:
+        "short",
+      year:
+        "numeric",
     },
   );
 }

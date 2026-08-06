@@ -437,3 +437,72 @@ function translateFileCaptureError(
         : `Der Dateiimport ist fehlgeschlagen (${status}).`;
   }
 }
+
+export async function loadDiscoveryAttachment(
+  discoveryId: string,
+): Promise<{
+  blob: Blob;
+  objectUrl: string;
+}> {
+  const response =
+    await authenticatedFetch(
+      `/api/capture/attachments/${encodeURIComponent(
+        discoveryId,
+      )}`,
+      {
+        method:
+          "GET",
+      },
+    );
+
+  if (!response.ok) {
+    const body =
+      await readJson<{
+        error?: string;
+      }>(response);
+
+    throw new Error(
+      translateAttachmentError(
+        body.error,
+        response.status,
+      ),
+    );
+  }
+
+  const blob =
+    await response.blob();
+
+  return {
+    blob,
+
+    objectUrl:
+      URL.createObjectURL(
+        blob,
+      ),
+  };
+}
+
+function translateAttachmentError(
+  code: string | undefined,
+  status: number,
+): string {
+  switch (code) {
+    case "SESSION_INVALID":
+      return "Deine SaveWise-Anmeldung ist abgelaufen.";
+
+    case "DISCOVERY_NOT_FOUND":
+      return "Dieser Inhalt wurde nicht gefunden.";
+
+    case "DISCOVERY_ATTACHMENT_NOT_FOUND":
+      return "Für diesen Inhalt wurde keine Originaldatei gefunden.";
+
+    case "DROPBOX_NOT_CONNECTED":
+      return "Dropbox ist nicht verbunden.";
+
+    default:
+      return code
+        ? `Dateifehler: ${code}`
+        : `Die Originaldatei konnte nicht geladen werden (${status}).`;
+  }
+}
+

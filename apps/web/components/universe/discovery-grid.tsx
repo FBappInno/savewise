@@ -1,5 +1,9 @@
 "use client";
 
+import type {
+  Discovery,
+} from "@savewise/shared";
+
 import {
   useMemo,
 } from "react";
@@ -20,7 +24,12 @@ import {
   useWorkspace,
 } from "@/providers/workspace-provider";
 
-export function DiscoveryGrid() {
+export function DiscoveryGrid({
+  onOpenDiscovery,
+}: {
+  onOpenDiscovery:
+    (discovery: Discovery) => void;
+}) {
   const {
     workspaceDiscoveries,
     isLoading,
@@ -75,7 +84,7 @@ export function DiscoveryGrid() {
 
         return sortedDiscoveries.filter(
           (discovery) => {
-            const searchableContent = [
+            const content = [
               discovery.title,
               discovery.improvedTitle,
               discovery.summary,
@@ -101,7 +110,7 @@ export function DiscoveryGrid() {
                 "de-CH",
               );
 
-            return searchableContent.includes(
+            return content.includes(
               normalized,
             );
           },
@@ -162,7 +171,7 @@ export function DiscoveryGrid() {
       {searchQuery ? (
         <div className="active-search-message">
           <span>
-            Ergebnisse für
+            Ergebnisse für{" "}
             <strong>
               „{searchQuery}“
             </strong>
@@ -207,7 +216,8 @@ export function DiscoveryGrid() {
         0 ? (
         <div className="discovery-loading-grid">
           {Array.from({
-            length: 6,
+            length:
+              6,
           }).map(
             (_, index) => (
               <div
@@ -234,9 +244,7 @@ export function DiscoveryGrid() {
 
           <p>
             Verwende „Neues Wissen
-            erfassen“ links in der Sidebar,
-            um einen Link oder eine Notiz
-            hinzuzufügen.
+            erfassen“ links in der Sidebar.
           </p>
         </div>
       ) : null}
@@ -277,6 +285,9 @@ export function DiscoveryGrid() {
                 }
                 key={
                   discovery.id
+                }
+                onOpen={
+                  onOpenDiscovery
                 }
               />
             ),
