@@ -24,6 +24,7 @@ import {
 
 import { AccountCard } from "@/components/settings/account-card";
 import { StorageSettingsPanel } from "@/components/settings/storage-settings-panel";
+import { WorkspaceCard } from "@/components/settings/workspace-card";
 import { StarBackground } from "@/components/universe-ui/star-background";
 import { formatAppDateTime } from "@/i18n/date-time";
 import { useAppSettings } from "@/providers/app-settings-provider";
@@ -435,6 +436,33 @@ export default function SettingsScreen() {
             activeWorkspaceId={
               settings.workspace.activeId
             }
+          />
+        </SettingsSection>
+
+        <SettingsSection
+          description="Trenne persönliches und berufliches Wissen in unabhängige Bereiche."
+          icon="albums-outline"
+          title="Arbeitsbereiche"
+          tone="violet"
+        >
+          <WorkspaceCard
+            activeWorkspaceId={
+              settings.workspace.activeId
+            }
+            onChange={async (
+              activeId,
+            ) => {
+              await updateSettings(
+                (current) => ({
+                  ...current,
+
+                  workspace: {
+                    ...current.workspace,
+                    activeId,
+                  },
+                }),
+              );
+            }}
           />
         </SettingsSection>
 
