@@ -54,6 +54,12 @@ import {
   UniverseNode,
 } from "@/components/universe/universe-node";
 
+import {
+  UniverseDomainExplorer,
+  type UniverseExplorerDiscovery,
+  type UniverseExplorerDomain,
+} from "@/components/universe/universe-domain-explorer";
+
 import type {
   UniverseNodePlacement,
 } from "@/components/universe/universe-types";
@@ -121,6 +127,14 @@ export function KnowledgeUniverse({
   const [
     selectedNodeId,
     setSelectedNodeId,
+  ] =
+    useState<
+      string | null
+    >(null);
+
+  const [
+    explorerDomainId,
+    setExplorerDomainId,
   ] =
     useState<
       string | null
@@ -211,6 +225,28 @@ export function KnowledgeUniverse({
       selectedNode,
     ]);
 
+  const explorerDomain =
+    useMemo<
+      UniverseExplorerDomain | null
+    >(
+      () => {
+        if (!explorerDomainId) {
+          return null;
+        }
+
+        return buildExplorerDomain(
+          explorerDomainId,
+          graph,
+          discoveries,
+        );
+      },
+      [
+        discoveries,
+        explorerDomainId,
+        graph,
+      ],
+    );
+
   useEffect(() => {
     centerUniverse(
       camera,
@@ -232,6 +268,10 @@ export function KnowledgeUniverse({
     );
 
     setSelectedNodeId(
+      null,
+    );
+
+    setExplorerDomainId(
       null,
     );
 
@@ -260,12 +300,15 @@ export function KnowledgeUniverse({
         expandedDomainId ===
         node.id
       ) {
-        setExpandedDomainId(
-          null,
-        );
-
-        setExpandedTopicId(
-          null,
+        /*
+         * Erster Klick:
+         * Domäne wird im Universum aufgeklappt.
+         *
+         * Zweiter Klick auf dieselbe Domäne:
+         * Der vollständige Explorer öffnet sich.
+         */
+        setExplorerDomainId(
+          node.id,
         );
       } else {
         setExpandedDomainId(
@@ -275,6 +318,10 @@ export function KnowledgeUniverse({
         setExpandedTopicId(
           null,
         );
+
+        setExplorerDomainId(
+          null,
+        );
       }
     }
 
@@ -282,11 +329,24 @@ export function KnowledgeUniverse({
       placement.level ===
       "topic"
     ) {
+      setExplorerDomainId(
+        null,
+      );
+
       setExpandedTopicId(
         expandedTopicId ===
           node.id
           ? null
           : node.id,
+      );
+    }
+
+    if (
+      placement.level ===
+      "subtopic"
+    ) {
+      setExplorerDomainId(
+        null,
       );
     }
 
@@ -497,8 +557,303 @@ export function KnowledgeUniverse({
           </Text>
         </View>
       )}
+
+      <UniverseDomainExplorer
+        domain={
+          explorerDomain
+        }
+        onClose={() => {
+          setExplorerDomainId(
+            null,
+          );
+        }}
+        onOpenDiscovery={(
+          discoveryId,
+        ) => {
+          const discovery =
+            discoveries.find(
+              (candidate) =>
+                candidate.id ===
+                discoveryId,
+            );
+
+          if (!discovery) {
+            return;
+          }
+
+          setExplorerDomainId(
+            null,
+          );
+
+          onOpenDiscovery(
+            discovery,
+          );
+        }}
+        visible={
+          explorerDomain !==
+          null
+        }
+      />
     </GestureHandlerRootView>
   );
+}
+
+function buildExplorerDomain(
+  domainId: string,
+  graph: KnowledgeGraph,
+  discoveries: Discovery[],
+): UniverseExplorerDomain | null {
+  const nodesById =
+    new Map(
+      graph.nodes.map(
+        (node) => [
+          node.id,
+          node,
+        ],
+      ),
+    );
+
+  const discoveriesById =
+    new Map(
+      discoveries.map(
+        (discovery) => [
+          discovery.id,
+          discovery,
+        ],
+      ),
+    );
+
+  const domain =
+    nodesById.get(
+      domainId,
+    );
+
+  if (
+    !domain ||
+    domain.kind !==
+      "domain"
+  ) {
+    return null;
+  }
+
+  const topics =
+    domain.childIds
+      .map(
+        (childId) =>
+          nodesById.get(
+            childId,
+          ),
+      )
+      .filter(
+        (
+          node,
+        ): node is NonNullable<
+          typeof node
+        > =>
+          Boolean(node),
+      )
+      .filter(
+        (node) =>
+          node.kind ===
+            "topic" ||
+          node.parentId ===
+            domain.id,
+      )
+      .map(
+        (topic) => ({
+          id:
+            topic.id,
+
+          label:
+            topic.title,
+
+          discoveries:
+            mapExplorerDiscoveries(
+              topic.discoveryIds,
+              discoveriesById,
+            ),
+
+          subtopics:
+            topic.childIds
+              .map(
+                (childId) =>
+                  nodesById.get(
+                    childId,
+                  ),
+              )
+              .filter(
+                (
+                  node,
+                ): node is NonNullable<
+                  typeof node
+                > =>
+                  Boolean(node),
+              )
+              .map(
+                (subtopic) => ({
+                  id:
+                    subtopic.id,
+
+                  label:
+                    subtopic.title,
+
+                  discoveries:
+                    mapExplorerDiscoveries(
+                      collectNodeDiscoveryIds(
+                        subtopic.id,
+                        nodesById,
+                      ),
+                      discoveriesById,
+                    ),
+                }),
+              )
+              .sort(
+                (first, second) =>
+                  first.label.localeCompare(
+                    second.label,
+                    undefined,
+                    {
+                      sensitivity:
+                        "base",
+                    },
+                  ),
+              ),
+        }),
+      )
+      .sort(
+        (first, second) =>
+          first.label.localeCompare(
+            second.label,
+            undefined,
+            {
+              sensitivity:
+                "base",
+            },
+          ),
+      );
+
+  return {
+    id:
+      domain.id,
+
+    label:
+      domain.title,
+
+    discoveries:
+      mapExplorerDiscoveries(
+        domain.discoveryIds,
+        discoveriesById,
+      ),
+
+    topics,
+  };
+}
+
+function collectNodeDiscoveryIds(
+  nodeId: string,
+  nodesById: Map<
+    string,
+    KnowledgeGraph["nodes"][number]
+  >,
+  visited =
+    new Set<string>(),
+): string[] {
+  if (
+    visited.has(
+      nodeId,
+    )
+  ) {
+    return [];
+  }
+
+  visited.add(
+    nodeId,
+  );
+
+  const node =
+    nodesById.get(
+      nodeId,
+    );
+
+  if (!node) {
+    return [];
+  }
+
+  const discoveryIds =
+    new Set(
+      node.discoveryIds,
+    );
+
+  node.childIds.forEach(
+    (childId) => {
+      collectNodeDiscoveryIds(
+        childId,
+        nodesById,
+        visited,
+      ).forEach(
+        (discoveryId) => {
+          discoveryIds.add(
+            discoveryId,
+          );
+        },
+      );
+    },
+  );
+
+  return [
+    ...discoveryIds,
+  ];
+}
+
+function mapExplorerDiscoveries(
+  discoveryIds: string[],
+  discoveriesById: Map<
+    string,
+    Discovery
+  >,
+): UniverseExplorerDiscovery[] {
+  return discoveryIds
+    .map(
+      (discoveryId) =>
+        discoveriesById.get(
+          discoveryId,
+        ),
+    )
+    .filter(
+      (
+        discovery,
+      ): discovery is Discovery =>
+        Boolean(discovery),
+    )
+    .map(
+      (discovery) => ({
+        id:
+          discovery.id,
+
+        title:
+          discovery.improvedTitle ||
+          discovery.title,
+
+        summary:
+          discovery.summary ??
+          null,
+
+        url:
+          discovery.url ??
+          null,
+      }),
+    )
+    .sort(
+      (first, second) =>
+        first.title.localeCompare(
+          second.title,
+          undefined,
+          {
+            sensitivity:
+              "base",
+          },
+        ),
+    );
 }
 
 function getNodeLevel(
