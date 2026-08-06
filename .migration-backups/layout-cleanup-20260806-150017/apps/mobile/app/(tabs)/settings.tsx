@@ -23,7 +23,6 @@ import {
 } from "react-native";
 
 import { AccountCard } from "@/components/settings/account-card";
-import { BiometricSettingsRow } from "@/components/settings/biometric-settings-row";
 import { StorageSettingsPanel } from "@/components/settings/storage-settings-panel";
 import { WorkspaceCard } from "@/components/settings/workspace-card";
 import { StarBackground } from "@/components/universe-ui/star-background";
@@ -353,6 +352,48 @@ export default function SettingsScreen() {
           false
         }
       >
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <View
+              style={
+                styles.coreIcon
+              }
+            >
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .primaryBright
+                }
+                name="settings-outline"
+                size={25}
+              />
+            </View>
+
+            <View style={styles.flex}>
+              <Text
+                style={styles.eyebrow}
+              >
+                SAVEWISE CORE
+              </Text>
+
+              <Text style={styles.title}>
+                Control Center
+              </Text>
+            </View>
+
+            <StatusBadge
+              label="ONLINE"
+              tone="success"
+            />
+          </View>
+
+          <Text style={styles.subtitle}>
+            Verwalte Konto, KI,
+            Speicher, Datenschutz und
+            Systemeinstellungen.
+          </Text>
+        </View>
+
         <View
           style={
             styles.systemOverview
@@ -394,12 +435,6 @@ export default function SettingsScreen() {
             }
             activeWorkspaceId={
               settings.workspace.activeId
-            }
-          />
-
-          <BiometricSettingsRow
-            isSignedIn={
-              settings.account.hasPassword
             }
           />
         </SettingsSection>

@@ -159,6 +159,51 @@ export default function SecondBrainScreen() {
           false
         }
       >
+        <View style={styles.header}>
+          <View style={styles.headerTopRow}>
+            <View style={styles.aiLogo}>
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .primaryBright
+                }
+                name="sparkles"
+                size={26}
+              />
+            </View>
+
+            <View style={styles.flex}>
+              <Text style={styles.eyebrow}>
+                SAVEWISE INTELLIGENCE
+              </Text>
+
+              <Text style={styles.title}>
+                AI Command Center
+              </Text>
+            </View>
+
+            <View style={styles.aiStatus}>
+              <View
+                style={styles.aiStatusDot}
+              />
+
+              <Text
+                style={
+                  styles.aiStatusText
+                }
+              >
+                ACTIVE
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.subtitle}>
+            Analysiere dein Wissen,
+            entdecke Zusammenhänge und
+            entwickle neue Erkenntnisse.
+          </Text>
+        </View>
+
         {!settings.ai.knowledgeGraph ? (
           <ErrorCard
             message={t(

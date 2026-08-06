@@ -48,7 +48,10 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const colorScheme = useColorScheme();
-  const { t } = useAppSettings();
+  const {
+    t,
+    updateSettings,
+  } = useAppSettings();
 
   const [
     biometricState,
@@ -93,6 +96,31 @@ function RootNavigator() {
           availability.label,
         );
 
+        /*
+         * Der sichtbare Kontostatus wird nicht lokal erraten,
+         * sondern mit der echten Railway-Session synchronisiert.
+         */
+        void updateSettings(
+          (current) => {
+            if (
+              current.account.hasPassword ===
+              validSession
+            ) {
+              return current;
+            }
+
+            return {
+              ...current,
+
+              account: {
+                ...current.account,
+                hasPassword:
+                  validSession,
+              },
+            };
+          },
+        );
+
         if (
           biometricEnabled &&
           validSession &&
@@ -115,7 +143,10 @@ function RootNavigator() {
         "unlocked",
       );
     });
-  }, [unlockWithBiometrics]);
+  }, [
+    unlockWithBiometrics,
+    updateSettings,
+  ]);
 
   useEffect(() => {
     void trackAnonymousEvent("AppStart", { operation: "app" });

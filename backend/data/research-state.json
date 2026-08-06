@@ -1,155 +1,7 @@
 {
-  "lastRunAt": "2026-08-05T13:02:29.250Z",
-  "nextRecommendedRunAt": "2026-08-06T13:02:29.250Z",
+  "lastRunAt": "2026-08-06T13:50:45.290Z",
+  "nextRecommendedRunAt": "2026-08-07T13:50:45.290Z",
   "interests": [
-    {
-      "id": "node-nutrition",
-      "title": "Ernährung",
-      "description": "Wissen rund um Ernährung, Makronährstoffe und gesundheitsbezogene Ernährungsempfehlungen.",
-      "nodeIds": [
-        "node-carbohydrates"
-      ],
-      "discoveryCount": 1,
-      "strength": 0.15,
-      "knowledgeGaps": [
-        "Untersuchung der langfristigen Auswirkungen verschiedener Diäten auf die Gesundheit"
-      ],
-      "previousStrength": 0.15,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T18:25:31.865Z",
-      "observedRuns": 4
-    },
-    {
-      "id": "node-current-events",
-      "title": "Aktuelle Ereignisse",
-      "description": "Berichterstattung über aktuelle Themen und Ereignisse in verschiedenen Lebensbereichen.",
-      "nodeIds": [
-        "node-entertainment"
-      ],
-      "discoveryCount": 2,
-      "strength": 0.15,
-      "knowledgeGaps": [
-        "Ausgewogenere Berichterstattung zu sozialen und kulturellen Themen in der Schweiz"
-      ],
-      "previousStrength": 0.15,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T18:25:31.865Z",
-      "observedRuns": 4
-    },
-    {
-      "id": "node-safety-and-risk-management",
-      "title": "Sicherheits- und Risikomanagement",
-      "description": "Umfassende Betrachtung von Sicherheitsprozessen und Risikofaktoren mit Schwerpunkt auf menschlichem Versagen in Arbeit, Industrie und Cybersicherheit.",
-      "nodeIds": [
-        "node-safety-and-risk-management"
-      ],
-      "discoveryCount": 5,
-      "strength": 0.1282,
-      "previousStrength": 0.1282,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
-    {
-      "id": "node-human-error",
-      "title": "Menschliches Versagen",
-      "description": "Der zentrale Risikofaktor in Sicherheitsvorfällen, Unfällen und Störfällen, beeinflusst Arbeits-, Industrie- und Cybersicherheit.",
-      "nodeIds": [
-        "node-human-error"
-      ],
-      "discoveryCount": 5,
-      "strength": 0.1282,
-      "previousStrength": 0.1282,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
-    {
-      "id": "node-pets",
-      "title": "Haustiere",
-      "description": "Informationen über Haustiere mit Schwerpunkt auf Katzen, Kätzchen und deren Verhalten und Kommunikation.",
-      "nodeIds": [
-        "node-pets"
-      ],
-      "discoveryCount": 4,
-      "strength": 0.1026,
-      "previousStrength": 0.1026,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
-    {
-      "id": "node-cats",
-      "title": "Katzen",
-      "description": "Verhalten und Lautäußerungen von Katzen und Kätzchen mit Fokus auf spielerisches Erkunden und Kommunikation.",
-      "nodeIds": [
-        "node-cats"
-      ],
-      "discoveryCount": 4,
-      "strength": 0.1026,
-      "previousStrength": 0.1026,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
-    {
-      "id": "node-industrial-and-occupational-safety",
-      "title": "Industrie- und Arbeitssicherheit",
-      "description": "Analyse von Unfallursachen, organisatorischen Fehlern und Präventionsmaßnahmen im Arbeits- und Industrieumfeld.",
-      "nodeIds": [
-        "node-industrial-and-occupational-safety"
-      ],
-      "discoveryCount": 3,
-      "strength": 0.0769,
-      "previousStrength": 0.0769,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
-    {
-      "id": "node-kitten-behavior",
-      "title": "Verhalten von Kätzchen",
-      "description": "Beobachtungen zum spielerischen Entdecken und kommunikativen Miauen junger Kätzchen.",
-      "nodeIds": [
-        "node-kitten-behavior"
-      ],
-      "discoveryCount": 3,
-      "strength": 0.0769,
-      "previousStrength": 0.0769,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
-    {
-      "id": "node-science-environmental-and-earth",
-      "title": "Wissenschaft: Umwelt- und Erdwissenschaften",
-      "description": "Wissenschaftliche Erkenntnisse zum Klimawandel, historischen Klimazyklen sowie Strategien zur Minderung und Anpassung.",
-      "nodeIds": [
-        "node-science-environmental-and-earth"
-      ],
-      "discoveryCount": 2,
-      "strength": 0.15,
-      "previousStrength": 0.15,
-      "trend": "long-term",
-      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
-      "firstDetectedAt": "2026-08-03T21:28:36.897Z",
-      "observedRuns": 3,
-      "knowledgeGaps": []
-    },
     {
       "id": "node-root-travel",
       "title": "Travel",
@@ -158,152 +10,191 @@
         "node-root-travel"
       ],
       "discoveryCount": 4,
-      "strength": 0.1026,
+      "strength": 0.1,
       "previousStrength": 0.1026,
-      "trend": "stable",
-      "trendExplanation": "Seit dem letzten Recherchelauf weitgehend stabil.",
+      "trend": "long-term",
+      "trendExplanation": "Über mehrere Rechercheläufe stabiler Schwerpunkt.",
       "firstDetectedAt": "2026-08-04T11:08:18.945Z",
-      "observedRuns": 2,
+      "observedRuns": 3,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-haustiere-und-tierpflege",
+      "title": "Haustiere und Tierpflege",
+      "description": "Umfassende Themen rund um Haustiere, deren Verhalten und Pflege, insbesondere Katzen und spezielle Pflegeaspekte wie Baden von Tieren.",
+      "nodeIds": [
+        "node-haustiere-und-tierpflege"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.1,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-kochen-und-ernaehrung",
+      "title": "Kochen und Ernährung",
+      "description": "Ernährungswissenschaft und praktische Kochrezepte mit Fokus auf schnelle Airfryer-Gerichte sowie Nährstoffwissen zu Kohlenhydraten und Proteinen.",
+      "nodeIds": [
+        "node-kochen-und-ernaehrung"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.1,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-technologie-und-verteidigung",
+      "title": "Technologie und Verteidigung",
+      "description": "Technologische Entwicklungen im Bereich militärischer Luftfahrt, Drohnenabwehr und elektronischer Installationen für den Innenbereich.",
+      "nodeIds": [
+        "node-technologie-und-verteidigung"
+      ],
+      "discoveryCount": 4,
+      "strength": 0.1,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-katzen-und-verhalten",
+      "title": "Katzen und Verhalten",
+      "description": "Verhaltensbeobachtungen und Kommunikation von Katzen und Kätzchen inklusive Lautäußerungen und Schlafverhalten.",
+      "nodeIds": [
+        "node-katzen-und-verhalten"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.075,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-freizeit-und-extremsport",
+      "title": "Freizeit und Extremsport",
+      "description": "Aktivitäten zur Freizeitgestaltung mit Schwerpunkt auf Gleitschirm- und Paragliding in den Alpen inklusive Thermikprognosen.",
+      "nodeIds": [
+        "node-freizeit-und-extremsport"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.075,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-gleitschirmfliegen",
+      "title": "Gleitschirmfliegen",
+      "description": "Beschreibung und Ausrüstung für Paragliding und Gleitschirmfliegen sowie Sicherheitsaspekte und Wetterprognosen für alpine Startplätze.",
+      "nodeIds": [
+        "node-gleitschirmfliegen"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.075,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
+      "knowledgeGaps": []
+    },
+    {
+      "id": "node-node-root-travel-tourism",
+      "title": "Tourism",
+      "description": "Knowledge about tourism.",
+      "nodeIds": [
+        "node-node-root-travel-tourism"
+      ],
+      "discoveryCount": 3,
+      "strength": 0.075,
+      "previousStrength": null,
+      "trend": "new",
+      "trendExplanation": "Neu aus der persönlichen Bibliothek erkannt.",
+      "firstDetectedAt": "2026-08-06T13:50:31.410Z",
+      "observedRuns": 1,
       "knowledgeGaps": []
     }
   ],
   "candidates": [
     {
-      "title": "Auswirkungen von Low-Carb-Di\u0000ten auf die Gesundheit",
-      "url": "https://gesundheitswelt.allianz.de/gesundheit-ernaehrung/abnehmen-diaet/low-carb.html",
-      "sourceName": "Allianz Gesundheitswelt",
+      "title": "Pflege von Katzen | Infos, Tipps & Tricks | Katze.net",
+      "url": "https://www.katze.net/haltung/pflege/",
+      "sourceName": "Katze.net",
       "sourceType": "article",
-      "publishedAt": "2026-07-15",
-      "summary": "Low-Carb-Di\u0000ten versprechen schnelle Abnehmerfolge, sind jedoch nicht als dauerhafte Ern\u0000hrungsweise geeignet und k\u0000nnen gesundheitssch\u0000dlich sein.",
-      "interestId": "node-nutrition",
+      "publishedAt": "2026-07-13",
+      "summary": "Umfassende Informationen zur Katzenpflege, einschließlich Fellpflege, Augen-, Ohren- und Zahnpflege sowie allgemeine Gesundheitstipps.",
+      "interestId": "node-haustiere-und-tierpflege",
       "scores": {
         "relevance": 0.9,
         "quality": 0.85,
-        "recency": 0.8,
-        "trustworthiness": 0.9,
-        "knowledgeValue": 0.85,
-        "gapCoverage": 0.9,
-        "overall": 0.88
-      },
-      "relevance": "relevant",
-      "decisionReason": "Behandelt die langfristigen Auswirkungen von Low-Carb-Di\u0000ten auf die Gesundheit.",
-      "impact": "extends",
-      "impactExplanation": "Erweitert das Wissen \u0000ber die gesundheitlichen Risiken von Low-Carb-Di\u0000ten.",
-      "relatedDiscoveryIds": [
-        "24ea02ed-81fa-442b-bcca-c5c81942a29e"
-      ],
-      "id": "research-3f3ec908270a117b",
-      "status": "suggested",
-      "foundAt": "2026-08-05T13:02:29.249Z"
-    },
-    {
-      "title": "Kultur im Service public: Zwischen Vielfalt und Sichtbarkeit",
-      "url": "https://www.srgd.ch/aktuelles/news/kultur-im-service-public/",
-      "sourceName": "SRG Deutschschweiz",
-      "sourceType": "article",
-      "publishedAt": "2026-07-15",
-      "summary": "Eine neue Studie zeigt, welche kulturellen Themen besonders sichtbar sind und wo L\u0000cken bestehen.",
-      "interestId": "node-current-events",
-      "scores": {
-        "relevance": 0.85,
-        "quality": 0.8,
-        "recency": 0.75,
-        "trustworthiness": 0.85,
-        "knowledgeValue": 0.8,
-        "gapCoverage": 0.85,
-        "overall": 0.82
-      },
-      "relevance": "relevant",
-      "decisionReason": "Behandelt die Sichtbarkeit kultureller Themen in den Medien und identifiziert L\u0000cken in der Berichterstattung.",
-      "impact": "extends",
-      "impactExplanation": "Erweitert das Wissen \u0000ber die mediale Sichtbarkeit kultureller Themen und bestehende L\u0000cken.",
-      "relatedDiscoveryIds": [
-        "d52cffb7-9e98-406a-999e-246414b5d3e1"
-      ],
-      "id": "research-11b9f0df8f6e96c7",
-      "status": "suggested",
-      "foundAt": "2026-08-05T13:02:29.249Z"
-    },
-    {
-      "title": "Der \"Faktor Mensch\" in der Arbeitssicherheit",
-      "url": "https://www.haufe.de/id/beitrag/psychologie-der-arbeitssicherheit-HI4327474.html",
-      "sourceName": "Haufe",
-      "sourceType": "article",
-      "publishedAt": "2026-08-03",
-      "summary": "Dieser Artikel analysiert, dass menschliches Fehlverhalten in der Arbeitssicherheit eine Hauptursache für Unfälle ist. Es wird diskutiert, dass zwischen 70–90 % aller Unfälle durch menschliches Verhalten verursacht werden und dass technische Mängel seltener die Ursache sind.",
-      "interestId": "node-human-error",
-      "scores": {
-        "relevance": 0.9,
-        "quality": 0.85,
-        "recency": 0.8,
-        "trustworthiness": 0.95,
-        "knowledgeValue": 0.9,
-        "gapCoverage": 0.85,
-        "overall": 0.88
-      },
-      "relevance": "relevant",
-      "decisionReason": "Bietet aktuelle und vertrauenswürdige Informationen über den Einfluss menschlichen Versagens auf die Arbeitssicherheit.",
-      "impact": "confirms",
-      "impactExplanation": "Best\u0000tigt die Bedeutung menschlichen Fehlverhaltens als Hauptursache für Unfälle in der Arbeitssicherheit.",
-      "relatedDiscoveryIds": [],
-      "id": "research-5ea619b9168a8b3c",
-      "status": "suggested",
-      "foundAt": "2026-08-05T13:02:29.249Z"
-    },
-    {
-      "title": "Unfallursachen: Der Faktor Mensch in der Arbeitssicherheit",
-      "url": "https://www.haufe.de/id/beitrag/psychologie-der-arbeitssicherheit-1-der-faktor-mensch-in-der-arbeitssicherheit-HI4722328.html",
-      "sourceName": "Haufe",
-      "sourceType": "article",
-      "publishedAt": "2025-06-15",
-      "summary": "Dieser Artikel beleuchtet die Rolle des menschlichen Faktors bei Arbeitsunfällen und diskutiert, wie menschliches Verhalten die Arbeitssicherheit beeinflusst.",
-      "interestId": "node-industrial-and-occupational-safety",
-      "scores": {
-        "relevance": 0.9,
-        "quality": 0.85,
-        "recency": 0.8,
-        "trustworthiness": 0.95,
-        "knowledgeValue": 0.9,
-        "gapCoverage": 0.85,
-        "overall": 0.88
-      },
-      "relevance": "relevant",
-      "decisionReason": "Bietet tiefe Einblicke in die menschlichen Faktoren bei Arbeitsunfällen.",
-      "impact": "extends",
-      "impactExplanation": "Erweitert das Verständnis über die Ursachen von Arbeitsunfällen.",
-      "relatedDiscoveryIds": [],
-      "id": "research-2772a6a1e78c1600",
-      "status": "suggested",
-      "foundAt": "2026-08-05T13:02:29.249Z"
-    },
-    {
-      "title": "Forbes Travel Guide’s Top Destinations For 2026",
-      "url": "https://www.forbes.com/sites/forbestravelguide/2025/12/28/forbes-travel-guides-top-destinations-for-2026/",
-      "sourceName": "Forbes",
-      "sourceType": "news",
-      "publishedAt": "2025-12-28",
-      "summary": "Forbes Travel Guide präsentiert eine Liste der 20 besten Reiseziele für 2026, darunter Abu Dhabi, Antalya und Zanzibar.",
-      "interestId": "node-root-travel",
-      "scores": {
-        "relevance": 0.9,
-        "quality": 0.95,
-        "recency": 0.85,
+        "recency": 0.9,
         "trustworthiness": 0.95,
         "knowledgeValue": 0.9,
         "gapCoverage": 0.85,
         "overall": 0.9
       },
       "relevance": "relevant",
-      "decisionReason": "Aktuelle und vertrauenswürdige Quelle mit umfassenden Reiseempfehlungen für 2026.",
-      "impact": "new-perspective",
-      "impactExplanation": "Bietet neue Perspektiven auf aufstrebende Reiseziele für 2026.",
+      "decisionReason": "Bietet detaillierte Pflegehinweise für Katzen, einschließlich Fellpflege und Gesundheitsvorsorge.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das Wissen über spezifische Pflegepraktiken für Katzen.",
       "relatedDiscoveryIds": [],
-      "id": "research-1c4b8d2ffa85c085",
+      "id": "research-a0f5a4a0967570ae",
       "status": "suggested",
-      "foundAt": "2026-08-05T13:02:29.249Z"
+      "foundAt": "2026-08-06T13:50:45.289Z"
+    },
+    {
+      "title": "Neueste Drohnentechnologien in der Verteidigungsindustrie",
+      "url": "https://drohnenindustrie.de/magazin/artikel/drohnentechnologien-verteidigungsindustrie/",
+      "sourceName": "Drohnenindustrie.de",
+      "sourceType": "article",
+      "publishedAt": "2025-03-17",
+      "summary": "Dieser Artikel bietet einen Überblick über die neuesten Entwicklungen in der Drohnentechnologie innerhalb der Verteidigungsindustrie, einschließlich autonomer Drohnen, Schwarmtechnologie, Stealth-Drohnen und elektronischer Kriegsführung.",
+      "interestId": "node-technologie-und-verteidigung",
+      "scores": {
+        "relevance": 0.9,
+        "quality": 0.85,
+        "recency": 0.8,
+        "trustworthiness": 0.9,
+        "knowledgeValue": 0.95,
+        "gapCoverage": 0.9,
+        "overall": 0.88
+      },
+      "relevance": "relevant",
+      "decisionReason": "Bietet umfassende Informationen zu aktuellen Drohnentechnologien in der Verteidigung.",
+      "impact": "extends",
+      "impactExplanation": "Erweitert das Verständnis über die neuesten Entwicklungen in der Drohnentechnologie.",
+      "relatedDiscoveryIds": [],
+      "id": "research-3afb8106bd576322",
+      "status": "suggested",
+      "foundAt": "2026-08-06T13:50:45.289Z"
     }
   ],
   "insights": [
+    {
+      "id": "insight-trends-2026-08-06",
+      "kind": "trend",
+      "title": "Interessen verändern sich",
+      "description": "Haustiere und Tierpflege: Neu aus der persönlichen Bibliothek erkannt. Kochen und Ernährung: Neu aus der persönlichen Bibliothek erkannt. Technologie und Verteidigung: Neu aus der persönlichen Bibliothek erkannt. Katzen und Verhalten: Neu aus der persönlichen Bibliothek erkannt. Freizeit und Extremsport: Neu aus der persönlichen Bibliothek erkannt. Gleitschirmfliegen: Neu aus der persönlichen Bibliothek erkannt. Tourism: Neu aus der persönlichen Bibliothek erkannt.",
+      "candidateIds": [],
+      "discoveryIds": [],
+      "createdAt": "2026-08-06T13:50:45.290Z"
+    },
     {
       "id": "insight-confirms-research-5ea619b9168a8b3c",
       "kind": "confirmation",
@@ -405,6 +296,30 @@
     }
   ],
   "briefings": [
+    {
+      "id": "briefing-2026-08-06",
+      "date": "2026-08-06",
+      "title": "Dein tägliches Research-Briefing",
+      "summary": "2 relevante Quellen gefunden, 0 ungeeignete Treffer verworfen und 0 Wissenslücken berücksichtigt.",
+      "counts": {
+        "totalFound": 2,
+        "papers": 0,
+        "videos": 0,
+        "startups": 0,
+        "studies": 0,
+        "trends": 7,
+        "knowledgeGaps": 0,
+        "discarded": 0
+      },
+      "candidateIds": [
+        "research-a0f5a4a0967570ae",
+        "research-3afb8106bd576322"
+      ],
+      "insightIds": [
+        "insight-trends-2026-08-06"
+      ],
+      "createdAt": "2026-08-06T13:50:45.290Z"
+    },
     {
       "id": "briefing-2026-08-05",
       "date": "2026-08-05",

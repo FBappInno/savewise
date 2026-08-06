@@ -29,10 +29,6 @@ type HeaderConfiguration = {
   title: string;
 
   subtitle: string;
-
-  statusLabel: string;
-
-  statusActive: boolean;
 };
 
 export default function TabLayout() {
@@ -48,7 +44,6 @@ export default function TabLayout() {
   const headerConfiguration =
     getHeaderConfiguration(
       pathname,
-      settings,
     );
 
   return (
@@ -75,12 +70,6 @@ export default function TabLayout() {
               }),
             );
           }}
-          statusActive={
-            headerConfiguration.statusActive
-          }
-          statusLabel={
-            headerConfiguration.statusLabel
-          }
           subtitle={
             headerConfiguration.subtitle
           }
@@ -244,9 +233,6 @@ export default function TabLayout() {
 
 function getHeaderConfiguration(
   pathname: string,
-  settings: ReturnType<
-    typeof useAppSettings
-  >["settings"],
 ): HeaderConfiguration | null {
   if (
     pathname.includes(
@@ -262,14 +248,6 @@ function getHeaderConfiguration(
 
       subtitle:
         "Verbindungen und Muster in deinem Wissen",
-
-      statusLabel:
-        settings.ai.knowledgeGraph
-          ? "KI AKTIV"
-          : "KI AUS",
-
-      statusActive:
-        settings.ai.knowledgeGraph,
     };
   }
 
@@ -287,14 +265,6 @@ function getHeaderConfiguration(
 
       subtitle:
         "Neue Quellen, Trends und Wissenslücken",
-
-      statusLabel:
-        settings.ai.autonomousResearch
-          ? "RESEARCH AKTIV"
-          : "RESEARCH AUS",
-
-      statusActive:
-        settings.ai.autonomousResearch,
     };
   }
 
@@ -312,14 +282,6 @@ function getHeaderConfiguration(
 
       subtitle:
         "Konto, Workspaces und App-Konfiguration",
-
-      statusLabel:
-        settings.account.hasPassword
-          ? "KONTO AKTIV"
-          : "LOKAL",
-
-      statusActive:
-        settings.account.hasPassword,
     };
   }
 
@@ -332,14 +294,6 @@ function getHeaderConfiguration(
 
   subtitle:
     "Dein persönliches Wissensnetzwerk",
-
-  statusLabel:
-    settings.ai.knowledgeGraph
-      ? "KI AKTIV"
-      : "KI AUS",
-
-  statusActive:
-    settings.ai.knowledgeGraph,
 };
 
 }

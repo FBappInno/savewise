@@ -30,10 +30,6 @@ type MissionHeaderProps = {
 
   subtitle?: string;
 
-  statusLabel?: string;
-
-  statusActive?: boolean;
-
   activeWorkspaceId:
     WorkspaceId;
 
@@ -46,8 +42,6 @@ export function MissionHeader({
   icon,
   title,
   subtitle,
-  statusLabel,
-  statusActive = true,
   activeWorkspaceId,
   onWorkspaceChange,
 }: MissionHeaderProps) {
@@ -104,42 +98,14 @@ export function MissionHeader({
           </View>
         </View>
 
-        <View style={styles.workspaceArea}>
-          <CompactWorkspaceSwitcher
-            activeWorkspaceId={
-              activeWorkspaceId
-            }
-            onChange={
-              onWorkspaceChange
-            }
-          />
-
-          {statusLabel ? (
-            <View style={styles.statusRow}>
-              <View
-                style={[
-                  styles.statusDot,
-
-                  statusActive
-                    ? styles.statusDotActive
-                    : styles.statusDotInactive,
-                ]}
-              />
-
-              <Text
-                style={[
-                  styles.statusText,
-
-                  statusActive
-                    ? styles.statusTextActive
-                    : styles.statusTextInactive,
-                ]}
-              >
-                {statusLabel}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+        <CompactWorkspaceSwitcher
+          activeWorkspaceId={
+            activeWorkspaceId
+          }
+          onChange={
+            onWorkspaceChange
+          }
+        />
       </View>
     </View>
   );
@@ -209,50 +175,6 @@ const styles =
 
     titleArea: {
       flex: 1,
-    },
-
-    workspaceArea: {
-      alignItems: "flex-end",
-      gap: 4,
-    },
-
-    statusRow: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: 4,
-      paddingRight: 4,
-    },
-
-    statusDot: {
-      borderRadius: 999,
-      height: 5,
-      width: 5,
-    },
-
-    statusDotActive: {
-      backgroundColor:
-        universeTheme.colors.green,
-    },
-
-    statusDotInactive: {
-      backgroundColor:
-        universeTheme.colors.textMuted,
-    },
-
-    statusText: {
-      fontSize: 6,
-      fontWeight: "900",
-      letterSpacing: 0.65,
-    },
-
-    statusTextActive: {
-      color:
-        universeTheme.colors.green,
-    },
-
-    statusTextInactive: {
-      color:
-        universeTheme.colors.textMuted,
     },
 
     eyebrow: {

@@ -222,6 +222,54 @@ export default function ResearchScreen() {
           false
         }
       >
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <View
+              style={styles.scoutIcon}
+            >
+              <Ionicons
+                color={
+                  universeTheme.colors
+                    .primaryBright
+                }
+                name="telescope"
+                size={25}
+              />
+            </View>
+
+            <View style={styles.flex}>
+              <Text style={styles.eyebrow}>
+                AUTONOMOUS INTELLIGENCE
+              </Text>
+
+              <Text style={styles.title}>
+                SaveWise Scout
+              </Text>
+            </View>
+
+            <View style={styles.statusBadge}>
+              <View
+                style={styles.statusDot}
+              />
+
+              <Text
+                style={
+                  styles.statusText
+                }
+              >
+                ONLINE
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.subtitle}>
+            Scout durchsucht neue
+            Quellen, erkennt Trends und
+            ergänzt dein Wissen
+            selbstständig.
+          </Text>
+        </View>
+
         <View style={styles.missionCard}>
           <View
             style={

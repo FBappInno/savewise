@@ -32,6 +32,7 @@ import {
   filterDiscoveriesByWorkspace,
 } from "@/utils/workspace";
 import { UniverseSearch } from "@/components/universe/universe-search";
+import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 
 import type {
   CapturedItem,
@@ -41,6 +42,7 @@ export default function UniverseHomeScreen() {
   const {
     settings,
     t,
+    updateSettings,
   } = useAppSettings();
 
   const [
@@ -223,6 +225,150 @@ export default function UniverseHomeScreen() {
           false
         }
       >
+        <View style={styles.header}>
+          <View style={styles.brand}>
+            <View
+              style={
+                styles.brandIcon
+              }
+            >
+              <Text
+                style={
+                  styles.brandIconText
+                }
+              >
+                S
+              </Text>
+            </View>
+
+            <View style={styles.flex}>
+              <Text
+                style={
+                  styles.eyebrow
+                }
+              >
+                DEIN ZWEITES GEHIRN
+              </Text>
+
+              <Text
+                style={
+                  styles.title
+                }
+              >
+                Wissensuniversum
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={
+              styles.headerActions
+            }
+          >
+            <Pressable
+              accessibilityLabel="Daten neu laden"
+              accessibilityRole="button"
+              disabled={
+                isUpdating
+              }
+              onPress={() => {
+                void handleRefresh();
+              }}
+              style={({ pressed }) => [
+                styles.actionButton,
+
+                pressed &&
+                  styles.pressed,
+
+                isUpdating &&
+                  styles.disabled,
+              ]}
+            >
+              {isUpdating ? (
+                <ActivityIndicator
+                  color={
+                    universeTheme
+                      .colors
+                      .primaryBright
+                  }
+                  size="small"
+                />
+              ) : (
+                <Ionicons
+                  color={
+                    universeTheme
+                      .colors
+                      .primaryBright
+                  }
+                  name="refresh-outline"
+                  size={21}
+                />
+              )}
+            </Pressable>
+
+            <Pressable
+              accessibilityLabel="Neue Discovery"
+              accessibilityRole="button"
+              disabled={
+                isImporting
+              }
+              onPress={() => {
+                setCaptureModalVisible(
+                  true,
+                );
+              }}
+              style={({ pressed }) => [
+                styles.addButton,
+
+                pressed &&
+                  styles.pressed,
+
+                isImporting &&
+                  styles.disabled,
+              ]}
+            >
+              {isImporting ? (
+                <ActivityIndicator
+                  color="#03111E"
+                  size="small"
+                />
+              ) : (
+                <Ionicons
+                  color="#03111E"
+                  name="add"
+                  size={26}
+                />
+              )}
+            </Pressable>
+          </View>
+        </View>
+
+        <WorkspaceSwitcher
+          activeWorkspaceId={
+            settings.workspace.activeId
+          }
+          discoveryCount={
+            universeDiscoveries.length
+          }
+          domainCount={
+            domainCount
+          }
+          onChange={async (
+            activeId,
+          ) => {
+            await updateSettings(
+              (current) => ({
+                ...current,
+
+                workspace: {
+                  ...current.workspace,
+                  activeId,
+                },
+              }),
+            );
+          }}
+        />
+
         <View style={styles.metrics}>
           <MetricCard
             icon="documents-outline"
@@ -255,87 +401,38 @@ export default function UniverseHomeScreen() {
           />
         </View>
 
-        <View style={styles.searchActionRow}>
-          <View style={styles.searchArea}>
-            <UniverseSearch
-              discoveries={
-                universeDiscoveries
-              }
-              onOpenDiscovery={
-                openDiscovery
-              }
-            />
-          </View>
+          <UniverseSearch
+  discoveries={
+    universeDiscoveries
+  }
+  onOpenDiscovery={
+    openDiscovery
+  }
+/>
 
-          <Pressable
-            accessibilityLabel="Daten neu laden"
-            accessibilityRole="button"
-            disabled={isUpdating}
-            onPress={() => {
-              void handleRefresh();
-            }}
-            style={({ pressed }) => [
-              styles.actionButton,
+        <View
+          style={
+            styles.refreshHint
+          }
+        >
+          <Ionicons
+            color={
+              universeTheme.colors
+                .textMuted
+            }
+            name="information-circle-outline"
+            size={14}
+          />
 
-              pressed &&
-                styles.pressed,
-
-              isUpdating &&
-                styles.disabled,
-            ]}
+          <Text
+            style={
+              styles.refreshHintText
+            }
           >
-            {isUpdating ? (
-              <ActivityIndicator
-                color={
-                  universeTheme.colors
-                    .primaryBright
-                }
-                size="small"
-              />
-            ) : (
-              <Ionicons
-                color={
-                  universeTheme.colors
-                    .primaryBright
-                }
-                name="refresh-outline"
-                size={20}
-              />
-            )}
-          </Pressable>
-
-          <Pressable
-            accessibilityLabel="Neue Discovery"
-            accessibilityRole="button"
-            disabled={isImporting}
-            onPress={() => {
-              setCaptureModalVisible(
-                true,
-              );
-            }}
-            style={({ pressed }) => [
-              styles.addButton,
-
-              pressed &&
-                styles.pressed,
-
-              isImporting &&
-                styles.disabled,
-            ]}
-          >
-            {isImporting ? (
-              <ActivityIndicator
-                color="#03111E"
-                size="small"
-              />
-            ) : (
-              <Ionicons
-                color="#03111E"
-                name="add"
-                size={23}
-              />
-            )}
-          </Pressable>
+             ·
+            
+            
+          </Text>
         </View>
 
         {error ? (
@@ -820,18 +917,6 @@ const styles =
           .textSecondary,
       fontSize: 9,
       marginTop: 2,
-    },
-
-    searchActionRow: {
-      alignItems: "center",
-      flexDirection: "row",
-      gap: 8,
-      marginHorizontal: 16,
-    },
-
-    searchArea: {
-      flex: 1,
-      minWidth: 0,
     },
 
     refreshHint: {
