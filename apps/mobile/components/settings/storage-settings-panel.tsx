@@ -29,15 +29,12 @@ import {
   trackAnonymousEvent,
 } from "@/services/anonymous-analytics";
 import {
-  deleteDropboxSession,
-  loadDropboxSession,
-} from "@/services/storage/dropbox-credentials";
-import {
   connectDropbox,
   disconnectDropbox,
   getDropboxAppKey,
   getDropboxRedirectUri,
   syncWithDropbox,
+  testStoredDropboxConnection,
 } from "@/services/storage/dropbox-sync-service";
 import {
   describeStorageTarget,
@@ -155,14 +152,22 @@ export function StorageSettingsPanel() {
       },
     );
 
-    void loadDropboxSession().then(
-      (session) => {
-        setDropboxAccount(
-          session?.displayName ??
+    if (supportsDropbox) {
+      void testStoredDropboxConnection()
+        .then(
+          (connection) => {
+            setDropboxAccount(
+              connection?.displayName ??
+                null,
+            );
+          },
+        )
+        .catch(() => {
+          setDropboxAccount(
             null,
-        );
-      },
-    );
+          );
+        });
+    }
   }, []);
 
   async function selectMode(
@@ -188,7 +193,6 @@ export function StorageSettingsPanel() {
       preferredMode === "local"
     ) {
       await deleteWebDavCredentials();
-      await deleteDropboxSession();
       setPassword("");
     }
 

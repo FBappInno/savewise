@@ -43,6 +43,12 @@ export async function logoutAccount(): Promise<void> {
   ]);
 }
 
+export async function getStoredAccountSessionToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(
+    SESSION_KEY,
+  );
+}
+
 export async function hasStoredAccountSession(): Promise<boolean> {
   return Boolean(
     await SecureStore.getItemAsync(
