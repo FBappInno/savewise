@@ -5,9 +5,13 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
-import nodemailer from "nodemailer";
-
 import { runtimeConfig } from "../../config/runtime-config";
+
+import {
+  MailConfigurationError,
+  MailDeliveryError,
+  sendAccountVerificationEmail,
+} from "../mail";
 import { storagePaths } from "../../config/storage-paths";
 import {
   readJsonFile,
@@ -219,7 +223,7 @@ export async function requestAccountVerification(
       token,
     );
 
-  await sendVerificationEmail({
+  await deliverVerificationEmail({
     email:
       account.email,
 
@@ -541,7 +545,7 @@ function derivePassword(
   );
 }
 
-async function sendVerificationEmail(
+async function deliverVerificationEmail(
   input: {
     email: string;
 
@@ -550,65 +554,64 @@ async function sendVerificationEmail(
     verificationUrl: string;
   },
 ): Promise<void> {
-  if (
-    runtimeConfig.isProduction &&
-    !runtimeConfig.smtpUrl
-  ) {
+  try {
+    await sendAccountVerificationEmail({
+      recipientEmail:
+        input.email,
+
+      username:
+        input.username,
+
+      verificationUrl:
+        input.verificationUrl,
+    });
+  } catch (error) {
+    if (
+      error instanceof
+        MailConfigurationError
+    ) {
+      console.error(
+        "Account verification mail is not configured:",
+        {
+          code: error.code,
+          message: error.message,
+        },
+      );
+
+      throw new AccountError(
+        "EMAIL_NOT_CONFIGURED",
+        503,
+      );
+    }
+
+    if (
+      error instanceof
+        MailDeliveryError
+    ) {
+      console.error(
+        "Account verification mail delivery failed:",
+        {
+          code: error.code,
+          message: error.message,
+        },
+      );
+
+      throw new AccountError(
+        "EMAIL_DELIVERY_FAILED",
+        502,
+      );
+    }
+
+    console.error(
+      "Unexpected account verification mail error:",
+      error,
+    );
+
     throw new AccountError(
-      "EMAIL_NOT_CONFIGURED",
-      503,
+      "EMAIL_DELIVERY_FAILED",
+      502,
     );
   }
-
-  const transporter =
-    runtimeConfig.smtpUrl
-      ? nodemailer.createTransport(
-          runtimeConfig.smtpUrl,
-        )
-      : nodemailer.createTransport({
-          streamTransport:
-            true,
-
-          newline:
-            "unix",
-
-          buffer:
-            true,
-        });
-
-  await transporter.sendMail({
-    from:
-      runtimeConfig.mailFrom,
-
-    to:
-      input.email,
-
-    subject:
-      "SaveWise – E-Mail-Adresse bestätigen",
-
-    text: [
-      `Hallo ${input.username},`,
-      "",
-      "Bestätige deine E-Mail-Adresse über diesen Link:",
-      input.verificationUrl,
-      "",
-      "Der Link ist 60 Minuten gültig.",
-    ].join("\n"),
-
-    html: [
-      `<p>Hallo ${escapeHtml(
-        input.username,
-      )},</p>`,
-
-      "<p>Bestätige deine E-Mail-Adresse, um deinen SaveWise-Account zu aktivieren.</p>",
-
-      `<p><a href="${escapeHtml(
-        input.verificationUrl,
-      )}">E-Mail-Adresse bestätigen</a></p>`,
-
-      "<p>Der Link ist 60 Minuten gültig.</p>",
-    ].join(""),
-  });
 }
 
 function createVerificationUrl(
