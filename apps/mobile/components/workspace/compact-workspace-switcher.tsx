@@ -281,15 +281,15 @@ const styles =
       borderRadius: 999,
       borderWidth: 1,
       flexDirection: "row",
-      gap: 5,
-      minHeight: 34,
-      paddingHorizontal: 10,
+      gap: 4,
+      minHeight: 30,
+      paddingHorizontal: 9,
     },
 
     triggerText: {
       fontSize: 10,
       fontWeight: "900",
-      maxWidth: 92,
+      maxWidth: 82,
     },
 
     backdrop: {

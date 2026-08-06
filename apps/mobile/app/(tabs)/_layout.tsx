@@ -285,12 +285,17 @@ function getHeaderConfiguration(
     };
   }
 
-  /*
-   * Das Universum besitzt bereits einen eigenen
-   * starken Kopfbereich und erhält deshalb keinen
-   * zusätzlichen MissionHeader.
-   */
-  return null;
+  return {
+  icon:
+    "planet-outline",
+
+  title:
+    "Universum",
+
+  subtitle:
+    "Dein persönliches Wissensnetzwerk",
+};
+
 }
 
 const styles =

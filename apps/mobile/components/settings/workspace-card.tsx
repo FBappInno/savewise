@@ -262,10 +262,10 @@ const styles =
         universeTheme.radius.md,
       borderWidth: 1,
       flexDirection: "row",
-      gap: 11,
-      minHeight: 78,
-      paddingHorizontal: 12,
-      paddingVertical: 11,
+      gap: 10,
+      minHeight: 64,
+      paddingHorizontal: 11,
+      paddingVertical: 8,
     },
 
     workspaceOptionActive: {
@@ -275,11 +275,11 @@ const styles =
 
     workspaceIcon: {
       alignItems: "center",
-      borderRadius: 12,
+      borderRadius: 11,
       borderWidth: 1,
-      height: 42,
+      height: 36,
       justifyContent: "center",
-      width: 42,
+      width: 36,
     },
 
     textArea: {
@@ -303,9 +303,9 @@ const styles =
       color:
         universeTheme.colors
           .textSecondary,
-      fontSize: 9,
-      lineHeight: 14,
-      marginTop: 5,
+      fontSize: 8,
+      lineHeight: 12,
+      marginTop: 3,
     },
 
     activeBadge: {
@@ -342,20 +342,20 @@ const styles =
     futureWorkspace: {
       alignItems: "center",
       flexDirection: "row",
-      gap: 11,
-      minHeight: 66,
+      gap: 10,
+      minHeight: 54,
       opacity: 0.58,
-      paddingHorizontal: 12,
+      paddingHorizontal: 11,
     },
 
     futureIcon: {
       alignItems: "center",
       backgroundColor:
         "rgba(148, 163, 184, 0.07)",
-      borderRadius: 12,
-      height: 42,
+      borderRadius: 11,
+      height: 36,
       justifyContent: "center",
-      width: 42,
+      width: 36,
     },
 
     futureTitle: {
