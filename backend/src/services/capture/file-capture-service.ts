@@ -2,16 +2,11 @@ import {
   randomUUID,
 } from "node:crypto";
 
-/*
- * Muss vor PDFParse geladen werden.
- * Das stellt den PDF.js-Worker in
- * Railway und Node korrekt bereit.
- */
-import "pdf-parse/worker";
-
 import {
-  PDFParse,
-} from "pdf-parse";
+  extractText,
+  getDocumentProxy,
+  getMeta,
+} from "unpdf";
 
 import type {
   Discovery,
@@ -49,6 +44,9 @@ import {
 
 const MAX_ANALYSIS_TEXT =
   16_000;
+
+const MAX_PDF_PAGES =
+  150;
 
 type ExtractedFileContent = {
   title: string;
@@ -271,8 +269,10 @@ export async function captureFile(
   };
 
   /*
-   * Zuerst wird die Originaldatei
-   * dauerhaft in Dropbox gesichert.
+   * Originaldatei zuerst dauerhaft
+   * in Dropbox sichern. Dadurch wird
+   * keine unvollständige Discovery
+   * gespeichert.
    */
   await uploadDropboxAttachment(
     input.saveWiseAccountId,
@@ -335,97 +335,106 @@ async function extractPdf(
   ExtractedFileContent
 > {
   /*
-   * Multer liefert einen Node-Buffer.
-   * Uint8Array.from erstellt einen
-   * eigenständigen, übertragbaren
-   * Speicherbereich für den PDF-Worker.
+   * Einen eigenständigen Uint8Array
+   * erzeugen. Dadurch verwenden wir
+   * nicht den möglicherweise größeren
+   * zugrunde liegenden Buffer von Multer.
    */
-  const pdfData =
+  const data =
     Uint8Array.from(
       bytes,
     );
 
-  const parser =
-    new PDFParse({
-      data:
-        pdfData,
-    });
+  const document =
+    await getDocumentProxy(
+      data,
+      {
+        maxImageSize:
+          16_777_216,
+      },
+    );
+
+  if (
+    document.numPages >
+    MAX_PDF_PAGES
+  ) {
+    throw new Error(
+      "PDF_PAGE_LIMIT_EXCEEDED",
+    );
+  }
+
+  const textResult =
+    await extractText(
+      document,
+      {
+        mergePages:
+          true,
+      },
+    );
+
+  /*
+   * Bei mergePages=true liefert
+   * unpdf bereits einen String.
+   */
+  const normalizedText =
+    normalizeText(
+      textResult.text,
+    ).slice(
+      0,
+      MAX_ANALYSIS_TEXT,
+    );
+
+  if (!normalizedText) {
+    throw new Error(
+      "PDF_HAS_NO_EXTRACTABLE_TEXT",
+    );
+  }
+
+  let title:
+    string | undefined;
 
   try {
+    const metadata =
+      await getMeta(
+        document,
+      );
+
+    const metadataTitle =
+      metadata.info?.Title;
+
+    title =
+      typeof metadataTitle ===
+        "string"
+        ? metadataTitle.trim()
+        : undefined;
+  } catch (
+    metadataError
+  ) {
     /*
-     * Nicht parallel ausführen.
-     * PDF.js kann denselben Datenpuffer
-     * nicht gleichzeitig an mehrere
-     * Worker-Aufrufe übertragen.
+     * Metadaten sind optional.
+     * Der Textimport darf deswegen
+     * nicht fehlschlagen.
      */
-    const textResult =
-      await parser.getText();
-
-    const normalizedText =
-      normalizeText(
-        textResult.text,
-      ).slice(
-        0,
-        MAX_ANALYSIS_TEXT,
-      );
-
-    if (!normalizedText) {
-      throw new Error(
-        "PDF_HAS_NO_EXTRACTABLE_TEXT",
-      );
-    }
-
-    let documentTitle:
-      string | undefined;
-
-    let pageCount:
-      number | undefined;
-
-    try {
-      const infoResult =
-        await parser.getInfo();
-
-      documentTitle =
-        infoResult.info?.Title
-          ?.trim() ||
-        undefined;
-
-      pageCount =
-        typeof infoResult.total ===
-          "number"
-          ? infoResult.total
-          : undefined;
-    } catch (
-      infoError
-    ) {
-      /*
-       * Metadaten sind optional.
-       * Ein erfolgreich extrahierter
-       * Text darf deshalb nicht wegen
-       * fehlender PDF-Metadaten scheitern.
-       */
-      console.warn(
-        "PDF metadata could not be read:",
-        infoError,
-      );
-    }
-
-    return {
-      title:
-        documentTitle ||
-        fileName.replace(
-          /\.pdf$/i,
-          "",
-        ),
-
-      text:
-        normalizedText,
-
-      pageCount,
-    };
-  } finally {
-    await parser.destroy();
+    console.warn(
+      "PDF metadata could not be read:",
+      metadataError,
+    );
   }
+
+  return {
+    title:
+      title ||
+      fileName.replace(
+        /\.pdf$/i,
+        "",
+      ),
+
+    text:
+      normalizedText,
+
+    pageCount:
+      textResult.totalPages,
+  };
 }
 
 async function extractImage(
@@ -548,8 +557,16 @@ function normalizeText(
 ): string {
   return value
     .replace(
-      /\s+/g,
+      /\r\n/g,
+      "\n",
+    )
+    .replace(
+      /[ \t]+/g,
       " ",
+    )
+    .replace(
+      /\n{3,}/g,
+      "\n\n",
     )
     .trim();
 }
