@@ -1,3 +1,7 @@
+export type WorkspaceId =
+  | "private"
+  | "business";
+
 export type SupportedLanguage = "de" | "en" | "fr" | "it" | "es";
 export type DisplayLanguage = "system" | SupportedLanguage;
 export type InputLanguage = "auto" | SupportedLanguage;
@@ -13,6 +17,10 @@ export type AppSettings = {
     username: string;
     email: string;
     hasPassword: boolean;
+  };
+
+  workspace: {
+    activeId: WorkspaceId;
   };
   language: {
     display: DisplayLanguage;
@@ -47,6 +55,10 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     username: "",
     email: "",
     hasPassword: false,
+  },
+
+  workspace: {
+    activeId: "private",
   },
   language: {
     display: "system",

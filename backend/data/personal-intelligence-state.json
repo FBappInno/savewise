@@ -1,6 +1,26 @@
 {
-  "modelVersion": 10,
+  "modelVersion": 11,
   "events": [
+    {
+      "id": "learning-11-02dd49951749",
+      "version": 11,
+      "trigger": "discovery-added",
+      "discoveryId": "813a117a-45fa-4fab-b479-83b77688de3c",
+      "graphFingerprint": "b4424d27ac9d0c04255eb9d96c4bccd15cef4bf412d4a677d1c6ffa6c24edcc3",
+      "delta": {
+        "addedNodeIds": [
+          "node-node-pets-haustierpflege",
+          "node-node-node-pets-haustierpflege-baden-von-haustieren"
+        ],
+        "removedNodeIds": [],
+        "movedNodeIds": [],
+        "addedRelationIds": [],
+        "removedRelationIds": [],
+        "summaryChanged": false
+      },
+      "explanation": "2 neue Knoten, 0 entfernte oder zusammengeführte Knoten, 0 neu eingeordnete Knoten, 0 neue Beziehungen.",
+      "createdAt": "2026-08-06T05:03:25.649Z"
+    },
     {
       "id": "learning-10-7343ec73235f",
       "version": 10,
@@ -324,7 +344,7 @@
     }
   ],
   "graphSnapshot": {
-    "fingerprint": "6436aeb10405f663fec44f913bc503b4d9a399af9c939262248f9e785c7de2c1",
+    "fingerprint": "b4424d27ac9d0c04255eb9d96c4bccd15cef4bf412d4a677d1c6ffa6c24edcc3",
     "summary": "Die Wissensbasis des Nutzers umfasst neun klar strukturierte Hauptdomänen. Im Bereich Sicherheits- und Risikomanagement steht menschliches Versagen als zentraler Faktor bei Arbeits- und Industrieunfällen sowie in der Cybersicherheit im Fokus. Ernährung wird durch differenzierte Kenntnisse zu gesundheitsrelevanten Kohlenhydraten und Proteinen abgedeckt. Lebensstilthemen gliedern sich in Kochen mit Schwerpunkt auf Heißluftfritteusen-Rezepte, Haustiere mit besonderem Fokus auf Katzenverhalten und digitale Unterhaltung via TikTok. Wissenschaftliche Inhalte befassen sich mit Umwelt- und Erdwissenschaften, insbesondere Klimawandel. Technologie und Verteidigung thematisieren moderne militärische Luftfahrt und Drohnenabwehr. Wirtschaft und internationale Beziehungen dokumentieren EU- und UN-Unter­",
     "nodes": [
       {
@@ -510,6 +530,14 @@
       {
         "id": "node-node-node-root-travel-destinations-cyclades-islands",
         "parentId": "node-node-root-travel-destinations"
+      },
+      {
+        "id": "node-node-pets-haustierpflege",
+        "parentId": "node-pets"
+      },
+      {
+        "id": "node-node-node-pets-haustierpflege-baden-von-haustieren",
+        "parentId": "node-node-pets-haustierpflege"
       },
       {
         "id": "node-root-3d-druck",

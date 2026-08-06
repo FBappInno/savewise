@@ -1538,5 +1538,44 @@
     "createdAt": "2026-08-04T04:53:21.436Z",
     "updatedAt": "2026-08-04T04:58:36.310Z",
     "savedAtLabel": "Just now"
+  },
+  {
+    "id": "813a117a-45fa-4fab-b479-83b77688de3c",
+    "source": "tiktok",
+    "url": "https://www.tiktok.com/@myquak/video/7638735745066306847?is_from_webapp=1&sender_device=pc",
+    "title": "TikTok video",
+    "improvedTitle": "Ente in der Badewanne umgeben von Blasen mit bunten Lichtreflexen",
+    "summary": "Eine Ente steht in einer mit Wasser und Blasen gefüllten Badewanne, während bunte Lichtreflexe an den Wänden sichtbar sind.  Das Bild zeigt ein ungewöhnliches und amüsantes Szenario einer Ente während eines Bades.",
+    "thumbnailUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-useast8-p-0068-tx2/ogw0Q4LeDZq9fnsIIDGAgtBkj6UA9CgISHIleo~tplv-tiktokx-origin.image?dr=10395&x-expires=1786165200&x-signature=4Nf18uNgb0zSQPVeFDONmIfkyec%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=no1a",
+    "author": "myquak",
+    "classification": {
+      "primaryCategory": "lifestyle",
+      "secondaryCategory": "Haustiere",
+      "topic": "Haustierpflege",
+      "subtopics": [
+        "Baden von Haustieren",
+        "Enten als Haustiere"
+      ]
+    },
+    "keywords": [
+      "Ente",
+      "Badewanne",
+      "Blasen",
+      "Lichtreflexe",
+      "Haustierpflege",
+      "Haustiere",
+      "Badezeit"
+    ],
+    "language": "de",
+    "confidence": 0.85,
+    "topics": [
+      "Haustierpflege",
+      "Baden von Haustieren",
+      "Enten als Haustiere"
+    ],
+    "createdAt": "2026-08-06T05:03:25.614Z",
+    "updatedAt": "2026-08-06T05:03:25.614Z",
+    "savedAtLabel": "Just now",
+    "workspaceId": "private"
   }
 ]

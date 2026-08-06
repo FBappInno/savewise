@@ -99,6 +99,18 @@ export type RelatedDiscoveriesResponse = {
   related: RelatedDiscovery[];
 };
 
+async function getActiveWorkspaceId(): Promise<
+  "private" | "business"
+> {
+  const settings =
+    await loadAppSettings();
+
+  return settings.workspace.activeId ===
+    "business"
+    ? "business"
+    : "private";
+}
+
 function getApiUrl(): string {
   const apiUrl =
     process.env.EXPO_PUBLIC_API_URL;
@@ -230,6 +242,10 @@ export async function importContent(
   rawUrl: string,
   preferredKnowledgePath?: string[],
 ): Promise<ImportResponse> {
+
+  const workspaceId =
+    await getActiveWorkspaceId();
+
   const startedAt = Date.now();
   void trackAnonymousEvent("ImportStarted", { operation: "discovery-import" });
   const url =
@@ -255,6 +271,8 @@ export async function importContent(
       {
         method: "POST",
         body: JSON.stringify({
+        workspaceId,
+
           url,
           preferredLanguage: resolveAnalysisLanguage(settings),
           preferredKnowledgePath: normalizeKnowledgePath(preferredKnowledgePath),
@@ -361,9 +379,16 @@ export async function updateDiscovery(
   return result;
 }
 
-export function getKnowledgeLibrary(): Promise<KnowledgeLibrary> {
+export async function getKnowledgeLibrary(): Promise<
+  KnowledgeLibrary
+> {
+  const workspaceId =
+    await getActiveWorkspaceId();
+
   return apiRequest<KnowledgeLibrary>(
-    "/api/knowledge",
+    `/api/knowledge?workspace=${encodeURIComponent(
+      workspaceId,
+    )}`,
   );
 }
 
@@ -492,10 +517,13 @@ export function saveResearchCandidate(
   );
 }
 
-export function rebuildKnowledgeLibrary(): Promise<{
+export async function rebuildKnowledgeLibrary(): Promise<{
   message: string;
   library: KnowledgeLibrary;
 }> {
+  const workspaceId =
+    await getActiveWorkspaceId();
+
   return apiRequest<{
     message: string;
     library: KnowledgeLibrary;
@@ -503,7 +531,12 @@ export function rebuildKnowledgeLibrary(): Promise<{
     "/api/knowledge/rebuild",
     {
       method: "POST",
+
+      body: JSON.stringify({
+        workspaceId,
+      }),
     },
+    180_000,
   );
 }
 

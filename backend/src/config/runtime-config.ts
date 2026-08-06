@@ -105,10 +105,6 @@ export const runtimeConfig = {
     process.env.OPENAI_API_KEY?.trim() ??
     "",
 
-  smtpUrl:
-    process.env.SMTP_URL?.trim() ??
-    "",
-
   mailFrom:
     process.env.MAIL_FROM?.trim() ||
     "SaveWise <no-reply@savewise.local>",

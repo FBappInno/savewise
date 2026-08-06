@@ -1,137 +1,314 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
 
-import { useAppSettings } from "@/providers/app-settings-provider";
-import { universeTheme } from "@/theme/universe-theme";
+import {
+  Tabs,
+  usePathname,
+} from "expo-router";
+
+import {
+  StyleSheet,
+  View,
+} from "react-native";
+
+import {
+  MissionHeader,
+} from "@/components/layout/mission-header";
+
+import {
+  useAppSettings,
+} from "@/providers/app-settings-provider";
+
+import {
+  universeTheme,
+} from "@/theme/universe-theme";
+
+type HeaderConfiguration = {
+  icon:
+    keyof typeof Ionicons.glyphMap;
+
+  title: string;
+
+  subtitle: string;
+};
 
 export default function TabLayout() {
-  const { t } = useAppSettings();
+  const {
+    settings,
+    t,
+    updateSettings,
+  } = useAppSettings();
+
+  const pathname =
+    usePathname();
+
+  const headerConfiguration =
+    getHeaderConfiguration(
+      pathname,
+    );
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
+    <View style={styles.screen}>
+      {headerConfiguration ? (
+        <MissionHeader
+          activeWorkspaceId={
+            settings.workspace.activeId
+          }
+          icon={
+            headerConfiguration.icon
+          }
+          onWorkspaceChange={async (
+            activeId,
+          ) => {
+            await updateSettings(
+              (current) => ({
+                ...current,
 
-        sceneStyle: {
-          backgroundColor:
-            universeTheme.colors
-              .background,
-        },
+                workspace: {
+                  ...current.workspace,
+                  activeId,
+                },
+              }),
+            );
+          }}
+          subtitle={
+            headerConfiguration.subtitle
+          }
+          title={
+            headerConfiguration.title
+          }
+        />
+      ) : null}
 
-        tabBarActiveTintColor:
-          universeTheme.colors
-            .primaryBright,
+      <View style={styles.tabs}>
+        <Tabs
+          initialRouteName="index"
+          screenOptions={{
+            headerShown: false,
 
-        tabBarInactiveTintColor:
-          universeTheme.colors
-            .textSecondary,
+            sceneStyle: {
+              backgroundColor:
+                universeTheme.colors
+                  .background,
+            },
 
-        tabBarStyle: {
-          backgroundColor: "#050D19",
-          borderTopColor:
-            universeTheme.colors
-              .border,
-          borderTopWidth: 1,
-          height: 86,
-          paddingBottom: 20,
-          paddingTop: 8,
-        },
+            tabBarActiveTintColor:
+              universeTheme.colors
+                .primaryBright,
 
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "600",
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: t("tabs.home"),
+            tabBarInactiveTintColor:
+              universeTheme.colors
+                .textMuted,
 
-          tabBarIcon: ({
-            color,
-            size,
-          }) => (
-            <Ionicons
-              color={color}
-              name="home-outline"
-              size={size}
-            />
-          ),
-        }}
-      />
+            tabBarStyle: {
+              backgroundColor:
+                universeTheme.colors
+                  .backgroundElevated,
 
-      <Tabs.Screen
-        name="library"
-        options={{
-          title: "Universum",
+              borderTopColor:
+                universeTheme.colors
+                  .border,
 
-          tabBarIcon: ({
-            color,
-            size,
-          }) => (
-            <Ionicons
-              color={color}
-              name="git-network-outline"
-              size={size}
-            />
-          ),
-        }}
-      />
+              borderTopWidth: 1,
 
-      <Tabs.Screen
-        name="insights"
-        options={{
-          title: t("tabs.brain"),
+              height: 84,
 
-          tabBarIcon: ({
-            color,
-            size,
-          }) => (
-            <Ionicons
-              color={color}
-              name="hardware-chip-outline"
-              size={size}
-            />
-          ),
-        }}
-      />
+              paddingBottom: 21,
 
-      <Tabs.Screen
-        name="research"
-        options={{
-          title: t("tabs.research"),
+              paddingTop: 8,
+            },
 
-          tabBarIcon: ({
-            color,
-            size,
-          }) => (
-            <Ionicons
-              color={color}
-              name="telescope-outline"
-              size={size}
-            />
-          ),
-        }}
-      />
+            tabBarLabelStyle: {
+              fontSize: 10,
 
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: t("tabs.settings"),
+              fontWeight: "700",
+            },
+          }}
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: "Universum",
 
-          tabBarIcon: ({
-            color,
-            size,
-          }) => (
-            <Ionicons
-              color={color}
-              name="settings-outline"
-              size={size}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+              tabBarIcon: ({
+                color,
+                size,
+                focused,
+              }) => (
+                <Ionicons
+                  color={color}
+                  name={
+                    focused
+                      ? "planet"
+                      : "planet-outline"
+                  }
+                  size={size}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="library"
+            options={{
+              href: null,
+            }}
+          />
+
+          <Tabs.Screen
+            name="insights"
+            options={{
+              title:
+                t("tabs.brain"),
+
+              tabBarIcon: ({
+                color,
+                size,
+                focused,
+              }) => (
+                <Ionicons
+                  color={color}
+                  name={
+                    focused
+                      ? "hardware-chip"
+                      : "hardware-chip-outline"
+                  }
+                  size={size}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="research"
+            options={{
+              title:
+                t("tabs.research"),
+
+              tabBarIcon: ({
+                color,
+                size,
+                focused,
+              }) => (
+                <Ionicons
+                  color={color}
+                  name={
+                    focused
+                      ? "telescope"
+                      : "telescope-outline"
+                  }
+                  size={size}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="settings"
+            options={{
+              title:
+                t("tabs.settings"),
+
+              tabBarIcon: ({
+                color,
+                size,
+                focused,
+              }) => (
+                <Ionicons
+                  color={color}
+                  name={
+                    focused
+                      ? "settings"
+                      : "settings-outline"
+                  }
+                  size={size}
+                />
+              ),
+            }}
+          />
+        </Tabs>
+      </View>
+    </View>
   );
 }
+
+function getHeaderConfiguration(
+  pathname: string,
+): HeaderConfiguration | null {
+  if (
+    pathname.includes(
+      "/insights",
+    )
+  ) {
+    return {
+      icon:
+        "hardware-chip-outline",
+
+      title:
+        "KI & Erkenntnisse",
+
+      subtitle:
+        "Verbindungen und Muster in deinem Wissen",
+    };
+  }
+
+  if (
+    pathname.includes(
+      "/research",
+    )
+  ) {
+    return {
+      icon:
+        "telescope-outline",
+
+      title:
+        "Research",
+
+      subtitle:
+        "Neue Quellen, Trends und Wissenslücken",
+    };
+  }
+
+  if (
+    pathname.includes(
+      "/settings",
+    )
+  ) {
+    return {
+      icon:
+        "settings-outline",
+
+      title:
+        "Einstellungen",
+
+      subtitle:
+        "Konto, Workspaces und App-Konfiguration",
+    };
+  }
+
+  return {
+  icon:
+    "planet-outline",
+
+  title:
+    "Universum",
+
+  subtitle:
+    "Dein persönliches Wissensnetzwerk",
+};
+
+}
+
+const styles =
+  StyleSheet.create({
+    screen: {
+      backgroundColor:
+        universeTheme.colors
+          .background,
+
+      flex: 1,
+    },
+
+    tabs: {
+      flex: 1,
+    },
+  });

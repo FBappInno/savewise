@@ -1,6 +1,7 @@
 import type {
   Discovery,
   KnowledgeLibrary,
+  WorkspaceId,
 } from "@savewise/shared";
 
 import type { DiscoveryRepository } from "../../repositories/discovery-repository";
@@ -10,6 +11,38 @@ import {
 } from "../knowledge/knowledge-graph-service";
 import { buildKnowledgeLibrary } from "../library/library-builder";
 import { canonicalizeDiscoveryUrl } from "../../utils/discovery-url";
+
+export function normalizeWorkspaceId(
+  value:
+    | string
+    | null
+    | undefined,
+): WorkspaceId {
+  return value === "business"
+    ? "business"
+    : "private";
+}
+
+export function getDiscoveryWorkspaceId(
+  discovery:
+    Pick<Discovery, "workspaceId">,
+): WorkspaceId {
+  return normalizeWorkspaceId(
+    discovery.workspaceId,
+  );
+}
+
+export function filterDiscoveriesByWorkspace(
+  discoveries: Discovery[],
+  workspaceId: WorkspaceId,
+): Discovery[] {
+  return discoveries.filter(
+    (discovery) =>
+      getDiscoveryWorkspaceId(
+        discovery,
+      ) === workspaceId,
+  );
+}
 
 export type RelatedDiscovery = {
   discovery: Discovery;
@@ -46,9 +79,18 @@ export async function saveDiscovery(
   const normalizedDiscoveryUrl =
     normalizeUrl(discovery.url);
 
+  const discoveryWorkspaceId =
+    getDiscoveryWorkspaceId(
+      discovery,
+    );
+
   const existingIndex =
     existingDiscoveries.findIndex(
       (existingDiscovery) =>
+        getDiscoveryWorkspaceId(
+          existingDiscovery,
+        ) ===
+          discoveryWorkspaceId &&
         normalizedDiscoveryUrl !== "" &&
         normalizeUrl(
           existingDiscovery.url,
@@ -63,6 +105,9 @@ export async function saveDiscovery(
 
     const updatedDiscovery: Discovery = {
       ...discovery,
+
+      workspaceId:
+        discoveryWorkspaceId,
 
       id: existingDiscovery.id,
 
@@ -88,12 +133,18 @@ export async function saveDiscovery(
     return updatedDiscovery;
   }
 
+  const storedDiscovery: Discovery = {
+    ...discovery,
+    workspaceId:
+      discoveryWorkspaceId,
+  };
+
   await repository.saveAll([
     ...existingDiscoveries,
-    discovery,
+    storedDiscovery,
   ]);
 
-  return discovery;
+  return storedDiscovery;
 }
 
 export async function getDiscoveryById(
@@ -114,13 +165,32 @@ export async function getDiscoveryById(
 export async function getDiscoveryByUrl(
   repository: DiscoveryRepository,
   url: string,
+  workspaceId: WorkspaceId =
+    "private",
 ): Promise<Discovery | null> {
-  const canonicalUrl = canonicalizeDiscoveryUrl(url);
-  if (!canonicalUrl) return null;
-  const discoveries = await repository.getAll();
-  return discoveries.find((discovery) =>
-    canonicalizeDiscoveryUrl(discovery.url) === canonicalUrl,
-  ) ?? null;
+  const canonicalUrl =
+    canonicalizeDiscoveryUrl(
+      url,
+    );
+
+  if (!canonicalUrl) {
+    return null;
+  }
+
+  const discoveries =
+    await repository.getAll();
+
+  return (
+    discoveries.find(
+      (discovery) =>
+        getDiscoveryWorkspaceId(
+          discovery,
+        ) === workspaceId &&
+        canonicalizeDiscoveryUrl(
+          discovery.url,
+        ) === canonicalUrl,
+    ) ?? null
+  );
 }
 
 export async function updateDiscovery(
@@ -188,10 +258,18 @@ export async function deleteDiscovery(
 
 export async function buildCurrentKnowledgeLibrary(
   repository: DiscoveryRepository,
+  workspaceId: WorkspaceId =
+    "private",
 ): Promise<KnowledgeLibrary> {
-  const discoveries =
+  const allDiscoveries =
     await getAllDiscoveries(
       repository,
+    );
+
+  const discoveries =
+    filterDiscoveriesByWorkspace(
+      allDiscoveries,
+      workspaceId,
     );
 
   const library =
@@ -206,17 +284,24 @@ export async function buildCurrentKnowledgeLibrary(
 
   return {
     ...library,
-
     graph,
   };
 }
 
 export async function rebuildCurrentKnowledgeLibrary(
   repository: DiscoveryRepository,
+  workspaceId: WorkspaceId =
+    "private",
 ): Promise<KnowledgeLibrary> {
-  const discoveries =
+  const allDiscoveries =
     await getAllDiscoveries(
       repository,
+    );
+
+  const discoveries =
+    filterDiscoveriesByWorkspace(
+      allDiscoveries,
+      workspaceId,
     );
 
   const library =
@@ -231,7 +316,6 @@ export async function rebuildCurrentKnowledgeLibrary(
 
   return {
     ...library,
-
     graph,
   };
 }

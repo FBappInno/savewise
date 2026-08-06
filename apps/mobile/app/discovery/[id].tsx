@@ -22,12 +22,17 @@ import {
   View,
 } from "react-native";
 
+import { DiscoveryActionsMenu } from "@/components/discovery-actions-menu";
 import { DiscoveryEditModal } from "@/components/discovery-edit-modal";
 import { RelatedDiscoveries } from "@/components/related-discoveries";
 import { StarBackground } from "@/components/universe-ui/star-background";
 import { useAppSettings } from "@/providers/app-settings-provider";
 import { hybridDiscoveryRepository } from "@/repositories/hybrid-discovery-repository";
 import { universeTheme } from "@/theme/universe-theme";
+import {
+  exportDiscoveryAsPdf,
+  shareDiscovery,
+} from "@/services/discovery-export-service";
 
 import type {
   Discovery,
@@ -78,6 +83,11 @@ export default function DiscoveryDetailScreen() {
   const [
     isEditing,
     setEditing,
+  ] = useState(false);
+
+  const [
+    isExportingPdf,
+    setExportingPdf,
   ] = useState(false);
 
   const existingMainTopics =
@@ -162,6 +172,51 @@ export default function DiscoveryDetailScreen() {
         "Link konnte nicht geöffnet werden",
         discovery.url,
       );
+    }
+  }
+
+  async function handleShare() {
+    if (!discovery) {
+      return;
+    }
+
+    try {
+      await shareDiscovery(
+        discovery,
+      );
+    } catch (shareError) {
+      Alert.alert(
+        "Teilen fehlgeschlagen",
+        shareError instanceof Error
+          ? shareError.message
+          : "Die Discovery konnte nicht geteilt werden.",
+      );
+    }
+  }
+
+  async function handleExportPdf() {
+    if (
+      !discovery ||
+      isExportingPdf
+    ) {
+      return;
+    }
+
+    setExportingPdf(true);
+
+    try {
+      await exportDiscoveryAsPdf(
+        discovery,
+      );
+    } catch (exportError) {
+      Alert.alert(
+        "PDF konnte nicht erstellt werden",
+        exportError instanceof Error
+          ? exportError.message
+          : "Der PDF-Export ist fehlgeschlagen.",
+      );
+    } finally {
+      setExportingPdf(false);
     }
   }
 
@@ -440,31 +495,20 @@ export default function DiscoveryDetailScreen() {
             </Text>
           </View>
 
-          <Pressable
-            accessibilityLabel="Bearbeiten"
-            accessibilityRole="button"
-            hitSlop={10}
-            onPress={() => {
-              setEditing(true);
-            }}
-            style={({ pressed }) => [
-              styles.topButton,
-
-              styles.editTopButton,
-
-              pressed &&
-                styles.pressed,
-            ]}
-          >
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .primaryBright
-              }
-              name="create-outline"
-              size={20}
-            />
-          </Pressable>
+                <DiscoveryActionsMenu
+        exportingPdf={
+          isExportingPdf
+        }
+        onEdit={() => {
+          setEditing(true);
+        }}
+        onExportPdf={() => {
+          void handleExportPdf();
+        }}
+        onShare={() => {
+          void handleShare();
+        }}
+      />
         </View>
 
         <View style={styles.heroCard}>
@@ -641,22 +685,8 @@ export default function DiscoveryDetailScreen() {
               }
             >
               <PathLevel
-                icon="layers-outline"
-                label="Domäne"
-                value={formatCategory(
-                  classification.primaryCategory,
-                )}
-              />
-
-              <View
-                style={
-                  styles.pathConnector
-                }
-              />
-
-              <PathLevel
                 icon="planet-outline"
-                label="Hauptthema"
+                label="Domäne"
                 value={
                   classification.secondaryCategory
                 }
@@ -908,62 +938,7 @@ export default function DiscoveryDetailScreen() {
           />
         </View>
 
-        <View style={styles.actionRow}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setEditing(true);
-            }}
-            style={({ pressed }) => [
-              styles.editButton,
-
-              pressed &&
-                styles.pressed,
-            ]}
-          >
-            <Ionicons
-              color="#03111E"
-              name="create-outline"
-              size={19}
-            />
-
-            <Text
-              style={
-                styles.editButtonText
-              }
-            >
-              {t("discovery.edit")}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={handleDelete}
-            style={({ pressed }) => [
-              styles.deleteButton,
-
-              pressed &&
-                styles.pressed,
-            ]}
-          >
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .danger
-              }
-              name="trash-outline"
-              size={19}
-            />
-
-            <Text
-              style={
-                styles.deleteButtonText
-              }
-            >
-              {t("discovery.delete")}
-            </Text>
-          </Pressable>
-        </View>
+        
       </ScrollView>
 
       <DiscoveryEditModal
@@ -986,10 +961,6 @@ export default function DiscoveryDetailScreen() {
 
           summary: t(
             "discovery.summaryField",
-          ),
-
-          primaryCategory: t(
-            "discovery.primaryCategory",
           ),
 
           secondaryCategory: t(
@@ -1023,6 +994,7 @@ export default function DiscoveryDetailScreen() {
         onClose={() => {
           setEditing(false);
         }}
+        onDelete={handleDelete}
         onSave={handleUpdate}
         visible={isEditing}
       />

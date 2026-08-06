@@ -12,7 +12,7 @@ import {
 import { buildKnowledgeGraphWithAI } from "../ai/openai-knowledge-architect";
 import { applyKnowledgeGraphOverrides } from "./knowledge-graph-overrides";
 
-const KNOWLEDGE_ARCHITECTURE_VERSION = "flat-clustered-v3";
+const KNOWLEDGE_ARCHITECTURE_VERSION = "hierarchical-universe-v4";
 
 export type KnowledgeGraphBuildOptions = {
   forceRebuild?: boolean;
@@ -99,85 +99,196 @@ function normalizeKnowledgeHierarchy(
   graph: KnowledgeGraph,
   discoveries: Discovery[],
 ): KnowledgeGraph {
-  const discoveryMap = new Map(discoveries.map((discovery) => [discovery.id, discovery]));
-  const nodes = graph.nodes.map((node) => ({
-    ...node,
-    childIds: [...node.childIds],
-    discoveryIds: [...node.discoveryIds],
-    aliases: [...node.aliases],
-    keywords: [...node.keywords],
-  }));
+  const nodes =
+    graph.nodes.map((node) => ({
+      ...node,
+      childIds: [],
+      discoveryIds: [
+        ...node.discoveryIds,
+      ],
+      aliases: [
+        ...node.aliases,
+      ],
+      keywords: [
+        ...node.keywords,
+      ],
+    }));
 
-  const removableRootIds = new Set<string>();
+  const nodeMap =
+    new Map(
+      nodes.map((node) => [
+        node.id,
+        node,
+      ]),
+    );
+
   for (const node of nodes) {
-    if (node.parentId !== null || node.kind !== "concept" || node.discoveryIds.length !== 1) continue;
-    const discovery = discoveryMap.get(node.discoveryIds[0]);
-    const classification = discovery?.classification;
-    if (!discovery || !classification) continue;
+    if (
+      node.parentId &&
+      !nodeMap.has(node.parentId)
+    ) {
+      node.parentId = null;
+    }
+  }
 
-    const path = uniqueLabels([
-      classification.secondaryCategory,
-      classification.topic,
-      ...classification.subtopics,
-    ]).slice(0, 3);
-    if (path.length === 0) continue;
+  const depthCache =
+    new Map<string, number>();
 
-    let parentId: string | null = null;
-    path.forEach((rawLabel, depth) => {
-      const label = formatLabel(rawLabel);
-      let target = nodes.find((candidate) =>
-        candidate.parentId === parentId && matchesLabel(candidate, label),
+  function getDepth(
+    node: KnowledgeGraph["nodes"][number],
+    visited = new Set<string>(),
+  ): number {
+    const cached =
+      depthCache.get(node.id);
+
+    if (
+      cached !== undefined
+    ) {
+      return cached;
+    }
+
+    if (
+      !node.parentId ||
+      visited.has(node.id)
+    ) {
+      depthCache.set(
+        node.id,
+        0,
       );
-      if (!target) {
-        target = {
-          id: createProvisionalNodeId(parentId, label),
-          title: label,
-          kind: getNodeKind(depth),
-          description: depth === path.length - 1
-            ? discovery.summary || discovery.description || label
-            : `Knowledge about ${label}.`,
-          parentId,
-          childIds: [],
-          discoveryIds: [],
-          aliases: [],
-          keywords: depth === path.length - 1 ? [...discovery.keywords] : [],
-          confidence: discovery.confidence ?? 0.5,
-        };
-        nodes.push(target);
-      }
-      if (depth === path.length - 1 && !target.discoveryIds.includes(discovery.id)) {
-        target.discoveryIds.push(discovery.id);
-      }
-      parentId = target.id;
-    });
-    removableRootIds.add(node.id);
+
+      return 0;
+    }
+
+    const parent =
+      nodeMap.get(
+        node.parentId,
+      );
+
+    if (!parent) {
+      node.parentId = null;
+
+      depthCache.set(
+        node.id,
+        0,
+      );
+
+      return 0;
+    }
+
+    const nextVisited =
+      new Set(visited);
+
+    nextVisited.add(node.id);
+
+    const depth =
+      Math.min(
+        2,
+        getDepth(
+          parent,
+          nextVisited,
+        ) + 1,
+      );
+
+    depthCache.set(
+      node.id,
+      depth,
+    );
+
+    return depth;
   }
 
-  let normalizedNodes = nodes.filter((node) => !removableRootIds.has(node.id));
-  normalizedNodes.forEach((node) => {
-    node.title = formatLabel(node.title);
-  });
-  rebuildHierarchyChildren(normalizedNodes);
+  for (const node of nodes) {
+    const depth =
+      getDepth(node);
 
-  const broadRootIds = new Set(
-    normalizedNodes
-      .filter((node) => node.parentId === null && node.childIds.length >= 4)
-      .map((node) => node.id),
+    node.kind =
+      depth === 0
+        ? "domain"
+        : depth === 1
+          ? "topic"
+          : "subtopic";
+
+    node.title =
+      formatLabel(
+        node.title,
+      );
+  }
+
+  const genericRootIds =
+    new Set(
+      nodes
+        .filter(
+          (node) =>
+            node.parentId === null &&
+            isGenericDomainLabel(
+              node.title,
+            ),
+        )
+        .map(
+          (node) =>
+            node.id,
+        ),
+    );
+
+  for (const node of nodes) {
+    if (
+      node.parentId &&
+      genericRootIds.has(
+        node.parentId,
+      )
+    ) {
+      node.parentId = null;
+      node.kind = "domain";
+    }
+  }
+
+  const normalizedNodes =
+    nodes.filter(
+      (node) =>
+        !genericRootIds.has(
+          node.id,
+        ),
+    );
+
+  rebuildHierarchyChildren(
+    normalizedNodes,
   );
-  for (const node of normalizedNodes) {
-    if (node.parentId && broadRootIds.has(node.parentId)) node.parentId = null;
-  }
-  normalizedNodes = normalizedNodes.filter((node) => !broadRootIds.has(node.id));
-  rebuildHierarchyChildren(normalizedNodes);
 
-  const nodeIds = new Set(normalizedNodes.map((node) => node.id));
+  const normalizedNodeIds =
+    new Set(
+      normalizedNodes.map(
+        (node) =>
+          node.id,
+      ),
+    );
+
   return {
     ...graph,
-    rootNodeIds: normalizedNodes.filter((node) => node.parentId === null).map((node) => node.id),
-    nodes: normalizedNodes,
-    relations: graph.relations.filter((relation) =>
-      nodeIds.has(relation.sourceId) && nodeIds.has(relation.targetId),
-    ),
+
+    rootNodeIds:
+      normalizedNodes
+        .filter(
+          (node) =>
+            node.parentId === null,
+        )
+        .map(
+          (node) =>
+            node.id,
+        ),
+
+    nodes:
+      normalizedNodes,
+
+    relations:
+      graph.relations.filter(
+        (relation) =>
+          normalizedNodeIds.has(
+            relation.sourceId,
+          ) &&
+          normalizedNodeIds.has(
+            relation.targetId,
+          ),
+      ),
   };
 }
 
@@ -254,8 +365,15 @@ function addDiscoveryHierarchy(
 ): void {
   const classification = discovery.classification;
   const rawLabels = [
-    classification?.secondaryCategory,
+    classification
+      ? resolveDomainLabel(
+          classification.primaryCategory,
+          classification.secondaryCategory,
+        )
+      : undefined,
+
     classification?.topic,
+
     ...(classification?.subtopics ?? []),
   ].slice(0, 3);
   const labels = uniqueLabels(
@@ -347,6 +465,66 @@ function matchesLabel(
       (alias) => normalizeText(alias) === normalizedLabel,
     )
   );
+}
+
+function resolveDomainLabel(
+  primaryCategory: string,
+  secondaryCategory: string,
+): string {
+  const normalizedSecondary =
+    secondaryCategory.trim();
+
+  if (
+    normalizedSecondary &&
+    !isGenericDomainLabel(
+      normalizedSecondary,
+    )
+  ) {
+    return normalizedSecondary;
+  }
+
+  const normalizedPrimary =
+    primaryCategory.trim();
+
+  if (
+    normalizedPrimary &&
+    !isGenericDomainLabel(
+      normalizedPrimary,
+    )
+  ) {
+    return normalizedPrimary;
+  }
+
+  return "Noch nicht eingeordnet";
+}
+
+function isGenericDomainLabel(
+  value: string,
+): boolean {
+  const normalized =
+    value
+      .trim()
+      .toLocaleLowerCase()
+      .replace(
+        /[\s_-]+/g,
+        " ",
+      );
+
+  return [
+    "other",
+    "others",
+    "general",
+    "miscellaneous",
+    "misc",
+    "unknown",
+    "uncategorized",
+    "unclassified",
+    "sonstiges",
+    "andere",
+    "allgemein",
+    "noch nicht eingeordnet",
+    "nicht eingeordnet",
+  ].includes(normalized);
 }
 
 function uniqueLabels(values: string[]): string[] {

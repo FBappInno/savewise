@@ -1025,29 +1025,29 @@ const captureLabels = {
     universe:
       "Wissensuniversum",
     universeHint:
-      "Lass SaveWise das Hauptthema bestimmen oder ordne den Beitrag selbst einer Hauptebene zu.",
+      "Lass SaveWise die Domäne bestimmen oder ordne die Discovery selbst einer Domäne zu.",
     automatic:
       "Automatisch durch KI",
     automaticDescription:
-      "SaveWise bestimmt Hauptthema, Topic und Unterthemen selbstständig.",
+      "SaveWise bestimmt Domäne, Topic und Unterthemen selbstständig.",
     manual:
       "MANUELLE EINORDNUNG",
-    mainTopic: "Hauptthema",
+    mainTopic: "Domäne",
     chooseMainTopic:
-      "Bestehendes Hauptthema auswählen",
+      "Bestehende Domäne auswählen",
     searchTopics:
-      "Hauptthemen durchsuchen …",
+      "Domänen durchsuchen …",
     noMatchingTopics:
-      "Keine passenden Hauptthemen gefunden.",
+      "Keine passenden Domänen gefunden.",
     or: "oder",
     newMainTopic:
-      "Neues Hauptthema",
+      "Neue Domäne",
     newMainTopicPlaceholder:
       "z. B. Robotik, Finanzen oder Reisen",
     aiHierarchyHint:
-      "Die KI erstellt innerhalb des gewählten Hauptthemas weiterhin das passende Topic und die Unterthemen.",
+      "Die KI erstellt innerhalb der gewählten Domäne weiterhin das passende Topic und die Unterthemen.",
     mainTopicRequired:
-      "Wähle ein Hauptthema oder erfasse ein neues.",
+      "Wähle eine Domäne oder erfasse eine neue.",
   },
 
   en: {
@@ -1068,29 +1068,29 @@ const captureLabels = {
     universe:
       "Knowledge universe",
     universeHint:
-      "Let SaveWise determine the main topic or assign the contribution yourself.",
+      "Let SaveWise determine the domain or assign the discovery to a domain yourself.",
     automatic:
       "Automatic by AI",
     automaticDescription:
-      "SaveWise determines the main topic, topic and subtopics.",
+      "SaveWise determines the domain, topic and subtopics.",
     manual:
       "MANUAL CLASSIFICATION",
-    mainTopic: "Main topic",
+    mainTopic: "Domain",
     chooseMainTopic:
-      "Select an existing main topic",
+      "Select an existing domain",
     searchTopics:
-      "Search main topics …",
+      "Search domains …",
     noMatchingTopics:
-      "No matching main topics found.",
+      "No matching domains found.",
     or: "or",
     newMainTopic:
-      "New main topic",
+      "New domain",
     newMainTopicPlaceholder:
       "e.g. Robotics, Finance or Travel",
     aiHierarchyHint:
-      "AI will still create the appropriate topic and subtopics inside the selected main topic.",
+      "AI will still create the appropriate topic and subtopics inside the selected domain.",
     mainTopicRequired:
-      "Select a main topic or create a new one.",
+      "Select a domain or create a new one.",
   },
 
   fr: {
@@ -1111,30 +1111,30 @@ const captureLabels = {
     universe:
       "Univers des connaissances",
     universeHint:
-      "Laissez SaveWise choisir le thème principal ou attribuez-le vous-même.",
+      "Laissez SaveWise choisir le domaine ou attribuez-le vous-même.",
     automatic:
       "Automatique par IA",
     automaticDescription:
-      "SaveWise détermine le thème principal, le sujet et les sous-thèmes.",
+      "SaveWise détermine le domaine, le sujet et les sous-thèmes.",
     manual:
       "CLASSEMENT MANUEL",
     mainTopic:
-      "Thème principal",
+      "Domaine",
     chooseMainTopic:
-      "Sélectionner un thème principal",
+      "Sélectionner un domaine",
     searchTopics:
-      "Rechercher les thèmes …",
+      "Rechercher les domaines …",
     noMatchingTopics:
-      "Aucun thème correspondant.",
+      "Aucun domaine correspondant.",
     or: "ou",
     newMainTopic:
-      "Nouveau thème principal",
+      "Nouveau domaine",
     newMainTopicPlaceholder:
       "p. ex. Robotique, Finance ou Voyages",
     aiHierarchyHint:
-      "L’IA crée toujours le sujet et les sous-thèmes appropriés.",
+      "L’IA crée toujours le sujet et les sous-thèmes appropriés dans le domaine sélectionné.",
     mainTopicRequired:
-      "Sélectionnez ou créez un thème principal.",
+      "Sélectionnez ou créez un domaine.",
   },
 
   it: {
@@ -1155,30 +1155,30 @@ const captureLabels = {
     universe:
       "Universo della conoscenza",
     universeHint:
-      "Lascia scegliere a SaveWise il tema principale oppure assegnalo manualmente.",
+      "Lascia scegliere a SaveWise il dominio oppure assegnalo manualmente.",
     automatic:
       "Automatico con IA",
     automaticDescription:
-      "SaveWise determina il tema principale, l’argomento e i sottoargomenti.",
+      "SaveWise determina il dominio, l’argomento e i sottoargomenti.",
     manual:
       "CLASSIFICAZIONE MANUALE",
     mainTopic:
-      "Tema principale",
+      "Dominio",
     chooseMainTopic:
-      "Seleziona un tema principale",
+      "Seleziona un dominio",
     searchTopics:
-      "Cerca temi principali …",
+      "Cerca domini …",
     noMatchingTopics:
-      "Nessun tema corrispondente.",
+      "Nessun dominio corrispondente.",
     or: "oppure",
     newMainTopic:
-      "Nuovo tema principale",
+      "Nuovo dominio",
     newMainTopicPlaceholder:
       "es. Robotica, Finanza o Viaggi",
     aiHierarchyHint:
-      "L’IA crea comunque l’argomento e i sottoargomenti appropriati.",
+      "L’IA crea comunque l’argomento e i sottoargomenti appropriati nel dominio selezionato.",
     mainTopicRequired:
-      "Seleziona o crea un tema principale.",
+      "Seleziona o crea un dominio.",
   },
 
   es: {
@@ -1199,30 +1199,30 @@ const captureLabels = {
     universe:
       "Universo de conocimiento",
     universeHint:
-      "Deja que SaveWise determine el tema principal o asígnalo manualmente.",
+      "Deja que SaveWise determine el dominio o asígnalo manualmente.",
     automatic:
       "Automático por IA",
     automaticDescription:
-      "SaveWise determina el tema principal, el tema y los subtemas.",
+      "SaveWise determina el dominio, el tema y los subtemas.",
     manual:
       "CLASIFICACIÓN MANUAL",
     mainTopic:
-      "Tema principal",
+      "Dominio",
     chooseMainTopic:
-      "Seleccionar un tema principal",
+      "Seleccionar un dominio",
     searchTopics:
-      "Buscar temas principales …",
+      "Buscar dominios …",
     noMatchingTopics:
-      "No se encontraron temas.",
+      "No se encontraron dominios.",
     or: "o",
     newMainTopic:
-      "Nuevo tema principal",
+      "Nuevo dominio",
     newMainTopicPlaceholder:
       "p. ej. Robótica, Finanzas o Viajes",
     aiHierarchyHint:
-      "La IA seguirá creando el tema y los subtemas apropiados.",
+      "La IA seguirá creando el tema y los subtemas apropiados dentro del dominio.",
     mainTopicRequired:
-      "Selecciona o crea un tema principal.",
+      "Selecciona o crea un dominio.",
   },
 } as const;
 

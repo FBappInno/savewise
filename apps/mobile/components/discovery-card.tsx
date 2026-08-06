@@ -10,6 +10,10 @@ import {
 import { formatAppDate } from "@/i18n/date-time";
 import { useAppSettings } from "@/providers/app-settings-provider";
 import { universeTheme } from "@/theme/universe-theme";
+import {
+  getDiscoveryHierarchy,
+} from "@/utils/knowledge-hierarchy";
+
 import type {
   Discovery,
   DiscoverySource,
@@ -22,8 +26,6 @@ type DiscoveryCardProps = {
     discovery: Discovery,
   ) => void;
 };
-
-const MAX_VISIBLE_TOPICS = 3;
 
 const sourceLabels: Record<
   DiscoverySource,
@@ -56,20 +58,9 @@ export function DiscoveryCard({
     settings,
   } = useAppSettings();
 
-  const classification =
-    discovery.classification;
-
-  const visibleTopics =
-    discovery.topics.slice(
-      0,
-      MAX_VISIBLE_TOPICS,
-    );
-
-  const hiddenTopicCount =
-    Math.max(
-      0,
-      discovery.topics.length -
-        visibleTopics.length,
+  const hierarchy =
+    getDiscoveryHierarchy(
+      discovery,
     );
 
   const displayedTitle =
@@ -78,9 +69,10 @@ export function DiscoveryCard({
 
   const confidence =
     typeof discovery.confidence ===
-      "number"
+    "number"
       ? Math.round(
-          discovery.confidence * 100,
+          discovery.confidence *
+            100,
         )
       : null;
 
@@ -179,33 +171,128 @@ export function DiscoveryCard({
         </Text>
       ) : null}
 
-      {classification ? (
-        <View style={styles.pathPanel}>
-          <Ionicons
-            color={
-              universeTheme.colors
-                .primary
-            }
-            name="git-network-outline"
-            size={15}
-          />
+      {hierarchy.domain ||
+      hierarchy.topic ||
+      hierarchy.subtopics.length >
+        0 ? (
+        <View style={styles.hierarchy}>
+          {hierarchy.domain ? (
+            <HierarchyRow
+              icon="planet-outline"
+              label="Domäne"
+              value={
+                hierarchy.domain
+              }
+            />
+          ) : null}
 
-          <Text
-            numberOfLines={2}
-            style={styles.pathText}
-          >
-            {formatCategory(
-              classification
-                .primaryCategory,
-            )}
-            {"  ›  "}
-            {
-              classification
-                .secondaryCategory
-            }
-            {"  ›  "}
-            {classification.topic}
-          </Text>
+          {hierarchy.topic ? (
+            <HierarchyConnector />
+          ) : null}
+
+          {hierarchy.topic ? (
+            <HierarchyRow
+              icon="sunny-outline"
+              label="Topic"
+              value={
+                hierarchy.topic
+              }
+            />
+          ) : null}
+
+          {hierarchy.subtopics.length >
+          0 ? (
+            <HierarchyConnector />
+          ) : null}
+
+          {hierarchy.subtopics.length >
+          0 ? (
+            <View
+              style={
+                styles.subtopicSection
+              }
+            >
+              <View
+                style={
+                  styles.levelHeader
+                }
+              >
+                <View
+                  style={
+                    styles.levelIcon
+                  }
+                >
+                  <Ionicons
+                    color={
+                      universeTheme
+                        .colors
+                        .violet
+                    }
+                    name="star-outline"
+                    size={15}
+                  />
+                </View>
+
+                <Text
+                  style={
+                    styles.levelLabel
+                  }
+                >
+                  Unterthema
+                </Text>
+              </View>
+
+              <View
+                style={
+                  styles.subtopicChips
+                }
+              >
+                {hierarchy.subtopics
+                  .slice(0, 4)
+                  .map(
+                    (subtopic) => (
+                      <View
+                        key={subtopic}
+                        style={
+                          styles.subtopicChip
+                        }
+                      >
+                        <Text
+                          numberOfLines={
+                            1
+                          }
+                          style={
+                            styles.subtopicText
+                          }
+                        >
+                          {subtopic}
+                        </Text>
+                      </View>
+                    ),
+                  )}
+
+                {hierarchy.subtopics
+                  .length > 4 ? (
+                  <View
+                    style={
+                      styles.moreChip
+                    }
+                  >
+                    <Text
+                      style={
+                        styles.moreText
+                      }
+                    >
+                      +
+                      {hierarchy
+                        .subtopics
+                        .length - 4}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
         </View>
       ) : null}
 
@@ -218,47 +305,9 @@ export function DiscoveryCard({
         </Text>
       ) : null}
 
-      {visibleTopics.length > 0 ? (
-        <View style={styles.topics}>
-          {visibleTopics.map(
-            (topic) => (
-              <View
-                key={`${discovery.id}-${topic}`}
-                style={styles.topicBadge}
-              >
-                <View
-                  style={styles.topicDot}
-                />
-
-                <Text
-                  numberOfLines={1}
-                  style={
-                    styles.topicText
-                  }
-                >
-                  {topic}
-                </Text>
-              </View>
-            ),
-          )}
-
-          {hiddenTopicCount > 0 ? (
-            <View style={styles.moreBadge}>
-              <Text
-                style={
-                  styles.moreBadgeText
-                }
-              >
-                +{hiddenTopicCount}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-      ) : null}
-
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Im Wissensuniversum öffnen
+          Discovery öffnen
         </Text>
 
         <Ionicons
@@ -274,125 +323,112 @@ export function DiscoveryCard({
   );
 }
 
-function formatCategory(
-  category: string,
-): string {
-  return category
-    .split("_")
-    .map(
-      (word) =>
-        word.charAt(0)
-          .toUpperCase() +
-        word.slice(1),
-    )
-    .join(" ");
+function HierarchyRow({
+  icon,
+  label,
+  value,
+}: {
+  icon:
+    keyof typeof Ionicons.glyphMap;
+
+  label: string;
+  value: string;
+}) {
+  return (
+    <View style={styles.hierarchyRow}>
+      <View style={styles.levelHeader}>
+        <View style={styles.levelIcon}>
+          <Ionicons
+            color={
+              universeTheme.colors
+                .primaryBright
+            }
+            name={icon}
+            size={15}
+          />
+        </View>
+
+        <Text style={styles.levelLabel}>
+          {label}
+        </Text>
+      </View>
+
+      <Text
+        numberOfLines={2}
+        style={styles.levelValue}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function HierarchyConnector() {
+  return (
+    <View
+      pointerEvents="none"
+      style={
+        styles.hierarchyConnector
+      }
+    />
+  );
 }
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor:
-      "rgba(6, 20, 36, 0.94)",
-
+      "rgba(20, 48, 77, 0.92)",
     borderColor:
-      universeTheme.colors.border,
-
-    borderRadius:
-      universeTheme.radius.lg,
-
+      "rgba(125, 211, 252, 0.24)",
+    borderRadius: 20,
     borderWidth: 1,
-
+    marginBottom: 14,
     overflow: "hidden",
-
-    padding: 18,
-
-    shadowColor:
-      universeTheme.colors.primary,
-
-    shadowOffset: {
-      height: 0,
-      width: 0,
-    },
-
-    shadowOpacity: 0.14,
-
-    shadowRadius: 14,
+    padding: 17,
   },
 
   glowLine: {
     backgroundColor:
-      universeTheme.colors.primary,
-
+      universeTheme.colors
+        .primaryBright,
     height: 2,
-
     left: 0,
-
     opacity: 0.75,
-
     position: "absolute",
-
     right: 0,
-
     top: 0,
-  },
-
-  pressed: {
-    opacity: 0.72,
-
-    transform: [
-      {
-        scale: 0.992,
-      },
-    ],
   },
 
   topRow: {
     alignItems: "center",
-
     flexDirection: "row",
-
     justifyContent:
       "space-between",
   },
 
   sourceGroup: {
     alignItems: "center",
-
     flexDirection: "row",
-
-    gap: 10,
+    gap: 9,
   },
 
   sourceIcon: {
     alignItems: "center",
-
     backgroundColor:
-      "rgba(56, 189, 248, 0.11)",
-
-    borderColor:
-      universeTheme.colors.border,
-
-    borderRadius: 12,
-
-    borderWidth: 1,
-
-    height: 38,
-
+      "rgba(56, 189, 248, 0.12)",
+    borderRadius: 11,
+    height: 37,
     justifyContent: "center",
-
-    width: 38,
+    width: 37,
   },
 
   source: {
     color:
       universeTheme.colors
         .primaryBright,
-
-    fontSize: 11,
-
-    fontWeight: "800",
-
-    letterSpacing: 0.8,
-
+    fontSize: 10,
+    fontWeight: "900",
+    letterSpacing: 0.7,
     textTransform: "uppercase",
   },
 
@@ -400,223 +436,190 @@ const styles = StyleSheet.create({
     color:
       universeTheme.colors
         .textMuted,
-
-    fontSize: 10,
-
-    marginTop: 2,
+    fontSize: 9,
+    marginTop: 3,
   },
 
   confidenceBadge: {
     alignItems: "center",
-
     backgroundColor:
-      "rgba(74, 222, 128, 0.08)",
-
+      "rgba(74, 222, 128, 0.09)",
     borderColor:
-      "rgba(74, 222, 128, 0.28)",
-
+      "rgba(74, 222, 128, 0.26)",
     borderRadius: 999,
-
     borderWidth: 1,
-
     flexDirection: "row",
-
     gap: 5,
-
     paddingHorizontal: 9,
-
     paddingVertical: 6,
   },
 
   confidenceText: {
     color:
       universeTheme.colors.green,
-
-    fontSize: 10,
-
-    fontWeight: "800",
+    fontSize: 9,
+    fontWeight: "900",
   },
 
   title: {
     color:
       universeTheme.colors.text,
-
     fontSize: 18,
-
-    fontWeight: "800",
-
+    fontWeight: "900",
     lineHeight: 24,
-
-    marginTop: 16,
+    marginTop: 14,
   },
 
   author: {
     color:
       universeTheme.colors
         .textSecondary,
-
-    fontSize: 12,
-
+    fontSize: 11,
     marginTop: 6,
   },
 
-  pathPanel: {
-    alignItems: "flex-start",
-
+  hierarchy: {
     backgroundColor:
-      "rgba(56, 189, 248, 0.06)",
-
+      "rgba(45, 76, 108, 0.63)",
     borderColor:
-      universeTheme.colors.border,
-
-    borderRadius: 13,
-
+      "rgba(148, 197, 229, 0.20)",
+    borderRadius: 15,
     borderWidth: 1,
-
-    flexDirection: "row",
-
-    gap: 8,
-
-    marginTop: 15,
-
+    marginTop: 14,
     padding: 12,
   },
 
-  pathText: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-
-    flex: 1,
-
-    fontSize: 11,
-
-    fontWeight: "600",
-
-    lineHeight: 16,
-  },
-
-  summary: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-
-    fontSize: 13,
-
-    lineHeight: 20,
-
-    marginTop: 14,
-  },
-
-  topics: {
+  hierarchyRow: {
+    alignItems: "center",
     flexDirection: "row",
+    gap: 12,
+    justifyContent:
+      "space-between",
+    minHeight: 35,
+  },
 
-    flexWrap: "wrap",
-
+  levelHeader: {
+    alignItems: "center",
+    flexDirection: "row",
     gap: 7,
-
-    marginTop: 15,
   },
 
-  topicBadge: {
+  levelIcon: {
     alignItems: "center",
-
     backgroundColor:
-      "rgba(139, 92, 246, 0.08)",
-
-    borderColor:
-      "rgba(139, 92, 246, 0.28)",
-
-    borderRadius: 999,
-
-    borderWidth: 1,
-
-    flexDirection: "row",
-
-    gap: 6,
-
-    maxWidth: "100%",
-
-    paddingHorizontal: 10,
-
-    paddingVertical: 6,
-  },
-
-  topicDot: {
-    backgroundColor:
-      universeTheme.colors.violet,
-
-    borderRadius: 999,
-
-    height: 5,
-
-    width: 5,
-  },
-
-  topicText: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-
-    flexShrink: 1,
-
-    fontSize: 10,
-
-    fontWeight: "700",
-  },
-
-  moreBadge: {
-    alignItems: "center",
-
-    borderColor:
-      universeTheme.colors.border,
-
-    borderRadius: 999,
-
-    borderWidth: 1,
-
+      "rgba(56, 189, 248, 0.09)",
+    borderRadius: 8,
+    height: 28,
     justifyContent: "center",
-
-    minHeight: 29,
-
-    paddingHorizontal: 10,
+    width: 28,
   },
 
-  moreBadgeText: {
+  levelLabel: {
     color:
       universeTheme.colors
         .textMuted,
+    fontSize: 9,
+    fontWeight: "900",
+    letterSpacing: 0.7,
+    textTransform: "uppercase",
+  },
 
-    fontSize: 10,
+  levelValue: {
+    color:
+      universeTheme.colors.text,
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 16,
+    textAlign: "right",
+  },
 
+  hierarchyConnector: {
+    backgroundColor:
+      "rgba(125, 211, 252, 0.28)",
+    height: 9,
+    marginLeft: 13,
+    width: 1,
+  },
+
+  subtopicSection: {
+    gap: 8,
+  },
+
+  subtopicChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 7,
+  },
+
+  subtopicChip: {
+    backgroundColor:
+      "rgba(139, 92, 246, 0.10)",
+    borderColor:
+      "rgba(167, 139, 250, 0.30)",
+    borderRadius: 999,
+    borderWidth: 1,
+    maxWidth: "100%",
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+
+  subtopicText: {
+    color:
+      universeTheme.colors
+        .textSecondary,
+    flexShrink: 1,
+    fontSize: 9,
     fontWeight: "700",
+  },
+
+  moreChip: {
+    alignItems: "center",
+    borderColor:
+      universeTheme.colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    justifyContent: "center",
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+
+  moreText: {
+    color:
+      universeTheme.colors
+        .textMuted,
+    fontSize: 9,
+    fontWeight: "800",
+  },
+
+  summary: {
+    color: "#D6E2EC",
+    fontSize: 12,
+    lineHeight: 19,
+    marginTop: 14,
   },
 
   footer: {
     alignItems: "center",
-
     borderTopColor:
       universeTheme.colors.border,
-
     borderTopWidth: 1,
-
     flexDirection: "row",
-
     justifyContent:
       "space-between",
-
-    marginTop: 17,
-
-    paddingTop: 13,
+    marginTop: 15,
+    paddingTop: 12,
   },
 
   footerText: {
     color:
       universeTheme.colors
         .primaryBright,
+    fontSize: 10,
+    fontWeight: "800",
+  },
 
-    fontSize: 11,
-
-    fontWeight: "700",
+  pressed: {
+    opacity: 0.66,
   },
 });

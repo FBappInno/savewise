@@ -8,6 +8,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import { hybridDiscoveryRepository } from "@/repositories/hybrid-discovery-repository";
 import type { Discovery } from "@/types/discovery";
 
+import type {
+  WorkspaceId,
+} from "@/types/app-settings";
+
 export function useDiscoveries() {
   const [
     discoveries,
@@ -90,6 +94,7 @@ export function useDiscoveries() {
       async (
         url: string,
         preferredKnowledgePath?: string[],
+        workspaceId: WorkspaceId = "private",
       ): Promise<Discovery> => {
         setError(null);
         setIsImporting(true);
@@ -99,6 +104,7 @@ export function useDiscoveries() {
             await hybridDiscoveryRepository.importFromUrl(
               url,
               preferredKnowledgePath,
+              workspaceId,
             );
 
           setDiscoveries(

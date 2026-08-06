@@ -30,6 +30,27 @@ export async function loginAccount(email: string, password: string): Promise<Acc
   return result.account;
 }
 
+export async function logoutAccount(): Promise<void> {
+  await Promise.all([
+    SecureStore.deleteItemAsync(
+      SESSION_KEY,
+    ),
+
+    AsyncStorage.setItem(
+      LOGIN_REQUIRED_KEY,
+      "true",
+    ),
+  ]);
+}
+
+export async function hasStoredAccountSession(): Promise<boolean> {
+  return Boolean(
+    await SecureStore.getItemAsync(
+      SESSION_KEY,
+    ),
+  );
+}
+
 export async function hasVerifiedAccountSession(): Promise<boolean> {
   const token = await SecureStore.getItemAsync(SESSION_KEY);
   if (!token) return false;
