@@ -62,7 +62,26 @@
           "cameraPermission": "SaveWise verwendet die Kamera, damit du Wissen, Dokumente und Whiteboards direkt erfassen kannst."
         }
       ],
-      "expo-document-picker"
+      "expo-document-picker",
+      [
+        "expo-share-intent",
+        {
+          "iosShareExtensionName": "SaveWise",
+          "iosAppGroupIdentifier": "group.com.fernandobiaggi.savewise.beta",
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsText": true,
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
+            "NSExtensionActivationSupportsWebPageWithMaxCount": 1,
+            "NSExtensionActivationSupportsImageWithMaxCount": 5,
+            "NSExtensionActivationSupportsFileWithMaxCount": 5
+          },
+          "androidIntentFilters": [
+            "text/*",
+            "image/*",
+            "application/pdf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

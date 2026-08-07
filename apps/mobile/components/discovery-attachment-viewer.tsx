@@ -6,7 +6,7 @@ import {
   Image,
 } from "expo-image";
 
-import * as Sharing from "expo-sharing";
+import * as SecureStore from "expo-secure-store";
 
 import type {
   Discovery,
@@ -28,12 +28,19 @@ import {
 } from "react-native";
 
 import {
+  WebView,
+} from "react-native-webview";
+
+import {
   downloadDiscoveryAttachment,
 } from "@/services/discovery-attachment-client";
 
 import {
   universeTheme,
 } from "@/theme/universe-theme";
+
+const SESSION_KEY =
+  "savewise.account.session.v1";
 
 export function DiscoveryAttachmentViewer({
   discovery,
@@ -50,14 +57,36 @@ export function DiscoveryAttachmentViewer({
     );
 
   const [
-    imageVisible,
-    setImageVisible,
+    viewerVisible,
+    setViewerVisible,
   ] =
     useState(false);
 
   const [
+    pdfUrl,
+    setPdfUrl,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
+    pdfToken,
+    setPdfToken,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
     isOpening,
     setOpening,
+  ] =
+    useState(false);
+
+  const [
+    pdfLoading,
+    setPdfLoading,
   ] =
     useState(false);
 
@@ -76,7 +105,8 @@ export function DiscoveryAttachmentViewer({
     attachment.captureType ===
     "pdf";
 
-  async function handleOpen() {
+  async function handleOpen():
+  Promise<void> {
     if (isOpening) {
       return;
     }
@@ -84,46 +114,62 @@ export function DiscoveryAttachmentViewer({
     setOpening(true);
 
     try {
-      const file =
-        await downloadDiscoveryAttachment(
-          discovery,
+      if (isPdf) {
+        const apiUrl =
+          process.env
+            .EXPO_PUBLIC_API_URL
+            ?.replace(
+              /\/$/,
+              "",
+            );
+
+        if (!apiUrl) {
+          throw new Error(
+            "EXPO_PUBLIC_API_URL ist nicht konfiguriert.",
+          );
+        }
+
+        const token =
+          await SecureStore
+            .getItemAsync(
+              SESSION_KEY,
+            );
+
+        if (!token) {
+          throw new Error(
+            "Deine SaveWise-Anmeldung ist abgelaufen.",
+          );
+        }
+
+        setPdfToken(
+          token,
         );
 
-      if (isImage) {
-        setImageUri(
-          file.localUri,
+        setPdfUrl(
+          `${apiUrl}/api/capture/attachments/${encodeURIComponent(
+            discovery.id,
+          )}`,
         );
 
-        setImageVisible(
+        setViewerVisible(
           true,
         );
 
         return;
       }
 
-      if (isPdf) {
-        const available =
-          await Sharing
-            .isAvailableAsync();
-
-        if (!available) {
-          throw new Error(
-            "Die iOS-Dateiansicht ist nicht verfügbar.",
+      if (isImage) {
+        const file =
+          await downloadDiscoveryAttachment(
+            discovery,
           );
-        }
 
-        await Sharing.shareAsync(
+        setImageUri(
           file.localUri,
-          {
-            mimeType:
-              file.mimeType,
+        );
 
-            UTI:
-              "com.adobe.pdf",
-
-            dialogTitle:
-              file.fileName,
-          },
+        setViewerVisible(
+          true,
         );
       }
     } catch (error) {
@@ -136,6 +182,29 @@ export function DiscoveryAttachmentViewer({
     } finally {
       setOpening(false);
     }
+  }
+
+  function closeViewer():
+  void {
+    setViewerVisible(
+      false,
+    );
+
+    setImageUri(
+      null,
+    );
+
+    setPdfUrl(
+      null,
+    );
+
+    setPdfToken(
+      null,
+    );
+
+    setPdfLoading(
+      false,
+    );
   }
 
   return (
@@ -189,8 +258,8 @@ export function DiscoveryAttachmentViewer({
 
           <Text style={styles.title}>
             {isPdf
-              ? "PDF öffnen"
-              : "Bild öffnen"}
+              ? "PDF anzeigen"
+              : "Bild anzeigen"}
           </Text>
 
           <Text
@@ -215,42 +284,44 @@ export function DiscoveryAttachmentViewer({
       </Pressable>
 
       <Modal
-        animationType="fade"
-        onRequestClose={() => {
-          setImageVisible(
-            false,
-          );
-        }}
+        animationType="slide"
+        onRequestClose={
+          closeViewer
+        }
         presentationStyle="fullScreen"
         visible={
-          imageVisible
+          viewerVisible
         }
       >
         <SafeAreaView
-          style={styles.previewScreen}
+          style={
+            styles.viewerScreen
+          }
         >
-          <View style={styles.previewHeader}>
-            <Text
-              numberOfLines={1}
-              style={
-                styles.previewTitle
-              }
-            >
-              {
-                attachment.fileName
-              }
-            </Text>
+          <View style={styles.viewerHeader}>
+            <View style={styles.viewerHeaderText}>
+              <Text style={styles.viewerEyebrow}>
+                {isPdf
+                  ? "PDF"
+                  : "BILD"}
+              </Text>
+
+              <Text
+                numberOfLines={1}
+                style={styles.viewerTitle}
+              >
+                {
+                  attachment.fileName
+                }
+              </Text>
+            </View>
 
             <Pressable
               hitSlop={12}
-              onPress={() => {
-                setImageVisible(
-                  false,
-                );
-              }}
-              style={
-                styles.closeButton
+              onPress={
+                closeViewer
               }
+              style={styles.closeButton}
             >
               <Ionicons
                 color="#FFFFFF"
@@ -260,17 +331,80 @@ export function DiscoveryAttachmentViewer({
             </Pressable>
           </View>
 
-          {imageUri ? (
-            <Image
-              contentFit="contain"
-              source={{
-                uri:
-                  imageUri,
-              }}
-              style={
-                styles.previewImage
-              }
-            />
+          {isImage &&
+          imageUri ? (
+            <View style={styles.imageStage}>
+              <Image
+                contentFit="contain"
+                source={{
+                  uri:
+                    imageUri,
+                }}
+                style={styles.previewImage}
+              />
+            </View>
+          ) : null}
+
+          {isPdf &&
+          pdfUrl &&
+          pdfToken ? (
+            <View style={styles.pdfStage}>
+              {pdfLoading ? (
+                <View style={styles.pdfLoader}>
+                  <ActivityIndicator
+                    color={
+                      universeTheme
+                        .colors
+                        .primaryBright
+                    }
+                    size="large"
+                  />
+
+                  <Text style={styles.pdfLoaderText}>
+                    PDF wird geladen …
+                  </Text>
+                </View>
+              ) : null}
+
+              <WebView
+                allowFileAccess
+                javaScriptEnabled
+                onError={(event) => {
+                  setPdfLoading(
+                    false,
+                  );
+
+                  Alert.alert(
+                    "PDF konnte nicht angezeigt werden",
+                    event.nativeEvent
+                      .description,
+                  );
+                }}
+                onLoadEnd={() => {
+                  setPdfLoading(
+                    false,
+                  );
+                }}
+                onLoadStart={() => {
+                  setPdfLoading(
+                    true,
+                  );
+                }}
+                originWhitelist={[
+                  "*",
+                ]}
+                source={{
+                  uri:
+                    pdfUrl,
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${pdfToken}`,
+                  },
+                }}
+                style={styles.pdfViewer}
+              />
+            </View>
           ) : null}
         </SafeAreaView>
       </Modal>
@@ -384,43 +518,67 @@ const styles =
         3,
     },
 
-    previewScreen: {
+    viewerScreen: {
       backgroundColor:
-        "#000000",
+        "#020A12",
 
       flex:
         1,
     },
 
-    previewHeader: {
+    viewerHeader: {
       alignItems:
         "center",
+
+      borderBottomColor:
+        "rgba(115, 216, 255, 0.14)",
+
+      borderBottomWidth:
+        StyleSheet
+          .hairlineWidth,
 
       flexDirection:
         "row",
 
-      gap:
-        12,
-
       minHeight:
-        56,
+        62,
 
       paddingHorizontal:
-        17,
+        16,
     },
 
-    previewTitle: {
+    viewerHeaderText: {
+      flex:
+        1,
+    },
+
+    viewerEyebrow: {
+      color:
+        universeTheme.colors
+          .primaryBright,
+
+      fontSize:
+        8,
+
+      fontWeight:
+        "900",
+
+      letterSpacing:
+        1,
+    },
+
+    viewerTitle: {
       color:
         "#FFFFFF",
 
-      flex:
-        1,
-
       fontSize:
-        13,
+        14,
 
       fontWeight:
-        "700",
+        "800",
+
+      marginTop:
+        2,
     },
 
     closeButton: {
@@ -428,13 +586,21 @@ const styles =
         "center",
 
       height:
-        42,
+        44,
 
       justifyContent:
         "center",
 
       width:
-        42,
+        44,
+    },
+
+    imageStage: {
+      backgroundColor:
+        "#000000",
+
+      flex:
+        1,
     },
 
     previewImage: {
@@ -443,6 +609,57 @@ const styles =
 
       width:
         "100%",
+    },
+
+    pdfStage: {
+      backgroundColor:
+        "#FFFFFF",
+
+      flex:
+        1,
+
+      position:
+        "relative",
+    },
+
+    pdfViewer: {
+      backgroundColor:
+        "#FFFFFF",
+
+      flex:
+        1,
+    },
+
+    pdfLoader: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "#071A2B",
+
+      gap:
+        13,
+
+      inset:
+        0,
+
+      justifyContent:
+        "center",
+
+      position:
+        "absolute",
+
+      zIndex:
+        5,
+    },
+
+    pdfLoaderText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        12,
     },
 
     pressed: {

@@ -13,6 +13,11 @@ import {
 } from "expo-status-bar";
 
 import {
+  ShareIntentProvider,
+} from "expo-share-intent";
+
+
+import {
   useEffect,
 } from "react";
 
@@ -29,6 +34,11 @@ import "react-native-reanimated";
 import {
   AnalyticsConsentModal,
 } from "@/components/analytics-consent-modal";
+
+import {
+  ShareIntentHandler,
+} from "@/components/share-intent-handler";
+
 
 import {
   useColorScheme,
@@ -50,16 +60,18 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView
-      style={{
-        flex:
-          1,
-      }}
-    >
-      <AppSettingsProvider>
-        <RootNavigator />
-      </AppSettingsProvider>
-    </GestureHandlerRootView>
+    <ShareIntentProvider>
+      <GestureHandlerRootView
+        style={{
+          flex:
+            1,
+        }}
+      >
+        <AppSettingsProvider>
+          <RootNavigator />
+        </AppSettingsProvider>
+      </GestureHandlerRootView>
+    </ShareIntentProvider>
   );
 }
 
@@ -181,6 +193,8 @@ function RootNavigator() {
       <StatusBar
         style="auto"
       />
+
+      <ShareIntentHandler />
 
       <AnalyticsConsentModal />
     </ThemeProvider>
