@@ -23,6 +23,7 @@ import {
 } from "react-native";
 
 import { DiscoveryActionsMenu } from "@/components/discovery-actions-menu";
+import { DiscoveryAttachmentViewer } from "@/components/discovery-attachment-viewer";
 import { DiscoveryEditModal } from "@/components/discovery-edit-modal";
 import { RelatedDiscoveries } from "@/components/related-discoveries";
 import { StarBackground } from "@/components/universe-ui/star-background";
@@ -835,6 +836,14 @@ export default function DiscoveryDetailScreen() {
               </View>
             </View>
           </ContentSection>
+        ) : null}
+
+        {discovery.attachment ? (
+          <DiscoveryAttachmentViewer
+            discovery={
+              discovery
+            }
+          />
         ) : null}
 
         {discovery.url ? (

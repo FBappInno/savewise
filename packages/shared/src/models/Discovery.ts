@@ -106,6 +106,11 @@ export type DiscoveryUpdate = {
 
   summary: string;
 
+workspaceId:
+  WorkspaceId;
+
+classification:
+  DiscoveryClassification;
   classification:
     DiscoveryClassification;
 

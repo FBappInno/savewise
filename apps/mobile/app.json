@@ -11,7 +11,11 @@
     "ios": {
       "bundleIdentifier": "com.fernandobiaggi.savewise.beta",
       "buildNumber": "1",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "SaveWise verwendet die Kamera, damit du Wissen, Dokumente und Whiteboards direkt erfassen kannst.",
+        "NSPhotoLibraryUsageDescription": "SaveWise benötigt Zugriff auf deine Fotos, damit du Bilder und Screenshots deinem Wissensuniversum hinzufügen kannst."
+      }
     },
     "android": {
       "package": "com.fernandobiaggi.savewise.beta",
@@ -49,6 +53,33 @@
         "expo-local-authentication",
         {
           "faceIDPermission": "SaveWise verwendet Face ID, um dein Wissensuniversum zu entsperren."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "SaveWise benötigt Zugriff auf deine Fotos, damit du Bilder und Screenshots deinem Wissensuniversum hinzufügen kannst.",
+          "cameraPermission": "SaveWise verwendet die Kamera, damit du Wissen, Dokumente und Whiteboards direkt erfassen kannst."
+        }
+      ],
+      "expo-document-picker",
+      [
+        "expo-share-intent",
+        {
+          "iosShareExtensionName": "SaveWise",
+          "iosAppGroupIdentifier": "group.com.fernandobiaggi.savewise.beta",
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsText": true,
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
+            "NSExtensionActivationSupportsWebPageWithMaxCount": 1,
+            "NSExtensionActivationSupportsImageWithMaxCount": 5,
+            "NSExtensionActivationSupportsFileWithMaxCount": 5
+          },
+          "androidIntentFilters": [
+            "text/*",
+            "image/*",
+            "application/pdf"
+          ]
         }
       ]
     ],

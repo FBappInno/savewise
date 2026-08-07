@@ -64,8 +64,12 @@ import {
 import {
   AccountError,
   authenticateAccount,
+  changeAccountPassword,
   loginAccount,
+  requestAccountEmailChange,
   requestAccountVerification,
+  revokeOtherAccountSessions,
+  updateAccountUsername,
   verifyAccountEmail,
 } from "./services/account/account-service";
 import {
@@ -258,6 +262,42 @@ const AccountVerificationRequestSchema = z.object({
   newPassword: z.string().min(10).max(128),
 }).strict();
 
+const AccountProfileUpdateSchema =
+  z.object({
+    username:
+      z.string()
+        .trim()
+        .min(2)
+        .max(80),
+  }).strict();
+
+const AccountPasswordChangeSchema =
+  z.object({
+    currentPassword:
+      z.string()
+        .min(1)
+        .max(128),
+
+    newPassword:
+      z.string()
+        .min(10)
+        .max(128),
+  }).strict();
+
+const AccountEmailChangeSchema =
+  z.object({
+    currentPassword:
+      z.string()
+        .min(1)
+        .max(128),
+
+    newEmail:
+      z.string()
+        .trim()
+        .email()
+        .max(254),
+  }).strict();
+
 const AccountLoginSchema = z.object({
   email: z.string().trim().email().max(254),
   password: z.string().min(1).max(128),
@@ -312,8 +352,20 @@ const DiscoveryIdSchema = z
 
 const DiscoveryUpdateSchema = z.object({
   title: z.string().trim().min(3).max(120),
+
   summary: z.string().trim().max(420),
-  language: z.enum(["de", "en", "fr", "it", "es"]).optional(),
+
+  workspaceId:
+    WorkspaceIdSchema,
+
+  language:
+    z.enum([
+      "de",
+      "en",
+      "fr",
+      "it",
+      "es",
+    ]).optional(),
   classification: z.object({
     primaryCategory: z.enum([
       "technology", "finance", "business", "science", "health",
@@ -423,6 +475,312 @@ app.post("/api/account/login", async (request, response) => {
     response.status(accountError?.status ?? 500).json({ error: accountError?.code ?? "LOGIN_FAILED" });
   }
 });
+
+app.patch(
+  "/api/account/profile",
+  async (
+    request,
+    response,
+  ) => {
+    const authorization =
+      request.headers.authorization;
+
+    const token =
+      authorization?.startsWith(
+        "Bearer ",
+      )
+        ? authorization.slice(7)
+        : "";
+
+    const account =
+      token
+        ? await authenticateAccount(
+            token,
+          )
+        : null;
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    const parsed =
+      AccountProfileUpdateSchema
+        .safeParse(
+          request.body,
+        );
+
+    if (!parsed.success) {
+      response.status(400).json({
+        error:
+          "ACCOUNT_INPUT_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      const updated =
+        await updateAccountUsername(
+          account.id,
+          parsed.data.username,
+        );
+
+      response.json({
+        account:
+          updated,
+      });
+    } catch (error) {
+      const accountError =
+        error instanceof
+        AccountError
+          ? error
+          : null;
+
+      response
+        .status(
+          accountError?.status ??
+          500,
+        )
+        .json({
+          error:
+            accountError?.code ??
+            "ACCOUNT_UPDATE_FAILED",
+        });
+    }
+  },
+);
+
+app.post(
+  "/api/account/password/change",
+  async (
+    request,
+    response,
+  ) => {
+    const authorization =
+      request.headers.authorization;
+
+    const token =
+      authorization?.startsWith(
+        "Bearer ",
+      )
+        ? authorization.slice(7)
+        : "";
+
+    const account =
+      token
+        ? await authenticateAccount(
+            token,
+          )
+        : null;
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    const parsed =
+      AccountPasswordChangeSchema
+        .safeParse(
+          request.body,
+        );
+
+    if (!parsed.success) {
+      response.status(400).json({
+        error:
+          "PASSWORD_INPUT_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      const updated =
+        await changeAccountPassword(
+          account.id,
+          token,
+          parsed.data
+            .currentPassword,
+          parsed.data
+            .newPassword,
+        );
+
+      response.json({
+        account:
+          updated,
+      });
+    } catch (error) {
+      const accountError =
+        error instanceof
+        AccountError
+          ? error
+          : null;
+
+      response
+        .status(
+          accountError?.status ??
+          500,
+        )
+        .json({
+          error:
+            accountError?.code ??
+            "PASSWORD_CHANGE_FAILED",
+        });
+    }
+  },
+);
+
+app.post(
+  "/api/account/email/change",
+  async (
+    request,
+    response,
+  ) => {
+    const authorization =
+      request.headers.authorization;
+
+    const token =
+      authorization?.startsWith(
+        "Bearer ",
+      )
+        ? authorization.slice(7)
+        : "";
+
+    const account =
+      token
+        ? await authenticateAccount(
+            token,
+          )
+        : null;
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    const parsed =
+      AccountEmailChangeSchema
+        .safeParse(
+          request.body,
+        );
+
+    if (!parsed.success) {
+      response.status(400).json({
+        error:
+          "ACCOUNT_INPUT_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      const result =
+        await requestAccountEmailChange(
+          account.id,
+          parsed.data
+            .currentPassword,
+          parsed.data
+            .newEmail,
+        );
+
+      response.status(202).json(
+        result,
+      );
+    } catch (error) {
+      const accountError =
+        error instanceof
+        AccountError
+          ? error
+          : null;
+
+      response
+        .status(
+          accountError?.status ??
+          500,
+        )
+        .json({
+          error:
+            accountError?.code ??
+            "EMAIL_CHANGE_FAILED",
+        });
+    }
+  },
+);
+
+app.post(
+  "/api/account/sessions/revoke-others",
+  async (
+    request,
+    response,
+  ) => {
+    const authorization =
+      request.headers.authorization;
+
+    const token =
+      authorization?.startsWith(
+        "Bearer ",
+      )
+        ? authorization.slice(7)
+        : "";
+
+    const account =
+      token
+        ? await authenticateAccount(
+            token,
+          )
+        : null;
+
+    if (!account) {
+      response.status(401).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    try {
+      const revoked =
+        await revokeOtherAccountSessions(
+          account.id,
+          token,
+        );
+
+      response.json({
+        revoked,
+      });
+    } catch (error) {
+      const accountError =
+        error instanceof
+        AccountError
+          ? error
+          : null;
+
+      response
+        .status(
+          accountError?.status ??
+          500,
+        )
+        .json({
+          error:
+            accountError?.code ??
+            "SESSION_REVOKE_FAILED",
+        });
+    }
+  },
+);
 
 app.get("/api/account/session", async (request, response) => {
   const authorization = request.headers.authorization;

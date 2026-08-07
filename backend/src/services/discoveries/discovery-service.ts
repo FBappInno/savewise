@@ -207,9 +207,20 @@ export async function updateDiscovery(
   const existing = discoveries[index];
   const updated: Discovery = {
     ...existing,
-    improvedTitle: update.title.trim(),
-    summary: update.summary.trim() || undefined,
-    language: update.language ?? existing.language,
+
+    workspaceId:
+      update.workspaceId,
+
+    improvedTitle:
+      update.title.trim(),
+
+    summary:
+      update.summary.trim() ||
+      undefined,
+
+    language:
+      update.language ??
+      existing.language,
     classification: {
       ...update.classification,
       secondaryCategory: update.classification.secondaryCategory.trim(),
