@@ -53,13 +53,17 @@ export async function getOrBuildKnowledgeGraph(
         sourceFingerprint,
       );
 
-    scheduleBackgroundRebuild(
-      discoveries,
-      sourceFingerprint,
+    /*
+     * Kein autonomer KI-Rebuild im Hintergrund.
+     *
+     * Der zuletzt synchronisierte Stand bleibt stabil,
+     * bis der Benutzer erneut synchronisiert oder eine
+     * Discovery bewusst geändert wird.
+     */
+    return normalizeKnowledgeHierarchy(
       immediateGraph,
+      discoveries,
     );
-
-    return normalizeKnowledgeHierarchy(immediateGraph, discoveries);
   }
 
   try {

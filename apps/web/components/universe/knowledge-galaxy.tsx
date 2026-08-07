@@ -314,7 +314,7 @@ export function KnowledgeGalaxy({
             <p>
               {selectedGalaxy
                 ? "Wähle einen Planeten, um die zugehörigen Sterne und Discoveries zu erkunden."
-                : "SaveWise führt gleichbedeutende Galaxien zusammen und ordnet verwandte Wissensbereiche räumlich in KI-Clustern an."}
+                : "SaveWise verteilt Galaxien frei im Raum, gruppiert verwandte Wissensbereiche intelligent und zeigt inhaltsstärkere Galaxien größer an."}
             </p>
           </div>
 
@@ -1160,249 +1160,93 @@ function createDomainGalaxies(
   discoveries: Discovery[],
   graph: KnowledgeGraph | null,
 ): DomainGalaxy[] {
-  if (
-    !graph ||
-    graph.nodes.length === 0
-  ) {
-    return createRawDomainGalaxies(
+  /*
+   * SOURCE OF TRUTH:
+   *
+   * Galaxie = classification.secondaryCategory
+   * Planet  = classification.topic
+   * Sterne  = classification.subtopics
+   *
+   * Der KI-Graph darf diese Hierarchie nicht ersetzen.
+   */
+  const galaxies =
+    createRawDomainGalaxies(
       discoveries,
     );
+
+  if (!graph) {
+    return galaxies;
   }
 
-  const discoveryMap =
-    new Map(
-      discoveries.map(
-        (discovery) => [
-          discovery.id,
-          discovery,
-        ],
-      ),
-    );
-
-  const nodeMap =
-    new Map(
-      graph.nodes.map(
-        (node) => [
-          node.id,
-          node,
-        ],
-      ),
-    );
-
-  const clusterIds =
+  /*
+   * Der Graph wird ausschließlich für
+   * die visuelle Cluster-Zuordnung benutzt.
+   */
+  const graphClusterIds =
     buildDomainClusterIds(
       graph,
     );
 
-  const galaxies =
-    graph.rootNodeIds
-      .map(
-        (rootId) =>
-          nodeMap.get(rootId),
-      )
-      .filter(
-        (
-          node,
-        ): node is
-          KnowledgeGraph["nodes"][number] =>
-          Boolean(
-            node &&
-            node.kind ===
-              "domain",
-          ),
-      )
-      .map((domainNode) => {
-        const discoveryIds =
-          collectGraphDiscoveryIds(
-            domainNode.id,
-            nodeMap,
-          );
-
-        const domainDiscoveries =
-          [...discoveryIds]
-            .map(
-              (id) =>
-                discoveryMap.get(id),
-            )
-            .filter(
-              (
-                discovery,
-              ): discovery is Discovery =>
-                Boolean(discovery),
-            )
-            .sort(
-              (
-                left,
-                right,
-              ) =>
-                new Date(
-                  right.createdAt,
-                ).getTime() -
-                new Date(
-                  left.createdAt,
-                ).getTime(),
-            );
-
-        const topicNodes =
-          domainNode.childIds
-            .map(
-              (childId) =>
-                nodeMap.get(
-                  childId,
-                ),
-            )
-            .filter(
-              (
-                node,
-              ): node is
-                KnowledgeGraph["nodes"][number] =>
-                Boolean(
-                  node &&
-                  node.kind ===
-                    "topic",
-                ),
-            );
-
-        const topics:
-          TopicSystem[] =
-          topicNodes.length > 0
-            ? topicNodes
-                .map(
-                  (topicNode) => {
-                    const topicDiscoveryIds =
-                      collectGraphDiscoveryIds(
-                        topicNode.id,
-                        nodeMap,
-                      );
-
-                    const topicDiscoveries =
-                      [...topicDiscoveryIds]
-                        .map(
-                          (id) =>
-                            discoveryMap.get(
-                              id,
-                            ),
-                        )
-                        .filter(
-                          (
-                            discovery,
-                          ): discovery is Discovery =>
-                            Boolean(
-                              discovery,
-                            ),
-                        );
-
-                    return {
-                      id:
-                        topicNode.id,
-
-                      label:
-                        topicNode.title,
-
-                      count:
-                        topicDiscoveries.length,
-
-                      discoveries:
-                        topicDiscoveries,
-                    };
-                  },
-                )
-                .filter(
-                  (topic) =>
-                    topic.count > 0,
-                )
-                .sort(
-                  (
-                    left,
-                    right,
-                  ) =>
-                    right.count -
-                    left.count,
-                )
-                .slice(
-                  0,
-                  12,
-                )
-            : createRawTopicSystems(
-                domainDiscoveries,
-                domainNode.title,
-              );
-
-        return {
-          id:
-            domainNode.id,
-
-          key:
-            domainNode.title,
-
-          label:
-            domainNode.title,
-
-          count:
-            domainDiscoveries.length,
-
-          discoveries:
-            domainDiscoveries,
-
-          topics,
-
-          clusterId:
-            clusterIds.get(
-              domainNode.id,
-            ) ??
-            domainNode.id,
-        };
-      })
-      .filter(
-        (galaxy) =>
-          galaxy.count > 0,
-      )
-      .sort(
-        (
-          left,
-          right,
-        ) =>
-          right.count -
-          left.count,
-      );
-
-  /*
-   * Wenn der Graph noch nicht alle
-   * Discoveries repräsentiert, nichts
-   * verschwinden lassen.
-   */
-  const representedIds =
-    new Set(
-      galaxies.flatMap(
-        (galaxy) =>
-          galaxy.discoveries.map(
-            (discovery) =>
-              discovery.id,
-          ),
-      ),
+  const graphDomains =
+    graph.nodes.filter(
+      (node) =>
+        node.kind === "domain",
     );
 
-  const missingDiscoveries =
-    discoveries.filter(
-      (discovery) =>
-        !representedIds.has(
-          discovery.id,
-        ),
-    );
+  const graphDomainByName =
+    new Map<
+      string,
+      KnowledgeGraph["nodes"][number]
+    >();
 
-  if (
-    missingDiscoveries.length >
-    0
+  for (
+    const node
+    of graphDomains
   ) {
-    return [
-      ...galaxies,
-      ...createRawDomainGalaxies(
-        missingDiscoveries,
+    graphDomainByName.set(
+      normalizeGalaxyKey(
+        node.title,
       ),
-    ];
+      node,
+    );
+
+    for (
+      const alias
+      of node.aliases
+    ) {
+      graphDomainByName.set(
+        normalizeGalaxyKey(
+          alias,
+        ),
+        node,
+      );
+    }
   }
 
-  return galaxies;
+  return galaxies.map(
+    (galaxy) => {
+      const graphNode =
+        graphDomainByName.get(
+          normalizeGalaxyKey(
+            galaxy.label,
+          ),
+        );
+
+      if (!graphNode) {
+        return galaxy;
+      }
+
+      return {
+        ...galaxy,
+
+        clusterId:
+          graphClusterIds.get(
+            graphNode.id,
+          ) ??
+          graphNode.id,
+      };
+    },
+  );
 }
 
 function createRawDomainGalaxies(
@@ -1878,6 +1722,7 @@ function normalizeGalaxyKey(
     );
 }
 
+
 function createOverviewPositions(
   galaxies:
     DomainGalaxy[],
@@ -1906,8 +1751,7 @@ function createOverviewPositions(
       const group =
         clusterMap.get(
           galaxy.clusterId,
-        ) ??
-        [];
+        ) ?? [];
 
       group.push({
         galaxy,
@@ -1922,30 +1766,30 @@ function createOverviewPositions(
   );
 
   const clusters =
-    [...clusterMap.values()]
+    [...clusterMap.entries()]
+      .map(
+        ([clusterId, members]) => ({
+          clusterId,
+          members,
+          totalCount:
+            members.reduce(
+              (
+                total,
+                member,
+              ) =>
+                total +
+                member.galaxy.count,
+              0,
+            ),
+        }),
+      )
       .sort(
         (
           left,
           right,
         ) =>
-          right.reduce(
-            (
-              total,
-              item,
-            ) =>
-              total +
-              item.galaxy.count,
-            0,
-          ) -
-          left.reduce(
-            (
-              total,
-              item,
-            ) =>
-              total +
-              item.galaxy.count,
-            0,
-          ),
+          right.totalCount -
+          left.totalCount,
       );
 
   const positions:
@@ -1954,146 +1798,465 @@ function createOverviewPositions(
       galaxies.length,
     );
 
-  const clusterCount =
-    clusters.length;
+  const clusterCenters =
+    createClusterScatterCenters(
+      clusters.map(
+        (cluster) => ({
+          id:
+            cluster.clusterId,
+          size:
+            cluster.members.length,
+          weight:
+            cluster.totalCount,
+        }),
+      ),
+    );
 
   clusters.forEach(
     (
-      members,
+      cluster,
       clusterIndex,
     ) => {
-      const clusterAngle =
-        (
-          Math.PI *
-          2 *
+      const center =
+        clusterCenters[
           clusterIndex
-        ) /
-          Math.max(
-            clusterCount,
-            1,
-          ) -
-        Math.PI / 2;
+        ];
 
-      /*
-       * Die Cluster selbst liegen
-       * großzügig verteilt um die
-       * Mitte des Universums.
-       */
-      const clusterRing =
-        clusterCount <= 4
-          ? 235
-          : clusterCount <= 7
-            ? 275
-            : 305;
+      const members =
+        cluster.members;
 
-      const clusterCenterX =
-        clusterCount === 1
-          ? CENTER_X
-          : CENTER_X +
-            Math.cos(
-              clusterAngle,
-            ) *
-              clusterRing;
-
-      const clusterCenterY =
-        clusterCount === 1
-          ? CENTER_Y
-          : CENTER_Y +
-            Math.sin(
-              clusterAngle,
-            ) *
-              clusterRing *
-              0.68;
+      const clusterSeed =
+        seededNumber(
+          cluster.clusterId,
+        );
 
       members.forEach(
         (
           member,
           memberIndex,
         ) => {
-          const memberCount =
-            members.length;
+          const galaxy =
+            member.galaxy;
+
+          const radius =
+            calculateGalaxyDisplayRadius(
+              galaxy.count,
+            );
 
           if (
-            memberCount === 1
+            members.length === 1
           ) {
             positions[
               member.index
             ] = {
               x:
-                clusterCenterX,
-
-              y:
-                clusterCenterY,
-
-              radius:
-                calculateDomainRadius(
-                  member.galaxy
-                    .count,
+                clampPosition(
+                  center.x,
+                  radius,
+                  96,
                 ),
+              y:
+                clampPosition(
+                  center.y,
+                  radius,
+                  92,
+                ),
+              radius,
             };
 
             return;
           }
 
           /*
-           * Petal-/Traubenform ähnlich
-           * der vom Nutzer skizzierten
-           * Clusteridee.
+           * Innerhalb eines Clusters:
+           * lockere, unregelmäßige Verteilung
+           * statt perfekter Kreisform.
            */
-          const localAngle =
-            (
-              Math.PI *
-              2 *
-              memberIndex
-            ) /
-              memberCount -
-            Math.PI / 2;
+          const localSeed =
+            seededNumber(
+              `${cluster.clusterId}:${galaxy.id}:${memberIndex}`,
+            );
 
-          const localRing =
-            memberCount <= 3
+          const angle =
+            localSeed *
+            Math.PI *
+            2;
+
+          const spiralFactor =
+            (memberIndex + 1) /
+            members.length;
+
+          const spreadBase =
+            members.length <= 3
               ? 70
-              : memberCount <= 6
-                ? 88
-                : 105;
+              : members.length <= 6
+                ? 95
+                : members.length <= 10
+                  ? 120
+                  : 145;
+
+          const spread =
+            spreadBase *
+            (0.45 +
+              spiralFactor *
+                0.9);
+
+          const offsetX =
+            Math.cos(angle) *
+              spread +
+            Math.sin(
+              angle *
+                1.7 +
+                clusterSeed *
+                  2,
+            ) *
+              22;
+
+          const offsetY =
+            Math.sin(angle) *
+              spread *
+              0.82 +
+            Math.cos(
+              angle *
+                1.3 +
+                clusterSeed *
+                  3,
+            ) *
+              18;
 
           positions[
             member.index
           ] = {
             x:
-              clusterCenterX +
-              Math.cos(
-                localAngle,
-              ) *
-                localRing,
-
-            y:
-              clusterCenterY +
-              Math.sin(
-                localAngle,
-              ) *
-                localRing *
-                0.78,
-
-            /*
-             * Im Cluster etwas kompakter,
-             * damit Beschriftungen weniger
-             * kollidieren.
-             */
-            radius:
-              Math.min(
-                48,
-                calculateDomainRadius(
-                  member.galaxy
-                    .count,
-                ),
+              clampPosition(
+                center.x +
+                  offsetX,
+                radius,
+                96,
               ),
+            y:
+              clampPosition(
+                center.y +
+                  offsetY,
+                radius,
+                92,
+              ),
+            radius,
           };
         },
       );
     },
   );
 
-  return positions;
+  return relaxOverviewPositions(
+    positions,
+    18,
+  );
+}
+
+function createClusterScatterCenters(
+  clusters: Array<{
+    id: string;
+    size: number;
+    weight: number;
+  }>,
+): Array<{
+  x: number;
+  y: number;
+}> {
+  if (
+    clusters.length === 0
+  ) {
+    return [];
+  }
+
+  const usableWidth =
+    WIDTH - 220;
+
+  const usableHeight =
+    HEIGHT - 190;
+
+  const cols =
+    Math.max(
+      2,
+      Math.ceil(
+        Math.sqrt(
+          clusters.length,
+        ),
+      ),
+    );
+
+  const rows =
+    Math.max(
+      2,
+      Math.ceil(
+        clusters.length / cols,
+      ),
+    );
+
+  const cellWidth =
+    usableWidth / cols;
+
+  const cellHeight =
+    usableHeight / rows;
+
+  const cells:
+    Array<{
+      col: number;
+      row: number;
+      seed: number;
+    }> = [];
+
+  for (
+    let row = 0;
+    row < rows;
+    row += 1
+  ) {
+    for (
+      let col = 0;
+      col < cols;
+      col += 1
+    ) {
+      cells.push({
+        col,
+        row,
+        seed:
+          seededNumber(
+            `cell:${col}:${row}`,
+          ),
+      });
+    }
+  }
+
+  cells.sort(
+    (left, right) =>
+      left.seed - right.seed,
+  );
+
+  return clusters.map(
+    (
+      cluster,
+      index,
+    ) => {
+      const cell =
+        cells[
+          index % cells.length
+        ];
+
+      const seed =
+        seededNumber(
+          `cluster:${cluster.id}`,
+        );
+
+      const jitterX =
+        (seed - 0.5) *
+        cellWidth *
+        0.58;
+
+      const jitterY =
+        (
+          seededNumber(
+            `${cluster.id}:y`,
+          ) - 0.5
+        ) *
+        cellHeight *
+        0.58;
+
+      const x =
+        110 +
+        cell.col *
+          cellWidth +
+        cellWidth / 2 +
+        jitterX;
+
+      const y =
+        88 +
+        cell.row *
+          cellHeight +
+        cellHeight / 2 +
+        jitterY;
+
+      return {
+        x,
+        y,
+      };
+    },
+  );
+}
+
+function calculateGalaxyDisplayRadius(
+  count: number,
+): number {
+  const base =
+    calculateDomainRadius(
+      count,
+    );
+
+  /*
+   * Mehr Inhalte = sichtbar größere Galaxie.
+   * Trotzdem innerhalb sinnvoller Grenzen.
+   */
+  return Math.max(
+    28,
+    Math.min(
+      74,
+      base + Math.log2(count + 1) * 6,
+    ),
+  );
+}
+
+function relaxOverviewPositions(
+  positions:
+    OverviewPosition[],
+  padding: number,
+): OverviewPosition[] {
+  const next =
+    positions.map(
+      (position) => ({
+        ...position,
+      }),
+    );
+
+  for (
+    let iteration = 0;
+    iteration < 140;
+    iteration += 1
+  ) {
+    for (
+      let i = 0;
+      i < next.length;
+      i += 1
+    ) {
+      for (
+        let j = i + 1;
+        j < next.length;
+        j += 1
+      ) {
+        const left =
+          next[i];
+        const right =
+          next[j];
+
+        const dx =
+          right.x - left.x;
+        const dy =
+          right.y - left.y;
+
+        const distance =
+          Math.max(
+            1,
+            Math.hypot(
+              dx,
+              dy,
+            ),
+          );
+
+        const minDistance =
+          left.radius +
+          right.radius +
+          padding;
+
+        if (
+          distance >=
+          minDistance
+        ) {
+          continue;
+        }
+
+        const push =
+          (minDistance -
+            distance) /
+          2;
+
+        const ux =
+          dx / distance;
+        const uy =
+          dy / distance;
+
+        left.x -=
+          ux * push;
+        left.y -=
+          uy * push;
+
+        right.x +=
+          ux * push;
+        right.y +=
+          uy * push;
+
+        left.x =
+          clampPosition(
+            left.x,
+            left.radius,
+            96,
+          );
+        left.y =
+          clampPosition(
+            left.y,
+            left.radius,
+            92,
+          );
+
+        right.x =
+          clampPosition(
+            right.x,
+            right.radius,
+            96,
+          );
+        right.y =
+          clampPosition(
+            right.y,
+            right.radius,
+            92,
+          );
+      }
+    }
+  }
+
+  return next;
+}
+
+function clampPosition(
+  value: number,
+  radius: number,
+  padding: number,
+): number {
+  return Math.max(
+    radius + padding,
+    Math.min(
+      WIDTH -
+        radius -
+        padding,
+      value,
+    ),
+  );
+}
+
+function seededNumber(
+  input: string,
+): number {
+  let hash = 2166136261;
+
+  for (
+    let index = 0;
+    index < input.length;
+    index += 1
+  ) {
+    hash ^=
+      input.charCodeAt(
+        index,
+      );
+
+    hash =
+      Math.imul(
+        hash,
+        16777619,
+      );
+  }
+
+  return (
+    (hash >>> 0) %
+    10000
+  ) / 10000;
 }
 
 function createFocusedTopicPositions(
