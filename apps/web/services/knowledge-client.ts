@@ -79,3 +79,45 @@ export async function askKnowledge(
 
   return body as KnowledgeAnswer;
 }
+
+export async function rebuildKnowledgeLibrary(
+  workspaceId: WorkspaceId,
+): Promise<KnowledgeLibrary> {
+  const response =
+    await authenticatedFetch(
+      "/api/knowledge/rebuild",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          workspaceId,
+        }),
+      },
+    );
+
+  const body =
+    await response
+      .json()
+      .catch(() => ({})) as {
+        library?: KnowledgeLibrary;
+        error?: string;
+      };
+
+  if (!response.ok) {
+    throw new Error(
+      body.error ??
+        "Das Wissensuniversum konnte nicht neu aufgebaut werden.",
+    );
+  }
+
+  if (!body.library) {
+    throw new Error(
+      "Der Server hat keine neue Wissensbibliothek zurückgegeben.",
+    );
+  }
+
+  return body.library;
+}
