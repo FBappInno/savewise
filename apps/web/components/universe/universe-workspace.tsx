@@ -1,5 +1,9 @@
 "use client";
 
+import type {
+  Discovery,
+} from "@savewise/shared";
+
 import {
   useEffect,
   useState,
@@ -12,6 +16,10 @@ import {
 import {
   DiscoveryGrid,
 } from "@/components/universe/discovery-grid";
+
+import {
+  DiscoveryViewerModal,
+} from "@/components/universe/discovery-viewer-modal";
 
 import {
   KnowledgeGalaxy,
@@ -48,6 +56,14 @@ export function UniverseWorkspace() {
         "discoveries"
         ? "discoveries"
         : "galaxy",
+    );
+
+  const [
+    selectedDiscovery,
+    setSelectedDiscovery,
+  ] =
+    useState<Discovery | null>(
+      null,
     );
 
   useEffect(() => {
@@ -119,10 +135,29 @@ export function UniverseWorkspace() {
 
       {activeView ===
       "galaxy" ? (
-        <KnowledgeGalaxy />
+        <KnowledgeGalaxy
+          onOpenDiscovery={
+            setSelectedDiscovery
+          }
+        />
       ) : (
-        <DiscoveryGrid />
+        <DiscoveryGrid
+          onOpenDiscovery={
+            setSelectedDiscovery
+          }
+        />
       )}
+
+      <DiscoveryViewerModal
+        discovery={
+          selectedDiscovery
+        }
+        onClose={() => {
+          setSelectedDiscovery(
+            null,
+          );
+        }}
+      />
     </section>
   );
 }

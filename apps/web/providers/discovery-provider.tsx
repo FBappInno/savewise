@@ -2,6 +2,7 @@
 
 import type {
   Discovery,
+  DiscoveryUpdate,
 } from "@savewise/shared";
 
 import {
@@ -33,17 +34,31 @@ import {
   importDiscoveryLink,
 } from "@/services/discovery-client";
 
+import {
+  updateDiscoveryRequest,
+} from "@/services/discovery-update-client";
+
+import {
+  loadWebSettings,
+  resolvePreferredLanguage,
+} from "@/services/web-settings";
+
+
 type DiscoveryContextValue = {
-  discoveries: Discovery[];
+  discoveries:
+    Discovery[];
 
   workspaceDiscoveries:
     Discovery[];
 
-  isLoading: boolean;
+  isLoading:
+    boolean;
 
-  isImporting: boolean;
+  isImporting:
+    boolean;
 
-  error: string | null;
+  error:
+    string | null;
 
   refreshDiscoveries:
     () => Promise<void>;
@@ -70,11 +85,17 @@ type DiscoveryContextValue = {
     },
   ) => Promise<Discovery>;
 
+  updateDiscovery: (
+    discoveryId: string,
+    update: DiscoveryUpdate,
+  ) => Promise<Discovery>;
+
   removeDiscovery: (
     discoveryId: string,
   ) => Promise<void>;
 
-  clearError: () => void;
+  clearError:
+    () => void;
 };
 
 const DiscoveryContext =
@@ -85,7 +106,8 @@ const DiscoveryContext =
 export function DiscoveryProvider({
   children,
 }: {
-  children: ReactNode;
+  children:
+    ReactNode;
 }) {
   const {
     status:
@@ -197,6 +219,27 @@ export function DiscoveryProvider({
         setError(null);
 
         try {
+          const settings =
+            loadWebSettings();
+
+          if (
+            !settings.privacy
+              .externalContentProcessing
+          ) {
+            throw new Error(
+              "Externe Inhaltsverarbeitung ist in den Einstellungen deaktiviert.",
+            );
+          }
+
+          if (
+            !settings.ai
+              .contentAnalysis
+          ) {
+            throw new Error(
+              "KI-Inhaltsanalyse ist in den Einstellungen deaktiviert.",
+            );
+          }
+
           const result =
             await importDiscoveryLink({
               rawUrl:
@@ -206,7 +249,9 @@ export function DiscoveryProvider({
                 activeWorkspaceId,
 
               preferredLanguage:
-                "de",
+                resolvePreferredLanguage(
+                  settings,
+                ),
 
               preferredKnowledgePath:
                 input
@@ -267,6 +312,27 @@ export function DiscoveryProvider({
         setError(null);
 
         try {
+          const settings =
+            loadWebSettings();
+
+          if (
+            !settings.privacy
+              .externalContentProcessing
+          ) {
+            throw new Error(
+              "Externe Inhaltsverarbeitung ist in den Einstellungen deaktiviert.",
+            );
+          }
+
+          if (
+            !settings.ai
+              .contentAnalysis
+          ) {
+            throw new Error(
+              "KI-Inhaltsanalyse ist in den Einstellungen deaktiviert.",
+            );
+          }
+
           const result =
             await importDiscoveryFile({
               file:
@@ -279,7 +345,9 @@ export function DiscoveryProvider({
                 activeWorkspaceId,
 
               preferredLanguage:
-                "de",
+                resolvePreferredLanguage(
+                  settings,
+                ),
 
               preferredKnowledgePath:
                 input
@@ -320,6 +388,51 @@ export function DiscoveryProvider({
         activeWorkspaceId,
         markPendingChange,
       ],
+    );
+
+  const updateDiscovery =
+    useCallback(
+      async (
+        discoveryId: string,
+        update: DiscoveryUpdate,
+      ): Promise<Discovery> => {
+        setError(null);
+
+        try {
+          const updated =
+            await updateDiscoveryRequest(
+              discoveryId,
+              update,
+            );
+
+          setDiscoveries(
+            (current) =>
+              current.map(
+                (discovery) =>
+                  discovery.id ===
+                  updated.id
+                    ? updated
+                    : discovery,
+              ),
+          );
+
+          markPendingChange();
+
+          return updated;
+        } catch (
+          updateError
+        ) {
+          const message =
+            updateError instanceof Error
+              ? updateError.message
+              : "Die Discovery konnte nicht aktualisiert werden.";
+
+          setError(message);
+
+          throw updateError;
+        }
+      },
+      [markPendingChange],
     );
 
   const removeDiscovery =
@@ -390,6 +503,7 @@ export function DiscoveryProvider({
         refreshDiscoveries,
         importLink,
         importFile,
+        updateDiscovery,
         removeDiscovery,
 
         clearError() {
@@ -405,6 +519,7 @@ export function DiscoveryProvider({
         refreshDiscoveries,
         importLink,
         importFile,
+        updateDiscovery,
         removeDiscovery,
       ],
     );

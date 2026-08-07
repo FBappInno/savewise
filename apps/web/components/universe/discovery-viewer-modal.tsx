@@ -3,6 +3,7 @@
 import type {
   Discovery,
   DiscoveryCategory,
+  WorkspaceId,
 } from "@savewise/shared";
 
 import {
@@ -15,8 +16,17 @@ import {
 } from "@/providers/discovery-provider";
 
 import {
+  useWorkspace,
+} from "@/providers/workspace-provider";
+
+import {
   loadDiscoveryAttachment,
 } from "@/services/discovery-client";
+
+import {
+  exportDiscoveryAsPdf,
+} from "@/services/discovery-pdf-export";
+
 
 const categories:
 Array<{
@@ -69,6 +79,29 @@ Array<{
   },
 ];
 
+const languages = [
+  {
+    value: "de",
+    label: "Deutsch",
+  },
+  {
+    value: "en",
+    label: "Englisch",
+  },
+  {
+    value: "fr",
+    label: "Französisch",
+  },
+  {
+    value: "it",
+    label: "Italienisch",
+  },
+  {
+    value: "es",
+    label: "Spanisch",
+  },
+] as const;
+
 export function DiscoveryViewerModal({
   discovery,
   onClose,
@@ -81,8 +114,14 @@ export function DiscoveryViewerModal({
 }) {
   const {
     updateDiscovery,
+    removeDiscovery,
   } =
     useDiscoveries();
+
+  const {
+    activeWorkspaceId,
+  } =
+    useWorkspace();
 
   const [
     currentDiscovery,
@@ -113,8 +152,20 @@ export function DiscoveryViewerModal({
     useState(false);
 
   const [
+    isActionMenuOpen,
+    setActionMenuOpen,
+  ] =
+    useState(false);
+
+  const [
     isSaving,
     setSaving,
+  ] =
+    useState(false);
+
+  const [
+    isDeleting,
+    setDeleting,
   ] =
     useState(false);
 
@@ -137,6 +188,14 @@ export function DiscoveryViewerModal({
     setSummary,
   ] =
     useState("");
+
+  const [
+    workspaceId,
+    setWorkspaceId,
+  ] =
+    useState<WorkspaceId>(
+      "private",
+    );
 
   const [
     category,
@@ -164,12 +223,25 @@ export function DiscoveryViewerModal({
   ] =
     useState("");
 
+  const [
+    language,
+    setLanguage,
+  ] =
+    useState<
+      | "de"
+      | "en"
+      | "fr"
+      | "it"
+      | "es"
+    >("de");
+
   useEffect(() => {
     setCurrentDiscovery(
       discovery,
     );
 
     setEditing(false);
+    setActionMenuOpen(false);
     setError(null);
 
     if (!discovery) {
@@ -184,6 +256,11 @@ export function DiscoveryViewerModal({
     setSummary(
       discovery.summary ??
       "",
+    );
+
+    setWorkspaceId(
+      discovery.workspaceId ??
+      "private",
     );
 
     setCategory(
@@ -211,6 +288,13 @@ export function DiscoveryViewerModal({
         []
       ).join(", "),
     );
+
+    setLanguage(
+      normalizeLanguage(
+        discovery.language,
+      ) ??
+      "de",
+    );
   }, [discovery]);
 
   useEffect(() => {
@@ -218,7 +302,10 @@ export function DiscoveryViewerModal({
       !currentDiscovery ||
       !currentDiscovery.attachment
     ) {
-      setAttachmentUrl(null);
+      setAttachmentUrl(
+        null,
+      );
+
       setLoading(false);
 
       return;
@@ -288,6 +375,37 @@ export function DiscoveryViewerModal({
     };
   }, [currentDiscovery]);
 
+  useEffect(() => {
+    function handleKeyDown(
+      event:
+        KeyboardEvent,
+    ) {
+      if (
+        event.key ===
+        "Escape"
+      ) {
+        onClose();
+      }
+    }
+
+    if (currentDiscovery) {
+      window.addEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+    }
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+    };
+  }, [
+    currentDiscovery,
+    onClose,
+  ]);
+
   if (!currentDiscovery) {
     return null;
   }
@@ -313,13 +431,49 @@ export function DiscoveryViewerModal({
 
   async function handleSave():
   Promise<void> {
+    const discoveryToUpdate =
+      currentDiscovery;
+
+    if (!discoveryToUpdate) {
+      return;
+    }
+
+    const cleanTitle =
+      title.trim();
+
+    const cleanTopic =
+      topic.trim();
+
+    const cleanSecondaryCategory =
+      secondaryCategory.trim();
+
     if (
-      !title.trim() ||
-      !summary.trim() ||
-      !topic.trim()
+      cleanTitle.length < 3
     ) {
       setError(
-        "Titel, Zusammenfassung und Thema dürfen nicht leer sein.",
+        "Der Titel muss mindestens 3 Zeichen enthalten.",
+      );
+
+      return;
+    }
+
+    if (
+      cleanSecondaryCategory.length <
+      2
+    ) {
+      setError(
+        "Die Domäne muss mindestens 2 Zeichen enthalten.",
+      );
+
+      return;
+    }
+
+    if (
+      cleanTopic.length <
+      2
+    ) {
+      setError(
+        "Das Topic muss mindestens 2 Zeichen enthalten.",
       );
 
       return;
@@ -331,25 +485,30 @@ export function DiscoveryViewerModal({
     try {
       const updated =
         await updateDiscovery(
-          currentDiscovery.id,
+          discoveryToUpdate.id,
           {
             title:
-              title.trim(),
+              cleanTitle,
 
             summary:
-              summary.trim(),
+              summary
+                .trim()
+                .slice(
+                  0,
+                  420,
+                ),
+
+            workspaceId,
 
             classification: {
               primaryCategory:
                 category,
 
               secondaryCategory:
-                secondaryCategory
-                  .trim() ||
-                topic.trim(),
+                cleanSecondaryCategory,
 
               topic:
-                topic.trim(),
+                cleanTopic,
 
               subtopics:
                 subtopics
@@ -358,15 +517,18 @@ export function DiscoveryViewerModal({
                     (value) =>
                       value.trim(),
                   )
-                  .filter(Boolean)
-                  .slice(0, 8),
+                  .filter(
+                    (value) =>
+                      value.length >=
+                      2,
+                  )
+                  .slice(
+                    0,
+                    6,
+                  ),
             },
 
-            language:
-              normalizeLanguage(
-                currentDiscovery
-                  .language,
-              ),
+            language,
           },
         );
 
@@ -375,6 +537,19 @@ export function DiscoveryViewerModal({
       );
 
       setEditing(false);
+
+      /*
+       * Wenn eine Discovery in den
+       * anderen Workspace verschoben
+       * wurde, gehört sie nicht mehr in
+       * die aktuelle Ansicht.
+       */
+      if (
+        workspaceId !==
+        activeWorkspaceId
+      ) {
+        onClose();
+      }
     } catch (
       saveError
     ) {
@@ -385,6 +560,134 @@ export function DiscoveryViewerModal({
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleShare():
+  Promise<void> {
+    const discoveryToShare =
+      currentDiscovery;
+
+    if (!discoveryToShare) {
+      return;
+    }
+
+    const shareText = [
+      displayTitle,
+      "",
+      discoveryToShare.summary ??
+        "",
+      "",
+      discoveryToShare.url ??
+        "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      if (
+        navigator.share
+      ) {
+        await navigator.share({
+          title:
+            displayTitle,
+
+          text:
+            discoveryToShare.summary ??
+            displayTitle,
+
+          url:
+            discoveryToShare.url,
+        });
+
+        return;
+      }
+
+      await navigator.clipboard.writeText(
+        shareText,
+      );
+
+      window.alert(
+        "Discovery wurde in die Zwischenablage kopiert.",
+      );
+    } catch (
+      shareError
+    ) {
+      if (
+        shareError instanceof DOMException &&
+        shareError.name ===
+          "AbortError"
+      ) {
+        return;
+      }
+
+      window.alert(
+        "Teilen ist in diesem Browser nicht verfügbar.",
+      );
+    }
+  }
+
+  async function handleSaveAsPdf():
+  Promise<void> {
+    const discoveryToExport =
+      currentDiscovery;
+
+    if (!discoveryToExport) {
+      return;
+    }
+
+    try {
+      await exportDiscoveryAsPdf(
+        discoveryToExport,
+      );
+    } catch (
+      exportError
+    ) {
+      window.alert(
+        exportError instanceof Error
+          ? exportError.message
+          : "Das PDF konnte nicht erstellt werden.",
+      );
+    }
+  }
+
+  async function handleDelete():
+  Promise<void> {
+    const discoveryToDelete =
+      currentDiscovery;
+
+    if (!discoveryToDelete) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `„${displayTitle}“ wirklich löschen?`,
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleting(true);
+    setError(null);
+
+    try {
+      await removeDiscovery(
+        discoveryToDelete.id,
+      );
+
+      onClose();
+    } catch (
+      deleteError
+    ) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Die Discovery konnte nicht gelöscht werden.",
+      );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -437,23 +740,122 @@ export function DiscoveryViewerModal({
             <h2>
               {displayTitle}
             </h2>
+
+            <div className="viewer-header-meta">
+              <span>
+                {(currentDiscovery.workspaceId ??
+                  "private") ===
+                "business"
+                  ? "Geschäftlich"
+                  : "Privat"}
+              </span>
+
+              <span>
+                ·
+              </span>
+
+              <span>
+                {formatDate(
+                  currentDiscovery.createdAt,
+                )}
+              </span>
+            </div>
           </div>
 
           <div className="viewer-header-actions">
-            <button
-              className="secondary-button"
-              onClick={() => {
-                setEditing(
-                  (current) =>
-                    !current,
-                );
-              }}
-              type="button"
-            >
-              {isEditing
-                ? "Bearbeitung schließen"
-                : "Bearbeiten"}
-            </button>
+            <div className="discovery-action-menu-wrapper">
+              <button
+                aria-expanded={
+                  isActionMenuOpen
+                }
+                aria-haspopup="menu"
+                aria-label="Discovery-Aktionen"
+                className="discovery-more-button"
+                onClick={() => {
+                  setActionMenuOpen(
+                    (current) =>
+                      !current,
+                  );
+                }}
+                type="button"
+              >
+                ···
+              </button>
+
+              {isActionMenuOpen ? (
+                <div
+                  className="discovery-action-menu"
+                  role="menu"
+                >
+                  <button
+                    onClick={() => {
+                      void handleShare();
+
+                      setActionMenuOpen(
+                        false,
+                      );
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    <span>
+                      ↗
+                    </span>
+
+                    Teilen
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      void handleSaveAsPdf();
+
+                      setActionMenuOpen(
+                        false,
+                      );
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    <span>
+                      PDF
+                    </span>
+
+                    Als PDF speichern
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditing(true);
+                      setError(null);
+                      setActionMenuOpen(
+                        false,
+                      );
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    <span>
+                      ✎
+                    </span>
+
+                    Anpassen
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            {isEditing ? (
+              <button
+                className="secondary-button"
+                onClick={() => {
+                  setEditing(false);
+                  setError(null);
+                }}
+                type="button"
+              >
+                Bearbeitung schließen
+              </button>
+            ) : null}
 
             <button
               aria-label="Ansicht schließen"
@@ -481,20 +883,14 @@ export function DiscoveryViewerModal({
               </div>
             ) : null}
 
-            {error &&
-            !isEditing ? (
-              <div className="capture-error">
-                {error}
-              </div>
-            ) : null}
-
             {!isLoading &&
-            !error &&
             isImage &&
             attachmentUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
-                alt={displayTitle}
+                alt={
+                  displayTitle
+                }
                 className="discovery-viewer-image"
                 src={
                   attachmentUrl
@@ -503,7 +899,6 @@ export function DiscoveryViewerModal({
             ) : null}
 
             {!isLoading &&
-            !error &&
             isPdf &&
             attachmentUrl ? (
               <iframe
@@ -567,12 +962,17 @@ export function DiscoveryViewerModal({
                   </span>
 
                   <input
+                    maxLength={
+                      120
+                    }
                     onChange={(event) => {
                       setTitle(
                         event.target.value,
                       );
                     }}
-                    value={title}
+                    value={
+                      title
+                    }
                   />
                 </label>
 
@@ -582,25 +982,65 @@ export function DiscoveryViewerModal({
                   </span>
 
                   <textarea
+                    maxLength={
+                      420
+                    }
                     onChange={(event) => {
                       setSummary(
                         event.target.value,
                       );
                     }}
-                    rows={7}
-                    value={summary}
+                    rows={6}
+                    value={
+                      summary
+                    }
                   />
+
+                  <small>
+                    {
+                      summary.length
+                    }
+                    /420
+                  </small>
                 </label>
 
                 <label className="form-field">
                   <span>
-                    Domäne
+                    Workspace
+                  </span>
+
+                  <select
+                    onChange={(event) => {
+                      setWorkspaceId(
+                        event.target
+                          .value as
+                          WorkspaceId,
+                      );
+                    }}
+                    value={
+                      workspaceId
+                    }
+                  >
+                    <option value="private">
+                      Privat
+                    </option>
+
+                    <option value="business">
+                      Geschäftlich
+                    </option>
+                  </select>
+                </label>
+
+                <label className="form-field">
+                  <span>
+                    Interne KI-Kategorie
                   </span>
 
                   <select
                     onChange={(event) => {
                       setCategory(
-                        event.target.value as
+                        event.target
+                          .value as
                           DiscoveryCategory,
                       );
                     }}
@@ -629,10 +1069,13 @@ export function DiscoveryViewerModal({
 
                 <label className="form-field">
                   <span>
-                    Unterdomäne
+                    Domäne
                   </span>
 
                   <input
+                    maxLength={
+                      60
+                    }
                     onChange={(event) => {
                       setSecondaryCategory(
                         event.target.value,
@@ -646,16 +1089,21 @@ export function DiscoveryViewerModal({
 
                 <label className="form-field">
                   <span>
-                    Thema
+                    Topic
                   </span>
 
                   <input
+                    maxLength={
+                      60
+                    }
                     onChange={(event) => {
                       setTopic(
                         event.target.value,
                       );
                     }}
-                    value={topic}
+                    value={
+                      topic
+                    }
                   />
                 </label>
 
@@ -670,11 +1118,47 @@ export function DiscoveryViewerModal({
                         event.target.value,
                       );
                     }}
-                    placeholder="Mit Komma trennen"
+                    placeholder="Mit Kommas trennen"
                     value={
                       subtopics
                     }
                   />
+                </label>
+
+                <label className="form-field">
+                  <span>
+                    Sprache
+                  </span>
+
+                  <select
+                    onChange={(event) => {
+                      setLanguage(
+                        event.target
+                          .value as
+                          typeof language,
+                      );
+                    }}
+                    value={
+                      language
+                    }
+                  >
+                    {languages.map(
+                      (entry) => (
+                        <option
+                          key={
+                            entry.value
+                          }
+                          value={
+                            entry.value
+                          }
+                        >
+                          {
+                            entry.label
+                          }
+                        </option>
+                      ),
+                    )}
+                  </select>
                 </label>
 
                 {error ? (
@@ -683,23 +1167,48 @@ export function DiscoveryViewerModal({
                   </div>
                 ) : null}
 
-                <button
-                  className="primary-button"
-                  disabled={
-                    isSaving
-                  }
-                  onClick={() => {
-                    void handleSave();
-                  }}
-                  type="button"
-                >
-                  {isSaving
-                    ? "Speichere …"
-                    : "Änderungen speichern"}
-                </button>
+                <div className="discovery-edit-actions">
+                  <button
+                    className="primary-button"
+                    disabled={
+                      isSaving ||
+                      isDeleting
+                    }
+                    onClick={() => {
+                      void handleSave();
+                    }}
+                    type="button"
+                  >
+                    {isSaving
+                      ? "Speichere …"
+                      : "Änderungen speichern"}
+                  </button>
+
+                  <button
+                    className="danger-button"
+                    disabled={
+                      isSaving ||
+                      isDeleting
+                    }
+                    onClick={() => {
+                      void handleDelete();
+                    }}
+                    type="button"
+                  >
+                    {isDeleting
+                      ? "Lösche …"
+                      : "Discovery löschen"}
+                  </button>
+                </div>
               </div>
             ) : (
               <>
+                {error ? (
+                  <div className="capture-error">
+                    {error}
+                  </div>
+                ) : null}
+
                 {currentDiscovery.summary ? (
                   <section>
                     <div className="card-eyebrow">
@@ -726,18 +1235,6 @@ export function DiscoveryViewerModal({
                         {
                           currentDiscovery
                             .classification
-                            .primaryCategory
-                        }
-                      </span>
-
-                      <b>
-                        ›
-                      </b>
-
-                      <span>
-                        {
-                          currentDiscovery
-                            .classification
                             .secondaryCategory
                         }
                       </span>
@@ -753,6 +1250,149 @@ export function DiscoveryViewerModal({
                             .topic
                         }
                       </span>
+                    </div>
+
+                    {currentDiscovery
+                      .classification
+                      .subtopics.length >
+                    0 ? (
+                      <div className="discovery-keywords">
+                        {currentDiscovery
+                          .classification
+                          .subtopics
+                          .map(
+                            (
+                              subtopic,
+                            ) => (
+                              <span
+                                key={
+                                  subtopic
+                                }
+                              >
+                                {
+                                  subtopic
+                                }
+                              </span>
+                            ),
+                          )}
+                      </div>
+                    ) : null}
+                  </section>
+                ) : null}
+
+                <section>
+                  <div className="card-eyebrow">
+                    DETAILS
+                  </div>
+
+                  <dl className="viewer-metadata-grid">
+                    <div>
+                      <dt>
+                        Workspace
+                      </dt>
+
+                      <dd>
+                        {(currentDiscovery.workspaceId ??
+                          "private") ===
+                        "business"
+                          ? "Geschäftlich"
+                          : "Privat"}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Sprache
+                      </dt>
+
+                      <dd>
+                        {
+                          currentDiscovery.language ??
+                          "–"
+                        }
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Erstellt
+                      </dt>
+
+                      <dd>
+                        {formatDateTime(
+                          currentDiscovery.createdAt,
+                        )}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Aktualisiert
+                      </dt>
+
+                      <dd>
+                        {formatDateTime(
+                          currentDiscovery.updatedAt,
+                        )}
+                      </dd>
+                    </div>
+
+                    {currentDiscovery.author ? (
+                      <div>
+                        <dt>
+                          Autor
+                        </dt>
+
+                        <dd>
+                          {
+                            currentDiscovery.author
+                          }
+                        </dd>
+                      </div>
+                    ) : null}
+
+                    {typeof currentDiscovery.confidence ===
+                    "number" ? (
+                      <div>
+                        <dt>
+                          KI-Confidence
+                        </dt>
+
+                        <dd>
+                          {Math.round(
+                            currentDiscovery.confidence *
+                              100,
+                          )}
+                          %
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </section>
+
+                {currentDiscovery.keywords.length >
+                0 ? (
+                  <section>
+                    <div className="card-eyebrow">
+                      SCHLAGWÖRTER
+                    </div>
+
+                    <div className="discovery-keywords">
+                      {currentDiscovery.keywords.map(
+                        (
+                          keyword,
+                        ) => (
+                          <span
+                            key={
+                              keyword
+                            }
+                          >
+                            {
+                              keyword
+                            }
+                          </span>
+                        ),
+                      )}
                     </div>
                   </section>
                 ) : null}
@@ -791,6 +1431,24 @@ export function DiscoveryViewerModal({
                           )}
                         </dd>
                       </div>
+
+                      {currentDiscovery
+                        .attachment
+                        .pageCount ? (
+                        <div>
+                          <dt>
+                            Seiten
+                          </dt>
+
+                          <dd>
+                            {
+                              currentDiscovery
+                                .attachment
+                                .pageCount
+                            }
+                          </dd>
+                        </div>
+                      ) : null}
                     </dl>
                   </section>
                 ) : null}
@@ -808,9 +1466,9 @@ export function DiscoveryViewerModal({
                     type="button"
                   >
                     {isPdf
-                      ? "PDF in neuem Tab öffnen"
+                      ? "PDF öffnen"
                       : isImage
-                        ? "Bild in neuem Tab öffnen"
+                        ? "Bild öffnen"
                         : "Originalquelle öffnen"}
                   </button>
                 ) : null}
@@ -840,6 +1498,38 @@ function normalizeLanguage(
     value === "es"
     ? value
     : undefined;
+}
+
+function formatDate(
+  value: string,
+): string {
+  return new Intl.DateTimeFormat(
+    "de-CH",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    },
+  ).format(
+    new Date(value),
+  );
+}
+
+function formatDateTime(
+  value: string,
+): string {
+  return new Intl.DateTimeFormat(
+    "de-CH",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  ).format(
+    new Date(value),
+  );
 }
 
 function formatFileSize(

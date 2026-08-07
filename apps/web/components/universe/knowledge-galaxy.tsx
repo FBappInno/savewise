@@ -13,10 +13,27 @@ import {
   useDiscoveries,
 } from "@/providers/discovery-provider";
 
-import type {
-  GalaxyConnection,
-  GalaxyNode,
-} from "@/types/galaxy";
+type TopicSystem = {
+  id: string;
+  label: string;
+  count: number;
+  discoveries: Discovery[];
+};
+
+type DomainGalaxy = {
+  id: string;
+  key: string;
+  label: string;
+  count: number;
+  discoveries: Discovery[];
+  topics: TopicSystem[];
+};
+
+type OverviewPosition = {
+  x: number;
+  y: number;
+  radius: number;
+};
 
 const WIDTH =
   1200;
@@ -34,35 +51,44 @@ const categoryLabels:
 Record<string, string> = {
   technology:
     "Technologie",
+
   finance:
     "Finanzen",
+
   business:
     "Business",
+
   science:
     "Wissenschaft",
+
   health:
     "Gesundheit",
+
   education:
     "Bildung",
+
   productivity:
     "Produktivität",
+
   culture:
     "Kultur",
+
   news:
     "Nachrichten",
+
   lifestyle:
     "Lifestyle",
+
   other:
     "Weitere",
 };
 
-type GalaxyModel = {
-  nodes: GalaxyNode[];
-  connections:
-    GalaxyConnection[];
-};
-
-export function KnowledgeGalaxy() {
+export function KnowledgeGalaxy({
+  onOpenDiscovery,
+}: {
+  onOpenDiscovery:
+    (discovery: Discovery) => void;
+}) {
   const {
     workspaceDiscoveries,
     isLoading,
@@ -70,43 +96,99 @@ export function KnowledgeGalaxy() {
     useDiscoveries();
 
   const [
-    selectedNodeId,
-    setSelectedNodeId,
+    selectedDomainId,
+    setSelectedDomainId,
   ] =
     useState<string | null>(
       null,
     );
 
-  const model =
+  const [
+    selectedTopicId,
+    setSelectedTopicId,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const galaxies =
     useMemo(
       () =>
-        createGalaxyModel(
+        createDomainGalaxies(
           workspaceDiscoveries,
         ),
       [workspaceDiscoveries],
     );
 
-  const selectedNode =
-    model.nodes.find(
-      (node) =>
-        node.id ===
-        selectedNodeId,
-    ) ?? null;
+  const selectedGalaxy =
+    galaxies.find(
+      (galaxy) =>
+        galaxy.id ===
+        selectedDomainId,
+    ) ??
+    null;
 
-  const selectedDiscoveries =
+  const selectedTopic =
+    selectedGalaxy
+      ?.topics.find(
+        (topic) =>
+          topic.id ===
+          selectedTopicId,
+      ) ??
+    null;
+
+  const inspectorDiscoveries =
+    selectedTopic
+      ? selectedTopic.discoveries
+      : selectedGalaxy
+        ? selectedGalaxy.discoveries
+        : [];
+
+  const overviewPositions =
     useMemo(
       () =>
-        selectedNode
-          ? getNodeDiscoveries(
-              workspaceDiscoveries,
-              selectedNode,
-            )
-          : [],
-      [
-        selectedNode,
-        workspaceDiscoveries,
-      ],
+        createOverviewPositions(
+          galaxies,
+        ),
+      [galaxies],
     );
+
+  function selectDomain(
+    galaxy:
+      DomainGalaxy,
+  ): void {
+    setSelectedDomainId(
+      galaxy.id,
+    );
+
+    setSelectedTopicId(
+      null,
+    );
+  }
+
+  function selectTopic(
+    topic:
+      TopicSystem,
+  ): void {
+    setSelectedTopicId(
+      (current) =>
+        current ===
+        topic.id
+          ? null
+          : topic.id,
+    );
+  }
+
+  function returnToOverview():
+  void {
+    setSelectedDomainId(
+      null,
+    );
+
+    setSelectedTopicId(
+      null,
+    );
+  }
 
   if (
     isLoading &&
@@ -135,14 +217,14 @@ export function KnowledgeGalaxy() {
         </div>
 
         <h3>
-          Noch keine Galaxie
+          Noch keine Galaxien
         </h3>
 
         <p>
           Sobald du Inhalte erfasst,
           entstehen hier automatisch
-          Domänen, Themen und fachliche
-          Verbindungen.
+          Domänen, Themen und
+          Wissensverbindungen.
         </p>
       </div>
     );
@@ -154,74 +236,97 @@ export function KnowledgeGalaxy() {
         <div className="galaxy-stage-header">
           <div>
             <div className="card-eyebrow">
-              KNOWLEDGE GALAXY
+              {selectedGalaxy
+                ? "DOMAIN EXPLORATION"
+                : "KNOWLEDGE UNIVERSE"}
             </div>
 
             <h2>
-              Dein Wissensuniversum
+              {selectedGalaxy
+                ? selectedGalaxy.label
+                : "Deine Wissensgalaxien"}
             </h2>
 
             <p>
-              Große Knoten sind Domänen.
-              Kleinere Knoten zeigen
-              Themen innerhalb dieser
-              Domänen.
+              {selectedGalaxy
+                ? "Wähle ein Sonnensystem, um rechts die zugehörigen Discoveries anzuzeigen."
+                : "Jede Galaxie entspricht einer Wissensdomäne. Je mehr Inhalte vorhanden sind, desto größer erscheint sie."}
             </p>
           </div>
 
-          <div className="galaxy-statistics">
-            <div>
-              <strong>
-                {
-                  model.nodes.filter(
-                    (node) =>
-                      node.type ===
-                      "domain",
-                  ).length
-                }
-              </strong>
-
+          {selectedGalaxy ? (
+            <button
+              className="galaxy-overview-button"
+              onClick={
+                returnToOverview
+              }
+              type="button"
+            >
               <span>
-                Domänen
+                ←
               </span>
+
+              Zur Hauptansicht
+            </button>
+          ) : (
+            <div className="galaxy-statistics">
+              <div>
+                <strong>
+                  {galaxies.length}
+                </strong>
+
+                <span>
+                  Galaxien
+                </span>
+              </div>
+
+              <div>
+                <strong>
+                  {
+                    galaxies.reduce(
+                      (
+                        total,
+                        galaxy,
+                      ) =>
+                        total +
+                        galaxy.topics.length,
+                      0,
+                    )
+                  }
+                </strong>
+
+                <span>
+                  Themen
+                </span>
+              </div>
+
+              <div>
+                <strong>
+                  {
+                    workspaceDiscoveries
+                      .length
+                  }
+                </strong>
+
+                <span>
+                  Inhalte
+                </span>
+              </div>
             </div>
-
-            <div>
-              <strong>
-                {
-                  model.nodes.filter(
-                    (node) =>
-                      node.type ===
-                      "topic",
-                  ).length
-                }
-              </strong>
-
-              <span>
-                Themen
-              </span>
-            </div>
-
-            <div>
-              <strong>
-                {
-                  workspaceDiscoveries
-                    .length
-                }
-              </strong>
-
-              <span>
-                Inhalte
-              </span>
-            </div>
-          </div>
+          )}
         </div>
 
-        <div className="galaxy-canvas-wrapper">
+        <div
+          className={
+            selectedGalaxy
+              ? "galaxy-canvas-wrapper galaxy-canvas-wrapper-focused"
+              : "galaxy-canvas-wrapper"
+          }
+        >
           <div className="galaxy-stars" />
 
           <svg
-            aria-label="Interaktive Wissensgalaxie"
+            aria-label="Interaktives Wissensuniversum"
             className="galaxy-canvas"
             preserveAspectRatio="xMidYMid meet"
             role="img"
@@ -229,34 +334,82 @@ export function KnowledgeGalaxy() {
           >
             <defs>
               <radialGradient
-                id="galaxy-core-gradient"
+                id="domain-galaxy-gradient"
               >
                 <stop
                   offset="0%"
-                  stopColor="#d9f7ff"
+                  stopColor="#e8fbff"
                 />
 
                 <stop
-                  offset="32%"
-                  stopColor="#73d8ff"
+                  offset="22%"
+                  stopColor="#91e6ff"
+                />
+
+                <stop
+                  offset="56%"
+                  stopColor="#209ccc"
                 />
 
                 <stop
                   offset="100%"
-                  stopColor="#0f6d9b"
+                  stopColor="#07324a"
+                />
+              </radialGradient>
+
+              <radialGradient
+                id="focused-domain-gradient"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="#ffffff"
+                />
+
+                <stop
+                  offset="18%"
+                  stopColor="#bff3ff"
+                />
+
+                <stop
+                  offset="48%"
+                  stopColor="#45c6ef"
+                />
+
+                <stop
+                  offset="100%"
+                  stopColor="#075277"
+                />
+              </radialGradient>
+
+              <radialGradient
+                id="topic-system-gradient"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="#ffffff"
+                />
+
+                <stop
+                  offset="38%"
+                  stopColor="#9be9ff"
+                />
+
+                <stop
+                  offset="100%"
+                  stopColor="#1686b3"
                 />
               </radialGradient>
 
               <filter
-                height="300%"
-                id="galaxy-glow"
-                width="300%"
-                x="-100%"
-                y="-100%"
+                height="500%"
+                id="domain-galaxy-glow"
+                width="500%"
+                x="-200%"
+                y="-200%"
               >
                 <feGaussianBlur
                   result="blur"
-                  stdDeviation="8"
+                  stdDeviation="13"
                 />
 
                 <feMerge>
@@ -270,254 +423,297 @@ export function KnowledgeGalaxy() {
                 </feMerge>
               </filter>
 
-              <linearGradient
-                id="galaxy-line-gradient"
-                x1="0%"
-                x2="100%"
+              <filter
+                height="500%"
+                id="topic-system-glow"
+                width="500%"
+                x="-200%"
+                y="-200%"
               >
-                <stop
-                  offset="0%"
-                  stopColor="#2d91bc"
-                  stopOpacity="0.14"
+                <feGaussianBlur
+                  result="blur"
+                  stdDeviation="7"
                 />
 
-                <stop
-                  offset="50%"
-                  stopColor="#73d8ff"
-                  stopOpacity="0.58"
-                />
+                <feMerge>
+                  <feMergeNode
+                    in="blur"
+                  />
 
-                <stop
-                  offset="100%"
-                  stopColor="#2d91bc"
-                  stopOpacity="0.14"
-                />
-              </linearGradient>
+                  <feMergeNode
+                    in="SourceGraphic"
+                  />
+                </feMerge>
+              </filter>
             </defs>
 
-            <g className="galaxy-orbits">
-              <circle
-                cx={CENTER_X}
-                cy={CENTER_Y}
-                r="148"
-              />
+            {!selectedGalaxy ? (
+              <g className="galaxy-overview-scene">
+                {galaxies.map(
+                  (
+                    galaxy,
+                    index,
+                  ) => {
+                    const position =
+                      overviewPositions[
+                        index
+                      ];
 
-              <circle
-                cx={CENTER_X}
-                cy={CENTER_Y}
-                r="255"
-              />
+                    if (!position) {
+                      return null;
+                    }
 
-              <circle
-                cx={CENTER_X}
-                cy={CENTER_Y}
-                r="345"
-              />
-            </g>
-
-            <g className="galaxy-connections">
-              {model.connections.map(
-                (connection) => {
-                  const source =
-                    model.nodes.find(
-                      (node) =>
-                        node.id ===
-                        connection.sourceId,
-                    );
-
-                  const target =
-                    model.nodes.find(
-                      (node) =>
-                        node.id ===
-                        connection.targetId,
-                    );
-
-                  if (
-                    !source ||
-                    !target
-                  ) {
-                    return null;
-                  }
-
-                  const highlighted =
-                    selectedNodeId ===
-                      source.id ||
-                    selectedNodeId ===
-                      target.id;
-
-                  return (
-                    <line
-                      className={
-                        highlighted
-                          ? "galaxy-connection galaxy-connection-highlighted"
-                          : "galaxy-connection"
-                      }
-                      key={
-                        connection.id
-                      }
-                      x1={
-                        source.x
-                      }
-                      x2={
-                        target.x
-                      }
-                      y1={
-                        source.y
-                      }
-                      y2={
-                        target.y
-                      }
-                    />
-                  );
-                },
-              )}
-            </g>
-
-            <g className="galaxy-nodes">
-              {model.nodes.map(
-                (node) => {
-                  const selected =
-                    node.id ===
-                    selectedNodeId;
-
-                  return (
-                    <g
-                      className={
-                        `galaxy-node galaxy-node-${node.type}` +
-                        (
-                          selected
-                            ? " galaxy-node-selected"
-                            : ""
-                        )
-                      }
-                      key={
-                        node.id
-                      }
-                      onClick={() => {
-                        setSelectedNodeId(
-                          selected
-                            ? null
-                            : node.id,
-                        );
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <circle
-                        className="galaxy-node-halo"
-                        cx={node.x}
-                        cy={node.y}
-                        r={
-                          node.radius +
-                          13
+                    return (
+                      <g
+                        className="domain-galaxy domain-galaxy-overview"
+                        key={
+                          galaxy.id
                         }
-                      />
+                        onClick={() => {
+                          selectDomain(
+                            galaxy,
+                          );
+                        }}
+                        onKeyDown={(event) => {
+                          if (
+                            event.key ===
+                              "Enter" ||
+                            event.key ===
+                              " "
+                          ) {
+                            event.preventDefault();
 
-                      <circle
-                        className="galaxy-node-core"
-                        cx={node.x}
-                        cy={node.y}
-                        r={
-                          node.radius
-                        }
-                      />
-
-                      {node.type !==
-                      "topic" ? (
+                            selectDomain(
+                              galaxy,
+                            );
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
                         <circle
-                          className="galaxy-node-ring"
-                          cx={node.x}
-                          cy={node.y}
+                          className="domain-galaxy-outer"
+                          cx={
+                            position.x
+                          }
+                          cy={
+                            position.y
+                          }
                           r={
-                            node.radius +
-                            5
+                            position.radius *
+                            1.62
                           }
                         />
-                      ) : null}
 
-                      <text
-                        className="galaxy-node-label"
-                        textAnchor="middle"
-                        x={node.x}
-                        y={
-                          node.y +
-                          node.radius +
-                          25
-                        }
-                      >
-                        {shortenLabel(
-                          node.label,
-                          node.type ===
-                            "topic"
-                            ? 20
-                            : 24,
-                        )}
-                      </text>
+                        <ellipse
+                          className="domain-galaxy-disc"
+                          cx={
+                            position.x
+                          }
+                          cy={
+                            position.y
+                          }
+                          rx={
+                            position.radius *
+                            1.42
+                          }
+                          ry={
+                            position.radius *
+                            0.46
+                          }
+                          transform={`rotate(${
+                            -18 +
+                            index *
+                              7
+                          } ${position.x} ${position.y})`}
+                        />
 
-                      <text
-                        className="galaxy-node-count"
-                        textAnchor="middle"
-                        x={node.x}
-                        y={
-                          node.y + 5
-                        }
-                      >
-                        {node.count}
-                      </text>
-                    </g>
-                  );
-                },
-              )}
-            </g>
+                        <circle
+                          className="domain-galaxy-nebula"
+                          cx={
+                            position.x
+                          }
+                          cy={
+                            position.y
+                          }
+                          r={
+                            position.radius *
+                            1.18
+                          }
+                        />
+
+                        <circle
+                          className="domain-galaxy-core"
+                          cx={
+                            position.x
+                          }
+                          cy={
+                            position.y
+                          }
+                          r={
+                            position.radius
+                          }
+                        />
+
+                        <text
+                          className="domain-galaxy-count"
+                          textAnchor="middle"
+                          x={
+                            position.x
+                          }
+                          y={
+                            position.y +
+                            6
+                          }
+                        >
+                          {
+                            galaxy.count
+                          }
+                        </text>
+
+                        <text
+                          className="domain-galaxy-label"
+                          textAnchor="middle"
+                          x={
+                            position.x
+                          }
+                          y={
+                            position.y +
+                            position.radius +
+                            29
+                          }
+                        >
+                          {
+                            galaxy.label
+                          }
+                        </text>
+                      </g>
+                    );
+                  },
+                )}
+              </g>
+            ) : (
+              <FocusedDomainScene
+                galaxy={
+                  selectedGalaxy
+                }
+                selectedTopicId={
+                  selectedTopicId
+                }
+                onSelectTopic={
+                  selectTopic
+                }
+              />
+            )}
           </svg>
 
           <div className="galaxy-control-hint">
-            Knoten anklicken, um Details
-            anzuzeigen
+            {selectedGalaxy
+              ? "Sonnensystem anklicken, um seine Discoveries zu filtern"
+              : "Galaxie anklicken, um die Domäne zu erkunden"}
           </div>
         </div>
       </div>
 
       <aside className="galaxy-inspector">
-        {selectedNode ? (
+        {selectedGalaxy ? (
           <>
             <div className="card-eyebrow">
-              {selectedNode.type ===
-              "core"
-                ? "WISSENSKERN"
-                : selectedNode.type ===
-                    "domain"
-                  ? "DOMÄNE"
-                  : "THEMA"}
+              {selectedTopic
+                ? "SONNENSYSTEM"
+                : "DOMÄNEN-GALAXIE"}
             </div>
 
             <h3>
-              {selectedNode.label}
+              {selectedTopic
+                ? selectedTopic.label
+                : selectedGalaxy.label}
             </h3>
 
             <div className="galaxy-inspector-count">
               <strong>
-                {selectedNode.count}
+                {
+                  inspectorDiscoveries
+                    .length
+                }
               </strong>
 
               <span>
-                zugeordnete{" "}
-                {selectedNode.count ===
+                {inspectorDiscoveries.length ===
                 1
                   ? "Discovery"
                   : "Discoveries"}
               </span>
             </div>
 
+            <div className="galaxy-topic-overview">
+              <button
+                className={
+                  !selectedTopicId
+                    ? "galaxy-topic-filter galaxy-topic-filter-active"
+                    : "galaxy-topic-filter"
+                }
+                onClick={() => {
+                  setSelectedTopicId(
+                    null,
+                  );
+                }}
+                type="button"
+              >
+                Alle
+                <b>
+                  {
+                    selectedGalaxy
+                      .count
+                  }
+                </b>
+              </button>
+
+              {selectedGalaxy.topics.map(
+                (topic) => (
+                  <button
+                    className={
+                      selectedTopicId ===
+                      topic.id
+                        ? "galaxy-topic-filter galaxy-topic-filter-active"
+                        : "galaxy-topic-filter"
+                    }
+                    key={
+                      topic.id
+                    }
+                    onClick={() => {
+                      selectTopic(
+                        topic,
+                      );
+                    }}
+                    type="button"
+                  >
+                    {topic.label}
+
+                    <b>
+                      {topic.count}
+                    </b>
+                  </button>
+                ),
+              )}
+            </div>
+
             <div className="galaxy-inspector-list">
-              {selectedDiscoveries
-                .slice(0, 8)
+              {inspectorDiscoveries
+                .slice(0, 20)
                 .map(
                   (discovery) => (
-                    <article
+                    <button
+                      className="galaxy-discovery-button"
                       key={
                         discovery.id
                       }
+                      onClick={() => {
+                        onOpenDiscovery(
+                          discovery,
+                        );
+                      }}
+                      type="button"
                     >
                       <strong>
                         {discovery
@@ -525,8 +721,7 @@ export function KnowledgeGalaxy() {
                           discovery.title}
                       </strong>
 
-                      {discovery
-                        .summary ? (
+                      {discovery.summary ? (
                         <p>
                           {
                             discovery
@@ -534,18 +729,22 @@ export function KnowledgeGalaxy() {
                           }
                         </p>
                       ) : null}
-                    </article>
+
+                      <span>
+                        Öffnen →
+                      </span>
+                    </button>
                   ),
                 )}
             </div>
 
-            {selectedDiscoveries.length >
-            8 ? (
+            {inspectorDiscoveries.length >
+            20 ? (
               <div className="galaxy-inspector-more">
                 +
-                {selectedDiscoveries.length -
-                  8}{" "}
-                weitere Inhalte
+                {inspectorDiscoveries.length -
+                  20}{" "}
+                weitere Discoveries
               </div>
             ) : null}
           </>
@@ -556,33 +755,34 @@ export function KnowledgeGalaxy() {
             </div>
 
             <h3>
-              Galaxie erkunden
+              Galaxie auswählen
             </h3>
 
             <p>
-              Wähle eine Domäne oder ein
-              Thema aus, um die darin
-              enthaltenen Discoveries zu
-              sehen.
+              Wähle links eine Domäne.
+              Sie wird anschließend im
+              Zentrum geöffnet und in
+              ihre Sonnensysteme
+              aufgeteilt.
             </p>
 
             <div className="galaxy-legend">
               <div>
                 <span className="legend-node legend-node-core" />
 
-                Wissenskern
+                Domänen-Galaxie
               </div>
 
               <div>
                 <span className="legend-node legend-node-domain" />
 
-                Domäne
+                Topic-Sonnensystem
               </div>
 
               <div>
                 <span className="legend-node legend-node-topic" />
 
-                Thema
+                Discoveries
               </div>
             </div>
           </div>
@@ -592,47 +792,288 @@ export function KnowledgeGalaxy() {
   );
 }
 
-function createGalaxyModel(
-  discoveries: Discovery[],
-): GalaxyModel {
-  const nodes:
-    GalaxyNode[] = [];
+function FocusedDomainScene({
+  galaxy,
+  selectedTopicId,
+  onSelectTopic,
+}: {
+  galaxy:
+    DomainGalaxy;
 
-  const connections:
-    GalaxyConnection[] = [];
+  selectedTopicId:
+    string | null;
 
-  const coreNode:
-    GalaxyNode = {
-      id:
-        "core:savewise",
+  onSelectTopic:
+    (topic: TopicSystem) => void;
+}) {
+  const topicPositions =
+    createFocusedTopicPositions(
+      galaxy.topics,
+    );
 
-      label:
-        "Mein Wissen",
+  const domainRadius =
+    Math.min(
+      106,
+      68 +
+        Math.sqrt(
+          galaxy.count,
+        ) *
+          7,
+    );
 
-      type:
-        "core",
+  return (
+    <g className="focused-domain-scene">
+      <circle
+        className="focused-domain-orbit focused-domain-orbit-one"
+        cx={CENTER_X}
+        cy={CENTER_Y}
+        r="170"
+      />
 
-      count:
-        discoveries.length,
+      <circle
+        className="focused-domain-orbit focused-domain-orbit-two"
+        cx={CENTER_X}
+        cy={CENTER_Y}
+        r="270"
+      />
 
-      x:
-        CENTER_X,
+      <circle
+        className="focused-domain-orbit focused-domain-orbit-three"
+        cx={CENTER_X}
+        cy={CENTER_Y}
+        r="350"
+      />
 
-      y:
-        CENTER_Y,
+      <ellipse
+        className="focused-domain-disc"
+        cx={CENTER_X}
+        cy={CENTER_Y}
+        rx={
+          domainRadius *
+          1.78
+        }
+        ry={
+          domainRadius *
+          0.49
+        }
+        transform={`rotate(-18 ${CENTER_X} ${CENTER_Y})`}
+      />
 
-      radius:
-        46,
+      <circle
+        className="focused-domain-nebula"
+        cx={CENTER_X}
+        cy={CENTER_Y}
+        r={
+          domainRadius *
+          1.45
+        }
+      />
 
-      parentId:
-        null,
-    };
+      <circle
+        className="focused-domain-core"
+        cx={CENTER_X}
+        cy={CENTER_Y}
+        r={
+          domainRadius
+        }
+      />
 
-  nodes.push(
-    coreNode,
+      <text
+        className="focused-domain-count"
+        textAnchor="middle"
+        x={CENTER_X}
+        y={
+          CENTER_Y + 6
+        }
+      >
+        {galaxy.count}
+      </text>
+
+      <text
+        className="focused-domain-label"
+        textAnchor="middle"
+        x={CENTER_X}
+        y={
+          CENTER_Y +
+          domainRadius +
+          36
+        }
+      >
+        {galaxy.label}
+      </text>
+
+      {galaxy.topics.map(
+        (
+          topic,
+          index,
+        ) => {
+          const position =
+            topicPositions[
+              index
+            ];
+
+          if (!position) {
+            return null;
+          }
+
+          const selected =
+            selectedTopicId ===
+            topic.id;
+
+          return (
+            <g
+              className={
+                selected
+                  ? "topic-solar-system topic-solar-system-selected"
+                  : "topic-solar-system"
+              }
+              key={
+                topic.id
+              }
+              onClick={() => {
+                onSelectTopic(
+                  topic,
+                );
+              }}
+              onKeyDown={(event) => {
+                if (
+                  event.key ===
+                    "Enter" ||
+                  event.key ===
+                    " "
+                ) {
+                  event.preventDefault();
+
+                  onSelectTopic(
+                    topic,
+                  );
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <line
+                className="topic-system-connection"
+                x1={CENTER_X}
+                x2={
+                  position.x
+                }
+                y1={CENTER_Y}
+                y2={
+                  position.y
+                }
+              />
+
+              <circle
+                className="topic-system-orbit"
+                cx={
+                  position.x
+                }
+                cy={
+                  position.y
+                }
+                r={
+                  position.radius *
+                  1.74
+                }
+              />
+
+              <circle
+                className="topic-system-halo"
+                cx={
+                  position.x
+                }
+                cy={
+                  position.y
+                }
+                r={
+                  position.radius *
+                  1.38
+                }
+              />
+
+              <circle
+                className="topic-system-core"
+                cx={
+                  position.x
+                }
+                cy={
+                  position.y
+                }
+                r={
+                  position.radius
+                }
+              />
+
+              {createDiscoverySatellites(
+                topic,
+                position,
+              ).map(
+                (
+                  satellite,
+                  satelliteIndex,
+                ) => (
+                  <circle
+                    className="topic-discovery-satellite"
+                    cx={
+                      satellite.x
+                    }
+                    cy={
+                      satellite.y
+                    }
+                    key={
+                      `${topic.id}:${satelliteIndex}`
+                    }
+                    r={
+                      satellite.radius
+                    }
+                  />
+                ),
+              )}
+
+              <text
+                className="topic-system-count"
+                textAnchor="middle"
+                x={
+                  position.x
+                }
+                y={
+                  position.y + 5
+                }
+              >
+                {topic.count}
+              </text>
+
+              <text
+                className="topic-system-label"
+                textAnchor="middle"
+                x={
+                  position.x
+                }
+                y={
+                  position.y +
+                  position.radius +
+                  24
+                }
+              >
+                {shortenLabel(
+                  topic.label,
+                  24,
+                )}
+              </text>
+            </g>
+          );
+        },
+      )}
+    </g>
   );
+}
 
-  const domainMap =
+function createDomainGalaxies(
+  discoveries:
+    Discovery[],
+): DomainGalaxy[] {
+  const grouped =
     new Map<
       string,
       Discovery[]
@@ -648,332 +1089,343 @@ function createGalaxyModel(
       "other";
 
     const current =
-      domainMap.get(
+      grouped.get(
         domain,
-      ) ?? [];
+      ) ??
+      [];
 
     current.push(
       discovery,
     );
 
-    domainMap.set(
+    grouped.set(
       domain,
       current,
     );
   }
 
-  const domains =
-    [...domainMap.entries()]
-      .sort(
-        (
-          left,
-          right,
-        ) =>
-          right[1].length -
-          left[1].length,
-      )
-      .slice(0, 10);
+  return [...grouped.entries()]
+    .sort(
+      (
+        left,
+        right,
+      ) =>
+        right[1].length -
+        left[1].length,
+    )
+    .map(
+      (
+        [domain, items],
+      ) => {
+        const topicMap =
+          new Map<
+            string,
+            Discovery[]
+          >();
 
-  domains.forEach(
+        for (
+          const discovery
+          of items
+        ) {
+          const topic =
+            discovery.classification
+              ?.topic?.trim() ||
+            discovery.topics?.[0]
+              ?.trim() ||
+            "Weitere Themen";
+
+          const current =
+            topicMap.get(
+              topic,
+            ) ??
+            [];
+
+          current.push(
+            discovery,
+          );
+
+          topicMap.set(
+            topic,
+            current,
+          );
+        }
+
+        const topics =
+          [...topicMap.entries()]
+            .sort(
+              (
+                left,
+                right,
+              ) =>
+                right[1].length -
+                left[1].length,
+            )
+            .slice(0, 12)
+            .map(
+              (
+                [topic, topicItems],
+              ) => ({
+                id:
+                  `${domain}:${topic}`,
+
+                label:
+                  topic,
+
+                count:
+                  topicItems.length,
+
+                discoveries:
+                  [...topicItems].sort(
+                    (
+                      left,
+                      right,
+                    ) =>
+                      new Date(
+                        right.createdAt,
+                      ).getTime() -
+                      new Date(
+                        left.createdAt,
+                      ).getTime(),
+                  ),
+              }),
+            );
+
+        return {
+          id:
+            `domain:${domain}`,
+
+          key:
+            domain,
+
+          label:
+            categoryLabels[
+              domain
+            ] ??
+            domain,
+
+          count:
+            items.length,
+
+          discoveries:
+            [...items].sort(
+              (
+                left,
+                right,
+              ) =>
+                new Date(
+                  right.createdAt,
+                ).getTime() -
+                new Date(
+                  left.createdAt,
+                ).getTime(),
+            ),
+
+          topics,
+        };
+      },
+    );
+}
+
+function createOverviewPositions(
+  galaxies:
+    DomainGalaxy[],
+): OverviewPosition[] {
+  const count =
+    galaxies.length;
+
+  return galaxies.map(
     (
-      [domain, items],
-      domainIndex,
+      galaxy,
+      index,
+    ) => {
+      if (
+        count === 1
+      ) {
+        return {
+          x:
+            CENTER_X,
+
+          y:
+            CENTER_Y,
+
+          radius:
+            calculateDomainRadius(
+              galaxy.count,
+            ),
+        };
+      }
+
+      const angle =
+        (
+          Math.PI *
+          2 *
+          index
+        ) /
+          count -
+        Math.PI / 2;
+
+      const ring =
+        count <= 5
+          ? 260
+          : index % 2 === 0
+            ? 235
+            : 330;
+
+      return {
+        x:
+          CENTER_X +
+          Math.cos(angle) *
+            ring,
+
+        y:
+          CENTER_Y +
+          Math.sin(angle) *
+            ring *
+            0.72,
+
+        radius:
+          calculateDomainRadius(
+            galaxy.count,
+          ),
+      };
+    },
+  );
+}
+
+function createFocusedTopicPositions(
+  topics:
+    TopicSystem[],
+): Array<{
+  x: number;
+  y: number;
+  radius: number;
+}> {
+  return topics.map(
+    (
+      topic,
+      index,
+    ) => {
+      const count =
+        Math.max(
+          topics.length,
+          1,
+        );
+
+      const angle =
+        (
+          Math.PI *
+          2 *
+          index
+        ) /
+          count -
+        Math.PI / 2;
+
+      const ring =
+        index % 3 === 0
+          ? 205
+          : index % 3 === 1
+            ? 292
+            : 345;
+
+      return {
+        x:
+          CENTER_X +
+          Math.cos(angle) *
+            ring,
+
+        y:
+          CENTER_Y +
+          Math.sin(angle) *
+            ring *
+            0.78,
+
+        radius:
+          Math.min(
+            35,
+            18 +
+              Math.sqrt(
+                topic.count,
+              ) *
+                5,
+          ),
+      };
+    },
+  );
+}
+
+function createDiscoverySatellites(
+  topic:
+    TopicSystem,
+
+  position: {
+    x: number;
+    y: number;
+    radius: number;
+  },
+): Array<{
+  x: number;
+  y: number;
+  radius: number;
+}> {
+  const visibleCount =
+    Math.min(
+      topic.count,
+      8,
+    );
+
+  return Array.from({
+    length:
+      visibleCount,
+  }).map(
+    (
+      _,
+      index,
     ) => {
       const angle =
         (
           Math.PI *
           2 *
-          domainIndex
+          index
         ) /
           Math.max(
-            domains.length,
+            visibleCount,
             1,
-          ) -
-        Math.PI / 2;
-
-      const domainDistance =
-        domains.length <= 5
-          ? 245
-          : 280;
-
-      const domainNode:
-        GalaxyNode = {
-        id:
-          `domain:${domain}`,
-
-        label:
-          categoryLabels[
-            domain
-          ] ?? domain,
-
-        type:
-          "domain",
-
-        count:
-          items.length,
-
-        x:
-          CENTER_X +
-          Math.cos(angle) *
-            domainDistance,
-
-        y:
-          CENTER_Y +
-          Math.sin(angle) *
-            domainDistance,
-
-        radius:
-          Math.min(
-            36,
-            24 +
-              Math.sqrt(
-                items.length,
-              ) *
-                3,
-          ),
-
-        parentId:
-          coreNode.id,
-      };
-
-      nodes.push(
-        domainNode,
-      );
-
-      connections.push({
-        id:
-          `${coreNode.id}->${domainNode.id}`,
-
-        sourceId:
-          coreNode.id,
-
-        targetId:
-          domainNode.id,
-      });
-
-      const topicMap =
-        new Map<
-          string,
-          Discovery[]
-        >();
-
-      for (
-        const discovery
-        of items
-      ) {
-        const topic =
-          discovery.classification
-            ?.topic?.trim() ||
-          discovery.topics?.[0]
-            ?.trim() ||
-          "Weitere Themen";
-
-        const current =
-          topicMap.get(
-            topic,
-          ) ?? [];
-
-        current.push(
-          discovery,
-        );
-
-        topicMap.set(
-          topic,
-          current,
-        );
-      }
-
-      const topics =
-        [...topicMap.entries()]
-          .sort(
-            (
-              left,
-              right,
-            ) =>
-              right[1].length -
-              left[1].length,
-          )
-          .slice(0, 6);
-
-      topics.forEach(
-        (
-          [topic, topicItems],
-          topicIndex,
-        ) => {
-          const topicSpread =
-            Math.PI * 0.82;
-
-          const topicAngle =
-            angle -
-            topicSpread / 2 +
-            (
-              topicSpread *
-              (
-                topicIndex +
-                0.5
-              )
-            ) /
-              Math.max(
-                topics.length,
-                1,
-              );
-
-          const topicDistance =
-            92 +
-            (
-              topicIndex % 2
-            ) *
-              20;
-
-          const topicNode:
-            GalaxyNode = {
-            id:
-              `topic:${domain}:${topic}`,
-
-            label:
-              topic,
-
-            type:
-              "topic",
-
-            count:
-              topicItems.length,
-
-            x:
-              clamp(
-                domainNode.x +
-                  Math.cos(
-                    topicAngle,
-                  ) *
-                    topicDistance,
-                45,
-                WIDTH - 45,
-              ),
-
-            y:
-              clamp(
-                domainNode.y +
-                  Math.sin(
-                    topicAngle,
-                  ) *
-                    topicDistance,
-                45,
-                HEIGHT - 45,
-              ),
-
-            radius:
-              Math.min(
-                19,
-                11 +
-                  Math.sqrt(
-                    topicItems.length,
-                  ) *
-                    2.2,
-              ),
-
-            parentId:
-              domainNode.id,
-          };
-
-          nodes.push(
-            topicNode,
           );
 
-          connections.push({
-            id:
-              `${domainNode.id}->${topicNode.id}`,
+      const orbit =
+        position.radius *
+        1.72;
 
-            sourceId:
-              domainNode.id,
+      return {
+        x:
+          position.x +
+          Math.cos(angle) *
+            orbit,
 
-            targetId:
-              topicNode.id,
-          });
-        },
-      );
+        y:
+          position.y +
+          Math.sin(angle) *
+            orbit,
+
+        radius:
+          index % 3 === 0
+            ? 3.3
+            : 2.4,
+      };
     },
   );
-
-  return {
-    nodes,
-    connections,
-  };
 }
 
-function getNodeDiscoveries(
-  discoveries: Discovery[],
-  node: GalaxyNode,
-): Discovery[] {
-  if (
-    node.type ===
-    "core"
-  ) {
-    return [...discoveries]
-      .sort(
-        (
-          left,
-          right,
-        ) =>
-          new Date(
-            right.createdAt,
-          ).getTime() -
-          new Date(
-            left.createdAt,
-          ).getTime(),
-      );
-  }
-
-  if (
-    node.type ===
-    "domain"
-  ) {
-    const domain =
-      node.id.replace(
-        "domain:",
-        "",
-      );
-
-    return discoveries.filter(
-      (discovery) =>
-        (
-          discovery.classification
-            ?.primaryCategory ??
-          "other"
-        ) === domain,
-    );
-  }
-
-  const [
-    ,
-    domain,
-    ...topicParts
-  ] =
-    node.id.split(":");
-
-  const topic =
-    topicParts.join(":");
-
-  return discoveries.filter(
-    (discovery) => {
-      const discoveryDomain =
-        discovery.classification
-          ?.primaryCategory ??
-        "other";
-
-      const discoveryTopic =
-        discovery.classification
-          ?.topic?.trim() ||
-        discovery.topics?.[0]
-          ?.trim() ||
-        "Weitere Themen";
-
-      return (
-        discoveryDomain ===
-          domain &&
-        discoveryTopic ===
-          topic
-      );
-    },
+function calculateDomainRadius(
+  count: number,
+): number {
+  return Math.min(
+    72,
+    28 +
+      Math.sqrt(
+        count,
+      ) *
+        9,
   );
 }
 
@@ -988,18 +1440,4 @@ function shortenLabel(
         maximumLength - 1,
       )}…`
     : value;
-}
-
-function clamp(
-  value: number,
-  minimum: number,
-  maximum: number,
-): number {
-  return Math.min(
-    maximum,
-    Math.max(
-      minimum,
-      value,
-    ),
-  );
 }

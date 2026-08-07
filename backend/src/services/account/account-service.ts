@@ -425,6 +425,354 @@ export async function authenticateAccount(
   );
 }
 
+
+export async function updateAccountUsername(
+  accountId: string,
+  usernameInput: string,
+): Promise<AccountSummary> {
+  const username =
+    usernameInput.trim();
+
+  if (
+    username.length < 2 ||
+    username.length > 80
+  ) {
+    throw new AccountError(
+      "USERNAME_INVALID",
+      400,
+    );
+  }
+
+  const accounts =
+    await loadAccounts();
+
+  const account =
+    accounts.find(
+      (candidate) =>
+        candidate.id ===
+        accountId,
+    );
+
+  if (!account) {
+    throw new AccountError(
+      "ACCOUNT_NOT_FOUND",
+      404,
+    );
+  }
+
+  account.username =
+    username;
+
+  account.updatedAt =
+    new Date()
+      .toISOString();
+
+  await saveAccounts(
+    accounts,
+  );
+
+  return {
+    username:
+      account.username,
+
+    email:
+      account.email,
+  };
+}
+
+export async function changeAccountPassword(
+  accountId: string,
+  currentSessionToken: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<AccountSummary> {
+  if (
+    newPassword.length < 10 ||
+    newPassword.length > 128
+  ) {
+    throw new AccountError(
+      "PASSWORD_INVALID",
+      400,
+    );
+  }
+
+  const accounts =
+    await loadAccounts();
+
+  const account =
+    accounts.find(
+      (candidate) =>
+        candidate.id ===
+        accountId,
+    );
+
+  if (!account) {
+    throw new AccountError(
+      "ACCOUNT_NOT_FOUND",
+      404,
+    );
+  }
+
+  const passwordValid =
+    await verifyPassword(
+      currentPassword,
+      account,
+    );
+
+  if (!passwordValid) {
+    throw new AccountError(
+      "CURRENT_PASSWORD_INVALID",
+      401,
+    );
+  }
+
+  const password =
+    await hashPassword(
+      newPassword,
+    );
+
+  account.passwordHash =
+    password.hash;
+
+  account.passwordSalt =
+    password.salt;
+
+  /*
+   * Sicherheitsverhalten:
+   * Passwortänderung meldet alle
+   * anderen Geräte ab, behält aber
+   * die aktuelle Sitzung gültig.
+   */
+  const currentTokenHash =
+    hashToken(
+      currentSessionToken,
+    );
+
+  const now =
+    Date.now();
+
+  account.sessions =
+    account.sessions.filter(
+      (session) =>
+        session.tokenHash ===
+          currentTokenHash &&
+        new Date(
+          session.expiresAt,
+        ).getTime() >
+          now,
+    );
+
+  account.updatedAt =
+    new Date()
+      .toISOString();
+
+  await saveAccounts(
+    accounts,
+  );
+
+  return {
+    username:
+      account.username,
+
+    email:
+      account.email,
+  };
+}
+
+export async function requestAccountEmailChange(
+  accountId: string,
+  currentPassword: string,
+  newEmailInput: string,
+): Promise<{
+  developmentVerificationUrl?:
+    string;
+}> {
+  const email =
+    normalizeEmail(
+      newEmailInput,
+    );
+
+  const accounts =
+    await loadAccounts();
+
+  const account =
+    accounts.find(
+      (candidate) =>
+        candidate.id ===
+        accountId,
+    );
+
+  if (!account) {
+    throw new AccountError(
+      "ACCOUNT_NOT_FOUND",
+      404,
+    );
+  }
+
+  const passwordValid =
+    await verifyPassword(
+      currentPassword,
+      account,
+    );
+
+  if (!passwordValid) {
+    throw new AccountError(
+      "CURRENT_PASSWORD_INVALID",
+      401,
+    );
+  }
+
+  const emailAlreadyUsed =
+    accounts.some(
+      (candidate) =>
+        candidate.id !==
+          account.id &&
+        candidate.email ===
+          email,
+    );
+
+  if (emailAlreadyUsed) {
+    throw new AccountError(
+      "EMAIL_ALREADY_USED",
+      409,
+    );
+  }
+
+  if (
+    email ===
+    account.email
+  ) {
+    throw new AccountError(
+      "EMAIL_UNCHANGED",
+      400,
+    );
+  }
+
+  const token =
+    randomBytes(32)
+      .toString(
+        "base64url",
+      );
+
+  const verificationUrl =
+    `${createVerificationUrl(
+      token,
+    )}&client=web`;
+
+  /*
+   * Erst E-Mail versenden.
+   * Falls der Mailversand fehlschlägt,
+   * bleibt der bestehende Account
+   * unverändert.
+   */
+  await deliverVerificationEmail({
+    email,
+
+    username:
+      account.username,
+
+    verificationUrl,
+  });
+
+  account.email =
+    email;
+
+  account.verifiedAt =
+    null;
+
+  account.verificationTokenHash =
+    hashToken(
+      token,
+    );
+
+  account.verificationExpiresAt =
+    new Date(
+      Date.now() +
+      VERIFICATION_TTL_MS,
+    ).toISOString();
+
+  /*
+   * E-Mail-Adresse ist Login-Identität.
+   * Deshalb werden nach einer Änderung
+   * alle bestehenden Sessions ungültig.
+   */
+  account.sessions =
+    [];
+
+  account.updatedAt =
+    new Date()
+      .toISOString();
+
+  await saveAccounts(
+    accounts,
+  );
+
+  return runtimeConfig.isProduction
+    ? {}
+    : {
+        developmentVerificationUrl:
+          verificationUrl,
+      };
+}
+
+export async function revokeOtherAccountSessions(
+  accountId: string,
+  currentSessionToken: string,
+): Promise<number> {
+  const accounts =
+    await loadAccounts();
+
+  const account =
+    accounts.find(
+      (candidate) =>
+        candidate.id ===
+        accountId,
+    );
+
+  if (!account) {
+    throw new AccountError(
+      "ACCOUNT_NOT_FOUND",
+      404,
+    );
+  }
+
+  const currentTokenHash =
+    hashToken(
+      currentSessionToken,
+    );
+
+  const now =
+    Date.now();
+
+  const previousCount =
+    account.sessions.length;
+
+  account.sessions =
+    account.sessions.filter(
+      (session) =>
+        session.tokenHash ===
+          currentTokenHash &&
+        new Date(
+          session.expiresAt,
+        ).getTime() >
+          now,
+    );
+
+  account.updatedAt =
+    new Date()
+      .toISOString();
+
+  await saveAccounts(
+    accounts,
+  );
+
+  return Math.max(
+    0,
+    previousCount -
+      account.sessions.length,
+  );
+}
+
 export class AccountError
   extends Error {
   constructor(
