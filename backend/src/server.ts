@@ -219,11 +219,17 @@ const ImportRequestSchema = z.object({
 });
 
 const KnowledgeQuestionSchema = z.object({
+  workspaceId:
+    WorkspaceIdSchema
+      .optional()
+      .default("private"),
+
   question: z
     .string()
     .trim()
     .min(3)
     .max(500),
+
   history: z.array(z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string().trim().min(1).max(5000),
@@ -2245,6 +2251,7 @@ app.post(
       const library =
         await buildCurrentKnowledgeLibrary(
           discoveryRepository,
+          parsedRequest.data.workspaceId,
         );
 
       if (!library.graph) {

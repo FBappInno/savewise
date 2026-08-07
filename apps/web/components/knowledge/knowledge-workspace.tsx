@@ -1,5 +1,12 @@
 "use client";
 
+import type {
+  Discovery,
+  KnowledgeAnswer,
+  KnowledgeGraphNode,
+  KnowledgeLibrary,
+} from "@savewise/shared";
+
 import {
   useCallback,
   useEffect,
@@ -7,17 +14,23 @@ import {
   useState,
 } from "react";
 
-import type {
-  KnowledgeLibrary,
-} from "@savewise/shared";
+import {
+  DiscoveryViewerModal,
+} from "@/components/universe/discovery-viewer-modal";
 
 import {
   useWorkspace,
 } from "@/providers/workspace-provider";
 
 import {
+  askKnowledge,
   getKnowledgeLibrary,
 } from "@/services/knowledge-client";
+
+type AiAction =
+  | "summary"
+  | "connections"
+  | "gaps";
 
 export function KnowledgeWorkspace() {
   const {
@@ -31,6 +44,34 @@ export function KnowledgeWorkspace() {
     useState<KnowledgeLibrary | null>(
       null,
     );
+
+  const [
+    path,
+    setPath,
+  ] =
+    useState<string[]>([]);
+
+  const [
+    selectedDiscovery,
+    setSelectedDiscovery,
+  ] =
+    useState<Discovery | null>(
+      null,
+    );
+
+  const [
+    aiAnswer,
+    setAiAnswer,
+  ] =
+    useState<KnowledgeAnswer | null>(
+      null,
+    );
+
+  const [
+    aiLoading,
+    setAiLoading,
+  ] =
+    useState(false);
 
   const [
     isLoading,
@@ -59,6 +100,8 @@ export function KnowledgeWorkspace() {
             );
 
           setLibrary(result);
+          setPath([]);
+          setAiAnswer(null);
         } catch (loadError) {
           setError(
             loadError instanceof Error
@@ -76,36 +119,224 @@ export function KnowledgeWorkspace() {
     void loadLibrary();
   }, [loadLibrary]);
 
-  const strongestInterests =
+  const graph =
+    library?.graph ?? null;
+
+  const nodesById =
     useMemo(
       () =>
-        [...(library?.interests ?? [])]
-          .sort(
-            (left, right) =>
-              right.score - left.score,
-          )
-          .slice(0, 8),
-      [library],
+        new Map(
+          (graph?.nodes ?? []).map(
+            (node) => [
+              node.id,
+              node,
+            ],
+          ),
+        ),
+      [graph],
     );
 
-  const strongestTopics =
+  const activeNode =
+    path.length > 0
+      ? nodesById.get(
+          path[path.length - 1],
+        ) ?? null
+      : null;
+
+  const galaxyNodes =
     useMemo(
       () =>
-        [...(library?.topics ?? [])]
+        (graph?.rootNodeIds ?? [])
+          .map(
+            (nodeId) =>
+              nodesById.get(nodeId),
+          )
+          .filter(
+            (
+              node,
+            ): node is KnowledgeGraphNode =>
+              node !== undefined,
+          )
+          .filter(
+            (node) =>
+              node.kind === "domain",
+          )
           .sort(
             (left, right) =>
-              right.discoveries -
-              left.discoveries,
-          )
-          .slice(0, 15),
-      [library],
+              countDiscoveries(
+                right,
+                nodesById,
+              ) -
+              countDiscoveries(
+                left,
+                nodesById,
+              ),
+          ),
+      [
+        graph,
+        nodesById,
+      ],
     );
+
+  const visibleChildren =
+    useMemo(() => {
+      if (!activeNode) {
+        return galaxyNodes;
+      }
+
+      const expectedKind =
+        activeNode.kind === "domain"
+          ? "topic"
+          : activeNode.kind === "topic"
+            ? "subtopic"
+            : null;
+
+      if (!expectedKind) {
+        return [];
+      }
+
+      return activeNode.childIds
+        .map(
+          (nodeId) =>
+            nodesById.get(nodeId),
+        )
+        .filter(
+          (
+            node,
+          ): node is KnowledgeGraphNode =>
+            node !== undefined,
+        )
+        .filter(
+          (node) =>
+            node.kind === expectedKind,
+        )
+        .sort(
+          (left, right) =>
+            countDiscoveries(
+              right,
+              nodesById,
+            ) -
+            countDiscoveries(
+              left,
+              nodesById,
+            ),
+        );
+    }, [
+      activeNode,
+      galaxyNodes,
+      nodesById,
+    ]);
+
+  const visibleDiscoveries =
+    useMemo(() => {
+      if (
+        !library ||
+        !activeNode
+      ) {
+        return [];
+      }
+
+      if (
+        activeNode.kind !== "subtopic" &&
+        visibleChildren.length > 0
+      ) {
+        return [];
+      }
+
+      const ids =
+        collectDiscoveryIds(
+          activeNode,
+          nodesById,
+        );
+
+      return library.discoveries
+        .filter(
+          (discovery) =>
+            ids.has(discovery.id),
+        );
+    }, [
+      activeNode,
+      library,
+      nodesById,
+      visibleChildren,
+    ]);
+
+  function openNode(
+    node: KnowledgeGraphNode,
+  ) {
+    setPath(
+      (current) => [
+        ...current,
+        node.id,
+      ],
+    );
+
+    setAiAnswer(null);
+  }
+
+  function goRoot() {
+    setPath([]);
+    setAiAnswer(null);
+  }
+
+  function goToPath(
+    index: number,
+  ) {
+    setPath(
+      (current) =>
+        current.slice(
+          0,
+          index + 1,
+        ),
+    );
+
+    setAiAnswer(null);
+  }
+
+  async function runAi(
+    action: AiAction,
+  ) {
+    const context =
+      activeNode
+        ? `${nodeKindLabel(
+            activeNode.kind,
+          )} "${activeNode.title}"`
+        : "mein gesamtes Wissensuniversum";
+
+    const question =
+      action === "summary"
+        ? `Fasse ${context} auf Basis meines gespeicherten Wissens zusammen. Erkläre die wichtigsten Erkenntnisse und nenne relevante Zusammenhänge.`
+        : action === "connections"
+          ? `Welche wichtigen Zusammenhänge erkennst du innerhalb von ${context}? Zeige Verbindungen zwischen meinen gespeicherten Discoveries, Topics und Unterthemen.`
+          : `Welche Wissenslücken erkennst du in ${context}? Nenne konkret, was in meinen gespeicherten Inhalten noch fehlt oder nur schwach belegt ist.`;
+
+    setAiLoading(true);
+    setError(null);
+
+    try {
+      const answer =
+        await askKnowledge(
+          activeWorkspaceId,
+          question,
+        );
+
+      setAiAnswer(answer);
+    } catch (aiError) {
+      setError(
+        aiError instanceof Error
+          ? aiError.message
+          : "Die KI-Analyse konnte nicht durchgeführt werden.",
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   return (
     <div className="knowledge-page">
-      <section className="knowledge-hero">
+      <header className="hero">
         <div>
-          <div className="knowledge-eyebrow">
+          <div className="eyebrow">
             SAVEWISE · WISSEN
           </div>
 
@@ -114,76 +345,44 @@ export function KnowledgeWorkspace() {
           </h1>
 
           <p>
-            Automatisch aus deinen
-            gespeicherten Discoveries
-            aufgebaut.
+            Galaxien, Topics,
+            Unterthemen und Discoveries –
+            automatisch aus deinem
+            gespeicherten Wissen aufgebaut.
           </p>
         </div>
 
-        <div className="knowledge-actions">
+        <div className="hero-actions">
           <span className="workspace-pill">
-            {activeWorkspaceId === "private"
+            {activeWorkspaceId ===
+            "private"
               ? "Privat"
               : "Geschäftlich"}
           </span>
 
           <button
-            className="refresh-button"
+            className="secondary-button"
             disabled={isLoading}
             onClick={() => {
               void loadLibrary();
             }}
             type="button"
           >
-            <span
-              className={
-                isLoading
-                  ? "refresh-icon spinning"
-                  : "refresh-icon"
-              }
-            >
-              ↻
-            </span>
-
-            Aktualisieren
+            ↻ Aktualisieren
           </button>
         </div>
-      </section>
+      </header>
 
       {error ? (
-        <section className="error-card">
-          <strong>
-            Bibliothek konnte nicht geladen werden
-          </strong>
-
-          <p>{error}</p>
-
-          <button
-            onClick={() => {
-              void loadLibrary();
-            }}
-            type="button"
-          >
-            Erneut versuchen
-          </button>
-        </section>
+        <div className="error-card">
+          {error}
+        </div>
       ) : null}
 
       {isLoading && !library ? (
-        <section className="loading-card">
-          <div className="loader" />
-
-          <div>
-            <strong>
-              Wissensbibliothek wird geladen
-            </strong>
-
-            <p>
-              SaveWise lädt deine
-              Wissensstruktur.
-            </p>
-          </div>
-        </section>
+        <div className="loading-card">
+          Wissensbibliothek wird geladen …
+        </div>
       ) : null}
 
       {library ? (
@@ -191,437 +390,948 @@ export function KnowledgeWorkspace() {
           <section className="statistics-grid">
             <StatisticCard
               label="Discoveries"
-              value={library.discoveries.length}
+              value={
+                library.discoveries.length
+              }
             />
 
             <StatisticCard
-              label="Themen"
-              value={library.topics.length}
+              label="Galaxien"
+              value={
+                galaxyNodes.length
+              }
+            />
+
+            <StatisticCard
+              label="Topics"
+              value={
+                graph?.nodes.filter(
+                  (node) =>
+                    node.kind ===
+                    "topic",
+                ).length ?? 0
+              }
             />
 
             <StatisticCard
               label="Verbindungen"
-              value={library.relations.length}
-            />
-
-            <StatisticCard
-              label="Interessen"
-              value={library.interests.length}
+              value={
+                graph?.relations.length ??
+                library.relations.length
+              }
             />
           </section>
 
-          <section className="knowledge-section">
-            <SectionHeading
-              eyebrow="PERSÖNLICHES PROFIL"
-              title="Deine stärksten Interessen"
-              description="SaveWise erkennt wiederkehrende Themen in deinen gespeicherten Inhalten."
+          {!graph ? (
+            <EmptyState
+              title="Noch kein Wissensgraph"
+              text="Sobald SaveWise genügend Discoveries analysiert hat, entsteht hier dein Wissensuniversum."
             />
+          ) : (
+            <>
+              <section className="section">
+                <div className="section-eyebrow">
+                  PERSÖNLICHES PROFIL
+                </div>
 
-            {strongestInterests.length > 0 ? (
-              <div className="interest-grid">
-                {strongestInterests.map(
-                  (interest, index) => (
-                    <InterestCard
-                      key={interest.id}
-                      rank={index + 1}
-                      interest={interest}
-                    />
-                  ),
-                )}
-              </div>
-            ) : (
-              <EmptyState
-                title="Noch keine stabilen Interessen"
-                text="Mit weiteren Discoveries erkennt SaveWise automatisch deine wichtigsten Themen."
-              />
-            )}
-          </section>
+                <h2>
+                  {activeNode
+                    ? nodeKindHeading(
+                        activeNode.kind,
+                      )
+                    : "Deine stärksten Galaxien"}
+                </h2>
 
-          <section className="knowledge-section">
-            <SectionHeading
-              eyebrow="WISSENSGEBIETE"
-              title="Deine Themen"
-              description="Die Themen, die aus deinen gespeicherten Discoveries entstanden sind."
-            />
+                <p className="section-description">
+                  {activeNode
+                    ? activeNode.description ||
+                      navigationDescription(
+                        activeNode.kind,
+                      )
+                    : "Deine größten Wissensbereiche, abgeleitet aus deinen gespeicherten Discoveries."}
+                </p>
 
-            {strongestTopics.length > 0 ? (
-              <div className="topic-grid">
-                {strongestTopics.map(
-                  (topic) => (
-                    <article
-                      className="topic-card"
-                      key={topic.id}
+                {path.length > 0 ? (
+                  <div className="breadcrumbs">
+                    <button
+                      onClick={goRoot}
+                      type="button"
                     >
-                      <div className="topic-header">
-                        <div className="topic-icon">
-                          ◇
-                        </div>
+                      Alle Galaxien
+                    </button>
 
-                        <div className="topic-heading">
+                    {path.map(
+                      (
+                        nodeId,
+                        index,
+                      ) => {
+                        const node =
+                          nodesById.get(
+                            nodeId,
+                          );
+
+                        if (!node) {
+                          return null;
+                        }
+
+                        return (
+                          <span
+                            key={nodeId}
+                          >
+                            <b>›</b>
+
+                            <button
+                              disabled={
+                                index ===
+                                path.length -
+                                  1
+                              }
+                              onClick={() =>
+                                goToPath(
+                                  index,
+                                )
+                              }
+                              type="button"
+                            >
+                              {node.title}
+                            </button>
+                          </span>
+                        );
+                      },
+                    )}
+                  </div>
+                ) : null}
+
+                {visibleChildren.length >
+                0 ? (
+                  <div className="node-grid">
+                    {visibleChildren.map(
+                      (node) => (
+                        <button
+                          className="node-card"
+                          key={node.id}
+                          onClick={() =>
+                            openNode(node)
+                          }
+                          type="button"
+                        >
+                          <div className="node-type">
+                            {nodeKindLabel(
+                              node.kind,
+                            )}
+                          </div>
+
                           <strong>
-                            {topic.name}
+                            {node.title}
                           </strong>
 
-                          <span>
-                            {topic.discoveries}{" "}
-                            {topic.discoveries === 1
-                              ? "Discovery"
-                              : "Discoveries"}
-                          </span>
-                        </div>
+                          <p>
+                            {node.description ||
+                              navigationDescription(
+                                node.kind,
+                              )}
+                          </p>
 
-                        <div className="topic-count">
-                          {topic.discoveries}
+                          <div className="node-footer">
+                            <span>
+                              {countDiscoveries(
+                                node,
+                                nodesById,
+                              )}{" "}
+                              Discoveries
+                            </span>
+
+                            <span className="open-label">
+                              Öffnen →
+                            </span>
+                          </div>
+                        </button>
+                      ),
+                    )}
+                  </div>
+                ) : null}
+
+                {visibleDiscoveries.length >
+                0 ? (
+                  <div className="discoveries-section">
+                    <div className="subheading">
+                      Zugehörige Discoveries
+                    </div>
+
+                    <div className="discovery-grid">
+                      {visibleDiscoveries.map(
+                        (discovery) => (
+                          <button
+                            className="discovery-card"
+                            key={
+                              discovery.id
+                            }
+                            onClick={() =>
+                              setSelectedDiscovery(
+                                discovery,
+                              )
+                            }
+                            type="button"
+                          >
+                            <div className="discovery-label">
+                              DISCOVERY
+                            </div>
+
+                            <strong>
+                              {discovery.improvedTitle ||
+                                discovery.title}
+                            </strong>
+
+                            {discovery.summary ? (
+                              <p>
+                                {
+                                  discovery.summary
+                                }
+                              </p>
+                            ) : null}
+
+                            <span>
+                              Öffnen →
+                            </span>
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+
+              <section className="section ai-section">
+                <div>
+                  <div className="section-eyebrow">
+                    SAVEWISE KI
+                  </div>
+
+                  <h2>
+                    Wissen analysieren
+                  </h2>
+
+                  <p className="section-description">
+                    Die KI arbeitet nur mit
+                    deinem gespeicherten
+                    SaveWise-Wissen und dem
+                    aktuell geöffneten
+                    Bereich.
+                  </p>
+                </div>
+
+                <div className="ai-actions">
+                  <button
+                    disabled={aiLoading}
+                    onClick={() => {
+                      void runAi(
+                        "summary",
+                      );
+                    }}
+                    type="button"
+                  >
+                    ✦ KI-Zusammenfassung
+                  </button>
+
+                  <button
+                    disabled={aiLoading}
+                    onClick={() => {
+                      void runAi(
+                        "connections",
+                      );
+                    }}
+                    type="button"
+                  >
+                    ⟷ Zusammenhänge
+                  </button>
+
+                  <button
+                    disabled={aiLoading}
+                    onClick={() => {
+                      void runAi(
+                        "gaps",
+                      );
+                    }}
+                    type="button"
+                  >
+                    ◇ Wissenslücken
+                  </button>
+                </div>
+
+                {aiLoading ? (
+                  <div className="ai-loading">
+                    SaveWise analysiert dein
+                    Wissen …
+                  </div>
+                ) : null}
+
+                {aiAnswer ? (
+                  <div className="ai-result">
+                    <div className="confidence">
+                      KI ·{" "}
+                      {Math.round(
+                        aiAnswer.confidence *
+                          100,
+                      )}
+                      % Konfidenz
+                    </div>
+
+                    <h3>
+                      Analyse
+                    </h3>
+
+                    <p className="answer">
+                      {aiAnswer.answer}
+                    </p>
+
+                    {aiAnswer.synthesis
+                      .practicalConclusions
+                      .length > 0 ? (
+                      <div className="result-block">
+                        <h4>
+                          Schlussfolgerungen
+                        </h4>
+
+                        <ul>
+                          {aiAnswer.synthesis.practicalConclusions.map(
+                            (
+                              conclusion,
+                            ) => (
+                              <li
+                                key={
+                                  conclusion
+                                }
+                              >
+                                {
+                                  conclusion
+                                }
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    {aiAnswer.synthesis
+                      .openQuestions
+                      .length > 0 ? (
+                      <div className="result-block">
+                        <h4>
+                          Offene Fragen
+                        </h4>
+
+                        <ul>
+                          {aiAnswer.synthesis.openQuestions.map(
+                            (
+                              question,
+                            ) => (
+                              <li
+                                key={
+                                  question
+                                }
+                              >
+                                {question}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    {aiAnswer.insufficientKnowledge ? (
+                      <div className="knowledge-gap">
+                        <strong>
+                          Fehlendes Wissen
+                        </strong>
+
+                        <p>
+                          {
+                            aiAnswer.insufficientKnowledge
+                          }
+                        </p>
+                      </div>
+                    ) : null}
+
+                    {aiAnswer.citations
+                      .length > 0 ? (
+                      <div className="result-block">
+                        <h4>
+                          Verwendete Discoveries
+                        </h4>
+
+                        <div className="citation-list">
+                          {aiAnswer.citations.map(
+                            (
+                              citation,
+                            ) => (
+                              <div
+                                className="citation"
+                                key={`${citation.discoveryId}-${citation.contribution}`}
+                              >
+                                <strong>
+                                  {
+                                    citation.title
+                                  }
+                                </strong>
+
+                                <p>
+                                  {
+                                    citation.contribution
+                                  }
+                                </p>
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
-
-                      {topic.keywords.length > 0 ? (
-                        <div className="keyword-list">
-                          {topic.keywords
-                            .slice(0, 5)
-                            .map((keyword) => (
-                              <span
-                                className="keyword-chip"
-                                key={`${topic.id}-${keyword}`}
-                              >
-                                {keyword}
-                              </span>
-                            ))}
-                        </div>
-                      ) : null}
-                    </article>
-                  ),
-                )}
-              </div>
-            ) : (
-              <EmptyState
-                title="Noch keine Themen"
-                text="Sobald Discoveries analysiert wurden, erscheinen hier deine Wissensgebiete."
-              />
-            )}
-          </section>
-
-          <section className="knowledge-section">
-            <SectionHeading
-              eyebrow="WISSENSSTRUKTUR"
-              title="Dein Wissensnetz"
-              description="SaveWise verbindet Discoveries, Themen und Interessen miteinander."
-            />
-
-            <div className="structure-grid">
-              <StructureCard
-                label="Wissensknoten"
-                value={library.nodes.length}
-              />
-
-              <StructureCard
-                label="Verbindungen"
-                value={library.relations.length}
-              />
-
-              <StructureCard
-                label="Insights"
-                value={library.insights.length}
-              />
-
-              <StructureCard
-                label="Graph"
-                value={
-                  library.graph
-                    ? "Aktiv"
-                    : "Noch leer"
-                }
-              />
-            </div>
-          </section>
-
-          {library.generatedAt ? (
-            <footer className="knowledge-footer">
-              Wissensbibliothek zuletzt
-              aktualisiert:{" "}
-              {new Date(
-                library.generatedAt,
-              ).toLocaleString(
-                "de-CH",
-                {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                },
-              )}
-            </footer>
-          ) : null}
+                    ) : null}
+                  </div>
+                ) : null}
+              </section>
+            </>
+          )}
         </>
       ) : null}
+
+      <DiscoveryViewerModal
+        discovery={
+          selectedDiscovery
+        }
+        onClose={() => {
+          setSelectedDiscovery(
+            null,
+          );
+        }}
+      />
 
       <style jsx>{`
         .knowledge-page {
           width: 100%;
           max-width: 1500px;
           margin: 0 auto;
-          padding: 34px 40px 70px;
+          padding: 36px 42px 80px;
         }
 
-        .knowledge-hero {
+        .hero {
           display: flex;
-          align-items: flex-start;
           justify-content: space-between;
-          gap: 32px;
-          margin-bottom: 30px;
+          align-items: flex-start;
+          gap: 30px;
+          margin-bottom: 32px;
         }
 
-        .knowledge-eyebrow {
-          color: #4078ff;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-          margin-bottom: 9px;
+        .eyebrow,
+        .section-eyebrow {
+          color: #4d7df0;
+          font-weight: 850;
+          letter-spacing: 0.13em;
         }
 
-        .knowledge-hero h1 {
+        .eyebrow {
+          font-size: 12px;
+          margin-bottom: 10px;
+        }
+
+        .section-eyebrow {
+          font-size: 13px;
+          margin-bottom: 8px;
+        }
+
+        h1 {
           margin: 0;
-          color: #14213d;
-          font-size: clamp(30px, 3vw, 44px);
-          line-height: 1.08;
+          font-size: clamp(
+            32px,
+            3vw,
+            45px
+          );
+          color: #eaf0fb;
           letter-spacing: -0.035em;
         }
 
-        .knowledge-hero p {
-          max-width: 650px;
-          color: #6f7890;
-          font-size: 15px;
-          line-height: 1.65;
-          margin: 11px 0 0;
+        .hero > div > p {
+          margin: 12px 0 0;
+          color: #aab6ca;
+          font-size: 16px;
+          line-height: 1.6;
         }
 
-        .knowledge-actions {
+        .hero-actions {
           display: flex;
-          align-items: center;
           gap: 10px;
-          flex-shrink: 0;
         }
 
         .workspace-pill,
-        .refresh-button {
-          min-height: 40px;
-          border: 1px solid #e0e6f0;
+        .secondary-button {
+          min-height: 42px;
+          border: 1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.13
+            );
           border-radius: 12px;
-          background: #ffffff;
-          font-size: 12px;
-          font-weight: 700;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.06
+          );
+          color: #dce5f4;
+          font-size: 13px;
+          font-weight: 750;
         }
 
         .workspace-pill {
-          display: inline-flex;
-          align-items: center;
-          padding: 0 14px;
-          color: #69738a;
-        }
-
-        .refresh-button {
           display: flex;
           align-items: center;
-          gap: 7px;
           padding: 0 15px;
-          color: #315fd5;
+        }
+
+        .secondary-button {
+          padding: 0 15px;
           cursor: pointer;
         }
 
-        .refresh-button:disabled {
-          opacity: 0.6;
+        .statistics-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(
+              4,
+              minmax(0, 1fr)
+            );
+          gap: 14px;
+          margin-bottom: 48px;
+        }
+
+        .section {
+          margin-top: 54px;
+        }
+
+        .section h2 {
+          color: #e9eef8;
+          font-size: 28px;
+          line-height: 1.2;
+          margin: 0;
+          letter-spacing: -0.025em;
+        }
+
+        .section-description {
+          color: #aeb9cc;
+          font-size: 15px;
+          line-height: 1.65;
+          max-width: 760px;
+          margin: 8px 0 0;
+        }
+
+        .breadcrumbs {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px;
+          margin-top: 24px;
+        }
+
+        .breadcrumbs span {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .breadcrumbs b {
+          color: #66738b;
+        }
+
+        .breadcrumbs button {
+          border: 0;
+          padding: 0;
+          background: none;
+          color: #7da0ff;
+          font-size: 14px;
+          cursor: pointer;
+        }
+
+        .breadcrumbs button:disabled {
+          color: #dce5f4;
+          font-weight: 750;
           cursor: default;
         }
 
-        .refresh-icon {
-          font-size: 18px;
-        }
-
-        .statistics-grid,
-        .structure-grid {
+        .node-grid {
           display: grid;
           grid-template-columns:
-            repeat(4, minmax(0, 1fr));
-          gap: 14px;
+            repeat(
+              3,
+              minmax(0, 1fr)
+            );
+          gap: 16px;
+          margin-top: 25px;
         }
 
-        .statistics-grid {
-          margin-bottom: 42px;
+        .node-card {
+          text-align: left;
+          min-height: 190px;
+          padding: 22px;
+          border: 1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.11
+            );
+          border-radius: 19px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.045
+          );
+          cursor: pointer;
+          transition:
+            transform 0.15s ease,
+            border-color 0.15s ease,
+            background 0.15s ease;
         }
 
-        .knowledge-section {
-          margin-top: 46px;
+        .node-card:hover {
+          transform: translateY(-3px);
+          border-color: rgba(
+            90,
+            133,
+            255,
+            0.55
+          );
+          background: rgba(
+            255,
+            255,
+            255,
+            0.07
+          );
         }
 
-        .interest-grid {
-          display: grid;
-          grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-          gap: 14px;
-          margin-top: 18px;
+        .node-type,
+        .discovery-label {
+          color: #7298ff;
+          font-size: 11px;
+          font-weight: 850;
+          letter-spacing: 0.11em;
         }
 
-        .topic-grid {
-          display: grid;
-          grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-          gap: 14px;
-          margin-top: 18px;
-        }
-
-        .topic-card {
-          min-height: 130px;
-          background: #ffffff;
-          border: 1px solid #e5e9f2;
-          border-radius: 17px;
-          padding: 17px;
-        }
-
-        .topic-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .topic-icon {
-          width: 38px;
-          height: 38px;
-          flex-shrink: 0;
-          display: grid;
-          place-items: center;
-          border-radius: 12px;
-          background: #f1f5ff;
-          color: #4078ff;
-        }
-
-        .topic-heading {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .topic-heading strong,
-        .topic-heading span {
+        .node-card > strong {
           display: block;
+          color: #eff4fc;
+          font-size: 18px;
+          line-height: 1.35;
+          margin-top: 11px;
         }
 
-        .topic-heading strong {
-          color: #27334e;
+        .node-card > p {
+          color: #9da9bd;
+          font-size: 14px;
+          line-height: 1.55;
+          margin: 9px 0 18px;
+        }
+
+        .node-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: auto;
+          color: #8794aa;
           font-size: 13px;
         }
 
-        .topic-heading span {
-          color: #8790a4;
-          font-size: 10px;
-          margin-top: 4px;
+        .open-label {
+          color: #7ca0ff;
+          font-weight: 750;
         }
 
-        .topic-count {
-          color: #4078ff;
-          font-size: 19px;
-          font-weight: 850;
+        .discoveries-section {
+          margin-top: 28px;
         }
 
-        .keyword-list {
+        .subheading {
+          color: #dce5f4;
+          font-size: 18px;
+          font-weight: 800;
+          margin-bottom: 14px;
+        }
+
+        .discovery-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
+          gap: 14px;
+        }
+
+        .discovery-card {
+          text-align: left;
+          padding: 20px;
+          border: 1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.11
+            );
+          border-radius: 17px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.045
+          );
+          cursor: pointer;
+        }
+
+        .discovery-card strong {
+          display: block;
+          color: #edf3fc;
+          font-size: 17px;
+          line-height: 1.4;
+          margin-top: 9px;
+        }
+
+        .discovery-card p {
+          color: #a0acbf;
+          font-size: 14px;
+          line-height: 1.55;
+          margin: 9px 0;
+        }
+
+        .discovery-card > span {
+          color: #7ca0ff;
+          font-size: 13px;
+          font-weight: 750;
+        }
+
+        .ai-section {
+          border-top: 1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.09
+            );
+          padding-top: 46px;
+        }
+
+        .ai-actions {
           display: flex;
           flex-wrap: wrap;
-          gap: 6px;
-          margin-top: 15px;
+          gap: 10px;
+          margin-top: 22px;
         }
 
-        .keyword-chip {
-          border-radius: 999px;
-          background: #f4f6fa;
-          color: #70798c;
-          padding: 5px 8px;
-          font-size: 9px;
-          font-weight: 650;
+        .ai-actions button {
+          min-height: 44px;
+          padding: 0 16px;
+          border: 1px solid
+            rgba(
+              91,
+              133,
+              255,
+              0.38
+            );
+          border-radius: 12px;
+          background: rgba(
+            62,
+            104,
+            220,
+            0.12
+          );
+          color: #cddaff;
+          font-size: 14px;
+          font-weight: 750;
+          cursor: pointer;
+        }
+
+        .ai-actions button:hover {
+          background: rgba(
+            62,
+            104,
+            220,
+            0.22
+          );
+        }
+
+        .ai-actions button:disabled {
+          opacity: 0.5;
+        }
+
+        .ai-loading {
+          margin-top: 20px;
+          color: #aeb9cc;
+          font-size: 14px;
+        }
+
+        .ai-result {
+          margin-top: 24px;
+          padding: 28px;
+          border: 1px solid
+            rgba(
+              102,
+              140,
+              255,
+              0.24
+            );
+          border-radius: 20px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.045
+          );
+        }
+
+        .confidence {
+          color: #78a0ff;
+          font-size: 12px;
+          font-weight: 800;
+        }
+
+        .ai-result h3 {
+          color: #eef3fb;
+          font-size: 22px;
+          margin: 8px 0 12px;
+        }
+
+        .answer {
+          color: #ccd5e4;
+          font-size: 15px;
+          line-height: 1.75;
+          white-space: pre-wrap;
+        }
+
+        .result-block {
+          margin-top: 24px;
+        }
+
+        .result-block h4 {
+          color: #e5ebf5;
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+
+        .result-block li {
+          color: #b5c0d2;
+          font-size: 14px;
+          line-height: 1.65;
+          margin-bottom: 6px;
+        }
+
+        .knowledge-gap {
+          margin-top: 24px;
+          padding: 17px;
+          border-radius: 14px;
+          background: rgba(
+            224,
+            165,
+            63,
+            0.09
+          );
+          border: 1px solid
+            rgba(
+              224,
+              165,
+              63,
+              0.22
+            );
+        }
+
+        .knowledge-gap strong {
+          color: #efc26b;
+          font-size: 14px;
+        }
+
+        .knowledge-gap p {
+          color: #c4b797;
+          font-size: 14px;
+          line-height: 1.6;
+          margin: 6px 0 0;
+        }
+
+        .citation-list {
+          display: grid;
+          gap: 9px;
+        }
+
+        .citation {
+          padding: 13px 15px;
+          border-radius: 12px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.04
+          );
+        }
+
+        .citation strong {
+          color: #dfe7f5;
+          font-size: 14px;
+        }
+
+        .citation p {
+          color: #9eabbf;
+          font-size: 13px;
+          line-height: 1.5;
+          margin: 4px 0 0;
         }
 
         .loading-card,
         .error-card {
-          margin-bottom: 28px;
-          padding: 24px;
-          border: 1px solid #e5e9f2;
-          border-radius: 18px;
-          background: #ffffff;
+          padding: 20px;
+          border-radius: 15px;
+          margin-bottom: 20px;
+          color: #dbe4f2;
+          font-size: 14px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.05
+          );
         }
 
-        .loading-card {
-          display: flex;
-          align-items: center;
-          gap: 16px;
+        .error-card {
+          color: #f2b0b0;
         }
 
-        .loading-card p,
-        .error-card p {
-          margin: 5px 0 0;
-          color: #7c869b;
-          font-size: 12px;
-        }
-
-        .loader {
-          width: 26px;
-          height: 26px;
-          border-radius: 50%;
-          border: 3px solid #e6ecfa;
-          border-top-color: #4078ff;
-          animation: spin 0.8s linear infinite;
-        }
-
-        .error-card button {
-          margin-top: 14px;
-          padding: 9px 13px;
-          border: 0;
-          border-radius: 10px;
-          background: #233968;
-          color: #ffffff;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        .knowledge-footer {
-          margin-top: 44px;
-          padding-top: 18px;
-          border-top: 1px solid #eceff5;
-          color: #969dae;
-          font-size: 11px;
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .spinning {
-          animation: spin 1s linear infinite;
-        }
-
-        @media (max-width: 1100px) {
-          .statistics-grid,
-          .structure-grid {
+        @media (
+          max-width: 1100px
+        ) {
+          .statistics-grid {
             grid-template-columns:
               repeat(2, 1fr);
           }
 
-          .topic-grid {
+          .node-grid {
             grid-template-columns:
               repeat(2, 1fr);
           }
         }
 
-        @media (max-width: 760px) {
+        @media (
+          max-width: 760px
+        ) {
           .knowledge-page {
-            padding: 24px 18px 60px;
+            padding:
+              26px 18px 60px;
           }
 
-          .knowledge-hero {
+          .hero {
             flex-direction: column;
           }
 
-          .interest-grid,
-          .topic-grid,
           .statistics-grid,
-          .structure-grid {
-            grid-template-columns: 1fr;
+          .node-grid,
+          .discovery-grid {
+            grid-template-columns:
+              1fr;
           }
         }
       `}</style>
@@ -643,221 +1353,38 @@ function StatisticCard({
 
       <style jsx>{`
         .statistic-card {
-          min-height: 116px;
+          min-height: 115px;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          padding: 18px 20px;
-          background: #ffffff;
-          border: 1px solid #e5e9f2;
-          border-radius: 18px;
-        }
-
-        strong {
-          color: #2e63e5;
-          font-size: 30px;
-          letter-spacing: -0.035em;
-        }
-
-        span {
-          margin-top: 5px;
-          color: #818a9d;
-          font-size: 11px;
-          font-weight: 700;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function StructureCard({
-  value,
-  label,
-}: {
-  value: number | string;
-  label: string;
-}) {
-  return (
-    <div className="structure-card">
-      <span>{label}</span>
-      <strong>{value}</strong>
-
-      <style jsx>{`
-        .structure-card {
-          padding: 18px;
-          border: 1px solid #e5e9f2;
-          border-radius: 16px;
-          background: #ffffff;
-        }
-
-        span {
-          display: block;
-          color: #8b93a5;
-          font-size: 10px;
-          margin-bottom: 7px;
-        }
-
-        strong {
-          color: #293650;
-          font-size: 17px;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="section-heading">
-      <span>{eyebrow}</span>
-      <h2>{title}</h2>
-      <p>{description}</p>
-
-      <style jsx>{`
-        span {
-          color: #4078ff;
-          font-size: 10px;
-          font-weight: 850;
-          letter-spacing: 0.13em;
-        }
-
-        h2 {
-          margin: 6px 0 4px;
-          color: #26324d;
-          font-size: 21px;
-          letter-spacing: -0.02em;
-        }
-
-        p {
-          margin: 0;
-          color: #8a92a4;
-          font-size: 12px;
-          line-height: 1.55;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function InterestCard({
-  interest,
-  rank,
-}: {
-  interest: {
-    id: string;
-    name: string;
-    score: number;
-    discoveries: number;
-  };
-  rank: number;
-}) {
-  const percentage =
-    Math.round(
-      Math.max(
-        0,
-        Math.min(
-          interest.score,
-          1,
-        ),
-      ) * 100,
-    );
-
-  return (
-    <div className="interest-card">
-      <div className="interest-top">
-        <span>#{rank}</span>
-
-        <strong>
-          {interest.name}
-        </strong>
-
-        <b>
-          {interest.discoveries}
-        </b>
-      </div>
-
-      <div className="strength-track">
-        <div
-          className="strength-fill"
-          style={{
-            width: `${Math.max(
-              4,
-              percentage,
-            )}%`,
-          }}
-        />
-      </div>
-
-      <div className="interest-meta">
-        <span>
-          Interessenstärke
-        </span>
-
-        <strong>
-          {percentage} %
-        </strong>
-      </div>
-
-      <style jsx>{`
-        .interest-card {
-          padding: 17px 18px;
-          border: 1px solid #e5e9f2;
+          padding: 20px;
+          border: 1px solid
+            rgba(
+              255,
+              255,
+              255,
+              0.1
+            );
           border-radius: 17px;
-          background: #ffffff;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.045
+          );
         }
 
-        .interest-top {
-          display: grid;
-          grid-template-columns:
-            40px 1fr auto;
-          gap: 8px;
-          align-items: center;
+        strong {
+          color: #79a0ff;
+          font-size: 31px;
+          line-height: 1;
         }
 
-        .interest-top span {
-          color: #4078ff;
-          font-size: 11px;
-          font-weight: 850;
-        }
-
-        .interest-top strong {
-          color: #26324d;
+        span {
+          color: #aab5c8;
           font-size: 13px;
-        }
-
-        .interest-top b {
-          color: #4078ff;
-          font-size: 18px;
-        }
-
-        .strength-track {
-          height: 5px;
-          margin-top: 15px;
-          overflow: hidden;
-          border-radius: 999px;
-          background: #edf0f6;
-        }
-
-        .strength-fill {
-          height: 100%;
-          border-radius: 999px;
-          background: #4c7df0;
-        }
-
-        .interest-meta {
-          display: flex;
-          justify-content: space-between;
+          font-weight: 700;
           margin-top: 8px;
-          color: #9299a9;
-          font-size: 10px;
         }
       `}</style>
     </div>
@@ -873,53 +1400,153 @@ function EmptyState({
 }) {
   return (
     <div className="empty-state">
-      <div>◇</div>
-
-      <section>
-        <strong>{title}</strong>
-        <p>{text}</p>
-      </section>
+      <strong>{title}</strong>
+      <p>{text}</p>
 
       <style jsx>{`
         .empty-state {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          margin-top: 18px;
-          padding: 20px;
-          border: 1px dashed #dce2ee;
+          padding: 22px;
+          border: 1px dashed
+            rgba(
+              255,
+              255,
+              255,
+              0.15
+            );
           border-radius: 16px;
-          background: rgba(
-            255,
-            255,
-            255,
-            0.55
-          );
-        }
-
-        .empty-state > div {
-          width: 42px;
-          height: 42px;
-          flex-shrink: 0;
-          display: grid;
-          place-items: center;
-          border-radius: 13px;
-          color: #4078ff;
-          background: #f0f5ff;
         }
 
         strong {
-          color: #33405c;
-          font-size: 12px;
+          color: #e4ebf6;
+          font-size: 16px;
         }
 
         p {
-          margin: 4px 0 0;
-          color: #8d95a6;
-          font-size: 11px;
-          line-height: 1.55;
+          color: #9daabd;
+          font-size: 14px;
+          margin: 6px 0 0;
         }
       `}</style>
     </div>
   );
+}
+
+function nodeKindLabel(
+  kind:
+    KnowledgeGraphNode["kind"],
+): string {
+  if (kind === "domain") {
+    return "GALAXIE";
+  }
+
+  if (kind === "topic") {
+    return "TOPIC";
+  }
+
+  if (kind === "subtopic") {
+    return "UNTERTHEMA";
+  }
+
+  return "KONZEPT";
+}
+
+function nodeKindHeading(
+  kind:
+    KnowledgeGraphNode["kind"],
+): string {
+  if (kind === "domain") {
+    return "Topics";
+  }
+
+  if (kind === "topic") {
+    return "Unterthemen";
+  }
+
+  if (kind === "subtopic") {
+    return "Discoveries";
+  }
+
+  return "Discoveries";
+}
+
+function navigationDescription(
+  kind:
+    KnowledgeGraphNode["kind"],
+): string {
+  if (kind === "domain") {
+    return "Öffne ein Topic, um tiefer in diese Galaxie einzusteigen.";
+  }
+
+  if (kind === "topic") {
+    return "Öffne ein Unterthema, um die zugehörigen Discoveries zu sehen.";
+  }
+
+  return "Die Discoveries bilden die Wissensbasis dieses Unterthemas.";
+}
+
+function collectDiscoveryIds(
+  node: KnowledgeGraphNode,
+  nodesById:
+    Map<
+      string,
+      KnowledgeGraphNode
+    >,
+  visited =
+    new Set<string>(),
+): Set<string> {
+  if (
+    visited.has(node.id)
+  ) {
+    return new Set();
+  }
+
+  visited.add(node.id);
+
+  const ids =
+    new Set(
+      node.discoveryIds,
+    );
+
+  for (
+    const childId
+    of node.childIds
+  ) {
+    const child =
+      nodesById.get(
+        childId,
+      );
+
+    if (!child) {
+      continue;
+    }
+
+    for (
+      const discoveryId
+      of collectDiscoveryIds(
+        child,
+        nodesById,
+        visited,
+      )
+    ) {
+      ids.add(
+        discoveryId,
+      );
+    }
+  }
+
+  return ids;
+}
+
+function countDiscoveries(
+  node: KnowledgeGraphNode,
+  nodesById:
+    Map<
+      string,
+      KnowledgeGraphNode
+    >,
+): number {
+  return collectDiscoveryIds(
+    node,
+    nodesById,
+  ).size;
 }
