@@ -24,6 +24,10 @@ import {
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
 import { updateKnowledgeGraphNode } from "./services/knowledge/knowledge-graph-overrides";
+
+import {
+  canonicalizeDiscoveryGalaxies,
+} from "./services/knowledge/galaxy-canonicalization-service";
 import { ContentFetchError } from "./types/content-fetch-error";
 import {
   analyzeSecondBrain,
@@ -1889,7 +1893,7 @@ app.post(
     const parsedWorkspace =
       WorkspaceIdSchema.safeParse(
         request.body?.workspaceId ??
-          "private",
+        "private",
       );
 
     if (!parsedWorkspace.success) {
@@ -1902,15 +1906,65 @@ app.post(
     }
 
     try {
-      const library =
+      /*
+       * Phase 1:
+       * KI analysiert das bestehende
+       * Wissensuniversum und erzeugt
+       * kanonische Galaxien + Aliase.
+       */
+      const initialLibrary =
         await rebuildCurrentKnowledgeLibrary(
           discoveryRepository,
           parsedWorkspace.data,
         );
 
+      let canonicalization: {
+        changedDiscoveries: number;
+        mergedGalaxies: Array<{
+          from: string;
+          to: string;
+        }>;
+      } = {
+        changedDiscoveries: 0,
+        mergedGalaxies: [],
+      };
+
+      if (initialLibrary.graph) {
+        /*
+         * Phase 2:
+         * Nur echte KI-Synonyme werden
+         * dauerhaft in den Discoveries
+         * vereinheitlicht.
+         */
+        canonicalization =
+          await canonicalizeDiscoveryGalaxies(
+            discoveryRepository,
+            initialLibrary.graph,
+            parsedWorkspace.data,
+          );
+      }
+
+      /*
+       * Phase 3:
+       * Wenn Discoveries geändert wurden,
+       * wird aus dem kanonischen Stand
+       * noch einmal der endgültige Graph
+       * aufgebaut.
+       */
+      const library =
+        canonicalization.changedDiscoveries >
+        0
+          ? await rebuildCurrentKnowledgeLibrary(
+              discoveryRepository,
+              parsedWorkspace.data,
+            )
+          : initialLibrary;
+
       response.json({
         message:
-          "Knowledge library and AI knowledge graph rebuilt successfully.",
+          "Knowledge universe synchronized successfully.",
+
+        canonicalization,
 
         library,
       });
