@@ -106,11 +106,9 @@ export type DiscoveryUpdate = {
 
   summary: string;
 
-workspaceId:
-  WorkspaceId;
+  workspaceId:
+    WorkspaceId;
 
-classification:
-  DiscoveryClassification;
   classification:
     DiscoveryClassification;
 
