@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio";
-import { PDFParse } from "pdf-parse";
 
 import { ContentFetchError } from "../types/content-fetch-error";
 import type { PageMetadata } from "../types/page-metadata";
@@ -353,7 +352,14 @@ async function parsePdfResponse(
   fetchStrategy: FetchStrategy,
 ): Promise<PageMetadata> {
   const bytes = await readLimitedBody(response, MAX_PDF_BYTES);
-  const parser = new PDFParse({ data: bytes });
+
+  const { PDFParse } =
+    await import("pdf-parse");
+
+  const parser =
+    new PDFParse({
+      data: bytes,
+    });
   try {
     const info = await parser.getInfo();
     const text = await parser.getText();
