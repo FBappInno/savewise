@@ -26,8 +26,12 @@ import { importContent } from "./services/import/content-import-service";
 import { updateKnowledgeGraphNode } from "./services/knowledge/knowledge-graph-overrides";
 
 import {
-  canonicalizeDiscoveryGalaxies,
-} from "./services/knowledge/galaxy-canonicalization-service";
+  organizeGalaxies,
+} from "./services/ai/openai-galaxy-organizer";
+
+import {
+  applyGalaxyOrganization,
+} from "./services/knowledge/galaxy-organization-service";
 import { ContentFetchError } from "./types/content-fetch-error";
 import {
   analyzeSecondBrain,
@@ -1907,70 +1911,97 @@ app.post(
 
     try {
       /*
-       * Phase 1:
-       * KI analysiert das bestehende
-       * Wissensuniversum und erzeugt
-       * kanonische Galaxien + Aliase.
+       * SCHRITT 1
+       *
+       * Aktuellen Stand laden.
+       * Kein vollständiger KI-Rebuild.
        */
-      const initialLibrary =
+      const currentLibrary =
+        await buildCurrentKnowledgeLibrary(
+          discoveryRepository,
+          parsedWorkspace.data,
+        );
+
+      /*
+       * SCHRITT 2
+       *
+       * Kleine spezialisierte KI analysiert
+       * ausschließlich die Galaxienebene.
+       */
+      const organization =
+        await withTimeout(
+          organizeGalaxies(
+            currentLibrary.discoveries,
+          ),
+          65_000,
+        );
+
+      /*
+       * SCHRITT 3
+       *
+       * MERGE / GROUP werden direkt auf
+       * die Discoveries angewendet.
+       */
+      const organizationResult =
+        await applyGalaxyOrganization(
+          discoveryRepository,
+          parsedWorkspace.data,
+          organization.assignments,
+        );
+
+      /*
+       * SCHRITT 4
+       *
+       * Genau EIN vollständiger
+       * Knowledge-Graph-Rebuild auf Basis
+       * der bereits bereinigten Struktur.
+       */
+      const library =
         await rebuildCurrentKnowledgeLibrary(
           discoveryRepository,
           parsedWorkspace.data,
         );
 
-      let canonicalization: {
-        changedDiscoveries: number;
-        mergedGalaxies: Array<{
-          from: string;
-          to: string;
-        }>;
-      } = {
-        changedDiscoveries: 0,
-        mergedGalaxies: [],
-      };
-
-      if (initialLibrary.graph) {
-        /*
-         * Phase 2:
-         * Nur echte KI-Synonyme werden
-         * dauerhaft in den Discoveries
-         * vereinheitlicht.
-         */
-        canonicalization =
-          await canonicalizeDiscoveryGalaxies(
-            discoveryRepository,
-            initialLibrary.graph,
-            parsedWorkspace.data,
-          );
-      }
-
-      /*
-       * Phase 3:
-       * Wenn Discoveries geändert wurden,
-       * wird aus dem kanonischen Stand
-       * noch einmal der endgültige Graph
-       * aufgebaut.
-       */
-      const library =
-        canonicalization.changedDiscoveries >
-        0
-          ? await rebuildCurrentKnowledgeLibrary(
-              discoveryRepository,
-              parsedWorkspace.data,
-            )
-          : initialLibrary;
-
       response.json({
         message:
           "Knowledge universe synchronized successfully.",
 
-        canonicalization,
+        organization: {
+          summary:
+            organization.summary,
+
+          previousGalaxyCount:
+            new Set(
+              currentLibrary.discoveries
+                .map(
+                  (discovery) =>
+                    discovery.classification
+                      ?.secondaryCategory
+                      ?.trim(),
+                )
+                .filter(Boolean),
+            ).size,
+
+          currentGalaxyCount:
+            new Set(
+              library.discoveries
+                .map(
+                  (discovery) =>
+                    discovery.classification
+                      ?.secondaryCategory
+                      ?.trim(),
+                )
+                .filter(Boolean),
+            ).size,
+
+          ...organizationResult,
+        },
 
         library,
       });
     } catch (error) {
       console.error(
-        "Knowledge library rebuild failed:",
+        "Knowledge universe synchronization failed:",
         error,
       );
 
@@ -1978,7 +2009,7 @@ app.post(
         error:
           error instanceof Error
             ? error.message
-            : "Knowledge library rebuild failed.",
+            : "Knowledge universe synchronization failed.",
       });
     }
   },
