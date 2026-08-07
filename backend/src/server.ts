@@ -1698,7 +1698,7 @@ app.patch(
         return;
       }
 
-      const library = await buildCurrentKnowledgeLibrary(
+      const library = await rebuildCurrentKnowledgeLibrary(
         discoveryRepository,
         discovery.workspaceId ?? "private",
       );
