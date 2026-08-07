@@ -9,6 +9,7 @@ import type {
 } from "@savewise/shared";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -23,6 +24,10 @@ import {
 } from "react-native";
 
 import {
+  InteractiveUniverseViewport,
+} from "@/components/universe/interactive-universe-viewport";
+
+import {
   universeTheme,
 } from "@/theme/universe-theme";
 
@@ -35,6 +40,9 @@ type KnowledgeUniverseProps = {
 
   onOpenDiscovery:
     (discovery: Discovery) => void;
+
+  workspaceId:
+    "private" | "business";
 };
 
 type DomainGalaxy = {
@@ -97,6 +105,7 @@ export function KnowledgeUniverse({
   graph,
   discoveries,
   onOpenDiscovery,
+  workspaceId,
 }: KnowledgeUniverseProps) {
   const [
     selectedDomainId,
@@ -113,6 +122,16 @@ export function KnowledgeUniverse({
     useState<string | null>(
       null,
     );
+
+  useEffect(() => {
+    setSelectedDomainId(
+      null,
+    );
+
+    setSelectedTopicId(
+      null,
+    );
+  }, [workspaceId]);
 
   const galaxies =
     useMemo(
@@ -270,7 +289,18 @@ export function KnowledgeUniverse({
       </View>
 
       <View style={styles.universeCard}>
-        <StarField />
+        <InteractiveUniverseViewport
+          height={
+            GALAXY_HEIGHT
+          }
+          resetKey={
+            workspaceId
+          }
+          width={
+            GALAXY_WIDTH
+          }
+        >
+          <StarField />
 
         {!selectedGalaxy ? (
           <UniverseOverview
@@ -294,6 +324,8 @@ export function KnowledgeUniverse({
             }
           />
         )}
+
+        </InteractiveUniverseViewport>
 
         <View style={styles.hintBadge}>
           <Ionicons
@@ -1148,6 +1180,9 @@ function buildDomainGalaxies(
         topics,
       };
     },
+  ).filter(
+    (galaxy) =>
+      galaxy.count > 0,
   );
 }
 

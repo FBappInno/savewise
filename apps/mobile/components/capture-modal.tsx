@@ -24,6 +24,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -517,16 +518,41 @@ export function CaptureModal({
     setError(null);
 
     try {
-      const permission =
+      const currentPermission =
         await ImagePicker
-          .requestMediaLibraryPermissionsAsync();
+          .getMediaLibraryPermissionsAsync();
 
-      if (
-        !permission.granted
-      ) {
+      let granted =
+        currentPermission.granted;
+
+      if (!granted) {
+        const requestedPermission =
+          await ImagePicker
+            .requestMediaLibraryPermissionsAsync();
+
+        granted =
+          requestedPermission.granted;
+      }
+
+      if (!granted) {
         Alert.alert(
-          "Zugriff erforderlich",
-          "SaveWise benötigt Zugriff auf deine Fotos, damit du Bilder importieren kannst.",
+          "Zugriff auf Fotos erforderlich",
+          "Aktiviere den Fotozugriff für SaveWise in den iPhone-Einstellungen.",
+          [
+            {
+              text:
+                "Abbrechen",
+              style:
+                "cancel",
+            },
+            {
+              text:
+                "Einstellungen öffnen",
+              onPress() {
+                void Linking.openSettings();
+              },
+            },
+          ],
         );
 
         return;
@@ -535,17 +561,18 @@ export function CaptureModal({
       const result =
         await ImagePicker
           .launchImageLibraryAsync({
-            mediaTypes: [
-              "images",
-            ],
+            mediaTypes:
+              ImagePicker
+                .MediaTypeOptions
+                .Images,
 
             allowsEditing:
               false,
 
-            quality:
-              1,
+            allowsMultipleSelection:
+              false,
 
-            selectionLimit:
+            quality:
               1,
           });
 
@@ -563,11 +590,17 @@ export function CaptureModal({
     } catch (
       pickerError
     ) {
-      setError(
+      const message =
         getErrorMessage(
           pickerError,
           "Das Bild konnte nicht ausgewählt werden.",
-        ),
+        );
+
+      setError(message);
+
+      Alert.alert(
+        "Bildauswahl fehlgeschlagen",
+        message,
       );
     }
   }
@@ -576,16 +609,41 @@ export function CaptureModal({
     setError(null);
 
     try {
-      const permission =
+      const available =
         await ImagePicker
-          .requestCameraPermissionsAsync();
+          .getCameraPermissionsAsync();
 
-      if (
-        !permission.granted
-      ) {
+      let granted =
+        available.granted;
+
+      if (!granted) {
+        const requested =
+          await ImagePicker
+            .requestCameraPermissionsAsync();
+
+        granted =
+          requested.granted;
+      }
+
+      if (!granted) {
         Alert.alert(
           "Kamerazugriff erforderlich",
-          "Erlaube SaveWise den Kamerazugriff, um Wissen direkt fotografieren zu können.",
+          "Aktiviere den Kamerazugriff für SaveWise in den iPhone-Einstellungen.",
+          [
+            {
+              text:
+                "Abbrechen",
+              style:
+                "cancel",
+            },
+            {
+              text:
+                "Einstellungen öffnen",
+              onPress() {
+                void Linking.openSettings();
+              },
+            },
+          ],
         );
 
         return;
@@ -594,9 +652,10 @@ export function CaptureModal({
       const result =
         await ImagePicker
           .launchCameraAsync({
-            mediaTypes: [
-              "images",
-            ],
+            mediaTypes:
+              ImagePicker
+                .MediaTypeOptions
+                .Images,
 
             allowsEditing:
               false,
@@ -622,11 +681,17 @@ export function CaptureModal({
     } catch (
       cameraError
     ) {
-      setError(
+      const message =
         getErrorMessage(
           cameraError,
           "Die Kamera konnte nicht geöffnet werden.",
-        ),
+        );
+
+      setError(message);
+
+      Alert.alert(
+        "Kamera konnte nicht geöffnet werden",
+        message,
       );
     }
   }

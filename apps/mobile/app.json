@@ -14,7 +14,7 @@
       "supportsTablet": false,
       "infoPlist": {
         "NSCameraUsageDescription": "SaveWise verwendet die Kamera, damit du Wissen, Dokumente und Whiteboards direkt erfassen kannst.",
-        "NSPhotoLibraryUsageDescription": "SaveWise benötigt Zugriff auf deine Fotomediathek, damit du Bilder und Screenshots deinem Wissensuniversum hinzufügen kannst."
+        "NSPhotoLibraryUsageDescription": "SaveWise benötigt Zugriff auf deine Fotos, damit du Bilder und Screenshots deinem Wissensuniversum hinzufügen kannst."
       }
     },
     "android": {
@@ -54,7 +54,15 @@
         {
           "faceIDPermission": "SaveWise verwendet Face ID, um dein Wissensuniversum zu entsperren."
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "SaveWise benötigt Zugriff auf deine Fotos, damit du Bilder und Screenshots deinem Wissensuniversum hinzufügen kannst.",
+          "cameraPermission": "SaveWise verwendet die Kamera, damit du Wissen, Dokumente und Whiteboards direkt erfassen kannst."
+        }
+      ],
+      "expo-document-picker"
     ],
     "experiments": {
       "typedRoutes": true,

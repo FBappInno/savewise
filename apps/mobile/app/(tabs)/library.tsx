@@ -164,6 +164,12 @@ export default function LibraryScreen() {
           onOpenDiscovery={
             openDiscovery
           }
+        workspaceId={
+            settings.workspace.activeId ===
+            "business"
+              ? "business"
+              : "private"
+          }
         />
       ) : null}
     </ScrollView>

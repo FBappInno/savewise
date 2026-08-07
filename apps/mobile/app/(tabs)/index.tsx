@@ -445,6 +445,12 @@ export default function UniverseHomeScreen() {
             onOpenDiscovery={
               openDiscovery
             }
+            workspaceId={
+              settings.workspace.activeId ===
+              "business"
+                ? "business"
+                : "private"
+            }
           />
         ) : null}
 
