@@ -403,7 +403,7 @@ export function KnowledgeWorkspace() {
             />
 
             <StatisticCard
-              label="Topics"
+              label="Planeten"
               value={
                 graph?.nodes.filter(
                   (node) =>
@@ -1440,11 +1440,11 @@ function nodeKindLabel(
   }
 
   if (kind === "topic") {
-    return "TOPIC";
+    return "PLANET";
   }
 
   if (kind === "subtopic") {
-    return "UNTERTHEMA";
+    return "STERN";
   }
 
   return "KONZEPT";
@@ -1455,11 +1455,11 @@ function nodeKindHeading(
     KnowledgeGraphNode["kind"],
 ): string {
   if (kind === "domain") {
-    return "Topics";
+    return "Planeten";
   }
 
   if (kind === "topic") {
-    return "Unterthemen";
+    return "Sterne";
   }
 
   if (kind === "subtopic") {
@@ -1474,14 +1474,14 @@ function navigationDescription(
     KnowledgeGraphNode["kind"],
 ): string {
   if (kind === "domain") {
-    return "Öffne ein Topic, um tiefer in diese Galaxie einzusteigen.";
+    return "Öffne einen Planeten, um tiefer in diese Galaxie einzusteigen.";
   }
 
   if (kind === "topic") {
-    return "Öffne ein Unterthema, um die zugehörigen Discoveries zu sehen.";
+    return "Öffne einen Stern, um die zugehörigen Discoveries zu sehen.";
   }
 
-  return "Die Discoveries bilden die Wissensbasis dieses Unterthemas.";
+  return "Die Discoveries bilden die Wissensbasis dieses Sterns.";
 }
 
 function collectDiscoveryIds(

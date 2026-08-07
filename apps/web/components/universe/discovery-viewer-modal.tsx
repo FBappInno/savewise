@@ -206,6 +206,12 @@ export function DiscoveryViewerModal({
     );
 
   const [
+    useAiClassification,
+    setUseAiClassification,
+  ] =
+    useState(true);
+
+  const [
     secondaryCategory,
     setSecondaryCategory,
   ] =
@@ -267,6 +273,11 @@ export function DiscoveryViewerModal({
       discovery.classification
         ?.primaryCategory ??
       "other",
+    );
+
+    setUseAiClassification(
+      discovery.classification
+        ?.mode !== "manual",
     );
 
     setSecondaryCategory(
@@ -462,7 +473,7 @@ export function DiscoveryViewerModal({
       2
     ) {
       setError(
-        "Die Domäne muss mindestens 2 Zeichen enthalten.",
+        "Die Galaxie muss mindestens 2 Zeichen enthalten.",
       );
 
       return;
@@ -473,7 +484,7 @@ export function DiscoveryViewerModal({
       2
     ) {
       setError(
-        "Das Topic muss mindestens 2 Zeichen enthalten.",
+        "Der Planet muss mindestens 2 Zeichen enthalten.",
       );
 
       return;
@@ -503,6 +514,11 @@ export function DiscoveryViewerModal({
             classification: {
               primaryCategory:
                 category,
+
+              mode:
+                useAiClassification
+                  ? "ai"
+                  : "manual",
 
               secondaryCategory:
                 cleanSecondaryCategory,
@@ -1031,48 +1047,64 @@ export function DiscoveryViewerModal({
                   </select>
                 </label>
 
-                <label className="form-field">
+                <div className="form-field">
                   <span>
-                    Interne KI-Kategorie
+                    Klassifizierung
                   </span>
 
-                  <select
-                    onChange={(event) => {
-                      setCategory(
-                        event.target
-                          .value as
-                          DiscoveryCategory,
-                      );
+                  <label
+                    style={{
+                      alignItems: "center",
+                      cursor: "pointer",
+                      display: "flex",
+                      gap: "10px",
+                      minHeight: "42px",
                     }}
-                    value={
-                      category
-                    }
                   >
-                    {categories.map(
-                      (entry) => (
-                        <option
-                          key={
-                            entry.value
-                          }
-                          value={
-                            entry.value
-                          }
-                        >
-                          {
-                            entry.label
-                          }
-                        </option>
-                      ),
-                    )}
-                  </select>
-                </label>
+                    <input
+                      checked={
+                        useAiClassification
+                      }
+                      onChange={(event) => {
+                        setUseAiClassification(
+                          event.target.checked,
+                        );
+                      }}
+                      style={{
+                        height: "18px",
+                        width: "18px",
+                      }}
+                      type="checkbox"
+                    />
+
+                    <span>
+                      Durch KI kategorisieren
+                    </span>
+                  </label>
+
+                  <small
+                    style={{
+                      color: "#7f91a8",
+                      display: "block",
+                      lineHeight: 1.45,
+                      marginTop: "4px",
+                    }}
+                  >
+                    {useAiClassification
+                      ? "Galaxie, Planet und Sterne werden von SaveWise bestimmt."
+                      : "Der manuelle Wissenspfad wird von SaveWise übernommen und nicht durch die KI ersetzt."}
+                  </small>
+                </div>
 
                 <label className="form-field">
                   <span>
-                    Domäne
+                    Galaxie
                   </span>
 
                   <input
+                    disabled={
+                      useAiClassification
+                    }
                     maxLength={
                       60
                     }
@@ -1089,10 +1121,13 @@ export function DiscoveryViewerModal({
 
                 <label className="form-field">
                   <span>
-                    Topic
+                    Planet
                   </span>
 
                   <input
+                    disabled={
+                      useAiClassification
+                    }
                     maxLength={
                       60
                     }
@@ -1109,16 +1144,19 @@ export function DiscoveryViewerModal({
 
                 <label className="form-field">
                   <span>
-                    Unterthemen
+                    Sterne
                   </span>
 
                   <input
+                    disabled={
+                      useAiClassification
+                    }
                     onChange={(event) => {
                       setSubtopics(
                         event.target.value,
                       );
                     }}
-                    placeholder="Mit Kommas trennen"
+                    placeholder="Mehrere Sterne mit Kommas trennen"
                     value={
                       subtopics
                     }
@@ -1227,7 +1265,7 @@ export function DiscoveryViewerModal({
                 {currentDiscovery.classification ? (
                   <section>
                     <div className="card-eyebrow">
-                      WISSENSPFAD
+                      GALAXIE · PLANET · STERNE
                     </div>
 
                     <div className="viewer-knowledge-path">

@@ -377,6 +377,12 @@ const DiscoveryUpdateSchema = z.object({
       "technology", "finance", "business", "science", "health",
       "education", "productivity", "culture", "news", "lifestyle", "other",
     ]),
+
+    mode: z
+      .enum(["ai", "manual"])
+      .optional()
+      .default("ai"),
+
     secondaryCategory: z.string().trim().min(2).max(60),
     topic: z.string().trim().min(2).max(60),
     subtopics: z.array(z.string().trim().min(2).max(50)).max(6),
@@ -1692,7 +1698,10 @@ app.patch(
         return;
       }
 
-      const library = await buildCurrentKnowledgeLibrary(discoveryRepository);
+      const library = await buildCurrentKnowledgeLibrary(
+        discoveryRepository,
+        discovery.workspaceId ?? "private",
+      );
       if (library.graph) {
         await recordLearningCycle(
           library.graph,

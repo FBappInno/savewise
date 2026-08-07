@@ -53,9 +53,28 @@ export type DiscoveryCategory =
   | "other";
 
 export interface DiscoveryClassification {
+  /*
+   * Technisches Legacy-Metadatum.
+   * Nicht mehr als eigene Wissensebene anzeigen.
+   */
   primaryCategory:
     DiscoveryCategory;
 
+  /*
+   * Bestimmt, ob der Wissenspfad von
+   * SaveWise AI oder vom Benutzer stammt.
+   *
+   * Alte Discoveries ohne mode gelten als "ai".
+   */
+  mode?: "ai" | "manual";
+
+  /*
+   * Einheitlicher SaveWise-Wissenspfad:
+   *
+   * secondaryCategory = Galaxie
+   * topic             = Planet
+   * subtopics         = Sterne
+   */
   secondaryCategory: string;
   topic: string;
   subtopics: string[];
