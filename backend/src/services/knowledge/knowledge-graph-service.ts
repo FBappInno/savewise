@@ -12,7 +12,7 @@ import {
 import { buildKnowledgeGraphWithAI } from "../ai/openai-knowledge-architect";
 import { applyKnowledgeGraphOverrides } from "./knowledge-graph-overrides";
 
-const KNOWLEDGE_ARCHITECTURE_VERSION = "hierarchical-universe-v4";
+const KNOWLEDGE_ARCHITECTURE_VERSION = "hierarchical-universe-v5-clustered";
 
 export type KnowledgeGraphBuildOptions = {
   forceRebuild?: boolean;
