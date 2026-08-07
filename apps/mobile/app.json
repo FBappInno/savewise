@@ -11,7 +11,11 @@
     "ios": {
       "bundleIdentifier": "com.fernandobiaggi.savewise.beta",
       "buildNumber": "1",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "SaveWise verwendet die Kamera, damit du Wissen, Dokumente und Whiteboards direkt erfassen kannst.",
+        "NSPhotoLibraryUsageDescription": "SaveWise benötigt Zugriff auf deine Fotomediathek, damit du Bilder und Screenshots deinem Wissensuniversum hinzufügen kannst."
+      }
     },
     "android": {
       "package": "com.fernandobiaggi.savewise.beta",

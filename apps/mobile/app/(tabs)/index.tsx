@@ -172,6 +172,13 @@ export default function UniverseHomeScreen() {
     }
   }
 
+  async function handleFileImported() {
+    await Promise.all([
+      refreshDiscoveries(),
+      refreshLibrary(),
+    ]);
+  }
+
   async function handleRefresh() {
     if (isUpdating) {
       return;
@@ -480,6 +487,9 @@ export default function UniverseHomeScreen() {
       </ScrollView>
 
       <CaptureModal
+        onFileImported={
+          handleFileImported
+        }
         existingMainTopics={
           existingMainTopics
         }

@@ -1,4 +1,19 @@
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Ionicons,
+} from "@expo/vector-icons";
+
+import * as DocumentPicker from "expo-document-picker";
+
+import {
+  Image,
+} from "expo-image";
+
+import * as ImagePicker from "expo-image-picker";
+
+import type {
+  Discovery,
+} from "@savewise/shared";
+
 import {
   useEffect,
   useMemo,
@@ -6,83 +21,260 @@ import {
 } from "react";
 
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
 } from "react-native";
 
-import { SaveWiseButton } from "@/components/savewise-button";
-import { StarBackground } from "@/components/universe-ui/star-background";
-import { useAppSettings } from "@/providers/app-settings-provider";
+import {
+  StarBackground,
+} from "@/components/universe-ui/star-background";
+
 import {
   isValidDiscoveryUrl,
   normalizeDiscoveryUrl,
 } from "@/services/content-import-client";
-import { resolveMetadata } from "@/services/metadata-resolver";
-import { universeTheme } from "@/theme/universe-theme";
-import type { CapturedItem } from "@/types/captured-item";
+
+import {
+  importMobileFile,
+  type MobileCaptureFile,
+  type MobileCaptureType,
+} from "@/services/file-capture-client";
+
+import {
+  resolveMetadata,
+} from "@/services/metadata-resolver";
+
+import {
+  universeTheme,
+} from "@/theme/universe-theme";
+
+import type {
+  CapturedItem,
+} from "@/types/captured-item";
+
+type CaptureMode =
+  | "menu"
+  | "link"
+  | "pdf"
+  | "image";
 
 type CaptureModalProps = {
-  visible: boolean;
-  existingMainTopics: string[];
-  onClose: () => void;
+  visible:
+    boolean;
+
+  existingMainTopics:
+    string[];
+
+  onClose:
+    () => void;
+
   onSave: (
-    capturedItem: CapturedItem,
+    capturedItem:
+      CapturedItem,
   ) => void;
+
+  onFileImported?: (
+    discovery:
+      Discovery,
+  ) => void | Promise<void>;
 };
+
+type CaptureOption = {
+  id:
+    | "link"
+    | "camera"
+    | "library"
+    | "pdf"
+    | "voice"
+    | "note";
+
+  title:
+    string;
+
+  description:
+    string;
+
+  icon:
+    keyof typeof Ionicons.glyphMap;
+
+  enabled:
+    boolean;
+};
+
+const OPTIONS:
+CaptureOption[] = [
+  {
+    id:
+      "link",
+
+    title:
+      "Link speichern",
+
+    description:
+      "Webseiten, Videos und Online-Quellen analysieren.",
+
+    icon:
+      "link-outline",
+
+    enabled:
+      true,
+  },
+
+  {
+    id:
+      "camera",
+
+    title:
+      "Foto aufnehmen",
+
+    description:
+      "Dokument, Whiteboard, Bildschirm oder Objekt direkt fotografieren.",
+
+    icon:
+      "camera-outline",
+
+    enabled:
+      true,
+  },
+
+  {
+    id:
+      "library",
+
+    title:
+      "Bild auswählen",
+
+    description:
+      "Screenshot oder Foto aus deiner Mediathek analysieren.",
+
+    icon:
+      "images-outline",
+
+    enabled:
+      true,
+  },
+
+  {
+    id:
+      "pdf",
+
+    title:
+      "PDF importieren",
+
+    description:
+      "Dokument auswählen, analysieren und mit deinem Wissen verbinden.",
+
+    icon:
+      "document-text-outline",
+
+    enabled:
+      true,
+  },
+
+  {
+    id:
+      "voice",
+
+    title:
+      "Spracheingabe",
+
+    description:
+      "Gedanken einsprechen und automatisch strukturieren.",
+
+    icon:
+      "mic-outline",
+
+    enabled:
+      false,
+  },
+
+  {
+    id:
+      "note",
+
+    title:
+      "Schnellnotiz",
+
+    description:
+      "Gedanken und Beobachtungen direkt festhalten.",
+
+    icon:
+      "create-outline",
+
+    enabled:
+      false,
+  },
+];
 
 export function CaptureModal({
   visible,
   existingMainTopics,
   onClose,
   onSave,
+  onFileImported,
 }: CaptureModalProps) {
-  const { locale } =
-    useAppSettings();
+  const [
+    mode,
+    setMode,
+  ] =
+    useState<CaptureMode>(
+      "menu",
+    );
 
-  const labels =
-    captureLabels[locale];
-
-  const [url, setUrl] =
+  const [
+    url,
+    setUrl,
+  ] =
     useState("");
 
   const [
-    automaticClassification,
-    setAutomaticClassification,
-  ] = useState(true);
+    knowledgePath,
+    setKnowledgePath,
+  ] =
+    useState("");
 
   const [
-    isTopicPickerOpen,
-    setTopicPickerOpen,
-  ] = useState(false);
+    selectedFile,
+    setSelectedFile,
+  ] =
+    useState<
+      MobileCaptureFile | null
+    >(null);
 
   const [
-    selectedMainTopic,
-    setSelectedMainTopic,
-  ] = useState<string | null>(
-    null,
-  );
+    selectedCaptureType,
+    setSelectedCaptureType,
+  ] =
+    useState<
+      MobileCaptureType | null
+    >(null);
 
   const [
-    customMainTopic,
-    setCustomMainTopic,
-  ] = useState("");
+    isImporting,
+    setImporting,
+  ] =
+    useState(false);
 
   const [
-    topicSearch,
-    setTopicSearch,
-  ] = useState("");
+    error,
+    setError,
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   useEffect(() => {
     if (!visible) {
-      resetForm();
+      reset();
     }
   }, [visible]);
 
@@ -95,7 +287,7 @@ export function CaptureModal({
       [url],
     );
 
-  const isValidUrl =
+  const validUrl =
     useMemo(
       () =>
         isValidDiscoveryUrl(
@@ -107,196 +299,580 @@ export function CaptureModal({
   const metadata =
     useMemo(
       () =>
-        isValidUrl
+        validUrl
           ? resolveMetadata(
               normalizedUrl,
             )
           : null,
       [
-        isValidUrl,
+        validUrl,
         normalizedUrl,
       ],
     );
 
-  const normalizedMainTopics =
+  const suggestedTopics =
     useMemo(
       () =>
-        normalizeMainTopics(
-          existingMainTopics,
+        [...new Set(
+          existingMainTopics
+            .map(
+              (topic) =>
+                topic.trim(),
+            )
+            .filter(Boolean),
+        )].slice(
+          0,
+          8,
         ),
       [existingMainTopics],
     );
 
-  const filteredMainTopics =
-    useMemo(() => {
-      const query =
-        topicSearch
-          .trim()
-          .toLocaleLowerCase();
-
-      if (!query) {
-        return normalizedMainTopics;
-      }
-
-      return normalizedMainTopics.filter(
-        (topic) =>
-          topic
-            .toLocaleLowerCase()
-            .includes(query),
-      );
-    }, [
-      normalizedMainTopics,
-      topicSearch,
-    ]);
-
-  const resolvedManualTopic =
-    resolveManualMainTopic(
-      selectedMainTopic,
-      customMainTopic,
+  function reset() {
+    setMode(
+      "menu",
     );
 
-  const canSave =
-    isValidUrl &&
-    Boolean(metadata) &&
-    (automaticClassification ||
-      Boolean(resolvedManualTopic));
-
-  function resetForm() {
     setUrl("");
-    setAutomaticClassification(
-      true,
+    setKnowledgePath("");
+    setSelectedFile(null);
+    setSelectedCaptureType(
+      null,
     );
-    setTopicPickerOpen(false);
-    setSelectedMainTopic(null);
-    setCustomMainTopic("");
-    setTopicSearch("");
+    setImporting(false);
+    setError(null);
   }
 
-  function handleAutomaticChange(
-    value: boolean,
-  ) {
-    setAutomaticClassification(
-      value,
-    );
-
-    if (value) {
-      setTopicPickerOpen(false);
-      setSelectedMainTopic(null);
-      setCustomMainTopic("");
-      setTopicSearch("");
-    }
-  }
-
-  function handleSave() {
+  function close() {
     if (
-      !canSave ||
-      !metadata
+      isImporting
     ) {
       return;
     }
 
-    const preferredKnowledgePath =
-      automaticClassification
-        ? undefined
-        : resolvedManualTopic
-          ? [resolvedManualTopic]
-          : undefined;
-
-    const capturedItem:
-      CapturedItem = {
-      id: Date.now().toString(),
-      title: metadata.title,
-      url: normalizedUrl,
-      source: metadata.source,
-      capturedAt:
-        new Date().toISOString(),
-      preferredKnowledgePath,
-    };
-
-    onSave(capturedItem);
-    resetForm();
-  }
-
-  function handleClose() {
-    resetForm();
+    reset();
     onClose();
   }
 
-  function selectMainTopic(
-    topic: string,
+  function back() {
+    if (
+      isImporting
+    ) {
+      return;
+    }
+
+    setMode(
+      "menu",
+    );
+
+    setSelectedFile(
+      null,
+    );
+
+    setSelectedCaptureType(
+      null,
+    );
+
+    setError(null);
+  }
+
+  function parsedKnowledgePath():
+  string[] | undefined {
+    const parts =
+      knowledgePath
+        .split(">")
+        .map(
+          (part) =>
+            part.trim(),
+        )
+        .filter(Boolean)
+        .slice(
+          0,
+          3,
+        );
+
+    return parts.length >
+      0
+      ? parts
+      : undefined;
+  }
+
+  function saveLink() {
+    if (
+      !validUrl ||
+      !metadata
+    ) {
+      setError(
+        "Bitte gib eine gültige Internetadresse ein.",
+      );
+
+      return;
+    }
+
+    const capturedItem:
+      CapturedItem = {
+      id:
+        Date.now()
+          .toString(),
+
+      title:
+        metadata.title,
+
+      url:
+        normalizedUrl,
+
+      source:
+        metadata.source,
+
+      capturedAt:
+        new Date()
+          .toISOString(),
+
+      preferredKnowledgePath:
+        parsedKnowledgePath(),
+    };
+
+    onSave(
+      capturedItem,
+    );
+  }
+
+  async function selectPdf() {
+    setError(null);
+
+    try {
+      const result =
+        await DocumentPicker
+          .getDocumentAsync({
+            type:
+              "application/pdf",
+
+            copyToCacheDirectory:
+              true,
+
+            multiple:
+              false,
+          });
+
+      if (
+        result.canceled ||
+        !result.assets[0]
+      ) {
+        return;
+      }
+
+      const asset =
+        result.assets[0];
+
+      if (
+        typeof asset.size ===
+          "number" &&
+        asset.size >
+          25 *
+          1024 *
+          1024
+      ) {
+        setError(
+          "Das PDF darf maximal 25 MB groß sein.",
+        );
+
+        return;
+      }
+
+      setSelectedCaptureType(
+        "pdf",
+      );
+
+      setSelectedFile({
+        uri:
+          asset.uri,
+
+        fileName:
+          asset.name ||
+          `SaveWise-${Date.now()}.pdf`,
+
+        mimeType:
+          asset.mimeType ||
+          "application/pdf",
+
+        sizeBytes:
+          asset.size,
+      });
+
+      setMode(
+        "pdf",
+      );
+    } catch (
+      pickerError
+    ) {
+      setError(
+        getErrorMessage(
+          pickerError,
+          "Das PDF konnte nicht ausgewählt werden.",
+        ),
+      );
+    }
+  }
+
+  async function selectImage() {
+    setError(null);
+
+    try {
+      const permission =
+        await ImagePicker
+          .requestMediaLibraryPermissionsAsync();
+
+      if (
+        !permission.granted
+      ) {
+        Alert.alert(
+          "Zugriff erforderlich",
+          "SaveWise benötigt Zugriff auf deine Fotos, damit du Bilder importieren kannst.",
+        );
+
+        return;
+      }
+
+      const result =
+        await ImagePicker
+          .launchImageLibraryAsync({
+            mediaTypes: [
+              "images",
+            ],
+
+            allowsEditing:
+              false,
+
+            quality:
+              1,
+
+            selectionLimit:
+              1,
+          });
+
+      if (
+        result.canceled ||
+        !result.assets[0]
+      ) {
+        return;
+      }
+
+      prepareImage(
+        result.assets[0],
+        "library",
+      );
+    } catch (
+      pickerError
+    ) {
+      setError(
+        getErrorMessage(
+          pickerError,
+          "Das Bild konnte nicht ausgewählt werden.",
+        ),
+      );
+    }
+  }
+
+  async function takePhoto() {
+    setError(null);
+
+    try {
+      const permission =
+        await ImagePicker
+          .requestCameraPermissionsAsync();
+
+      if (
+        !permission.granted
+      ) {
+        Alert.alert(
+          "Kamerazugriff erforderlich",
+          "Erlaube SaveWise den Kamerazugriff, um Wissen direkt fotografieren zu können.",
+        );
+
+        return;
+      }
+
+      const result =
+        await ImagePicker
+          .launchCameraAsync({
+            mediaTypes: [
+              "images",
+            ],
+
+            allowsEditing:
+              false,
+
+            quality:
+              0.92,
+
+            exif:
+              false,
+          });
+
+      if (
+        result.canceled ||
+        !result.assets[0]
+      ) {
+        return;
+      }
+
+      prepareImage(
+        result.assets[0],
+        "camera",
+      );
+    } catch (
+      cameraError
+    ) {
+      setError(
+        getErrorMessage(
+          cameraError,
+          "Die Kamera konnte nicht geöffnet werden.",
+        ),
+      );
+    }
+  }
+
+  function prepareImage(
+    asset:
+      ImagePicker.ImagePickerAsset,
+
+    origin:
+      "camera"
+      | "library",
   ) {
-    setSelectedMainTopic(topic);
-    setCustomMainTopic("");
-    setTopicSearch("");
-    setTopicPickerOpen(false);
+    if (
+      typeof asset.fileSize ===
+        "number" &&
+      asset.fileSize >
+        15 *
+        1024 *
+        1024
+    ) {
+      setError(
+        "Das Bild darf maximal 15 MB groß sein.",
+      );
+
+      return;
+    }
+
+    const mimeType =
+      resolveImageMimeType(
+        asset,
+      );
+
+    const extension =
+      resolveImageExtension(
+        mimeType,
+      );
+
+    const fileName =
+      asset.fileName ||
+      `SaveWise-${
+        origin ===
+          "camera"
+          ? "Foto"
+          : "Bild"
+      }-${Date.now()}.${extension}`;
+
+    setSelectedFile({
+      uri:
+        asset.uri,
+
+      fileName,
+
+      mimeType,
+
+      sizeBytes:
+        asset.fileSize,
+    });
+
+    setSelectedCaptureType(
+      "image",
+    );
+
+    setMode(
+      "image",
+    );
+  }
+
+  async function importSelectedFile() {
+    if (
+      !selectedFile ||
+      !selectedCaptureType
+    ) {
+      return;
+    }
+
+    setImporting(true);
+    setError(null);
+
+    try {
+      const discovery =
+        await importMobileFile({
+          file:
+            selectedFile,
+
+          captureType:
+            selectedCaptureType,
+
+          preferredKnowledgePath:
+            parsedKnowledgePath(),
+        });
+
+      if (
+        onFileImported
+      ) {
+        await onFileImported(
+          discovery,
+        );
+      }
+
+      reset();
+      onClose();
+    } catch (
+      importError
+    ) {
+      setError(
+        getErrorMessage(
+          importError,
+          "Die Datei konnte nicht importiert werden.",
+        ),
+      );
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function chooseOption(
+    option:
+      CaptureOption,
+  ) {
+    if (
+      !option.enabled
+    ) {
+      return;
+    }
+
+    switch (
+      option.id
+    ) {
+      case "link":
+        setMode(
+          "link",
+        );
+        return;
+
+      case "camera":
+        void takePhoto();
+        return;
+
+      case "library":
+        void selectImage();
+        return;
+
+      case "pdf":
+        void selectPdf();
+        return;
+
+      default:
+        return;
+    }
   }
 
   return (
     <Modal
       animationType="slide"
       onRequestClose={
-        handleClose
+        close
       }
       presentationStyle="pageSheet"
-      visible={visible}
+      visible={
+        visible
+      }
     >
       <KeyboardAvoidingView
         behavior={
-          Platform.OS === "ios"
+          Platform.OS ===
+          "ios"
             ? "padding"
             : undefined
         }
-        style={styles.screen}
+        style={
+          styles.screen
+        }
       >
-        <StarBackground density={55} />
+        <StarBackground
+          density={55}
+        />
 
         <View style={styles.header}>
-          <Pressable
-            accessibilityLabel={
-              labels.cancel
-            }
-            accessibilityRole="button"
-            hitSlop={10}
-            onPress={handleClose}
-            style={({ pressed }) => [
-              styles.closeButton,
-              pressed &&
-                styles.pressed,
-            ]}
-          >
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .textSecondary
+          {mode ===
+          "menu" ? (
+            <Pressable
+              accessibilityLabel="Schließen"
+              hitSlop={10}
+              onPress={
+                close
               }
-              name="close"
-              size={22}
-            />
-          </Pressable>
+              style={
+                styles.headerButton
+              }
+            >
+              <Ionicons
+                color={
+                  universeTheme
+                    .colors
+                    .textSecondary
+                }
+                name="close"
+                size={22}
+              />
+            </Pressable>
+          ) : (
+            <Pressable
+              accessibilityLabel="Zurück"
+              disabled={
+                isImporting
+              }
+              hitSlop={10}
+              onPress={
+                back
+              }
+              style={
+                styles.headerButton
+              }
+            >
+              <Ionicons
+                color={
+                  universeTheme
+                    .colors
+                    .textSecondary
+                }
+                name="arrow-back"
+                size={22}
+              />
+            </Pressable>
+          )}
 
-          <View
-            style={
-              styles.headerCenter
-            }
-          >
+          <View style={styles.headerCenter}>
             <Text style={styles.eyebrow}>
               CAPTURE
             </Text>
 
-            <Text
-              style={
-                styles.headerTitle
-              }
-            >
-              {labels.newDiscovery}
+            <Text style={styles.headerTitle}>
+              {mode ===
+              "menu"
+                ? "Neues Wissen"
+                : mode ===
+                    "link"
+                  ? "Link speichern"
+                  : mode ===
+                      "pdf"
+                    ? "PDF importieren"
+                    : "Bild analysieren"}
             </Text>
           </View>
 
-          <View
-            style={
-              styles.headerSpacer
-            }
-          />
+          <View style={styles.headerButton} />
         </View>
 
         <ScrollView
@@ -308,1451 +884,1621 @@ export function CaptureModal({
             false
           }
         >
-          <View
-            style={styles.introCard}
-          >
-            <View
-              style={styles.introIcon}
-            >
-              <Ionicons
-                color={
-                  universeTheme.colors
-                    .primaryBright
-                }
-                name="sparkles-outline"
-                size={24}
-              />
-            </View>
-
-            <View style={styles.flex}>
-              <Text
-                style={
-                  styles.introTitle
-                }
-              >
-                {labels.captureTitle}
-              </Text>
-
-              <Text
-                style={
-                  styles.introText
-                }
-              >
-                {labels.captureText}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={styles.label}>
-            {labels.link}
-          </Text>
-
-          <View
-            style={
-              styles.inputWrapper
-            }
-          >
-            <Ionicons
-              color={
-                universeTheme.colors
-                  .primary
-              }
-              name="link-outline"
-              size={19}
-            />
-
-            <TextInput
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoFocus
-              keyboardType="url"
-              onChangeText={setUrl}
-              onSubmitEditing={
-                handleSave
-              }
-              placeholder="example.com/article"
-              placeholderTextColor={
-                universeTheme.colors
-                  .textMuted
-              }
-              returnKeyType="done"
-              selectionColor={
-                universeTheme.colors
-                  .primaryBright
-              }
-              style={styles.input}
-              value={url}
-            />
-          </View>
-
-          {url.trim().length > 0 &&
-          !isValidUrl ? (
-            <View
-              style={
-                styles.validationRow
-              }
-            >
-              <Ionicons
-                color={
-                  universeTheme.colors
-                    .danger
-                }
-                name="alert-circle-outline"
-                size={16}
-              />
-
-              <Text
-                style={
-                  styles.validationText
-                }
-              >
-                {labels.invalidUrl}
-              </Text>
-            </View>
-          ) : null}
-
-          {metadata ? (
-            <View style={styles.preview}>
-              <View
-                style={
-                  styles.previewHeader
-                }
-              >
-                <Ionicons
-                  color={
-                    universeTheme.colors
-                      .green
-                  }
-                  name="checkmark-circle"
-                  size={18}
-                />
-
-                <Text
-                  style={
-                    styles.previewLabel
-                  }
-                >
-                  {labels.detected}
-                </Text>
-              </View>
-
-              <Text
-                style={
-                  styles.previewTitle
-                }
-              >
-                {metadata.title}
-              </Text>
-
-              <Text
-                style={
-                  styles.previewSource
-                }
-              >
-                {formatSource(
-                  metadata.source,
-                )}
-              </Text>
-
-              <Text
-                numberOfLines={2}
-                style={
-                  styles.previewUrl
-                }
-              >
-                {normalizedUrl}
-              </Text>
-            </View>
-          ) : null}
-
-          <View
-            style={
-              styles.sectionHeader
-            }
-          >
-            <Text
-              style={
-                styles.sectionEyebrow
-              }
-            >
-              KNOWLEDGE UNIVERSE
-            </Text>
-
-            <Text
-              style={
-                styles.sectionTitle
-              }
-            >
-              {labels.universe}
-            </Text>
-
-            <Text
-              style={
-                styles.sectionHint
-              }
-            >
-              {labels.universeHint}
-            </Text>
-          </View>
-
-          <View
-            style={
-              styles.automaticCard
-            }
-          >
-            <View
-              style={
-                styles.automaticIcon
-              }
-            >
-              <Ionicons
-                color={
-                  automaticClassification
-                    ? universeTheme
-                        .colors
-                        .primaryBright
-                    : universeTheme
-                        .colors
-                        .textMuted
-                }
-                name="sparkles-outline"
-                size={20}
-              />
-            </View>
-
-            <View style={styles.flex}>
-              <Text
-                style={
-                  styles.automaticTitle
-                }
-              >
-                {labels.automatic}
-              </Text>
-
-              <Text
-                style={
-                  styles.automaticText
-                }
-              >
-                {
-                  labels.automaticDescription
-                }
-              </Text>
-            </View>
-
-            <Switch
-              ios_backgroundColor="rgba(148, 163, 184, 0.18)"
-              onValueChange={
-                handleAutomaticChange
-              }
-              thumbColor="#F8FAFC"
-              trackColor={{
-                false:
-                  "rgba(148, 163, 184, 0.18)",
-                true:
-                  universeTheme.colors
-                    .primary,
-              }}
-              value={
-                automaticClassification
-              }
-            />
-          </View>
-
-          {!automaticClassification ? (
-            <View
-              style={
-                styles.manualArea
-              }
-            >
-              <Text
-                style={
-                  styles.manualEyebrow
-                }
-              >
-                {labels.manual}
-              </Text>
-
-              <Text
-                style={
-                  styles.manualTitle
-                }
-              >
-                {labels.mainTopic}
-              </Text>
-
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => {
-                  setTopicPickerOpen(
-                    (open) => !open,
-                  );
-                }}
-                style={({ pressed }) => [
-                  styles.topicSelect,
-                  pressed &&
-                    styles.pressed,
-                ]}
-              >
-                <View
-                  style={
-                    styles.topicSelectLeft
-                  }
-                >
+          {mode ===
+          "menu" ? (
+            <>
+              <View style={styles.heroCard}>
+                <View style={styles.heroIcon}>
                   <Ionicons
                     color={
                       universeTheme
-                        .colors.primary
+                        .colors
+                        .primaryBright
                     }
-                    name="planet-outline"
-                    size={18}
+                    name="sparkles"
+                    size={27}
                   />
-
-                  <Text
-                    numberOfLines={1}
-                    style={
-                      selectedMainTopic
-                        ? styles.topicSelectValue
-                        : styles.topicSelectPlaceholder
-                    }
-                  >
-                    {selectedMainTopic ??
-                      labels.chooseMainTopic}
-                  </Text>
                 </View>
 
+                <View style={styles.flex}>
+                  <Text style={styles.heroTitle}>
+                    Capture Hub
+                  </Text>
+
+                  <Text style={styles.heroText}>
+                    Erfasse Wissen dort,
+                    wo es entsteht. SaveWise
+                    analysiert und verbindet
+                    den Inhalt automatisch
+                    mit deinem Universum.
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.optionGrid}>
+                {OPTIONS.map(
+                  (option) => (
+                    <Pressable
+                      disabled={
+                        !option.enabled
+                      }
+                      key={
+                        option.id
+                      }
+                      onPress={() => {
+                        chooseOption(
+                          option,
+                        );
+                      }}
+                      style={({ pressed }) => [
+                        styles.optionCard,
+
+                        !option.enabled &&
+                          styles.optionDisabled,
+
+                        pressed &&
+                          option.enabled &&
+                          styles.optionPressed,
+                      ]}
+                    >
+                      <View style={styles.optionIcon}>
+                        <Ionicons
+                          color={
+                            option.enabled
+                              ? universeTheme
+                                  .colors
+                                  .primaryBright
+                              : universeTheme
+                                  .colors
+                                  .textMuted
+                          }
+                          name={
+                            option.icon
+                          }
+                          size={24}
+                        />
+                      </View>
+
+                      <View style={styles.optionContent}>
+                        <View style={styles.optionTitleRow}>
+                          <Text style={styles.optionTitle}>
+                            {
+                              option.title
+                            }
+                          </Text>
+
+                          {!option.enabled ? (
+                            <View style={styles.soonBadge}>
+                              <Text style={styles.soonText}>
+                                BALD
+                              </Text>
+                            </View>
+                          ) : null}
+                        </View>
+
+                        <Text style={styles.optionDescription}>
+                          {
+                            option.description
+                          }
+                        </Text>
+                      </View>
+
+                      {option.enabled ? (
+                        <Ionicons
+                          color={
+                            universeTheme
+                              .colors
+                              .textMuted
+                          }
+                          name="chevron-forward"
+                          size={18}
+                        />
+                      ) : null}
+                    </Pressable>
+                  ),
+                )}
+              </View>
+            </>
+          ) : null}
+
+          {mode ===
+          "link" ? (
+            <View style={styles.form}>
+              <CaptureIntro
+                description="SaveWise liest die Quelle, analysiert den Inhalt und ordnet ihn deinem Wissen zu."
+                icon="link-outline"
+                title="Online-Quelle"
+              />
+
+              <View style={styles.field}>
+                <Text style={styles.fieldLabel}>
+                  Internetadresse
+                </Text>
+
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={
+                    false
+                  }
+                  keyboardType="url"
+                  onChangeText={
+                    setUrl
+                  }
+                  placeholder="https://..."
+                  placeholderTextColor={
+                    universeTheme
+                      .colors
+                      .textMuted
+                  }
+                  style={styles.input}
+                  value={url}
+                />
+              </View>
+
+              {metadata &&
+              validUrl ? (
+                <View style={styles.previewCard}>
+                  <Ionicons
+                    color={
+                      universeTheme
+                        .colors
+                        .primaryBright
+                    }
+                    name="checkmark-circle"
+                    size={21}
+                  />
+
+                  <View style={styles.flex}>
+                    <Text style={styles.previewTitle}>
+                      {
+                        metadata.title
+                      }
+                    </Text>
+
+                    <Text style={styles.previewMeta}>
+                      Quelle erkannt
+                    </Text>
+                  </View>
+                </View>
+              ) : null}
+
+              <KnowledgePathField
+                onChange={
+                  setKnowledgePath
+                }
+                suggestions={
+                  suggestedTopics
+                }
+                value={
+                  knowledgePath
+                }
+              />
+
+              {error ? (
+                <ErrorBox
+                  message={
+                    error
+                  }
+                />
+              ) : null}
+
+              <Pressable
+                disabled={
+                  !validUrl ||
+                  !metadata
+                }
+                onPress={
+                  saveLink
+                }
+                style={[
+                  styles.primaryButton,
+
+                  (!validUrl ||
+                    !metadata) &&
+                    styles.buttonDisabled,
+                ]}
+              >
+                <Text style={styles.primaryButtonText}>
+                  Analysieren und speichern
+                </Text>
+
                 <Ionicons
-                  color={
-                    universeTheme.colors
-                      .textSecondary
-                  }
-                  name={
-                    isTopicPickerOpen
-                      ? "chevron-up"
-                      : "chevron-down"
-                  }
-                  size={18}
+                  color="#03131D"
+                  name="sparkles"
+                  size={17}
                 />
               </Pressable>
+            </View>
+          ) : null}
 
-              {isTopicPickerOpen ? (
-                <View
-                  style={
-                    styles.topicPicker
-                  }
-                >
-                  <View
+          {(mode ===
+            "pdf" ||
+            mode ===
+              "image") &&
+          selectedFile ? (
+            <View style={styles.form}>
+              <CaptureIntro
+                description={
+                  mode ===
+                  "pdf"
+                    ? "Text und Struktur werden extrahiert, von der KI analysiert und anschließend in Dropbox gesichert."
+                    : "SaveWise analysiert sichtbaren Text, Diagramme, Objekte und fachliche Zusammenhänge."
+                }
+                icon={
+                  mode ===
+                  "pdf"
+                    ? "document-text-outline"
+                    : "image-outline"
+                }
+                title={
+                  mode ===
+                  "pdf"
+                    ? "Dokument bereit"
+                    : "Bild bereit"
+                }
+              />
+
+              {mode ===
+              "image" ? (
+                <View style={styles.imagePreview}>
+                  <Image
+                    contentFit="contain"
+                    source={{
+                      uri:
+                        selectedFile.uri,
+                    }}
                     style={
-                      styles.topicSearchWrapper
+                      styles.previewImage
                     }
+                  />
+                </View>
+              ) : (
+                <View style={styles.pdfPreview}>
+                  <View style={styles.pdfIcon}>
+                    <Ionicons
+                      color={
+                        universeTheme
+                          .colors
+                          .primaryBright
+                      }
+                      name="document-text"
+                      size={34}
+                    />
+                  </View>
+
+                  <View style={styles.flex}>
+                    <Text
+                      numberOfLines={2}
+                      style={styles.fileName}
+                    >
+                      {
+                        selectedFile
+                          .fileName
+                      }
+                    </Text>
+
+                    <Text style={styles.fileMeta}>
+                      PDF
+                      {selectedFile.sizeBytes
+                        ? ` · ${formatFileSize(
+                            selectedFile.sizeBytes,
+                          )}`
+                        : ""}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {mode ===
+              "image" ? (
+                <View style={styles.imageActions}>
+                  <Pressable
+                    disabled={
+                      isImporting
+                    }
+                    onPress={() => {
+                      void takePhoto();
+                    }}
+                    style={styles.secondaryButton}
                   >
                     <Ionicons
                       color={
                         universeTheme
                           .colors
-                          .primary
+                          .primaryBright
                       }
-                      name="search-outline"
+                      name="camera-outline"
                       size={17}
                     />
 
-                    <TextInput
-                      autoCapitalize="sentences"
-                      autoCorrect={false}
-                      onChangeText={
-                        setTopicSearch
-                      }
-                      placeholder={
-                        labels.searchTopics
-                      }
-                      placeholderTextColor={
-                        universeTheme
-                          .colors
-                          .textMuted
-                      }
-                      selectionColor={
+                    <Text style={styles.secondaryButtonText}>
+                      Neu aufnehmen
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    disabled={
+                      isImporting
+                    }
+                    onPress={() => {
+                      void selectImage();
+                    }}
+                    style={styles.secondaryButton}
+                  >
+                    <Ionicons
+                      color={
                         universeTheme
                           .colors
                           .primaryBright
                       }
-                      style={
-                        styles.topicSearchInput
-                      }
-                      value={topicSearch}
+                      name="images-outline"
+                      size={17}
                     />
-                  </View>
 
-                  <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                    nestedScrollEnabled
-                    style={
-                      styles.topicOptions
-                    }
-                  >
-                    {filteredMainTopics.length >
-                    0 ? (
-                      filteredMainTopics.map(
-                        (topic) => (
-                          <TopicOption
-                            key={topic}
-                            label={topic}
-                            onPress={() => {
-                              selectMainTopic(
-                                topic,
-                              );
-                            }}
-                            selected={
-                              selectedMainTopic ===
-                              topic
-                            }
-                          />
-                        ),
-                      )
-                    ) : (
-                      <Text
-                        style={
-                          styles.noTopicText
-                        }
-                      >
-                        {
-                          labels.noMatchingTopics
-                        }
-                      </Text>
-                    )}
-                  </ScrollView>
+                    <Text style={styles.secondaryButtonText}>
+                      Anderes Bild
+                    </Text>
+                  </Pressable>
                 </View>
-              ) : null}
-
-              <View
-                style={
-                  styles.orDivider
-                }
-              >
-                <View
-                  style={
-                    styles.orLine
+              ) : (
+                <Pressable
+                  disabled={
+                    isImporting
                   }
-                />
-
-                <Text
-                  style={
-                    styles.orText
-                  }
-                >
-                  {labels.or}
-                </Text>
-
-                <View
-                  style={
-                    styles.orLine
-                  }
-                />
-              </View>
-
-              <Text
-                style={
-                  styles.customTopicLabel
-                }
-              >
-                {labels.newMainTopic}
-              </Text>
-
-              <View
-                style={[
-                  styles.inputWrapper,
-                  styles.customTopicWrapper,
-                ]}
-              >
-                <Ionicons
-                  color={
-                    universeTheme.colors
-                      .violet
-                  }
-                  name="add-circle-outline"
-                  size={19}
-                />
-
-                <TextInput
-                  autoCapitalize="sentences"
-                  autoCorrect
-                  maxLength={60}
-                  onChangeText={(value) => {
-                    setCustomMainTopic(
-                      value,
-                    );
-
-                    if (value.trim()) {
-                      setSelectedMainTopic(
-                        null,
-                      );
-                      setTopicPickerOpen(
-                        false,
-                      );
-                    }
+                  onPress={() => {
+                    void selectPdf();
                   }}
-                  placeholder={
-                    labels.newMainTopicPlaceholder
-                  }
-                  placeholderTextColor={
-                    universeTheme.colors
-                      .textMuted
-                  }
-                  selectionColor={
-                    universeTheme.colors
-                      .primaryBright
-                  }
-                  style={styles.input}
-                  value={customMainTopic}
-                />
-              </View>
-
-              <View
-                style={
-                  styles.aiHierarchyHint
-                }
-              >
-                <Ionicons
-                  color={
-                    universeTheme.colors
-                      .green
-                  }
-                  name="git-network-outline"
-                  size={17}
-                />
-
-                <Text
-                  style={
-                    styles.aiHierarchyText
-                  }
-                >
-                  {
-                    labels.aiHierarchyHint
-                  }
-                </Text>
-              </View>
-
-              {!resolvedManualTopic ? (
-                <View
-                  style={
-                    styles.validationRow
-                  }
+                  style={styles.secondaryButtonFull}
                 >
                   <Ionicons
                     color={
-                      universeTheme.colors
-                        .orange
+                      universeTheme
+                        .colors
+                        .primaryBright
                     }
-                    name="information-circle-outline"
-                    size={16}
+                    name="folder-open-outline"
+                    size={17}
                   />
 
-                  <Text
-                    style={
-                      styles.manualValidationText
-                    }
-                  >
-                    {
-                      labels.mainTopicRequired
-                    }
+                  <Text style={styles.secondaryButtonText}>
+                    Anderes PDF wählen
                   </Text>
+                </Pressable>
+              )}
+
+              <KnowledgePathField
+                onChange={
+                  setKnowledgePath
+                }
+                suggestions={
+                  suggestedTopics
+                }
+                value={
+                  knowledgePath
+                }
+              />
+
+              {error ? (
+                <ErrorBox
+                  message={
+                    error
+                  }
+                />
+              ) : null}
+
+              {isImporting ? (
+                <View style={styles.analysisCard}>
+                  <ActivityIndicator
+                    color={
+                      universeTheme
+                        .colors
+                        .primaryBright
+                    }
+                    size="small"
+                  />
+
+                  <View style={styles.flex}>
+                    <Text style={styles.analysisTitle}>
+                      SaveWise analysiert …
+                    </Text>
+
+                    <Text style={styles.analysisText}>
+                      KI-Analyse,
+                      Wissenszuordnung und
+                      Dropbox-Sicherung
+                      laufen.
+                    </Text>
+                  </View>
                 </View>
               ) : null}
+
+              <Pressable
+                disabled={
+                  isImporting
+                }
+                onPress={() => {
+                  void importSelectedFile();
+                }}
+                style={[
+                  styles.primaryButton,
+
+                  isImporting &&
+                    styles.buttonDisabled,
+                ]}
+              >
+                {isImporting ? (
+                  <ActivityIndicator
+                    color="#03131D"
+                    size="small"
+                  />
+                ) : (
+                  <Ionicons
+                    color="#03131D"
+                    name="sparkles"
+                    size={17}
+                  />
+                )}
+
+                <Text style={styles.primaryButtonText}>
+                  {isImporting
+                    ? "Analysiere …"
+                    : mode ===
+                        "pdf"
+                      ? "PDF analysieren"
+                      : "Bild analysieren"}
+                </Text>
+              </Pressable>
             </View>
           ) : null}
-
-          <View
-            style={
-              styles.buttonContainer
-            }
-          >
-            <SaveWiseButton
-              disabled={!canSave}
-              icon="sparkles"
-              label={labels.save}
-              onPress={handleSave}
-            />
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
   );
 }
 
-function TopicOption({
-  label,
-  onPress,
-  selected,
+function CaptureIntro({
+  icon,
+  title,
+  description,
 }: {
-  label: string;
-  onPress: () => void;
-  selected: boolean;
+  icon:
+    keyof typeof Ionicons.glyphMap;
+
+  title:
+    string;
+
+  description:
+    string;
 }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.topicOption,
-        selected &&
-          styles.topicOptionSelected,
-        pressed &&
-          styles.pressed,
-      ]}
-    >
-      <View
-        style={
-          styles.topicOptionIcon
-        }
-      >
-        <Ionicons
-          color={
-            selected
-              ? universeTheme.colors
-                  .primaryBright
-              : universeTheme.colors
-                  .textMuted
-          }
-          name="planet-outline"
-          size={16}
-        />
-      </View>
-
-      <Text
-        style={[
-          styles.topicOptionText,
-          selected &&
-            styles.topicOptionTextSelected,
-        ]}
-      >
-        {label}
-      </Text>
-
-      {selected ? (
+    <View style={styles.introCard}>
+      <View style={styles.introIcon}>
         <Ionicons
           color={
             universeTheme.colors
               .primaryBright
           }
-          name="checkmark-circle"
-          size={19}
+          name={icon}
+          size={23}
         />
-      ) : null}
-    </Pressable>
+      </View>
+
+      <View style={styles.flex}>
+        <Text style={styles.introTitle}>
+          {title}
+        </Text>
+
+        <Text style={styles.introText}>
+          {description}
+        </Text>
+      </View>
+    </View>
   );
 }
 
-function resolveManualMainTopic(
-  selectedMainTopic: string | null,
-  customMainTopic: string,
-): string | undefined {
-  const custom =
-    normalizeTopicName(
-      customMainTopic,
-    );
+function KnowledgePathField({
+  value,
+  suggestions,
+  onChange,
+}: {
+  value:
+    string;
 
-  if (custom) {
-    return custom;
+  suggestions:
+    string[];
+
+  onChange:
+    (value: string) => void;
+}) {
+  return (
+    <View style={styles.field}>
+      <View style={styles.fieldHeading}>
+        <Text style={styles.fieldLabel}>
+          Wissenspfad
+        </Text>
+
+        <Text style={styles.optional}>
+          OPTIONAL
+        </Text>
+      </View>
+
+      <TextInput
+        autoCapitalize="sentences"
+        onChangeText={
+          onChange
+        }
+        placeholder="z.B. Maschinenbau > Werkstoffe > Leichtbau"
+        placeholderTextColor={
+          universeTheme.colors
+            .textMuted
+        }
+        style={styles.input}
+        value={value}
+      />
+
+      <Text style={styles.fieldHelp}>
+        Leer lassen = SaveWise ordnet den
+        Inhalt vollständig automatisch ein.
+      </Text>
+
+      {suggestions.length >
+      0 ? (
+        <ScrollView
+          contentContainerStyle={
+            styles.suggestionRow
+          }
+          horizontal
+          showsHorizontalScrollIndicator={
+            false
+          }
+        >
+          {suggestions.map(
+            (topic) => (
+              <Pressable
+                key={topic}
+                onPress={() => {
+                  onChange(
+                    topic,
+                  );
+                }}
+                style={styles.suggestionChip}
+              >
+                <Text
+                  numberOfLines={1}
+                  style={styles.suggestionText}
+                >
+                  {topic}
+                </Text>
+              </Pressable>
+            ),
+          )}
+        </ScrollView>
+      ) : null}
+    </View>
+  );
+}
+
+function ErrorBox({
+  message,
+}: {
+  message:
+    string;
+}) {
+  return (
+    <View style={styles.errorBox}>
+      <Ionicons
+        color={
+          universeTheme.colors
+            .danger
+        }
+        name="alert-circle-outline"
+        size={19}
+      />
+
+      <Text style={styles.errorText}>
+        {message}
+      </Text>
+    </View>
+  );
+}
+
+function resolveImageMimeType(
+  asset:
+    ImagePicker.ImagePickerAsset,
+): string {
+  if (
+    asset.mimeType &&
+    [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ].includes(
+      asset.mimeType,
+    )
+  ) {
+    return asset.mimeType;
   }
 
-  return selectedMainTopic
-    ? normalizeTopicName(
-        selectedMainTopic,
-      )
-    : undefined;
+  const uri =
+    asset.uri.toLowerCase();
+
+  if (
+    uri.endsWith(
+      ".png",
+    )
+  ) {
+    return "image/png";
+  }
+
+  if (
+    uri.endsWith(
+      ".webp",
+    )
+  ) {
+    return "image/webp";
+  }
+
+  return "image/jpeg";
 }
 
-function normalizeMainTopics(
-  topics: string[],
-): string[] {
-  const unique =
-    new Map<string, string>();
+function resolveImageExtension(
+  mimeType:
+    string,
+): string {
+  if (
+    mimeType ===
+    "image/png"
+  ) {
+    return "png";
+  }
 
-  topics.forEach((topic) => {
-    const normalized =
-      normalizeTopicName(topic);
+  if (
+    mimeType ===
+    "image/webp"
+  ) {
+    return "webp";
+  }
 
-    if (!normalized) {
-      return;
-    }
+  return "jpg";
+}
 
-    const key =
-      normalized.toLocaleLowerCase();
-
-    if (!unique.has(key)) {
-      unique.set(
-        key,
-        normalized,
-      );
-    }
-  });
-
-  return [...unique.values()].sort(
-    (first, second) =>
-      first.localeCompare(
-        second,
-        undefined,
-        {
-          sensitivity: "base",
-        },
+function formatFileSize(
+  bytes:
+    number,
+): string {
+  if (
+    bytes <
+    1024 *
+      1024
+  ) {
+    return `${Math.max(
+      1,
+      Math.round(
+        bytes /
+        1024,
       ),
-  );
+    )} KB`;
+  }
+
+  return `${(
+    bytes /
+    1024 /
+    1024
+  ).toFixed(1)} MB`;
 }
 
-function normalizeTopicName(
-  value: string,
+function getErrorMessage(
+  error:
+    unknown,
+
+  fallback:
+    string,
 ): string {
-  return value
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 60);
+  return error instanceof Error
+    ? error.message
+    : fallback;
 }
 
-const captureLabels = {
-  de: {
-    cancel: "Abbrechen",
-    newDiscovery:
-      "Neue Discovery",
-    captureTitle:
-      "Neues Wissen erfassen",
-    captureText:
-      "SaveWise analysiert, ordnet und verbindet deinen Link.",
-    link: "Link",
-    invalidUrl:
-      "Bitte gib eine gültige Webadresse ein.",
-    detected:
-      "SaveWise erkannt",
-    save:
-      "Analysieren und speichern",
-    universe:
-      "Wissensuniversum",
-    universeHint:
-      "Lass SaveWise die Domäne bestimmen oder ordne die Discovery selbst einer Domäne zu.",
-    automatic:
-      "Automatisch durch KI",
-    automaticDescription:
-      "SaveWise bestimmt Domäne, Topic und Unterthemen selbstständig.",
-    manual:
-      "MANUELLE EINORDNUNG",
-    mainTopic: "Domäne",
-    chooseMainTopic:
-      "Bestehende Domäne auswählen",
-    searchTopics:
-      "Domänen durchsuchen …",
-    noMatchingTopics:
-      "Keine passenden Domänen gefunden.",
-    or: "oder",
-    newMainTopic:
-      "Neue Domäne",
-    newMainTopicPlaceholder:
-      "z. B. Robotik, Finanzen oder Reisen",
-    aiHierarchyHint:
-      "Die KI erstellt innerhalb der gewählten Domäne weiterhin das passende Topic und die Unterthemen.",
-    mainTopicRequired:
-      "Wähle eine Domäne oder erfasse eine neue.",
-  },
-
-  en: {
-    cancel: "Cancel",
-    newDiscovery:
-      "New discovery",
-    captureTitle:
-      "Capture new knowledge",
-    captureText:
-      "SaveWise analyzes, organizes and connects your link.",
-    link: "Link",
-    invalidUrl:
-      "Please enter a valid web address.",
-    detected:
-      "SaveWise detected",
-    save:
-      "Analyze and save",
-    universe:
-      "Knowledge universe",
-    universeHint:
-      "Let SaveWise determine the domain or assign the discovery to a domain yourself.",
-    automatic:
-      "Automatic by AI",
-    automaticDescription:
-      "SaveWise determines the domain, topic and subtopics.",
-    manual:
-      "MANUAL CLASSIFICATION",
-    mainTopic: "Domain",
-    chooseMainTopic:
-      "Select an existing domain",
-    searchTopics:
-      "Search domains …",
-    noMatchingTopics:
-      "No matching domains found.",
-    or: "or",
-    newMainTopic:
-      "New domain",
-    newMainTopicPlaceholder:
-      "e.g. Robotics, Finance or Travel",
-    aiHierarchyHint:
-      "AI will still create the appropriate topic and subtopics inside the selected domain.",
-    mainTopicRequired:
-      "Select a domain or create a new one.",
-  },
-
-  fr: {
-    cancel: "Annuler",
-    newDiscovery:
-      "Nouvelle découverte",
-    captureTitle:
-      "Capturer de nouvelles connaissances",
-    captureText:
-      "SaveWise analyse, organise et relie votre lien.",
-    link: "Lien",
-    invalidUrl:
-      "Saisissez une adresse web valide.",
-    detected:
-      "SaveWise a détecté",
-    save:
-      "Analyser et enregistrer",
-    universe:
-      "Univers des connaissances",
-    universeHint:
-      "Laissez SaveWise choisir le domaine ou attribuez-le vous-même.",
-    automatic:
-      "Automatique par IA",
-    automaticDescription:
-      "SaveWise détermine le domaine, le sujet et les sous-thèmes.",
-    manual:
-      "CLASSEMENT MANUEL",
-    mainTopic:
-      "Domaine",
-    chooseMainTopic:
-      "Sélectionner un domaine",
-    searchTopics:
-      "Rechercher les domaines …",
-    noMatchingTopics:
-      "Aucun domaine correspondant.",
-    or: "ou",
-    newMainTopic:
-      "Nouveau domaine",
-    newMainTopicPlaceholder:
-      "p. ex. Robotique, Finance ou Voyages",
-    aiHierarchyHint:
-      "L’IA crée toujours le sujet et les sous-thèmes appropriés dans le domaine sélectionné.",
-    mainTopicRequired:
-      "Sélectionnez ou créez un domaine.",
-  },
-
-  it: {
-    cancel: "Annulla",
-    newDiscovery:
-      "Nuova scoperta",
-    captureTitle:
-      "Acquisisci nuova conoscenza",
-    captureText:
-      "SaveWise analizza, organizza e collega il tuo link.",
-    link: "Link",
-    invalidUrl:
-      "Inserisci un indirizzo web valido.",
-    detected:
-      "SaveWise ha rilevato",
-    save:
-      "Analizza e salva",
-    universe:
-      "Universo della conoscenza",
-    universeHint:
-      "Lascia scegliere a SaveWise il dominio oppure assegnalo manualmente.",
-    automatic:
-      "Automatico con IA",
-    automaticDescription:
-      "SaveWise determina il dominio, l’argomento e i sottoargomenti.",
-    manual:
-      "CLASSIFICAZIONE MANUALE",
-    mainTopic:
-      "Dominio",
-    chooseMainTopic:
-      "Seleziona un dominio",
-    searchTopics:
-      "Cerca domini …",
-    noMatchingTopics:
-      "Nessun dominio corrispondente.",
-    or: "oppure",
-    newMainTopic:
-      "Nuovo dominio",
-    newMainTopicPlaceholder:
-      "es. Robotica, Finanza o Viaggi",
-    aiHierarchyHint:
-      "L’IA crea comunque l’argomento e i sottoargomenti appropriati nel dominio selezionato.",
-    mainTopicRequired:
-      "Seleziona o crea un dominio.",
-  },
-
-  es: {
-    cancel: "Cancelar",
-    newDiscovery:
-      "Nuevo descubrimiento",
-    captureTitle:
-      "Capturar nuevo conocimiento",
-    captureText:
-      "SaveWise analiza, organiza y conecta tu enlace.",
-    link: "Enlace",
-    invalidUrl:
-      "Introduce una dirección web válida.",
-    detected:
-      "SaveWise detectó",
-    save:
-      "Analizar y guardar",
-    universe:
-      "Universo de conocimiento",
-    universeHint:
-      "Deja que SaveWise determine el dominio o asígnalo manualmente.",
-    automatic:
-      "Automático por IA",
-    automaticDescription:
-      "SaveWise determina el dominio, el tema y los subtemas.",
-    manual:
-      "CLASIFICACIÓN MANUAL",
-    mainTopic:
-      "Dominio",
-    chooseMainTopic:
-      "Seleccionar un dominio",
-    searchTopics:
-      "Buscar dominios …",
-    noMatchingTopics:
-      "No se encontraron dominios.",
-    or: "o",
-    newMainTopic:
-      "Nuevo dominio",
-    newMainTopicPlaceholder:
-      "p. ej. Robótica, Finanzas o Viajes",
-    aiHierarchyHint:
-      "La IA seguirá creando el tema y los subtemas apropiados dentro del dominio.",
-    mainTopicRequired:
-      "Selecciona o crea un dominio.",
-  },
-} as const;
-
-function formatSource(
-  source: CapturedItem["source"],
-): string {
-  const labels: Record<
-    CapturedItem["source"],
-    string
-  > = {
-    youtube: "YouTube",
-    instagram: "Instagram",
-    facebook: "Facebook",
-    tiktok: "TikTok",
-    web: "Web",
-  };
-
-  return labels[source];
-}
-
-const styles = StyleSheet.create({
-  screen: {
-    backgroundColor:
-      universeTheme.colors.background,
-    flex: 1,
-  },
-
-  header: {
-    alignItems: "center",
-    borderBottomColor:
-      universeTheme.colors.border,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    justifyContent:
-      "space-between",
-    minHeight: 88,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-  },
-
-  closeButton: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(148, 163, 184, 0.08)",
-    borderRadius: 999,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
-  },
-
-  headerCenter: {
-    alignItems: "center",
-  },
-
-  eyebrow: {
-    color:
-      universeTheme.colors.primary,
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-  },
-
-  headerTitle: {
-    color:
-      universeTheme.colors.text,
-    fontSize: 17,
-    fontWeight: "900",
-    marginTop: 3,
-  },
-
-  headerSpacer: {
-    width: 40,
-  },
-
-  content: {
-    padding: 20,
-    paddingBottom: 50,
-  },
-
-  introCard: {
-    alignItems: "flex-start",
-    backgroundColor:
-      "rgba(6, 20, 36, 0.88)",
-    borderColor:
-      universeTheme.colors.border,
-    borderRadius:
-      universeTheme.radius.lg,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 13,
-    marginBottom: 25,
-    padding: 17,
-  },
-
-  introIcon: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(56, 189, 248, 0.1)",
-    borderColor:
-      universeTheme.colors
-        .borderStrong,
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 46,
-    justifyContent: "center",
-    width: 46,
-  },
-
-  flex: {
-    flex: 1,
-  },
-
-  introTitle: {
-    color:
-      universeTheme.colors.text,
-    fontSize: 15,
-    fontWeight: "900",
-  },
-
-  introText: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 4,
-  },
-
-  label: {
-    color:
-      universeTheme.colors
-        .primaryBright,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.9,
-    marginBottom: 8,
-    textTransform: "uppercase",
-  },
-
-  inputWrapper: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(6, 20, 36, 0.94)",
-    borderColor:
-      universeTheme.colors
-        .borderStrong,
-    borderRadius:
-      universeTheme.radius.lg,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 10,
-    minHeight: 56,
-    paddingHorizontal: 15,
-  },
-
-  input: {
-    color:
-      universeTheme.colors.text,
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    paddingVertical: 15,
-  },
-
-  validationRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 7,
-    marginTop: 9,
-  },
-
-  validationText: {
-    color:
-      universeTheme.colors.danger,
-    flex: 1,
-    fontSize: 12,
-  },
-
-  manualValidationText: {
-    color:
-      universeTheme.colors.orange,
-    flex: 1,
-    fontSize: 12,
-  },
-
-  preview: {
-    backgroundColor:
-      "rgba(6, 20, 36, 0.94)",
-    borderColor:
-      "rgba(74, 222, 128, 0.28)",
-    borderRadius:
-      universeTheme.radius.lg,
-    borderWidth: 1,
-    marginTop: 18,
-    padding: 17,
-  },
-
-  previewHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 7,
-  },
-
-  previewLabel: {
-    color:
-      universeTheme.colors.green,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-
-  previewTitle: {
-    color:
-      universeTheme.colors.text,
-    fontSize: 18,
-    fontWeight: "900",
-    lineHeight: 24,
-    marginTop: 13,
-  },
-
-  previewSource: {
-    color:
-      universeTheme.colors
-        .primaryBright,
-    fontSize: 12,
-    fontWeight: "700",
-    marginTop: 7,
-  },
-
-  previewUrl: {
-    color:
-      universeTheme.colors
-        .textMuted,
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 8,
-  },
-
-  sectionHeader: {
-    marginBottom: 11,
-    marginTop: 30,
-  },
-
-  sectionEyebrow: {
-    color:
-      universeTheme.colors.violet,
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.4,
-  },
-
-  sectionTitle: {
-    color:
-      universeTheme.colors.text,
-    fontSize: 18,
-    fontWeight: "900",
-    marginTop: 3,
-  },
-
-  sectionHint: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: 5,
-  },
-
-  automaticCard: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(6, 20, 36, 0.94)",
-    borderColor:
-      universeTheme.colors
-        .borderStrong,
-    borderRadius:
-      universeTheme.radius.lg,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 11,
-    padding: 14,
-  },
-
-  automaticIcon: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(56, 189, 248, 0.09)",
-    borderRadius: 12,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
-  },
-
-  automaticTitle: {
-    color:
-      universeTheme.colors.text,
-    fontSize: 13,
-    fontWeight: "900",
-  },
-
-  automaticText: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-    fontSize: 10,
-    lineHeight: 15,
-    marginTop: 3,
-  },
-
-  manualArea: {
-    backgroundColor:
-      "rgba(6, 20, 36, 0.8)",
-    borderColor:
-      "rgba(139, 92, 246, 0.25)",
-    borderRadius:
-      universeTheme.radius.lg,
-    borderWidth: 1,
-    marginTop: 12,
-    padding: 14,
-  },
-
-  manualEyebrow: {
-    color:
-      universeTheme.colors.violet,
-    fontSize: 8,
-    fontWeight: "900",
-    letterSpacing: 1,
-  },
-
-  manualTitle: {
-    color:
-      universeTheme.colors.text,
-    fontSize: 15,
-    fontWeight: "900",
-    marginBottom: 10,
-    marginTop: 3,
-  },
-
-  topicSelect: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(3, 12, 24, 0.72)",
-    borderColor:
-      universeTheme.colors.border,
-    borderRadius:
-      universeTheme.radius.md,
-    borderWidth: 1,
-    flexDirection: "row",
-    justifyContent:
-      "space-between",
-    minHeight: 54,
-    paddingHorizontal: 13,
-  },
-
-  topicSelectLeft: {
-    alignItems: "center",
-    flex: 1,
-    flexDirection: "row",
-    gap: 9,
-  },
-
-  topicSelectValue: {
-    color:
-      universeTheme.colors.text,
-    flex: 1,
-    fontSize: 13,
-    fontWeight: "700",
-  },
-
-  topicSelectPlaceholder: {
-    color:
-      universeTheme.colors
-        .textMuted,
-    flex: 1,
-    fontSize: 13,
-  },
-
-  topicPicker: {
-    backgroundColor:
-      "rgba(3, 12, 24, 0.95)",
-    borderColor:
-      universeTheme.colors.border,
-    borderRadius:
-      universeTheme.radius.md,
-    borderWidth: 1,
-    marginTop: 7,
-    overflow: "hidden",
-  },
-
-  topicSearchWrapper: {
-    alignItems: "center",
-    borderBottomColor:
-      universeTheme.colors.border,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    minHeight: 48,
-    paddingHorizontal: 12,
-  },
-
-  topicSearchInput: {
-    color:
-      universeTheme.colors.text,
-    flex: 1,
-    fontSize: 12,
-    paddingVertical: 11,
-  },
-
-  topicOptions: {
-    maxHeight: 220,
-  },
-
-  topicOption: {
-    alignItems: "center",
-    borderBottomColor:
-      universeTheme.colors.border,
-    borderBottomWidth:
-      StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 9,
-    minHeight: 49,
-    paddingHorizontal: 12,
-  },
-
-  topicOptionSelected: {
-    backgroundColor:
-      "rgba(56, 189, 248, 0.08)",
-  },
-
-  topicOptionIcon: {
-    alignItems: "center",
-    backgroundColor:
-      "rgba(56, 189, 248, 0.06)",
-    borderRadius: 8,
-    height: 29,
-    justifyContent: "center",
-    width: 29,
-  },
-
-  topicOptionText: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-    flex: 1,
-    fontSize: 12,
-  },
-
-  topicOptionTextSelected: {
-    color:
-      universeTheme.colors
-        .primaryBright,
-    fontWeight: "800",
-  },
-
-  noTopicText: {
-    color:
-      universeTheme.colors
-        .textMuted,
-    fontSize: 11,
-    padding: 15,
-    textAlign: "center",
-  },
-
-  orDivider: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 9,
-    marginVertical: 14,
-  },
-
-  orLine: {
-    backgroundColor:
-      universeTheme.colors.border,
-    flex: 1,
-    height: 1,
-  },
-
-  orText: {
-    color:
-      universeTheme.colors
-        .textMuted,
-    fontSize: 9,
-    fontWeight: "800",
-    textTransform: "uppercase",
-  },
-
-  customTopicLabel: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-    fontSize: 10,
-    fontWeight: "800",
-    marginBottom: 7,
-  },
-
-  customTopicWrapper: {
-    borderColor:
-      "rgba(139, 92, 246, 0.32)",
-  },
-
-  aiHierarchyHint: {
-    alignItems: "flex-start",
-    backgroundColor:
-      "rgba(74, 222, 128, 0.05)",
-    borderColor:
-      "rgba(74, 222, 128, 0.18)",
-    borderRadius:
-      universeTheme.radius.md,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 11,
-    padding: 11,
-  },
-
-  aiHierarchyText: {
-    color:
-      universeTheme.colors
-        .textSecondary,
-    flex: 1,
-    fontSize: 10,
-    lineHeight: 15,
-  },
-
-  buttonContainer: {
-    marginTop: 26,
-  },
-
-  pressed: {
-    opacity: 0.68,
-  },
-});
+const styles =
+  StyleSheet.create({
+    screen: {
+      backgroundColor:
+        universeTheme.colors
+          .background,
+
+      flex:
+        1,
+    },
+
+    header: {
+      alignItems:
+        "center",
+
+      borderBottomColor:
+        universeTheme.colors
+          .border,
+
+      borderBottomWidth:
+        StyleSheet
+          .hairlineWidth,
+
+      flexDirection:
+        "row",
+
+      minHeight:
+        74,
+
+      paddingHorizontal:
+        16,
+
+      paddingTop:
+        7,
+    },
+
+    headerButton: {
+      alignItems:
+        "center",
+
+      height:
+        42,
+
+      justifyContent:
+        "center",
+
+      width:
+        42,
+    },
+
+    headerCenter: {
+      alignItems:
+        "center",
+
+      flex:
+        1,
+    },
+
+    eyebrow: {
+      color:
+        universeTheme.colors
+          .primaryBright,
+
+      fontSize:
+        9,
+
+      fontWeight:
+        "900",
+
+      letterSpacing:
+        1.2,
+    },
+
+    headerTitle: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        20,
+
+      fontWeight:
+        "800",
+
+      marginTop:
+        2,
+    },
+
+    content: {
+      gap:
+        16,
+
+      padding:
+        16,
+
+      paddingBottom:
+        50,
+    },
+
+    heroCard: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.06)",
+
+      borderColor:
+        "rgba(115, 216, 255, 0.16)",
+
+      borderRadius:
+        17,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        14,
+
+      padding:
+        16,
+    },
+
+    heroIcon: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.1)",
+
+      borderRadius:
+        13,
+
+      height:
+        52,
+
+      justifyContent:
+        "center",
+
+      width:
+        52,
+    },
+
+    heroTitle: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        17,
+
+      fontWeight:
+        "800",
+    },
+
+    heroText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        12,
+
+      lineHeight:
+        18,
+
+      marginTop:
+        4,
+    },
+
+    optionGrid: {
+      gap:
+        10,
+    },
+
+    optionCard: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        universeTheme.colors
+          .surfaceStrong,
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        15,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        12,
+
+      minHeight:
+        88,
+
+      padding:
+        14,
+    },
+
+    optionPressed: {
+      backgroundColor:
+        "rgba(56, 189, 248, 0.08)",
+
+      borderColor:
+        universeTheme.colors
+          .primaryBright,
+    },
+
+    optionDisabled: {
+      opacity:
+        0.45,
+    },
+
+    optionIcon: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.075)",
+
+      borderRadius:
+        12,
+
+      height:
+        48,
+
+      justifyContent:
+        "center",
+
+      width:
+        48,
+    },
+
+    optionContent: {
+      flex:
+        1,
+    },
+
+    optionTitleRow: {
+      alignItems:
+        "center",
+
+      flexDirection:
+        "row",
+
+      gap:
+        7,
+    },
+
+    optionTitle: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        15,
+
+      fontWeight:
+        "800",
+    },
+
+    optionDescription: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        11,
+
+      lineHeight:
+        16,
+
+      marginTop:
+        4,
+    },
+
+    soonBadge: {
+      backgroundColor:
+        "rgba(139, 92, 246, 0.1)",
+
+      borderColor:
+        "rgba(139, 92, 246, 0.25)",
+
+      borderRadius:
+        999,
+
+      borderWidth:
+        1,
+
+      paddingHorizontal:
+        6,
+
+      paddingVertical:
+        3,
+    },
+
+    soonText: {
+      color:
+        universeTheme.colors
+          .violet,
+
+      fontSize:
+        7,
+
+      fontWeight:
+        "900",
+    },
+
+    form: {
+      gap:
+        15,
+    },
+
+    introCard: {
+      alignItems:
+        "flex-start",
+
+      backgroundColor:
+        "rgba(8, 24, 39, 0.82)",
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        15,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        12,
+
+      padding:
+        14,
+    },
+
+    introIcon: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.08)",
+
+      borderRadius:
+        11,
+
+      height:
+        44,
+
+      justifyContent:
+        "center",
+
+      width:
+        44,
+    },
+
+    introTitle: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        15,
+
+      fontWeight:
+        "800",
+    },
+
+    introText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        11,
+
+      lineHeight:
+        17,
+
+      marginTop:
+        4,
+    },
+
+    field: {
+      gap:
+        8,
+    },
+
+    fieldHeading: {
+      alignItems:
+        "center",
+
+      flexDirection:
+        "row",
+
+      justifyContent:
+        "space-between",
+    },
+
+    fieldLabel: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        12,
+
+      fontWeight:
+        "800",
+    },
+
+    optional: {
+      color:
+        universeTheme.colors
+          .textMuted,
+
+      fontSize:
+        8,
+
+      fontWeight:
+        "900",
+
+      letterSpacing:
+        0.7,
+    },
+
+    input: {
+      backgroundColor:
+        "rgba(3, 13, 24, 0.78)",
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        12,
+
+      borderWidth:
+        1,
+
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        14,
+
+      minHeight:
+        50,
+
+      paddingHorizontal:
+        13,
+    },
+
+    fieldHelp: {
+      color:
+        universeTheme.colors
+          .textMuted,
+
+      fontSize:
+        10,
+
+      lineHeight:
+        15,
+    },
+
+    suggestionRow: {
+      gap:
+        7,
+
+      paddingRight:
+        16,
+    },
+
+    suggestionChip: {
+      backgroundColor:
+        "rgba(56, 189, 248, 0.05)",
+
+      borderColor:
+        "rgba(115, 216, 255, 0.13)",
+
+      borderRadius:
+        999,
+
+      borderWidth:
+        1,
+
+      maxWidth:
+        190,
+
+      paddingHorizontal:
+        10,
+
+      paddingVertical:
+        7,
+    },
+
+    suggestionText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        10,
+
+      fontWeight:
+        "700",
+    },
+
+    previewCard: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(74, 222, 128, 0.06)",
+
+      borderColor:
+        "rgba(74, 222, 128, 0.2)",
+
+      borderRadius:
+        12,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        10,
+
+      padding:
+        12,
+    },
+
+    previewTitle: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        12,
+
+      fontWeight:
+        "800",
+    },
+
+    previewMeta: {
+      color:
+        universeTheme.colors
+          .green,
+
+      fontSize:
+        9,
+
+      marginTop:
+        2,
+    },
+
+    imagePreview: {
+      backgroundColor:
+        "#020A12",
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        16,
+
+      borderWidth:
+        1,
+
+      height:
+        310,
+
+      overflow:
+        "hidden",
+    },
+
+    previewImage: {
+      height:
+        "100%",
+
+      width:
+        "100%",
+    },
+
+    imageActions: {
+      flexDirection:
+        "row",
+
+      gap:
+        9,
+    },
+
+    secondaryButton: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.05)",
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        11,
+
+      borderWidth:
+        1,
+
+      flex:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        7,
+
+      justifyContent:
+        "center",
+
+      minHeight:
+        45,
+
+      paddingHorizontal:
+        10,
+    },
+
+    secondaryButtonFull: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.05)",
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        11,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        7,
+
+      justifyContent:
+        "center",
+
+      minHeight:
+        45,
+    },
+
+    secondaryButtonText: {
+      color:
+        universeTheme.colors
+          .primaryBright,
+
+      fontSize:
+        11,
+
+      fontWeight:
+        "800",
+    },
+
+    pdfPreview: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(8, 24, 39, 0.88)",
+
+      borderColor:
+        universeTheme.colors
+          .border,
+
+      borderRadius:
+        15,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        12,
+
+      minHeight:
+        92,
+
+      padding:
+        14,
+    },
+
+    pdfIcon: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.08)",
+
+      borderRadius:
+        12,
+
+      height:
+        54,
+
+      justifyContent:
+        "center",
+
+      width:
+        54,
+    },
+
+    fileName: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        13,
+
+      fontWeight:
+        "800",
+    },
+
+    fileMeta: {
+      color:
+        universeTheme.colors
+          .textMuted,
+
+      fontSize:
+        10,
+
+      marginTop:
+        4,
+    },
+
+    analysisCard: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(56, 189, 248, 0.07)",
+
+      borderColor:
+        "rgba(115, 216, 255, 0.18)",
+
+      borderRadius:
+        12,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        11,
+
+      padding:
+        12,
+    },
+
+    analysisTitle: {
+      color:
+        universeTheme.colors
+          .text,
+
+      fontSize:
+        12,
+
+      fontWeight:
+        "800",
+    },
+
+    analysisText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        10,
+
+      lineHeight:
+        15,
+
+      marginTop:
+        2,
+    },
+
+    errorBox: {
+      alignItems:
+        "flex-start",
+
+      backgroundColor:
+        "rgba(248, 113, 113, 0.06)",
+
+      borderColor:
+        "rgba(248, 113, 113, 0.22)",
+
+      borderRadius:
+        12,
+
+      borderWidth:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        8,
+
+      padding:
+        11,
+    },
+
+    errorText: {
+      color:
+        universeTheme.colors
+          .danger,
+
+      flex:
+        1,
+
+      fontSize:
+        11,
+
+      lineHeight:
+        16,
+    },
+
+    primaryButton: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        universeTheme.colors
+          .primaryBright,
+
+      borderRadius:
+        12,
+
+      flexDirection:
+        "row",
+
+      gap:
+        8,
+
+      justifyContent:
+        "center",
+
+      minHeight:
+        52,
+
+      paddingHorizontal:
+        16,
+    },
+
+    primaryButtonText: {
+      color:
+        "#03131D",
+
+      fontSize:
+        13,
+
+      fontWeight:
+        "900",
+    },
+
+    buttonDisabled: {
+      opacity:
+        0.42,
+    },
+
+    flex: {
+      flex:
+        1,
+    },
+  });
