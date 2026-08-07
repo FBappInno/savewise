@@ -13,6 +13,14 @@ import {
   useDiscoveries,
 } from "@/providers/discovery-provider";
 
+import {
+  useWorkspace,
+} from "@/providers/workspace-provider";
+
+import {
+  rebuildKnowledgeLibrary,
+} from "@/services/knowledge-client";
+
 type TopicSystem = {
   id: string;
   label: string;
@@ -47,42 +55,6 @@ const CENTER_X =
 const CENTER_Y =
   HEIGHT / 2;
 
-const categoryLabels:
-Record<string, string> = {
-  technology:
-    "Technologie",
-
-  finance:
-    "Finanzen",
-
-  business:
-    "Business",
-
-  science:
-    "Wissenschaft",
-
-  health:
-    "Gesundheit",
-
-  education:
-    "Bildung",
-
-  productivity:
-    "Produktivität",
-
-  culture:
-    "Kultur",
-
-  news:
-    "Nachrichten",
-
-  lifestyle:
-    "Lifestyle",
-
-  other:
-    "Weitere",
-};
-
 export function KnowledgeGalaxy({
   onOpenDiscovery,
 }: {
@@ -94,6 +66,17 @@ export function KnowledgeGalaxy({
     isLoading,
   } =
     useDiscoveries();
+
+  const {
+    activeWorkspaceId,
+  } =
+    useWorkspace();
+
+  const [
+    isSynchronizing,
+    setSynchronizing,
+  ] =
+    useState(false);
 
   const [
     selectedDomainId,
@@ -179,6 +162,27 @@ export function KnowledgeGalaxy({
     );
   }
 
+  async function synchronizeUniverse():
+  Promise<void> {
+    setSynchronizing(true);
+
+    try {
+      await rebuildKnowledgeLibrary(
+        activeWorkspaceId,
+      );
+
+      /*
+       * Discoveries bilden die sichtbare
+       * Galaxie direkt. Reload stellt sicher,
+       * dass auch alle Provider denselben
+       * aktuellen Stand besitzen.
+       */
+      window.location.reload();
+    } finally {
+      setSynchronizing(false);
+    }
+  }
+
   function returnToOverview():
   void {
     setSelectedDomainId(
@@ -237,7 +241,7 @@ export function KnowledgeGalaxy({
           <div>
             <div className="card-eyebrow">
               {selectedGalaxy
-                ? "DOMAIN EXPLORATION"
+                ? "GALAXY EXPLORATION"
                 : "KNOWLEDGE UNIVERSE"}
             </div>
 
@@ -249,8 +253,8 @@ export function KnowledgeGalaxy({
 
             <p>
               {selectedGalaxy
-                ? "Wähle ein Sonnensystem, um rechts die zugehörigen Discoveries anzuzeigen."
-                : "Jede Galaxie entspricht einer Wissensdomäne. Je mehr Inhalte vorhanden sind, desto größer erscheint sie."}
+                ? "Wähle einen Planeten, um die zugehörigen Sterne und Discoveries zu erkunden."
+                : "Jede Galaxie entspricht einem deiner Wissensbereiche. Je mehr Discoveries vorhanden sind, desto größer erscheint sie."}
             </p>
           </div>
 
@@ -269,7 +273,29 @@ export function KnowledgeGalaxy({
               Zur Hauptansicht
             </button>
           ) : (
-            <div className="galaxy-statistics">
+            <div
+              style={{
+                alignItems: "center",
+                display: "flex",
+                gap: "14px",
+              }}
+            >
+              <button
+                className="galaxy-overview-button"
+                disabled={
+                  isSynchronizing
+                }
+                onClick={() => {
+                  void synchronizeUniverse();
+                }}
+                type="button"
+              >
+                {isSynchronizing
+                  ? "✦ Synchronisiere …"
+                  : "✦ Universum synchronisieren"}
+              </button>
+
+              <div className="galaxy-statistics">
               <div>
                 <strong>
                   {galaxies.length}
@@ -296,7 +322,7 @@ export function KnowledgeGalaxy({
                 </strong>
 
                 <span>
-                  Themen
+                  Planeten
                 </span>
               </div>
 
@@ -311,6 +337,7 @@ export function KnowledgeGalaxy({
                 <span>
                   Inhalte
                 </span>
+              </div>
               </div>
             </div>
           )}
@@ -1085,8 +1112,9 @@ function createDomainGalaxies(
   ) {
     const domain =
       discovery.classification
-        ?.primaryCategory ??
-      "other";
+        ?.secondaryCategory
+        ?.trim() ||
+      "Noch nicht eingeordnet";
 
     const current =
       grouped.get(
@@ -1198,9 +1226,6 @@ function createDomainGalaxies(
             domain,
 
           label:
-            categoryLabels[
-              domain
-            ] ??
             domain,
 
           count:

@@ -25,7 +25,6 @@ import {
 import {
   askKnowledge,
   getKnowledgeLibrary,
-  rebuildKnowledgeLibrary,
 } from "@/services/knowledge-client";
 
 type AiAction =
@@ -120,29 +119,6 @@ export function KnowledgeWorkspace() {
     void loadLibrary();
   }, [loadLibrary]);
 
-  async function rebuildUniverse() {
-    setLoading(true);
-    setError(null);
-    setAiAnswer(null);
-
-    try {
-      const rebuilt =
-        await rebuildKnowledgeLibrary(
-          activeWorkspaceId,
-        );
-
-      setLibrary(rebuilt);
-      setPath([]);
-    } catch (rebuildError) {
-      setError(
-        rebuildError instanceof Error
-          ? rebuildError.message
-          : "Das Wissensuniversum konnte nicht neu aufgebaut werden.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const graph =
     library?.graph ?? null;
@@ -396,16 +372,7 @@ export function KnowledgeWorkspace() {
             ↻ Aktualisieren
           </button>
 
-          <button
-            className="secondary-button"
-            disabled={isLoading}
-            onClick={() => {
-              void rebuildUniverse();
-            }}
-            type="button"
-          >
-            ✦ Universum synchronisieren
-          </button>
+
         </div>
       </header>
 
