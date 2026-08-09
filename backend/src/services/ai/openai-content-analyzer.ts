@@ -111,6 +111,18 @@ const ContentAnalysisSchema = z.object({
     .max(1),
 });
 
+const GalaxyCandidateSelectionSchema =
+  z.object({
+    galaxyIndexes:
+      z.array(
+        z.number()
+          .int()
+          .min(0)
+          .max(49),
+      )
+        .max(5),
+  });
+
 export type ExistingKnowledgePath = {
   galaxy: string;
   planets: string[];
@@ -154,9 +166,172 @@ export async function analyzeContent(
    * für Titel, Zusammenfassung und
    * Klassifikation relevant sind.
    */
-  const knowledgeContext =
+  /*
+   * CLASSIFICATION V3
+   *
+   * Stufe 1:
+   * Alle vorhandenen Galaxien werden nur mit
+   * ihrem Namen betrachtet.
+   *
+   * Stufe 2:
+   * Die eigentliche Inhaltsanalyse bekommt
+   * anschließend nur noch maximal fünf
+   * semantisch plausible Galaxien inklusive
+   * ihrer Planeten.
+   */
+  const candidateSelectionStartedAt =
+    Date.now();
+
+  let candidateSelectionDurationMs =
+    0;
+
+  let candidateKnowledgePaths =
     existingKnowledgePaths
-      .slice(0, 50)
+      .slice(0, 5);
+
+  if (
+    existingKnowledgePaths.length >
+    5
+  ) {
+    try {
+      const candidateInput =
+        JSON.stringify({
+          title:
+            metadata.title,
+
+          description:
+            metadata.description,
+
+          text:
+            extractedText
+              .slice(0, 1_800),
+
+          transcript:
+            videoTranscript
+              .slice(0, 1_800),
+
+          galaxies:
+            existingKnowledgePaths
+              .slice(0, 50)
+              .map(
+                (
+                  path,
+                  index,
+                ) => ({
+                  id:
+                    index,
+
+                  label:
+                    path.galaxy,
+                }),
+              ),
+        });
+
+      const candidateResponse =
+        await openai.responses.parse({
+          model:
+            CONTENT_ANALYSIS_MODEL,
+
+          instructions: [
+            "You select existing SaveWise Galaxies that are semantically plausible homes for a new piece of content.",
+            "A Galaxy is a broad durable interest area, not the narrow topic of one individual article or video.",
+            "Return at most 5 existing Galaxy IDs, ranked from most plausible to least plausible.",
+            "Prefer broad semantic fit over exact word overlap.",
+            "Treat translations, synonyms and related wording as the same semantic area.",
+            "Include a Galaxy when the new content could reasonably belong inside it.",
+            "Do not invent Galaxy IDs.",
+            "If none are remotely plausible, return an empty list.",
+          ].join(
+            "\n",
+          ),
+
+          input:
+            candidateInput,
+
+          text: {
+            format:
+              zodTextFormat(
+                GalaxyCandidateSelectionSchema,
+                "savewise_galaxy_candidates",
+              ),
+          },
+        });
+
+      const rawIndexes =
+        candidateResponse
+          .output_parsed
+          ?.galaxyIndexes ??
+        [];
+
+      const selectedIndexes =
+        [
+          ...new Set(
+            rawIndexes.filter(
+              (index) =>
+                index >= 0 &&
+                index <
+                  existingKnowledgePaths
+                    .length &&
+                index < 50,
+            ),
+          ),
+        ]
+          .slice(0, 5);
+
+      if (
+        selectedIndexes.length >
+        0
+      ) {
+        candidateKnowledgePaths =
+          selectedIndexes
+            .map(
+              (index) =>
+                existingKnowledgePaths[
+                  index
+                ],
+            )
+            .filter(
+              (
+                path,
+              ): path is ExistingKnowledgePath =>
+                Boolean(
+                  path,
+                ),
+            );
+      }
+
+      candidateSelectionDurationMs =
+        Date.now() -
+        candidateSelectionStartedAt;
+    } catch (
+      candidateError
+    ) {
+      candidateSelectionDurationMs =
+        Date.now() -
+        candidateSelectionStartedAt;
+
+      console.error(
+        "[AI Galaxy Candidates] selection failed; using frequency fallback:",
+        candidateError,
+      );
+
+      /*
+       * Ein Fehler in der Vorauswahl darf
+       * niemals den Import blockieren.
+       */
+      candidateKnowledgePaths =
+        existingKnowledgePaths
+          .slice(0, 5);
+    }
+  } else {
+    candidateSelectionDurationMs =
+      Date.now() -
+      candidateSelectionStartedAt;
+  }
+
+  const knowledgeContext =
+    candidateKnowledgePaths
+      .slice(0, 5)
       .map(
         (path) => ({
           galaxy:
@@ -164,9 +339,26 @@ export async function analyzeContent(
 
           planets:
             path.planets
-              .slice(0, 6),
+              .slice(0, 8),
         }),
       );
+
+  console.log(
+    "[AI Galaxy Candidates]",
+    JSON.stringify({
+      available:
+        existingKnowledgePaths.length,
+
+      selected:
+        knowledgeContext.map(
+          (path) =>
+            path.galaxy,
+        ),
+
+      durationMs:
+        candidateSelectionDurationMs,
+    }),
+  );
 
   const metadataInput =
     JSON.stringify({
@@ -300,7 +492,11 @@ export async function analyzeContent(
 
       "Galaxy must be broader than Planet. Planet must be broader than each Star.",
 
-      "If existingKnowledge is supplied, it is the authoritative current taxonomy of the active SaveWise workspace.",
+      "If existingKnowledge is supplied, it contains the most semantically plausible existing Galaxies from the active SaveWise workspace.",
+      "The supplied existing Galaxies were already shortlisted for semantic relevance.",
+      "If ANY supplied Galaxy is a reasonable broad home for the content, you MUST reuse it.",
+      "Do not create a new Galaxy merely because a more specific, elegant, translated or differently worded label could be invented.",
+      "A new Galaxy is allowed only when every supplied existing Galaxy materially represents a different subject area.",
 
       "Before naming the Galaxy, explicitly decide taxonomyDecision.galaxy.action.",
       "Use galaxy.action='reuse' whenever an existing Galaxy covers the same broad semantic subject, even when another synonym, translation, wording or slightly narrower label might seem more precise.",
@@ -427,6 +623,14 @@ export async function analyzeContent(
       preferredLanguage:
         preferredLanguage ??
         null,
+
+      availableGalaxyCandidates:
+        existingKnowledgePaths.length,
+
+      shortlistedGalaxyCandidates:
+        knowledgeContext.length,
+
+      candidateSelectionDurationMs,
 
       existingGalaxyCandidates:
         knowledgeContext.length,
