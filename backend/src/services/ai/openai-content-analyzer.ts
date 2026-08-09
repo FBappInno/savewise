@@ -232,25 +232,38 @@ export async function analyzeContent(
       CONTENT_ANALYSIS_MODEL,
 
     instructions: [
-      "You organize saved content for SaveWise.",
-      "Use only the supplied evidence. Never invent unsupported facts.",
+      "You are the classification engine for SaveWise, a personal knowledge library.",
+      "Analyze the supplied content and return only evidence-supported information.",
 
-      "Return: factual title, max 2-sentence compact summary, classification, keywords, language and confidence.",
+      "Return a factual improved title, a compact summary of at most 2 sentences, classification, keywords, language and confidence.",
 
-      "Visible SaveWise hierarchy: secondaryCategory = Galaxy, topic = Planet, subtopics = Stars.",
-      "Choose reusable semantic labels. Avoid platform/site names and vague labels such as General, Other or Miscellaneous when a specific subject is supported.",
-      "Galaxy must be broader than Planet; Stars must be narrower than Planet.",
+      "SaveWise uses this hierarchy:",
+      "secondaryCategory = the GALAXY: a broad reusable subject area.",
+      "topic = the PLANET: the main subject of this specific content inside that Galaxy.",
+      "subtopics = STARS: specific narrower concepts contained in the content.",
 
-      "primaryCategory is an internal category and must use the provided schema enum.",
+      "IMPORTANT: Galaxy, Planet, Star, Stars, Topic, Category, General, Miscellaneous and Other are hierarchy or placeholder terms, NOT valid semantic labels. Never return those words as secondaryCategory, topic or subtopics.",
 
-      "For video, use transcript/text first. If an image is supplied, treat it only as supporting thumbnail evidence.",
-      "If fetchStrategy is url-derived, infer only what title/URL supports and confidence must be <= 0.65.",
+      "Use concrete semantic names based on the actual subject.",
+      "Example: Galaxy 'Travel', Planet 'Urban Exploration', Stars ['Abandoned Places', 'Military Sites'].",
+      "Example: Galaxy 'Sport', Planet 'Alpine Skiing', Stars ['Ski Technique', 'Equipment'].",
 
-      "Confidence measures evidence quality and certainty of the classification.",
+      "Galaxy must be broader than Planet. Planet must be broader than each Star.",
+      "Prefer stable reusable labels instead of inventing unnecessarily narrow Galaxies.",
+      "Do not use websites, platforms, authors or media formats as Galaxy/Planet labels unless they are genuinely the subject.",
+
+      "primaryCategory is internal only and must use one of the schema enum values.",
+
+      "Use transcript and extracted text as primary evidence.",
+      "If a thumbnail image is supplied, use it only as supporting evidence and never let decorative thumbnail text override stronger textual evidence.",
+
+      "If fetchStrategy is url-derived, infer only what the title and URL clearly support and confidence must be <= 0.65.",
+
+      "Confidence is between 0 and 1 and reflects both evidence quality and certainty of the semantic classification.",
 
       preferredLanguage
-        ? `Write title, summary, Galaxy, Planet, Stars and keywords in ${languageName(preferredLanguage)}. Set language to '${preferredLanguage}'.`
-        : "Use the dominant content language.",
+        ? `Write improvedTitle, summary, secondaryCategory, topic, subtopics and keywords in ${languageName(preferredLanguage)}. Set language to '${preferredLanguage}'.`
+        : "Use the dominant language of the supplied content.",
     ].join("\n"),
 
     input,
