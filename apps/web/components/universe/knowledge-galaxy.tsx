@@ -8,6 +8,7 @@ import type {
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -56,16 +57,112 @@ type OverviewPosition = {
 };
 
 const WIDTH =
-  1200;
+  1800;
 
 const HEIGHT =
-  720;
+  1150;
 
 const CENTER_X =
   WIDTH / 2;
 
 const CENTER_Y =
   HEIGHT / 2;
+
+const INITIAL_VIEW_WIDTH =
+  1200;
+
+const INITIAL_VIEW_HEIGHT =
+  720;
+
+const MIN_VIEW_WIDTH =
+  430;
+
+const MAX_VIEW_WIDTH =
+  WIDTH;
+
+type UniverseCamera = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+function createInitialCamera():
+UniverseCamera {
+  return {
+    x:
+      CENTER_X -
+      INITIAL_VIEW_WIDTH / 2,
+
+    y:
+      CENTER_Y -
+      INITIAL_VIEW_HEIGHT / 2,
+
+    width:
+      INITIAL_VIEW_WIDTH,
+
+    height:
+      INITIAL_VIEW_HEIGHT,
+  };
+}
+
+function clampCamera(
+  camera:
+    UniverseCamera,
+): UniverseCamera {
+  const width =
+    Math.min(
+      WIDTH,
+      Math.max(
+        MIN_VIEW_WIDTH,
+        camera.width,
+      ),
+    );
+
+  const height =
+    width *
+    (
+      INITIAL_VIEW_HEIGHT /
+      INITIAL_VIEW_WIDTH
+    );
+
+  const maxX =
+    Math.max(
+      0,
+      WIDTH -
+      width,
+    );
+
+  const maxY =
+    Math.max(
+      0,
+      HEIGHT -
+      height,
+    );
+
+  return {
+    x:
+      Math.min(
+        maxX,
+        Math.max(
+          0,
+          camera.x,
+        ),
+      ),
+
+    y:
+      Math.min(
+        maxY,
+        Math.max(
+          0,
+          camera.y,
+        ),
+      ),
+
+    width,
+    height,
+  };
+}
 
 export function KnowledgeGalaxy({
   onOpenDiscovery,
@@ -89,6 +186,36 @@ export function KnowledgeGalaxy({
     setSynchronizing,
   ] =
     useState(false);
+
+
+  const [
+    camera,
+    setCamera,
+  ] =
+    useState<UniverseCamera>(
+      createInitialCamera,
+    );
+
+  const dragState =
+    useRef<{
+      pointerId: number;
+      clientX: number;
+      clientY: number;
+      camera:
+        UniverseCamera;
+      moved: boolean;
+    } | null>(
+      null,
+    );
+
+  const svgRef =
+    useRef<SVGSVGElement | null>(
+      null,
+    );
+
+  const zoomLevel =
+    INITIAL_VIEW_WIDTH /
+    camera.width;
 
   const [
     knowledgeGraph,
@@ -132,6 +259,12 @@ export function KnowledgeGalaxy({
     return () => {
       active = false;
     };
+  }, [activeWorkspaceId]);
+
+  useEffect(() => {
+    setCamera(
+      createInitialCamera(),
+    );
   }, [activeWorkspaceId]);
 
   const [
@@ -195,6 +328,249 @@ export function KnowledgeGalaxy({
         ),
       [galaxies],
     );
+
+  function handleUniverseWheel(
+    event:
+      React.WheelEvent<
+        SVGSVGElement
+      >,
+  ): void {
+    event.preventDefault();
+
+    const svg =
+      svgRef.current;
+
+    if (!svg) {
+      return;
+    }
+
+    const rect =
+      svg.getBoundingClientRect();
+
+    if (
+      rect.width <= 0 ||
+      rect.height <= 0
+    ) {
+      return;
+    }
+
+    const pointerX =
+      (
+        event.clientX -
+        rect.left
+      ) /
+      rect.width;
+
+    const pointerY =
+      (
+        event.clientY -
+        rect.top
+      ) /
+      rect.height;
+
+    const zoomFactor =
+      Math.exp(
+        event.deltaY *
+        0.00135,
+      );
+
+    setCamera(
+      (current) => {
+        const nextWidth =
+          Math.min(
+            MAX_VIEW_WIDTH,
+            Math.max(
+              MIN_VIEW_WIDTH,
+              current.width *
+              zoomFactor,
+            ),
+          );
+
+        const nextHeight =
+          nextWidth *
+          (
+            INITIAL_VIEW_HEIGHT /
+            INITIAL_VIEW_WIDTH
+          );
+
+        const worldPointerX =
+          current.x +
+          pointerX *
+          current.width;
+
+        const worldPointerY =
+          current.y +
+          pointerY *
+          current.height;
+
+        return clampCamera({
+          x:
+            worldPointerX -
+            pointerX *
+            nextWidth,
+
+          y:
+            worldPointerY -
+            pointerY *
+            nextHeight,
+
+          width:
+            nextWidth,
+
+          height:
+            nextHeight,
+        });
+      },
+    );
+  }
+
+  function handleUniversePointerDown(
+    event:
+      React.PointerEvent<
+        SVGSVGElement
+      >,
+  ): void {
+    if (
+      event.pointerType ===
+        "mouse" &&
+      event.button !== 0
+    ) {
+      return;
+    }
+
+    event.currentTarget
+      .setPointerCapture(
+        event.pointerId,
+      );
+
+    dragState.current = {
+      pointerId:
+        event.pointerId,
+
+      clientX:
+        event.clientX,
+
+      clientY:
+        event.clientY,
+
+      camera: {
+        ...camera,
+      },
+
+      moved:
+        false,
+    };
+  }
+
+  function handleUniversePointerMove(
+    event:
+      React.PointerEvent<
+        SVGSVGElement
+      >,
+  ): void {
+    const drag =
+      dragState.current;
+
+    if (
+      !drag ||
+      drag.pointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    const svg =
+      svgRef.current;
+
+    if (!svg) {
+      return;
+    }
+
+    const rect =
+      svg.getBoundingClientRect();
+
+    if (
+      rect.width <= 0 ||
+      rect.height <= 0
+    ) {
+      return;
+    }
+
+    const deltaClientX =
+      event.clientX -
+      drag.clientX;
+
+    const deltaClientY =
+      event.clientY -
+      drag.clientY;
+
+    if (
+      Math.abs(
+        deltaClientX,
+      ) > 3 ||
+      Math.abs(
+        deltaClientY,
+      ) > 3
+    ) {
+      drag.moved =
+        true;
+    }
+
+    const deltaWorldX =
+      deltaClientX /
+      rect.width *
+      drag.camera.width;
+
+    const deltaWorldY =
+      deltaClientY /
+      rect.height *
+      drag.camera.height;
+
+    setCamera(
+      clampCamera({
+        ...drag.camera,
+
+        x:
+          drag.camera.x -
+          deltaWorldX,
+
+        y:
+          drag.camera.y -
+          deltaWorldY,
+      }),
+    );
+  }
+
+  function finishUniversePointer(
+    event:
+      React.PointerEvent<
+        SVGSVGElement
+      >,
+  ): void {
+    const drag =
+      dragState.current;
+
+    if (
+      !drag ||
+      drag.pointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    dragState.current =
+      null;
+
+    try {
+      event.currentTarget
+        .releasePointerCapture(
+          event.pointerId,
+        );
+    } catch {
+      // Pointer capture may already
+      // have been released.
+    }
+  }
 
   function selectDomain(
     galaxy:
@@ -287,7 +663,7 @@ export function KnowledgeGalaxy({
         <p>
           Sobald du Inhalte erfasst,
           entstehen hier automatisch
-          Domänen, Themen und
+          Galaxien, Planeten und
           Wissensverbindungen.
         </p>
       </div>
@@ -415,9 +791,36 @@ export function KnowledgeGalaxy({
           <svg
             aria-label="Interaktives Wissensuniversum"
             className="galaxy-canvas"
+            onPointerCancel={
+              finishUniversePointer
+            }
+            onPointerDown={
+              handleUniversePointerDown
+            }
+            onPointerMove={
+              handleUniversePointerMove
+            }
+            onPointerUp={
+              finishUniversePointer
+            }
+            onWheel={
+              handleUniverseWheel
+            }
             preserveAspectRatio="xMidYMid meet"
+            ref={
+              svgRef
+            }
             role="img"
-            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+            style={{
+              cursor:
+                dragState.current
+                  ? "grabbing"
+                  : "grab",
+
+              touchAction:
+                "none",
+            }}
+            viewBox={`${camera.x} ${camera.y} ${camera.width} ${camera.height}`}
           >
             <defs>
               <radialGradient
@@ -556,10 +959,15 @@ export function KnowledgeGalaxy({
                         key={
                           galaxy.id
                         }
-                        onClick={() => {
+                        onClick={(event) => {
+                          event.stopPropagation();
+
                           selectDomain(
                             galaxy,
                           );
+                        }}
+                        onPointerDown={(event) => {
+                          event.stopPropagation();
                         }}
                         onKeyDown={(event) => {
                           if (
@@ -658,22 +1066,31 @@ export function KnowledgeGalaxy({
                           }
                         </text>
 
-                        <text
-                          className="domain-galaxy-label"
-                          textAnchor="middle"
-                          x={
-                            position.x
-                          }
-                          y={
-                            position.y +
-                            position.radius +
-                            29
-                          }
-                        >
-                          {
-                            galaxy.label
-                          }
-                        </text>
+                        {
+                          (
+                            zoomLevel >=
+                              0.72 ||
+                            galaxy.count >=
+                              3
+                          ) ? (
+                            <text
+                              className="domain-galaxy-label"
+                              textAnchor="middle"
+                              x={
+                                position.x
+                              }
+                              y={
+                                position.y +
+                                position.radius +
+                                29
+                              }
+                            >
+                              {
+                                galaxy.label
+                              }
+                            </text>
+                          ) : null
+                        }
                       </g>
                     );
                   },
@@ -696,8 +1113,8 @@ export function KnowledgeGalaxy({
 
           <div className="galaxy-control-hint">
             {selectedGalaxy
-              ? "Sonnensystem anklicken, um seine Discoveries zu filtern"
-              : "Galaxie anklicken, um die Domäne zu erkunden"}
+              ? "Ziehen zum Verschieben · Scrollen/Trackpad zum Zoomen · Planet anklicken zum Erkunden"
+              : "Ziehen zum Verschieben · Scrollen/Trackpad zum Zoomen · Galaxie anklicken zum Erkunden"}
           </div>
         </div>
       </div>
@@ -708,7 +1125,7 @@ export function KnowledgeGalaxy({
             <div className="card-eyebrow">
               {selectedTopic
                 ? "SONNENSYSTEM"
-                : "DOMÄNEN-GALAXIE"}
+                : "GALAXIE"}
             </div>
 
             <h3>
@@ -846,10 +1263,9 @@ export function KnowledgeGalaxy({
             </h3>
 
             <p>
-              Wähle links eine Domäne.
-              Sie wird anschließend im
-              Zentrum geöffnet und in
-              ihre Sonnensysteme
+              Wähle links eine Galaxie.
+              Sie wird anschließend geöffnet
+              und in ihre Planeten
               aufgeteilt.
             </p>
 
@@ -857,13 +1273,13 @@ export function KnowledgeGalaxy({
               <div>
                 <span className="legend-node legend-node-core" />
 
-                Domänen-Galaxie
+                Galaxie
               </div>
 
               <div>
                 <span className="legend-node legend-node-domain" />
 
-                Topic-Sonnensystem
+                Planet
               </div>
 
               <div>
