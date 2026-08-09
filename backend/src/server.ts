@@ -1470,6 +1470,134 @@ app.post(
         return;
       }
 
+      const workspaceDiscoveries =
+        (
+          await getAllDiscoveries(
+            discoveryRepository,
+          )
+        ).filter(
+          (discovery) =>
+            (
+              discovery.workspaceId ??
+              "private"
+            ) ===
+            parsedRequest.data
+              .workspaceId,
+        );
+
+      const galaxyMap =
+        new Map<
+          string,
+          {
+            count: number;
+            planets:
+              Map<
+                string,
+                number
+              >;
+          }
+        >();
+
+      for (
+        const discovery of
+        workspaceDiscoveries
+      ) {
+        const classification =
+          discovery.classification;
+
+        if (!classification) {
+          continue;
+        }
+
+        const galaxy =
+          classification
+            .secondaryCategory
+            ?.trim();
+
+        const planet =
+          classification
+            .topic
+            ?.trim();
+
+        if (!galaxy) {
+          continue;
+        }
+
+        const current =
+          galaxyMap.get(
+            galaxy,
+          ) ?? {
+            count:
+              0,
+
+            planets:
+              new Map<
+                string,
+                number
+              >(),
+          };
+
+        current.count += 1;
+
+        if (planet) {
+          current.planets.set(
+            planet,
+            (
+              current.planets.get(
+                planet,
+              ) ??
+              0
+            ) + 1,
+          );
+        }
+
+        galaxyMap.set(
+          galaxy,
+          current,
+        );
+      }
+
+      const existingKnowledgePaths =
+        [
+          ...galaxyMap.entries(),
+        ]
+          .sort(
+            (
+              [, left],
+              [, right],
+            ) =>
+              right.count -
+              left.count,
+          )
+          .slice(0, 24)
+          .map(
+            ([
+              galaxy,
+              data,
+            ]) => ({
+              galaxy,
+
+              planets:
+                [
+                  ...data.planets
+                    .entries(),
+                ]
+                  .sort(
+                    (
+                      [, left],
+                      [, right],
+                    ) =>
+                      right -
+                      left,
+                  )
+                  .slice(0, 10)
+                  .map(
+                    ([planet]) =>
+                      planet,
+                  ),
+            }),
+          );
+
       const importResult =
         await withTimeout(
           importContent(
@@ -1479,6 +1607,8 @@ app.post(
                 parsedRequest.data.preferredLanguage,
               preferredKnowledgePath:
                 parsedRequest.data.preferredKnowledgePath,
+
+              existingKnowledgePaths,
             },
           ),
           90_000,
@@ -1501,6 +1631,7 @@ app.post(
       const library =
         await buildCurrentKnowledgeLibrary(
           discoveryRepository,
+          parsedRequest.data.workspaceId,
         );
 
       if (library.graph) {

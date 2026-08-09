@@ -6,7 +6,10 @@ import type {
 } from "@savewise/shared";
 
 import { fetchPageMetadata } from "../../utils/metadata-fetcher";
-import { analyzeContent } from "../ai/openai-content-analyzer";
+import {
+  analyzeContent,
+  type ExistingKnowledgePath,
+} from "../ai/openai-content-analyzer";
 
 export type ContentImportResult = {
   metadata: {
@@ -72,6 +75,9 @@ export async function importContent(
 
     preferredKnowledgePath?:
       string[];
+
+    existingKnowledgePaths?:
+      ExistingKnowledgePath[];
   } = {},
 ): Promise<ContentImportResult> {
   const importStartedAt =
@@ -110,6 +116,8 @@ export async function importContent(
     await analyzeContent(
       metadata,
       options.preferredLanguage,
+      options.existingKnowledgePaths ??
+        [],
     );
 
   const aiDurationMs =

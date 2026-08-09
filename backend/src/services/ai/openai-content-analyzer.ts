@@ -87,9 +87,16 @@ const ContentAnalysisSchema = z.object({
     .max(1),
 });
 
+export type ExistingKnowledgePath = {
+  galaxy: string;
+  planets: string[];
+};
+
 export async function analyzeContent(
   metadata: PageMetadata,
   preferredLanguage?: "de" | "en" | "fr" | "it" | "es",
+  existingKnowledgePaths:
+    ExistingKnowledgePath[] = [],
 ): Promise<ContentAnalysis> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error(
@@ -123,8 +130,27 @@ export async function analyzeContent(
    * für Titel, Zusammenfassung und
    * Klassifikation relevant sind.
    */
+  const knowledgeContext =
+    existingKnowledgePaths
+      .slice(0, 24)
+      .map(
+        (path) => ({
+          galaxy:
+            path.galaxy,
+
+          planets:
+            path.planets
+              .slice(0, 10),
+        }),
+      );
+
   const metadataInput =
     JSON.stringify({
+      existingKnowledge:
+        knowledgeContext.length > 0
+          ? knowledgeContext
+          : undefined,
+
       preferredLanguage:
         preferredLanguage ??
         undefined,
@@ -249,6 +275,15 @@ export async function analyzeContent(
       "Example: Galaxy 'Sport', Planet 'Alpine Skiing', Stars ['Ski Technique', 'Equipment'].",
 
       "Galaxy must be broader than Planet. Planet must be broader than each Star.",
+
+      "If existingKnowledge is supplied, it represents the current taxonomy of the active SaveWise workspace.",
+      "Prefer an existing Galaxy whenever its semantic scope clearly fits the content.",
+      "Inside a fitting existing Galaxy, prefer an existing Planet whenever it accurately represents the content.",
+      "When reusing an existing Galaxy or Planet, copy its label exactly as supplied.",
+      "Do not create synonyms, spelling variants or near-duplicate labels for existing concepts.",
+      "Create a new Galaxy only when none of the existing Galaxies is a reasonable semantic home for the content.",
+      "Create a new Planet only when the Galaxy fits but none of its existing Planets accurately fits.",
+      "Do not force an unrelated existing label merely to avoid creating a new one.",
       "Prefer stable reusable labels instead of inventing unnecessarily narrow Galaxies.",
       "Do not use websites, platforms, authors or media formats as Galaxy/Planet labels unless they are genuinely the subject.",
 
@@ -357,6 +392,20 @@ export async function analyzeContent(
       preferredLanguage:
         preferredLanguage ??
         null,
+
+      existingGalaxyCandidates:
+        knowledgeContext.length,
+
+      existingPlanetCandidates:
+        knowledgeContext.reduce(
+          (
+            total,
+            path,
+          ) =>
+            total +
+            path.planets.length,
+          0,
+        ),
     }),
   );
 
