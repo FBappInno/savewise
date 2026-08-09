@@ -18,6 +18,12 @@ const openai = new OpenAI({
   maxRetries: 1,
 });
 
+const MAX_ANALYSIS_TEXT_CHARS =
+  8_000;
+
+const MIN_TEXT_FOR_TEXT_ONLY_VIDEO =
+  500;
+
 const categories = [
   "technology",
   "finance",
@@ -91,42 +97,132 @@ export async function analyzeContent(
     );
   }
 
-  const metadataInput = JSON.stringify({
-    allowedPrimaryCategories: categories,
-    preferredLanguage: preferredLanguage ?? null,
+  const extractedText =
+    metadata.extractedText
+      ?.slice(
+        0,
+        MAX_ANALYSIS_TEXT_CHARS,
+      )
+      .trim() ||
+    "";
 
-    metadata: {
-      url: metadata.url,
-      title: metadata.title,
-      description: metadata.description ?? null,
-      author: metadata.author ?? null,
-      siteName: metadata.siteName ?? null,
-      publishedAt: metadata.publishedAt ?? null,
-      contentType: metadata.contentType,
-      fetchStrategy: metadata.fetchStrategy,
-      mediaType: metadata.mediaType ?? null,
-      videoPlatform: metadata.videoPlatform ?? null,
-      videoTranscript: metadata.videoTranscript?.slice(0, 12_000) ?? null,
-      extractedText: metadata.extractedText?.slice(0, 12_000) ?? null,
-    },
-  });
+  const videoTranscript =
+    metadata.videoTranscript
+      ?.slice(
+        0,
+        MAX_ANALYSIS_TEXT_CHARS,
+      )
+      .trim() ||
+    "";
 
-  const input = metadata.mediaType === "video" && metadata.thumbnailUrl
-    ? [{
-        role: "user" as const,
-        content: [
+  /*
+   * Das Modell benötigt keine null-lastige
+   * Kopie aller Metadaten.
+   *
+   * Wir übergeben nur Informationen, die
+   * für Titel, Zusammenfassung und
+   * Klassifikation relevant sind.
+   */
+  const metadataInput =
+    JSON.stringify({
+      preferredLanguage:
+        preferredLanguage ??
+        undefined,
+
+      title:
+        metadata.title,
+
+      description:
+        metadata.description ??
+        undefined,
+
+      author:
+        metadata.author ??
+        undefined,
+
+      site:
+        metadata.siteName ??
+        undefined,
+
+      contentType:
+        metadata.contentType,
+
+      fetchStrategy:
+        metadata.fetchStrategy,
+
+      mediaType:
+        metadata.mediaType ??
+        undefined,
+
+      videoPlatform:
+        metadata.videoPlatform ??
+        undefined,
+
+      transcript:
+        videoTranscript ||
+        undefined,
+
+      text:
+        extractedText ||
+        undefined,
+    });
+
+  const availableTextCharacters =
+    extractedText.length +
+    videoTranscript.length;
+
+  /*
+   * Ein Thumbnail verursacht einen
+   * multimodalen Modellpfad.
+   *
+   * Wenn bereits genügend Text oder
+   * Transcript vorhanden ist, liefert
+   * das Bild für die Klassifikation meist
+   * wenig zusätzlichen Nutzen.
+   *
+   * Bei schwacher Textbasis bleibt das
+   * Thumbnail dagegen erhalten.
+   */
+  const shouldUseThumbnail =
+    metadata.mediaType ===
+      "video" &&
+    Boolean(
+      metadata.thumbnailUrl,
+    ) &&
+    availableTextCharacters <
+      MIN_TEXT_FOR_TEXT_ONLY_VIDEO;
+
+  const input =
+    shouldUseThumbnail &&
+    metadata.thumbnailUrl
+      ? [
           {
-            type: "input_text" as const,
-            text: metadataInput,
+            role:
+              "user" as const,
+
+            content: [
+              {
+                type:
+                  "input_text" as const,
+
+                text:
+                  metadataInput,
+              },
+
+              {
+                type:
+                  "input_image" as const,
+
+                image_url:
+                  metadata.thumbnailUrl,
+
+                detail:
+                  "low" as const,
+              },
+            ],
           },
-          {
-            type: "input_image" as const,
-            image_url: metadata.thumbnailUrl,
-            detail: "low" as const,
-          },
-        ],
-      }]
-    : metadataInput;
+        ]
+      : metadataInput;
 
   const aiStartedAt =
     Date.now();
@@ -136,36 +232,25 @@ export async function analyzeContent(
       CONTENT_ANALYSIS_MODEL,
 
     instructions: [
-      "You are the knowledge organization engine for SaveWise.",
-      "Analyze saved online content using only the provided metadata and extracted text.",
-      "For video links, combine the creator caption, embedded transcript and visible thumbnail evidence.",
-      "Never claim to have watched motion or heard audio when only a thumbnail or caption is supplied.",
-      "If video evidence is sparse, describe only what is supported and lower confidence.",
-      "Do not invent information that is not supported by the metadata.",
-      "When fetchStrategy is 'url-derived', the page body was unavailable: infer only the minimal subject visible in the URL/title, explicitly avoid unsupported features or claims, and keep confidence at or below 0.65.",
-      "Create a clear and factual improved title.",
-      "Write a compact summary with at most two short sentences and roughly 55 words.",
-      "Lead with the central insight. Remove introductions, repetition, examples and secondary details unless essential.",
-      "Never start with phrases such as 'This article discusses' or 'The content is about'.",
-      "Build a reusable hierarchy for a personal knowledge library.",
-      "primaryCategory is legacy internal metadata only and is NOT a visible knowledge level.",
-      "The visible SaveWise hierarchy is:",
-      "secondaryCategory = Galaxy, topic = Planet, subtopics = Stars.",
-      "A Galaxy must be a broad durable knowledge area suitable for containing many future discoveries.",
-      "A Planet is a meaningful subject within that Galaxy.",
-      "Stars are narrower concepts or specializations within the Planet.",
-      "Do not create an overly specific Galaxy when the subject would work better as a Planet.",
-      "Avoid vague Galaxies such as Lifestyle, General, Other, Miscellaneous, Allgemein or Sonstiges.",
-      "Examples:",
-      "technology -> Technology & Engineering -> Robotics -> Humanoid Robots",
-      "technology -> Technology & Engineering -> Software Development -> React",
-      "health -> Health & Nutrition -> Nutrition -> Protein",
-      "lifestyle -> Outdoor & Leisure -> Paragliding -> Equipment",
-      "Avoid using the website or platform name as a topic.",
-      "Confidence must represent how strongly the supplied metadata supports the classification.",
+      "You organize saved content for SaveWise.",
+      "Use only the supplied evidence. Never invent unsupported facts.",
+
+      "Return: factual title, max 2-sentence compact summary, classification, keywords, language and confidence.",
+
+      "Visible SaveWise hierarchy: secondaryCategory = Galaxy, topic = Planet, subtopics = Stars.",
+      "Choose reusable semantic labels. Avoid platform/site names and vague labels such as General, Other or Miscellaneous when a specific subject is supported.",
+      "Galaxy must be broader than Planet; Stars must be narrower than Planet.",
+
+      "primaryCategory is an internal category and must use the provided schema enum.",
+
+      "For video, use transcript/text first. If an image is supplied, treat it only as supporting thumbnail evidence.",
+      "If fetchStrategy is url-derived, infer only what title/URL supports and confidence must be <= 0.65.",
+
+      "Confidence measures evidence quality and certainty of the classification.",
+
       preferredLanguage
-        ? `Write the improved title, summary, hierarchy labels and keywords exclusively in ${languageName(preferredLanguage)}. Set language to '${preferredLanguage}'.`
-        : "Preserve the dominant language of the content.",
+        ? `Write title, summary, Galaxy, Planet, Stars and keywords in ${languageName(preferredLanguage)}. Set language to '${preferredLanguage}'.`
+        : "Use the dominant content language.",
     ].join("\n"),
 
     input,
@@ -225,14 +310,8 @@ export async function analyzeContent(
       totalTokens,
 
       inputCharacters:
-        Math.min(
-          extractedTextLength,
-          12_000,
-        ) +
-        Math.min(
-          videoTranscriptLength,
-          12_000,
-        ),
+        extractedText.length +
+        videoTranscript.length,
 
       contentType:
         metadata.contentType,
@@ -248,6 +327,9 @@ export async function analyzeContent(
         Boolean(
           metadata.thumbnailUrl,
         ),
+
+      thumbnailSentToAI:
+        shouldUseThumbnail,
 
       hasTranscript:
         Boolean(
