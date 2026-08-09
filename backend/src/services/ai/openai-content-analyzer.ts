@@ -69,6 +69,30 @@ const ContentAnalysisSchema = z.object({
       .max(6),
   }),
 
+  taxonomyDecision: z.object({
+    galaxy: z.object({
+      action: z.enum([
+        "reuse",
+        "create_new",
+      ]),
+
+      existingLabel: z
+        .string()
+        .max(60),
+    }),
+
+    planet: z.object({
+      action: z.enum([
+        "reuse",
+        "create_new",
+      ]),
+
+      existingLabel: z
+        .string()
+        .max(60),
+    }),
+  }),
+
   keywords: z
     .array(
       z.string().min(2).max(40),
@@ -132,7 +156,7 @@ export async function analyzeContent(
    */
   const knowledgeContext =
     existingKnowledgePaths
-      .slice(0, 24)
+      .slice(0, 50)
       .map(
         (path) => ({
           galaxy:
@@ -140,7 +164,7 @@ export async function analyzeContent(
 
           planets:
             path.planets
-              .slice(0, 10),
+              .slice(0, 6),
         }),
       );
 
@@ -276,14 +300,25 @@ export async function analyzeContent(
 
       "Galaxy must be broader than Planet. Planet must be broader than each Star.",
 
-      "If existingKnowledge is supplied, it represents the current taxonomy of the active SaveWise workspace.",
-      "Prefer an existing Galaxy whenever its semantic scope clearly fits the content.",
-      "Inside a fitting existing Galaxy, prefer an existing Planet whenever it accurately represents the content.",
-      "When reusing an existing Galaxy or Planet, copy its label exactly as supplied.",
-      "Do not create synonyms, spelling variants or near-duplicate labels for existing concepts.",
-      "Create a new Galaxy only when none of the existing Galaxies is a reasonable semantic home for the content.",
-      "Create a new Planet only when the Galaxy fits but none of its existing Planets accurately fits.",
-      "Do not force an unrelated existing label merely to avoid creating a new one.",
+      "If existingKnowledge is supplied, it is the authoritative current taxonomy of the active SaveWise workspace.",
+
+      "Before naming the Galaxy, explicitly decide taxonomyDecision.galaxy.action.",
+      "Use galaxy.action='reuse' whenever an existing Galaxy covers the same broad semantic subject, even when another synonym, translation, wording or slightly narrower label might seem more precise.",
+      "Creating a new Galaxy is exceptional. Use galaxy.action='create_new' only when the subject materially falls outside every existing Galaxy.",
+      "If uncertain between reusing a reasonably fitting Galaxy and creating a similar new Galaxy, REUSE the existing Galaxy.",
+
+      "When galaxy.action='reuse', set galaxy.existingLabel to the exact existing Galaxy label from existingKnowledge.",
+      "When galaxy.action='create_new', set galaxy.existingLabel to an empty string.",
+
+      "After the Galaxy decision, explicitly decide taxonomyDecision.planet.action.",
+      "Use planet.action='reuse' whenever an existing Planet inside the selected Galaxy represents the same or substantially overlapping subject.",
+      "Use planet.action='create_new' only when none of the existing Planets inside that Galaxy accurately represents the subject.",
+
+      "When planet.action='reuse', set planet.existingLabel to the exact existing Planet label from existingKnowledge.",
+      "When planet.action='create_new', set planet.existingLabel to an empty string.",
+
+      "Never create a translated duplicate, synonym, spelling variant or stylistic variation of an existing Galaxy or Planet.",
+      "Do not force a genuinely unrelated existing label merely to avoid creating something new.",
       "Prefer stable reusable labels instead of inventing unnecessarily narrow Galaxies.",
       "Do not use websites, platforms, authors or media formats as Galaxy/Planet labels unless they are genuinely the subject.",
 
@@ -297,7 +332,7 @@ export async function analyzeContent(
       "Confidence is between 0 and 1 and reflects both evidence quality and certainty of the semantic classification.",
 
       preferredLanguage
-        ? `Write improvedTitle, summary, secondaryCategory, topic, subtopics and keywords in ${languageName(preferredLanguage)}. Set language to '${preferredLanguage}'.`
+        ? `Write improvedTitle, summary, NEW secondaryCategory/topic labels, subtopics and keywords in ${languageName(preferredLanguage)}. Existing Galaxy and Planet labels selected through taxonomyDecision must NEVER be translated; reuse them exactly as supplied. Set language to '${preferredLanguage}'.`
         : "Use the dominant language of the supplied content.",
     ].join("\n"),
 
@@ -415,14 +450,159 @@ export async function analyzeContent(
     );
   }
 
+  const parsedResult =
+    response.output_parsed;
+
+  const normalizeKnowledgeLabel =
+    (
+      value: string,
+    ) =>
+      value
+        .trim()
+        .toLocaleLowerCase();
+
+  const requestedGalaxy =
+    parsedResult
+      .taxonomyDecision
+      .galaxy
+      .existingLabel
+      .trim();
+
+  const matchedGalaxyPath =
+    parsedResult
+      .taxonomyDecision
+      .galaxy
+      .action ===
+    "reuse"
+      ? existingKnowledgePaths
+          .find(
+            (path) =>
+              normalizeKnowledgeLabel(
+                path.galaxy,
+              ) ===
+              normalizeKnowledgeLabel(
+                requestedGalaxy,
+              ),
+          )
+      : undefined;
+
+  const finalGalaxy =
+    matchedGalaxyPath
+      ?.galaxy ??
+    parsedResult
+      .classification
+      .secondaryCategory;
+
+  const planetGalaxyPath =
+    matchedGalaxyPath ??
+    existingKnowledgePaths
+      .find(
+        (path) =>
+          normalizeKnowledgeLabel(
+            path.galaxy,
+          ) ===
+          normalizeKnowledgeLabel(
+            finalGalaxy,
+          ),
+      );
+
+  const requestedPlanet =
+    parsedResult
+      .taxonomyDecision
+      .planet
+      .existingLabel
+      .trim();
+
+  const matchedPlanet =
+    parsedResult
+      .taxonomyDecision
+      .planet
+      .action ===
+    "reuse"
+      ? planetGalaxyPath
+          ?.planets
+          .find(
+            (planet) =>
+              normalizeKnowledgeLabel(
+                planet,
+              ) ===
+              normalizeKnowledgeLabel(
+                requestedPlanet,
+              ),
+          )
+      : undefined;
+
+  const {
+    taxonomyDecision,
+    ...analysisResult
+  } = parsedResult;
+
   const result = {
-    ...response.output_parsed,
+    ...analysisResult,
+
+    classification: {
+      ...analysisResult
+        .classification,
+
+      secondaryCategory:
+        finalGalaxy,
+
+      topic:
+        matchedPlanet ??
+        analysisResult
+          .classification
+          .topic,
+    },
 
     language:
       preferredLanguage ??
-      response.output_parsed
-        .language,
+      analysisResult.language,
   };
+
+  console.log(
+    "[AI Taxonomy Decision]",
+    JSON.stringify({
+      galaxyAction:
+        taxonomyDecision
+          .galaxy
+          .action,
+
+      requestedGalaxy:
+        taxonomyDecision
+          .galaxy
+          .existingLabel ||
+        null,
+
+      galaxyReuseApplied:
+        Boolean(
+          matchedGalaxyPath,
+        ),
+
+      finalGalaxy,
+
+      planetAction:
+        taxonomyDecision
+          .planet
+          .action,
+
+      requestedPlanet:
+        taxonomyDecision
+          .planet
+          .existingLabel ||
+        null,
+
+      planetReuseApplied:
+        Boolean(
+          matchedPlanet,
+        ),
+
+      finalPlanet:
+        matchedPlanet ??
+        analysisResult
+          .classification
+          .topic,
+    }),
+  );
 
   console.log(
     "[AI Result]",

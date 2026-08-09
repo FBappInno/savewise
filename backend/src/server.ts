@@ -1569,7 +1569,7 @@ app.post(
               right.count -
               left.count,
           )
-          .slice(0, 24)
+          .slice(0, 50)
           .map(
             ([
               galaxy,
@@ -1590,7 +1590,7 @@ app.post(
                       right -
                       left,
                   )
-                  .slice(0, 10)
+                  .slice(0, 6)
                   .map(
                     ([planet]) =>
                       planet,
