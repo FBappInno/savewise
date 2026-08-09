@@ -238,6 +238,68 @@ export function isValidDiscoveryUrl(
   }
 }
 
+export type GalaxyCandidatePreview = {
+  galaxy: string;
+  score: number;
+};
+
+export async function getGalaxyCandidates(
+  rawUrl: string,
+): Promise<GalaxyCandidatePreview[]> {
+  const workspaceId =
+    await getActiveWorkspaceId();
+
+  const url =
+    normalizeDiscoveryUrl(
+      rawUrl,
+    );
+
+  if (
+    !isValidDiscoveryUrl(
+      url,
+    )
+  ) {
+    throw new Error(
+      "Bitte gib zuerst eine gültige Internetadresse ein.",
+    );
+  }
+
+  const response =
+    await apiRequest<{
+      candidates:
+        GalaxyCandidatePreview[];
+    }>(
+      "/api/import/candidates",
+      {
+        method:
+          "POST",
+
+        body:
+          JSON.stringify({
+            url,
+            workspaceId,
+          }),
+      },
+      45_000,
+    );
+
+  return response
+    .candidates
+    .filter(
+      (candidate) =>
+        typeof candidate.galaxy ===
+          "string" &&
+        candidate.galaxy
+          .trim()
+          .length >
+          0,
+    )
+    .slice(
+      0,
+      5,
+    );
+}
+
 export async function importContent(
   rawUrl: string,
   preferredKnowledgePath?: string[],

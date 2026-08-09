@@ -23,6 +23,12 @@ import {
   updateDiscovery,
 } from "./services/discoveries/discovery-service";
 import { importContent } from "./services/import/content-import-service";
+import {
+  selectGalaxyCandidates,
+} from "./services/ai/openai-galaxy-candidates";
+import {
+  fetchPageMetadata,
+} from "./utils/metadata-fetcher";
 import { updateKnowledgeGraphNode } from "./services/knowledge/knowledge-graph-overrides";
 
 import {
@@ -225,6 +231,20 @@ const ImportRequestSchema = z.object({
   preferredLanguage: z.enum(["de", "en", "fr", "it", "es"]).optional(),
   preferredKnowledgePath: z.array(z.string().trim().min(2).max(60)).min(1).max(3).optional(),
 });
+
+const GalaxyCandidatePreviewSchema =
+  z.object({
+    workspaceId:
+      WorkspaceIdSchema
+        .optional()
+        .default("private"),
+
+    url:
+      z.string()
+        .trim()
+        .url(),
+  });
+
 
 const KnowledgeQuestionSchema = z.object({
   workspaceId:
@@ -1431,6 +1451,211 @@ app.post(
   },
 );
 
+
+async function buildGalaxyCandidatePaths(
+  workspaceId:
+    "private" | "business",
+) {
+  const workspaceDiscoveries =
+    (
+      await getAllDiscoveries(
+        discoveryRepository,
+      )
+    ).filter(
+      (discovery) =>
+        (
+          discovery.workspaceId ??
+          "private"
+        ) ===
+        workspaceId,
+    );
+
+  const galaxyMap =
+    new Map<
+      string,
+      {
+        count: number;
+        planets:
+          Map<
+            string,
+            number
+          >;
+      }
+    >();
+
+  for (
+    const discovery of
+    workspaceDiscoveries
+  ) {
+    const classification =
+      discovery.classification;
+
+    if (!classification) {
+      continue;
+    }
+
+    const galaxy =
+      classification
+        .secondaryCategory
+        ?.trim();
+
+    const planet =
+      classification
+        .topic
+        ?.trim();
+
+    if (!galaxy) {
+      continue;
+    }
+
+    const current =
+      galaxyMap.get(
+        galaxy,
+      ) ?? {
+        count: 0,
+
+        planets:
+          new Map<
+            string,
+            number
+          >(),
+      };
+
+    current.count += 1;
+
+    if (planet) {
+      current.planets.set(
+        planet,
+        (
+          current.planets.get(
+            planet,
+          ) ??
+          0
+        ) + 1,
+      );
+    }
+
+    galaxyMap.set(
+      galaxy,
+      current,
+    );
+  }
+
+  return [
+    ...galaxyMap.entries(),
+  ]
+    .sort(
+      (
+        [, left],
+        [, right],
+      ) =>
+        right.count -
+        left.count,
+    )
+    .slice(
+      0,
+      50,
+    )
+    .map(
+      ([
+        galaxy,
+        data,
+      ]) => ({
+        galaxy,
+
+        planets:
+          [
+            ...data.planets
+              .entries(),
+          ]
+            .sort(
+              (
+                [, left],
+                [, right],
+              ) =>
+                right -
+                left,
+            )
+            .slice(
+              0,
+              12,
+            )
+            .map(
+              ([planet]) =>
+                planet,
+            ),
+      }),
+    );
+}
+
+app.post(
+  "/api/import/candidates",
+  async (
+    request,
+    response,
+  ) => {
+    const parsed =
+      GalaxyCandidatePreviewSchema
+        .safeParse(
+          request.body,
+        );
+
+    if (!parsed.success) {
+      response.status(
+        400,
+      ).json({
+        error:
+          "A valid URL is required.",
+      });
+
+      return;
+    }
+
+    try {
+      const [
+        metadata,
+        existingKnowledgePaths,
+      ] =
+        await Promise.all([
+          fetchPageMetadata(
+            parsed.data.url,
+          ),
+
+          buildGalaxyCandidatePaths(
+            parsed.data.workspaceId,
+          ),
+        ]);
+
+      const candidates =
+        await withTimeout(
+          selectGalaxyCandidates(
+            metadata,
+            existingKnowledgePaths,
+          ),
+          40_000,
+        );
+
+      response.json({
+        candidates,
+      });
+    } catch (error) {
+      console.error(
+        "Galaxy candidate preview failed:",
+        error,
+      );
+
+      response.status(
+        500,
+      ).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "GALAXY_CANDIDATE_PREVIEW_FAILED",
+      });
+    }
+  },
+);
+
 app.post(
   "/api/import",
   async (request, response) => {
@@ -1598,6 +1823,24 @@ app.post(
             }),
           );
 
+      const preferredGalaxy =
+        parsedRequest.data
+          .preferredKnowledgePath
+          ?.[0]
+          ?.trim();
+
+      const effectiveKnowledgePaths =
+        preferredGalaxy
+          ? existingKnowledgePaths
+              .filter(
+                (path) =>
+                  path.galaxy
+                    .toLocaleLowerCase() ===
+                  preferredGalaxy
+                    .toLocaleLowerCase(),
+              )
+          : existingKnowledgePaths;
+
       const importResult =
         await withTimeout(
           importContent(
@@ -1608,7 +1851,8 @@ app.post(
               preferredKnowledgePath:
                 parsedRequest.data.preferredKnowledgePath,
 
-              existingKnowledgePaths,
+              existingKnowledgePaths:
+                effectiveKnowledgePaths,
             },
           ),
           90_000,
