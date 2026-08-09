@@ -74,6 +74,9 @@ export async function importContent(
       string[];
   } = {},
 ): Promise<ContentImportResult> {
+  const importStartedAt =
+    Date.now();
+
   console.log(
     "[Import] Starting:",
     url,
@@ -85,10 +88,13 @@ export async function importContent(
   const metadata =
     await fetchPageMetadata(url);
 
+  const metadataDurationMs =
+    Date.now() -
+    metadataStartedAt;
+
   console.log(
     `[Import] Metadata: ${
-      Date.now() -
-      metadataStartedAt
+      metadataDurationMs
     }ms`,
   );
 
@@ -106,9 +112,13 @@ export async function importContent(
       options.preferredLanguage,
     );
 
+  const aiDurationMs =
+    Date.now() -
+    aiStartedAt;
+
   console.log(
     `[Import] AI: ${
-      Date.now() - aiStartedAt
+      aiDurationMs
     }ms`,
   );
 
@@ -216,6 +226,53 @@ export async function importContent(
     updatedAt: now,
     savedAtLabel: "Just now",
   };
+
+  const totalDurationMs =
+    Date.now() -
+    importStartedAt;
+
+  console.log(
+    "[Import Metrics]",
+    JSON.stringify({
+      operation:
+        "content-import",
+
+      totalDurationMs,
+      metadataDurationMs,
+      aiDurationMs,
+
+      nonAiDurationMs:
+        Math.max(
+          0,
+          totalDurationMs -
+            aiDurationMs,
+        ),
+
+      fetchStrategy:
+        metadata.fetchStrategy,
+
+      contentType:
+        metadata.contentType,
+
+      confidence:
+        analysis.confidence,
+
+      galaxy:
+        classification
+          .secondaryCategory,
+
+      planet:
+        classification.topic,
+
+      stars:
+        classification
+          .subtopics.length,
+
+      preferredPathUsed:
+        preferredPath.length >
+        0,
+    }),
+  );
 
   return {
     metadata: {

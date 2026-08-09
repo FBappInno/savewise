@@ -223,7 +223,7 @@ export function UniverseSearch({
                 onChangeText={
                   setQuery
                 }
-                placeholder="Titel, Domäne, Topic oder Unterthema …"
+                placeholder="Titel, Galaxie, Planet oder Stern …"
                 placeholderTextColor={
                   universeTheme.colors
                     .textMuted
@@ -342,7 +342,7 @@ export function UniverseSearch({
                     }
                   >
                     Suche nach einem Titel,
-                    einer Domäne, einem Topic
+                    einer Galaxie, einem Planeten
                     oder einem Unterthema.
                     Auch verwandte Begriffe
                     und kleinere Tippfehler
@@ -388,7 +388,7 @@ export function UniverseSearch({
                   >
                     Versuche einen allgemeineren
                     Begriff oder suche direkt
-                    nach einer Domäne, einem
+                    nach einer Galaxie, einem
                     Topic oder Unterthema.
                   </Text>
                 </View>

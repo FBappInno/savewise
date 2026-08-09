@@ -72,6 +72,13 @@ export function DiscoveryEditModal({
   ] = useState("");
 
   const [
+    workspaceId,
+    setWorkspaceId,
+  ] = useState<
+    "private" | "business"
+  >("private");
+
+  const [
     automaticClassification,
     setAutomaticClassification,
   ] = useState(true);
@@ -142,9 +149,15 @@ export function DiscoveryEditModal({
       discovery.summary ?? "",
     );
 
-    setAutomaticClassification(
-      true,
+    setWorkspaceId(
+      discovery.workspaceId ??
+        "private",
     );
+
+    setAutomaticClassification(
+  classification?.mode !==
+    "manual",
+);
 
     setOriginalMainTopic(
       currentMainTopic,
@@ -278,7 +291,10 @@ export function DiscoveryEditModal({
 
     try {
       await onSave({
-        title: title.trim(),
+        workspaceId,
+
+
+    title: title.trim(),
 
         summary:
           summary.trim(),
@@ -296,7 +312,12 @@ export function DiscoveryEditModal({
             topic.trim(),
 
           subtopics:
-            parsedSubtopics,
+        parsedSubtopics,
+
+      mode:
+        automaticClassification
+          ? "ai"
+          : "manual",
         },
       });
     } finally {
@@ -473,6 +494,103 @@ export function DiscoveryEditModal({
           </Text>
 
           <SectionHeader
+            eyebrow="WORKSPACE"
+            title="Arbeitsbereich"
+          />
+
+          <View
+            style={
+              styles.workspaceSelector
+            }
+          >
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setWorkspaceId(
+                  "private",
+                );
+              }}
+              style={[
+                styles.workspaceOption,
+
+                workspaceId ===
+                  "private" &&
+                  styles.workspaceOptionActive,
+              ]}
+            >
+              <Ionicons
+                color={
+                  workspaceId ===
+                  "private"
+                    ? universeTheme
+                        .colors
+                        .primaryBright
+                    : universeTheme
+                        .colors
+                        .textMuted
+                }
+                name="person-outline"
+                size={18}
+              />
+
+              <Text
+                style={[
+                  styles.workspaceOptionText,
+
+                  workspaceId ===
+                    "private" &&
+                    styles.workspaceOptionTextActive,
+                ]}
+              >
+                Privat
+              </Text>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setWorkspaceId(
+                  "business",
+                );
+              }}
+              style={[
+                styles.workspaceOption,
+
+                workspaceId ===
+                  "business" &&
+                  styles.workspaceOptionActive,
+              ]}
+            >
+              <Ionicons
+                color={
+                  workspaceId ===
+                  "business"
+                    ? universeTheme
+                        .colors
+                        .primaryBright
+                    : universeTheme
+                        .colors
+                        .textMuted
+                }
+                name="briefcase-outline"
+                size={18}
+              />
+
+              <Text
+                style={[
+                  styles.workspaceOptionText,
+
+                  workspaceId ===
+                    "business" &&
+                    styles.workspaceOptionTextActive,
+                ]}
+              >
+                Geschäftlich
+              </Text>
+            </Pressable>
+          </View>
+
+          <SectionHeader
             eyebrow="KNOWLEDGE UNIVERSE"
             title="Einordnung"
           />
@@ -566,7 +684,7 @@ export function DiscoveryEditModal({
                     styles.currentPathLabel
                   }
                 >
-                  Aktuelle Domäne
+                  Aktuelle Galaxie
                 </Text>
 
                 <Text
@@ -597,7 +715,7 @@ export function DiscoveryEditModal({
                   styles.manualTitle
                 }
               >
-                Domäne
+                Galaxie
               </Text>
 
               <Pressable
@@ -637,7 +755,7 @@ export function DiscoveryEditModal({
                     }
                   >
                     {selectedMainTopic ??
-                      "Domäne auswählen"}
+                      "Galaxie auswählen"}
                   </Text>
                 </View>
 
@@ -772,7 +890,7 @@ export function DiscoveryEditModal({
 
               <Field
                 icon="add-circle-outline"
-                label="Neue Domäne"
+                label="Neue Galaxie"
                 maxLength={60}
                 onChangeText={(
                   value,
@@ -814,7 +932,7 @@ export function DiscoveryEditModal({
                     styles.manualHintText
                   }
                 >
-                  Eine neue Domäne
+                  Eine neue Galaxie
                   erscheint nach dem
                   Speichern automatisch
                   im Universum.
@@ -847,7 +965,7 @@ export function DiscoveryEditModal({
               styles.subtopicHint
             }
           >
-            Unterthemen mit Kommas
+            Sterne mit Kommas
             trennen. Maximal sechs
             Einträge.
           </Text>
@@ -1178,7 +1296,8 @@ function normalizeSubtopics(
       if (!unique.has(key)) {
         unique.set(key, entry);
       }
-    });
+  
+});
 
   return [...unique.values()].slice(
     0,
@@ -1685,4 +1804,78 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.7,
   },
+
+    workspaceSelector: {
+      flexDirection:
+        "row",
+
+      gap:
+        10,
+
+      marginBottom:
+        22,
+    },
+
+    workspaceOption: {
+      alignItems:
+        "center",
+
+      backgroundColor:
+        "rgba(148, 163, 184, 0.08)",
+
+      borderColor:
+        "rgba(148, 163, 184, 0.18)",
+
+      borderRadius:
+        14,
+
+      borderWidth:
+        1,
+
+      flex:
+        1,
+
+      flexDirection:
+        "row",
+
+      gap:
+        9,
+
+      justifyContent:
+        "center",
+
+      minHeight:
+        52,
+
+      paddingHorizontal:
+        14,
+    },
+
+    workspaceOptionActive: {
+      backgroundColor:
+        "rgba(56, 189, 248, 0.12)",
+
+      borderColor:
+        universeTheme.colors
+          .primary,
+    },
+
+    workspaceOptionText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+
+      fontSize:
+        14,
+
+      fontWeight:
+        "600",
+    },
+
+    workspaceOptionTextActive: {
+      color:
+        universeTheme.colors
+          .text,
+    },
+
 });

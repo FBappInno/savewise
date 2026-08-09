@@ -330,16 +330,16 @@ function getLevelLabel(
   if (
     level === "domain"
   ) {
-    return "Domäne";
+    return "Galaxie";
   }
 
   if (
     level === "topic"
   ) {
-    return "Topic";
+    return "Planet";
   }
 
-  return "Unterthema";
+  return "Stern";
 }
 
 function getDomainColor(

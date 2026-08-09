@@ -132,32 +132,37 @@ export class HybridDiscoveryRepository
         update,
       );
 
+    /*
+     * Optimistic Update:
+     * Die Änderung steht sofort lokal zur Verfügung.
+     */
     await sqliteDiscoveryRepository.save(
       locallyUpdatedDiscovery,
       "pending-update",
     );
 
-    try {
-      const response =
-        await updateDiscovery(
-          discoveryId,
-          update,
+    /*
+     * Backend-Synchronisierung läuft im Hintergrund.
+     * Die Oberfläche wartet nicht mehr darauf.
+     */
+    void updateDiscovery(
+      discoveryId,
+      update,
+    )
+      .then(async (response) => {
+        await sqliteDiscoveryRepository.save(
+          response.discovery,
+          "synced",
         );
+      })
+      .catch((error) => {
+        console.warn(
+          "Discovery was updated locally. Remote synchronization will be retried later.",
+          error,
+        );
+      });
 
-      await sqliteDiscoveryRepository.save(
-        response.discovery,
-        "synced",
-      );
-
-      return response.discovery;
-    } catch (error) {
-      console.warn(
-        "Discovery was updated locally. Remote synchronization will be retried later.",
-        error,
-      );
-
-      return locallyUpdatedDiscovery;
-    }
+    return locallyUpdatedDiscovery;
   }
 
   async delete(

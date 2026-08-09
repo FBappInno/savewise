@@ -88,10 +88,10 @@ const GALAXY_WIDTH =
 
 const GALAXY_HEIGHT =
   Math.min(
-    520,
+    680,
     Math.max(
-      420,
-      GALAXY_WIDTH * 1.2,
+      500,
+      GALAXY_WIDTH * 1.45,
     ),
   );
 
@@ -100,6 +100,22 @@ const CENTER_X =
 
 const CENTER_Y =
   GALAXY_HEIGHT / 2;
+
+/*
+ * Muss zur Weltgröße in
+ * interactive-universe-viewport.tsx passen.
+ */
+const UNIVERSE_WORLD_WIDTH =
+  Math.max(
+    GALAXY_WIDTH * 2.6,
+    900,
+  );
+
+const UNIVERSE_WORLD_HEIGHT =
+  Math.max(
+    GALAXY_HEIGHT * 2.3,
+    1050,
+  );
 
 export function KnowledgeUniverse({
   graph,
@@ -146,6 +162,15 @@ export function KnowledgeUniverse({
       ],
     );
 
+  const overviewPositions =
+    useMemo(
+      () =>
+        createOverviewPositions(
+          galaxies,
+        ),
+      [galaxies],
+    );
+
   const selectedGalaxy =
     galaxies.find(
       (galaxy) =>
@@ -153,6 +178,18 @@ export function KnowledgeUniverse({
         selectedDomainId,
     ) ??
     null;
+
+  const selectedGalaxyPosition =
+    selectedGalaxy
+      ? overviewPositions[
+          galaxies.findIndex(
+            (galaxy) =>
+              galaxy.node.id ===
+              selectedGalaxy.node.id,
+          )
+        ] ??
+        null
+      : null;
 
   const selectedTopic =
     selectedGalaxy
@@ -242,7 +279,7 @@ export function KnowledgeUniverse({
         <View style={styles.headerText}>
           <Text style={styles.eyebrow}>
             {selectedGalaxy
-              ? "DOMAIN EXPLORATION"
+              ? "GALAXIE ERKUNDEN"
               : "KNOWLEDGE UNIVERSE"}
           </Text>
 
@@ -254,8 +291,8 @@ export function KnowledgeUniverse({
 
           <Text style={styles.subtitle}>
             {selectedGalaxy
-              ? "Wähle ein Sonnensystem, um die zugehörigen Discoveries zu erkunden."
-              : "Jede Galaxie entspricht einer Domäne. Mehr Wissen erzeugt eine größere Galaxie."}
+              ? "Wähle einen Planeten, um Sterne und zugehörige Discoveries zu erkunden."
+              : "Jede Galaxie ist ein zentraler Wissensbereich. Mehr Inhalte erzeugen eine größere Galaxie."}
           </Text>
         </View>
 
@@ -290,6 +327,9 @@ export function KnowledgeUniverse({
 
       <View style={styles.universeCard}>
         <InteractiveUniverseViewport
+          focusPoint={
+            selectedGalaxyPosition
+          }
           height={
             GALAXY_HEIGHT
           }
@@ -307,6 +347,9 @@ export function KnowledgeUniverse({
             galaxies={
               galaxies
             }
+            positions={
+              overviewPositions
+            }
             onOpenDomain={
               openDomain
             }
@@ -315,6 +358,18 @@ export function KnowledgeUniverse({
           <DomainFocus
             galaxy={
               selectedGalaxy
+            }
+            origin={
+              selectedGalaxyPosition ??
+              {
+                x:
+                  UNIVERSE_WORLD_WIDTH /
+                  2,
+
+                y:
+                  UNIVERSE_WORLD_HEIGHT /
+                  2,
+              }
             }
             onOpenTopic={
               openTopic
@@ -343,8 +398,8 @@ export function KnowledgeUniverse({
 
           <Text style={styles.hintText}>
             {selectedGalaxy
-              ? "Topic antippen"
-              : "Domäne antippen"}
+              ? "Planet antippen"
+              : "Galaxie antippen"}
           </Text>
         </View>
       </View>
@@ -355,8 +410,8 @@ export function KnowledgeUniverse({
             <View style={styles.inspectorHeaderText}>
               <Text style={styles.eyebrow}>
                 {selectedTopic
-                  ? "SONNENSYSTEM"
-                  : "DOMÄNEN-GALAXIE"}
+                  ? "PLANET"
+                  : "GALAXIE"}
               </Text>
 
               <Text style={styles.inspectorTitle}>
@@ -592,7 +647,7 @@ export function KnowledgeUniverse({
             </Text>
 
             <Text style={styles.overviewStatLabel}>
-              Domänen
+              Galaxien
             </Text>
           </View>
 
@@ -613,7 +668,7 @@ export function KnowledgeUniverse({
             </Text>
 
             <Text style={styles.overviewStatLabel}>
-              Topics
+              Planeten
             </Text>
           </View>
 
@@ -638,19 +693,18 @@ export function KnowledgeUniverse({
 
 function UniverseOverview({
   galaxies,
+  positions,
   onOpenDomain,
 }: {
   galaxies:
     DomainGalaxy[];
 
+  positions:
+    Point[];
+
   onOpenDomain:
     (galaxy: DomainGalaxy) => void;
 }) {
-  const positions =
-    createOverviewPositions(
-      galaxies.length,
-    );
-
   return (
     <View style={styles.scene}>
       {galaxies.map(
@@ -781,11 +835,15 @@ function UniverseOverview({
 
 function DomainFocus({
   galaxy,
+  origin,
   selectedTopicId,
   onOpenTopic,
 }: {
   galaxy:
     DomainGalaxy;
+
+  origin:
+    Point;
 
   selectedTopicId:
     string | null;
@@ -796,6 +854,7 @@ function DomainFocus({
   const topicPositions =
     createTopicPositions(
       galaxy.topics.length,
+      origin,
     );
 
   const domainSize =
@@ -835,11 +894,11 @@ function DomainFocus({
               domainSize,
 
             left:
-              CENTER_X -
+              origin.x -
               domainSize / 2,
 
             top:
-              CENTER_Y -
+              origin.y -
               domainSize / 2,
 
             width:
@@ -1291,81 +1350,264 @@ function mapDiscoveries(
 }
 
 function createOverviewPositions(
-  count: number,
+  galaxies: DomainGalaxy[],
 ): Point[] {
   if (
-    count === 1
+    galaxies.length ===
+    0
+  ) {
+    return [];
+  }
+
+  if (
+    galaxies.length ===
+    1
   ) {
     return [
       {
         x:
-          CENTER_X,
+          UNIVERSE_WORLD_WIDTH /
+          2,
 
         y:
-          CENTER_Y,
+          UNIVERSE_WORLD_HEIGHT /
+          2,
       },
     ];
   }
 
-  return Array.from({
-    length:
-      count,
-  }).map(
+  const paddingX =
+    120;
+
+  const paddingY =
+    135;
+
+  const usableWidth =
+    UNIVERSE_WORLD_WIDTH -
+    paddingX * 2;
+
+  const usableHeight =
+    UNIVERSE_WORLD_HEIGHT -
+    paddingY * 2;
+
+  const placed:
+    Point[] = [];
+
+  return galaxies.map(
     (
-      _,
+      galaxy,
       index,
     ) => {
-      const angle =
-        (
-          Math.PI *
-          2 *
-          index
-        ) /
-          count -
-        Math.PI / 2;
+      /*
+       * Jede Galaxie erhält aus ihrer stabilen ID
+       * einen reproduzierbaren Ausgangspunkt.
+       * Dadurch springen die Positionen nicht bei
+       * jedem Rendern oder App-Neustart.
+       */
+      const hashX =
+        stableUniverseHash(
+          `${galaxy.node.id}:x`,
+        );
 
-      const ring =
-        count <= 6
-          ? Math.min(
-              GALAXY_WIDTH *
-                0.34,
-              135,
-            )
-          : index % 2 ===
-              0
-            ? Math.min(
-                GALAXY_WIDTH *
-                  0.29,
-                118,
-              )
-            : Math.min(
-                GALAXY_WIDTH *
-                  0.42,
-                168,
-              );
+      const hashY =
+        stableUniverseHash(
+          `${galaxy.node.id}:y`,
+        );
 
-      return {
+      let candidate: Point = {
         x:
-          CENTER_X +
-          Math.cos(
-            angle,
-          ) *
-            ring,
+          paddingX +
+          hashX *
+            usableWidth,
 
         y:
-          CENTER_Y +
-          Math.sin(
-            angle,
-          ) *
-            ring *
-            1.25,
+          paddingY +
+          hashY *
+            usableHeight,
       };
+
+      /*
+       * Verhindert starke Überlappungen.
+       * Bei einer Kollision wird die Galaxie
+       * deterministisch in einer Spirale
+       * nach außen verschoben.
+       */
+      const minimumDistance =
+        150;
+
+      let attempt =
+        0;
+
+      while (
+        placed.some(
+          (existing) =>
+            distanceBetween(
+              existing,
+              candidate,
+            ) <
+            minimumDistance,
+        ) &&
+        attempt <
+          24
+      ) {
+        const angle =
+          stableUniverseHash(
+            `${galaxy.node.id}:angle`,
+          ) *
+            Math.PI *
+            2 +
+          attempt *
+            0.82;
+
+        const radius =
+          42 +
+          attempt *
+            19;
+
+        candidate = {
+          x:
+            clampUniverseCoordinate(
+              paddingX +
+                hashX *
+                  usableWidth +
+                Math.cos(
+                  angle,
+                ) *
+                  radius,
+              paddingX,
+              UNIVERSE_WORLD_WIDTH -
+                paddingX,
+            ),
+
+          y:
+            clampUniverseCoordinate(
+              paddingY +
+                hashY *
+                  usableHeight +
+                Math.sin(
+                  angle,
+                ) *
+                  radius,
+              paddingY,
+              UNIVERSE_WORLD_HEIGHT -
+                paddingY,
+            ),
+        };
+
+        attempt +=
+          1;
+      }
+
+      /*
+       * Die größte Galaxie liegt etwas näher
+       * am sichtbaren Zentrum. Dadurch startet
+       * das Universum visuell mit einem starken
+       * Wissensbereich, bleibt aber frei verteilt.
+       */
+      if (
+        index ===
+        0
+      ) {
+        candidate = {
+          x:
+            candidate.x *
+              0.72 +
+            (
+              UNIVERSE_WORLD_WIDTH /
+              2
+            ) *
+              0.28,
+
+          y:
+            candidate.y *
+              0.72 +
+            (
+              UNIVERSE_WORLD_HEIGHT /
+              2
+            ) *
+              0.28,
+        };
+      }
+
+      placed.push(
+        candidate,
+      );
+
+      return candidate;
     },
+  );
+}
+
+function stableUniverseHash(
+  value: string,
+): number {
+  let hash =
+    2166136261;
+
+  for (
+    let index = 0;
+    index < value.length;
+    index += 1
+  ) {
+    hash ^=
+      value.charCodeAt(
+        index,
+      );
+
+    hash =
+      Math.imul(
+        hash,
+        16777619,
+      );
+  }
+
+  return (
+    hash >>> 0
+  ) /
+    4294967295;
+}
+
+function distanceBetween(
+  first: Point,
+  second: Point,
+): number {
+  const dx =
+    first.x -
+    second.x;
+
+  const dy =
+    first.y -
+    second.y;
+
+  return Math.sqrt(
+    dx * dx +
+    dy * dy,
+  );
+}
+
+function clampUniverseCoordinate(
+  value: number,
+  minimum: number,
+  maximum: number,
+): number {
+  return Math.min(
+    maximum,
+    Math.max(
+      minimum,
+      value,
+    ),
   );
 }
 
 function createTopicPositions(
   count: number,
+  center: Point = {
+    x:
+      CENTER_X,
+
+    y:
+      CENTER_Y,
+  },
 ): Point[] {
   return Array.from({
     length:
@@ -1403,14 +1645,14 @@ function createTopicPositions(
 
       return {
         x:
-          CENTER_X +
+          center.x +
           Math.cos(
             angle,
           ) *
             ring,
 
         y:
-          CENTER_Y +
+          center.y +
           Math.sin(
             angle,
           ) *

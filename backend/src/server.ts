@@ -1696,35 +1696,91 @@ app.patch(
     }
 
     try {
-      const discovery = await updateDiscovery(
-        discoveryRepository,
-        parsedId.data,
-        parsedUpdate.data,
-      );
+      /*
+       * Vorherigen Workspace merken.
+       *
+       * Falls eine Discovery von Privat nach Geschäftlich
+       * oder umgekehrt verschoben wird, müssen anschließend
+       * beide Knowledge Libraries aktualisiert werden.
+       */
+      const previousDiscovery =
+        await getDiscoveryById(
+          discoveryRepository,
+          parsedId.data,
+        );
+
+      const discovery =
+        await updateDiscovery(
+          discoveryRepository,
+          parsedId.data,
+          parsedUpdate.data,
+        );
+
       if (!discovery) {
-        response.status(404).json({ error: "Discovery not found." });
+        response.status(404).json({
+          error:
+            "Discovery not found.",
+        });
+
         return;
       }
 
-      const library = await rebuildCurrentKnowledgeLibrary(
-        discoveryRepository,
-        discovery.workspaceId ?? "private",
-      );
-      if (library.graph) {
-        await recordLearningCycle(
-          library.graph,
-          "discovery-updated",
-          discovery.id,
-        );
-      }
+      /*
+       * WICHTIG:
+       * Die Discovery ist jetzt bereits persistent gespeichert.
+       *
+       * Deshalb antworten wir sofort an Web / Mobile.
+       * Der Benutzer muss nicht auf den kompletten
+       * Knowledge-Graph-Rebuild warten.
+       */
       response.json({
         discovery,
+
         knowledgeUpdate: {
-          generatedAt: library.generatedAt,
-          totalDiscoveries: library.discoveries.length,
-          totalTopics: library.topics.length,
-          totalGraphNodes: library.graph?.nodes.length ?? 0,
+          status:
+            "queued",
         },
+      });
+
+      /*
+       * Knowledge-Nacharbeit läuft anschließend
+       * unabhängig von der HTTP-Antwort.
+       */
+      const affectedWorkspaceIds =
+        new Set([
+          previousDiscovery
+            ?.workspaceId ??
+            "private",
+
+          discovery.workspaceId ??
+            "private",
+        ]);
+
+      void Promise.all(
+        [...affectedWorkspaceIds].map(
+          async (
+            workspaceId,
+          ) => {
+            const library =
+              await rebuildCurrentKnowledgeLibrary(
+                discoveryRepository,
+                workspaceId,
+              );
+
+            if (library.graph) {
+              await recordLearningCycle(
+                library.graph,
+                "discovery-updated",
+                discovery.id,
+              );
+            }
+          },
+        ),
+      ).catch((backgroundError) => {
+        console.error(
+          "Background knowledge update after discovery edit failed:",
+          backgroundError,
+        );
       });
     } catch (error) {
       console.error("Discovery could not be updated:", error);

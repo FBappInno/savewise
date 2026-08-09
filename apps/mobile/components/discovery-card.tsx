@@ -179,7 +179,7 @@ export function DiscoveryCard({
           {hierarchy.domain ? (
             <HierarchyRow
               icon="planet-outline"
-              label="Domäne"
+              label="Galaxie"
               value={
                 hierarchy.domain
               }
@@ -193,7 +193,7 @@ export function DiscoveryCard({
           {hierarchy.topic ? (
             <HierarchyRow
               icon="sunny-outline"
-              label="Topic"
+              label="Planet"
               value={
                 hierarchy.topic
               }

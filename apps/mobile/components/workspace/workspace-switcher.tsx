@@ -194,7 +194,7 @@ export function WorkspaceSwitcher({
                 styles.workspaceStatsLabel
               }
             >
-              Domänen
+              Galaxien
             </Text>
           </View>
 

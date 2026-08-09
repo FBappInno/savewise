@@ -1,7 +1,3 @@
-import {
-  Ionicons,
-} from "@expo/vector-icons";
-
 import type {
   PropsWithChildren,
 } from "react";
@@ -12,51 +8,43 @@ import {
 } from "react";
 
 import {
-  Pressable,
   StyleSheet,
   View,
 } from "react-native";
 
 import {
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 
 import {
   centerUniverse,
-  clampScale,
+  focusUniversePoint,
   type UniverseCameraState,
+  type UniversePoint,
 } from "@/components/universe/universe-camera";
 
 import {
   UniverseGestures,
 } from "@/components/universe/universe-gestures";
 
-import {
-  universeTheme,
-} from "@/theme/universe-theme";
-
 type Props =
   PropsWithChildren<{
-    width:
-      number;
-
-    height:
-      number;
-
-    resetKey:
-      string;
+    width: number;
+    height: number;
+    resetKey: string;
+    focusPoint?: UniversePoint | null;
   }>;
 
 export function InteractiveUniverseViewport({
   width,
   height,
   resetKey,
+  focusPoint = null,
   children,
 }: Props) {
   const scale =
     useSharedValue(
-      1,
+      0.78,
     );
 
   const translateX =
@@ -98,18 +86,27 @@ export function InteractiveUniverseViewport({
     );
 
   /*
-   * Die Welt ist etwas größer als das
-   * sichtbare Fenster. Dadurch lassen
-   * sich viele Galaxien frei erkunden.
+   * Die mobile Welt ist deutlich größer
+   * als der sichtbare iPhone-Ausschnitt.
+   *
+   * Dadurch kann das Universum wie eine
+   * echte Karte verschoben und erkundet
+   * werden.
    */
   const world =
     useMemo(
       () => ({
         width:
-          width,
+          Math.max(
+            width * 2.6,
+            900,
+          ),
 
         height:
-          height,
+          Math.max(
+            height * 2.3,
+            1050,
+          ),
       }),
       [
         width,
@@ -119,7 +116,7 @@ export function InteractiveUniverseViewport({
 
   useEffect(() => {
     scale.value =
-      1;
+      0.78;
 
     centerUniverse(
       camera,
@@ -138,38 +135,35 @@ export function InteractiveUniverseViewport({
     world,
   ]);
 
-  function zoomBy(
-    delta:
-      number,
-  ) {
-    scale.value =
-      withTiming(
-        clampScale(
-          scale.value +
-            delta,
-          0.6,
-          2.8,
-        ),
-        {
-          duration:
-            180,
-        },
-      );
-  }
+  useEffect(() => {
+    if (!focusPoint) {
+      return;
+    }
 
-  function center() {
-    centerUniverse(
+    focusUniversePoint(
       camera,
+      focusPoint,
       viewport,
       world,
+      {
+        animated:
+          true,
+
+        durationMs:
+          460,
+      },
     );
-  }
+  }, [
+    camera,
+    focusPoint,
+    viewport,
+    world,
+  ]);
 
   return (
     <View
       style={[
         styles.wrapper,
-
         {
           height,
           width,
@@ -181,10 +175,10 @@ export function InteractiveUniverseViewport({
           camera
         }
         maximumScale={
-          2.8
+          3.2
         }
         minimumScale={
-          0.6
+          0.42
         }
         viewport={
           viewport
@@ -193,74 +187,18 @@ export function InteractiveUniverseViewport({
           world
         }
       >
-        {children}
+        <View
+          style={{
+            height:
+              world.height,
+
+            width:
+              world.width,
+          }}
+        >
+          {children}
+        </View>
       </UniverseGestures>
-
-      <View style={styles.controls}>
-        <Pressable
-          hitSlop={8}
-          onPress={() => {
-            zoomBy(
-              -0.2,
-            );
-          }}
-          style={
-            styles.controlButton
-          }
-        >
-          <Ionicons
-            color={
-              universeTheme
-                .colors
-                .textSecondary
-            }
-            name="remove"
-            size={19}
-          />
-        </Pressable>
-
-        <Pressable
-          hitSlop={8}
-          onPress={
-            center
-          }
-          style={
-            styles.controlButton
-          }
-        >
-          <Ionicons
-            color={
-              universeTheme
-                .colors
-                .primaryBright
-            }
-            name="locate-outline"
-            size={18}
-          />
-        </Pressable>
-
-        <Pressable
-          hitSlop={8}
-          onPress={() => {
-            zoomBy(
-              0.2,
-            );
-          }}
-          style={
-            styles.controlButton
-          }
-        >
-          <Ionicons
-            color={
-              universeTheme
-                .colors
-                .textSecondary
-            }
-            name="add"
-            size={19}
-          />
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -273,52 +211,5 @@ const styles =
 
       position:
         "relative",
-    },
-
-    controls: {
-      alignItems:
-        "center",
-
-      alignSelf:
-        "center",
-
-      backgroundColor:
-        "rgba(2, 12, 22, 0.92)",
-
-      borderColor:
-        universeTheme.colors
-          .border,
-
-      borderRadius:
-        999,
-
-      borderWidth:
-        1,
-
-      bottom:
-        10,
-
-      flexDirection:
-        "row",
-
-      padding:
-        3,
-
-      position:
-        "absolute",
-    },
-
-    controlButton: {
-      alignItems:
-        "center",
-
-      height:
-        34,
-
-      justifyContent:
-        "center",
-
-      width:
-        38,
     },
   });

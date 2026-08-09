@@ -44,6 +44,10 @@ export function useKnowledgeLibrary() {
       setIsLoading(true);
 
       try {
+        /*
+         * Cache sofort anzeigen, damit die
+         * Oberfläche schnell verfügbar ist.
+         */
         const localLibrary =
           await hybridKnowledgeRepository.getLibrary();
 
@@ -51,10 +55,15 @@ export function useKnowledgeLibrary() {
           setLibrary(
             localLibrary,
           );
-
-          return;
         }
 
+        /*
+         * Anschließend IMMER den aktuellen
+         * Backend-Stand laden.
+         *
+         * Damit bleiben Mobile und Web
+         * synchron.
+         */
         try {
           const refreshedLibrary =
             await hybridKnowledgeRepository.refresh();
@@ -62,14 +71,16 @@ export function useKnowledgeLibrary() {
           setLibrary(
             refreshedLibrary,
           );
-        } catch {
-          setLibrary(null);
+        } catch (refreshError) {
+          if (!localLibrary) {
+            throw refreshError;
+          }
         }
       } catch (loadError) {
         setError(
           getErrorMessage(
             loadError,
-            "Die Wissensbibliothek konnte nicht lokal geladen werden.",
+            "Die Wissensbibliothek konnte nicht geladen werden.",
           ),
         );
       } finally {

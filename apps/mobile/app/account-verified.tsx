@@ -68,6 +68,11 @@ export default function AccountVerifiedScreen() {
         <Pressable
           accessibilityRole="button"
           onPress={() => {
+            /*
+             * Der zentrale Auth-Gate verhindert
+             * anschließend automatisch den Zugriff
+             * auf SaveWise ohne gültige Session.
+             */
             router.replace("/(tabs)" as never);
           }}
           style={({ pressed }) => [

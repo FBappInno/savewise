@@ -157,7 +157,7 @@ export function UniverseDomainExplorer({
               discoveries={
                 domain.discoveries
               }
-              label="Direkt in dieser Domäne"
+              label="Direkt in dieser Galaxie"
               onOpenDiscovery={
                 onOpenDiscovery
               }
@@ -404,7 +404,7 @@ function EmptyState() {
       </Text>
 
       <Text style={styles.emptyDescription}>
-        Diese Domäne besitzt aktuell noch
+        Diese Galaxie besitzt aktuell noch
         keine untergeordneten Topics.
       </Text>
     </View>

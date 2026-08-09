@@ -365,7 +365,7 @@ function formatKind(
       return "Domain";
 
     case "topic":
-      return "Topic";
+      return "Planet";
 
     case "subtopic":
       return "Subtopic";

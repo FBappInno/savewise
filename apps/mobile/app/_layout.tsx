@@ -50,6 +50,10 @@ import {
 } from "@/providers/app-settings-provider";
 
 import {
+  AppAuthGate,
+} from "@/components/auth/app-auth-gate";
+
+import {
   trackAnonymousEvent,
 } from "@/services/anonymous-analytics";
 
@@ -68,7 +72,9 @@ export default function RootLayout() {
         }}
       >
         <AppSettingsProvider>
-          <RootNavigator />
+          <AppAuthGate>
+            <RootNavigator />
+          </AppAuthGate>
         </AppSettingsProvider>
       </GestureHandlerRootView>
     </ShareIntentProvider>

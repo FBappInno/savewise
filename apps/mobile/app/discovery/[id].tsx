@@ -687,7 +687,7 @@ export default function DiscoveryDetailScreen() {
             >
               <PathLevel
                 icon="planet-outline"
-                label="Domäne"
+                label="Galaxie"
                 value={
                   classification.secondaryCategory
                 }
@@ -701,7 +701,7 @@ export default function DiscoveryDetailScreen() {
 
               <PathLevel
                 icon="git-branch-outline"
-                label="Topic"
+                label="Planet"
                 value={
                   classification.topic
                 }

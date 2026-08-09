@@ -47,9 +47,9 @@ import type {
 
 const OPTIMIZATION_STAGES = [
   "Discoveries analysieren",
-  "Domänen überprüfen",
+  "Galaxien überprüfen",
   "Topics neu gruppieren",
-  "Unterthemen strukturieren",
+  "Sterne strukturieren",
   "Verbindungen berechnen",
 ] as const;
 
@@ -270,9 +270,9 @@ export default function SettingsScreen() {
         "Optimierung abgeschlossen",
         [
           `${result.discoveries} Discoveries analysiert`,
-          `${result.domains} Domänen`,
-          `${result.topics} Topics`,
-          `${result.subtopics} Unterthemen`,
+          `${result.domains} Galaxien`,
+          `${result.topics} Planeten`,
+          `${result.subtopics} Sterne`,
           "",
           "Die neue Struktur wurde lokal gespeichert.",
         ].join("\n"),
@@ -1042,7 +1042,7 @@ function UniverseOptimizationPanel({
       >
         Die KI analysiert alle
         Discoveries erneut und verbessert
-        Domänen, Topics, Unterthemen und
+        Galaxien, Planeten, Sterne und
         deren Beziehungen.
       </Text>
 
@@ -1052,7 +1052,7 @@ function UniverseOptimizationPanel({
         }
       >
         <OptimizationFact
-          text="Domänen konsolidieren"
+          text="Galaxien konsolidieren"
         />
 
         <OptimizationFact
@@ -1060,7 +1060,7 @@ function UniverseOptimizationPanel({
         />
 
         <OptimizationFact
-          text="Unterthemen strukturieren"
+          text="Sterne strukturieren"
         />
 
         <OptimizationFact
@@ -1268,7 +1268,7 @@ function UniverseOptimizationModal({
                 }
               >
                 <OptimizationFact
-                  text="Domänen werden überprüft"
+                  text="Galaxien werden überprüft"
                 />
 
                 <OptimizationFact
@@ -1276,7 +1276,7 @@ function UniverseOptimizationModal({
                 />
 
                 <OptimizationFact
-                  text="Unterthemen werden strukturiert"
+                  text="Sterne werden strukturiert"
                 />
 
                 <OptimizationFact

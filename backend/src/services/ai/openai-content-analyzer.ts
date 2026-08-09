@@ -9,6 +9,9 @@ import type {
 
 import type { PageMetadata } from "../../types/page-metadata";
 
+const CONTENT_ANALYSIS_MODEL =
+  "gpt-4.1-mini";
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   timeout: 45_000,
@@ -125,8 +128,12 @@ export async function analyzeContent(
       }]
     : metadataInput;
 
+  const aiStartedAt =
+    Date.now();
+
   const response = await openai.responses.parse({
-    model: "gpt-4.1-mini",
+    model:
+      CONTENT_ANALYSIS_MODEL,
 
     instructions: [
       "You are the knowledge organization engine for SaveWise.",
@@ -171,16 +178,138 @@ export async function analyzeContent(
     },
   });
 
+  const aiDurationMs =
+    Date.now() -
+    aiStartedAt;
+
+  const inputTokens =
+    response.usage
+      ?.input_tokens ??
+    0;
+
+  const outputTokens =
+    response.usage
+      ?.output_tokens ??
+    0;
+
+  const totalTokens =
+    response.usage
+      ?.total_tokens ??
+    inputTokens +
+      outputTokens;
+
+  const extractedTextLength =
+    metadata.extractedText
+      ?.length ??
+    0;
+
+  const videoTranscriptLength =
+    metadata.videoTranscript
+      ?.length ??
+    0;
+
+  console.log(
+    "[AI Metrics]",
+    JSON.stringify({
+      operation:
+        "content-analysis",
+
+      model:
+        CONTENT_ANALYSIS_MODEL,
+
+      durationMs:
+        aiDurationMs,
+
+      inputTokens,
+      outputTokens,
+      totalTokens,
+
+      inputCharacters:
+        Math.min(
+          extractedTextLength,
+          12_000,
+        ) +
+        Math.min(
+          videoTranscriptLength,
+          12_000,
+        ),
+
+      contentType:
+        metadata.contentType,
+
+      fetchStrategy:
+        metadata.fetchStrategy,
+
+      mediaType:
+        metadata.mediaType ??
+        null,
+
+      hasThumbnail:
+        Boolean(
+          metadata.thumbnailUrl,
+        ),
+
+      hasTranscript:
+        Boolean(
+          metadata.videoTranscript,
+        ),
+
+      hasExtractedText:
+        Boolean(
+          metadata.extractedText,
+        ),
+
+      preferredLanguage:
+        preferredLanguage ??
+        null,
+    }),
+  );
+
   if (!response.output_parsed) {
     throw new Error(
       "AI returned no structured analysis.",
     );
   }
 
-  return {
+  const result = {
     ...response.output_parsed,
-    language: preferredLanguage ?? response.output_parsed.language,
+
+    language:
+      preferredLanguage ??
+      response.output_parsed
+        .language,
   };
+
+  console.log(
+    "[AI Result]",
+    JSON.stringify({
+      model:
+        CONTENT_ANALYSIS_MODEL,
+
+      confidence:
+        result.confidence,
+
+      galaxy:
+        result.classification
+          .secondaryCategory,
+
+      planet:
+        result.classification
+          .topic,
+
+      stars:
+        result.classification
+          .subtopics.length,
+
+      keywords:
+        result.keywords.length,
+
+      language:
+        result.language,
+    }),
+  );
+
+  return result;
 }
 
 function languageName(language: "de" | "en" | "fr" | "it" | "es"): string {

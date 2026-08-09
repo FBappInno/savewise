@@ -3,8 +3,10 @@ import type {
   KnowledgeLibrary,
 } from "@savewise/shared";
 
-import { hybridDiscoveryRepository } from "@/repositories/hybrid-discovery-repository";
-import { localKnowledgeRepository } from "@/repositories/local-knowledge-repository";
+import {
+  localKnowledgeRepository,
+} from "@/repositories/local-knowledge-repository";
+
 import {
   getKnowledgeLibrary,
   rebuildKnowledgeLibrary,
@@ -15,22 +17,20 @@ export class HybridKnowledgeRepository {
   async getLibrary(): Promise<
     KnowledgeLibrary | null
   > {
-    const localLibrary =
-      await localKnowledgeRepository.getLibrary();
-
-    if (!localLibrary) {
-      return null;
-    }
-
-    return this.attachCurrentLocalDiscoveries(
-      localLibrary,
-    );
+    return localKnowledgeRepository.getLibrary();
   }
 
   async refresh(): Promise<
     KnowledgeLibrary
   > {
     try {
+      /*
+       * Das Backend ist die Source of Truth.
+       *
+       * Die komplette Library inklusive
+       * Discoveries und Klassifikationen
+       * kommt aus derselben Quelle wie im Web.
+       */
       const remoteLibrary =
         await getKnowledgeLibrary();
 
@@ -40,12 +40,17 @@ export class HybridKnowledgeRepository {
 
       return remoteLibrary;
     } catch (error) {
+      /*
+       * Nur wenn das Backend nicht erreichbar
+       * ist, verwenden wir den letzten lokalen
+       * Stand als Offline-Fallback.
+       */
       const localLibrary =
-        await this.getLibrary();
+        await localKnowledgeRepository.getLibrary();
 
       if (localLibrary) {
         console.warn(
-          "Backend unavailable. Using local knowledge library.",
+          "Backend unavailable. Using cached knowledge library.",
           error,
         );
 
@@ -59,17 +64,10 @@ export class HybridKnowledgeRepository {
   async getOrRefresh(): Promise<
     KnowledgeLibrary | null
   > {
-    const localLibrary =
-      await this.getLibrary();
-
-    if (localLibrary) {
-      return localLibrary;
-    }
-
     try {
       return await this.refresh();
     } catch {
-      return null;
+      return localKnowledgeRepository.getLibrary();
     }
   }
 
@@ -125,7 +123,7 @@ export class HybridKnowledgeRepository {
     KnowledgeGraph | null
   > {
     const localLibrary =
-      await this.getLibrary();
+      await localKnowledgeRepository.getLibrary();
 
     if (localLibrary?.graph) {
       return localLibrary.graph;
@@ -138,20 +136,6 @@ export class HybridKnowledgeRepository {
     string | null
   > {
     return localKnowledgeRepository.getLastUpdate();
-  }
-
-  private async attachCurrentLocalDiscoveries(
-    library: KnowledgeLibrary,
-  ): Promise<KnowledgeLibrary> {
-    const localDiscoveries =
-      await hybridDiscoveryRepository.getAll();
-
-    return {
-      ...library,
-
-      discoveries:
-        localDiscoveries,
-    };
   }
 }
 

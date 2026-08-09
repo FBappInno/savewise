@@ -100,30 +100,7 @@ export default function UniverseHomeScreen() {
     );
 
   const domainCount =
-    useMemo(() => {
-      if (!graph) {
-        return 0;
-      }
-
-      const rootIds =
-        new Set(
-          graph.rootNodeIds,
-        );
-
-      return graph.nodes.filter(
-        (node) =>
-          (
-            rootIds.has(
-              node.id,
-            ) ||
-            node.parentId === null
-          ) &&
-          node.kind === "domain" &&
-          !isGenericDomain(
-            node.title,
-          ),
-      ).length;
-    }, [graph]);
+    existingMainTopics.length;
 
   function openDiscovery(
     discovery: Discovery,
@@ -242,7 +219,7 @@ export default function UniverseHomeScreen() {
 
           <MetricCard
             icon="planet-outline"
-            label="Domänen"
+            label="Galaxien"
             value={domainCount}
           />
 
