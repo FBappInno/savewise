@@ -12,6 +12,7 @@
     "test:knowledge-graph": "tsx --test src/scripts/test-deterministic-knowledge-graph.ts",
     "test:explicit-taxonomy-migration": "tsx --test src/scripts/test-explicit-taxonomy-migration.ts",
     "test:explicit-taxonomy-migration-phase-two": "tsx --test src/scripts/test-explicit-taxonomy-migration-phase-two.ts",
+    "test:explicit-galaxy-consolidation": "tsx --test src/scripts/test-explicit-galaxy-consolidation.ts",
     "test:personal-assistant": "tsx --test src/scripts/test-personal-knowledge-assistant.ts",
     "test:autonomous-research": "tsx --test src/scripts/test-autonomous-research-agent.ts",
     "test:personal-intelligence": "tsx --test src/scripts/test-personal-intelligence-platform.ts",
