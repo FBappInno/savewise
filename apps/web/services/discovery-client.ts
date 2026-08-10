@@ -63,6 +63,11 @@ export type ImportResponse = {
   knowledgeUpdate: KnowledgeUpdate;
 };
 
+export type GalaxyCandidatePreview = {
+  galaxy: string;
+  score: number;
+};
+
 type DiscoveriesResponse = {
   discoveries: Discovery[];
 };
@@ -192,6 +197,50 @@ export async function importDiscoveryLink(
   }
 
   return body as ImportResponse;
+}
+
+export async function getDiscoveryLinkGalaxyCandidates(
+  input: {
+    rawUrl: string;
+    workspaceId: WorkspaceId;
+  },
+): Promise<GalaxyCandidatePreview[]> {
+  const url =
+    normalizeDiscoveryUrl(
+      input.rawUrl,
+    );
+
+  if (
+    !isValidDiscoveryUrl(url)
+  ) {
+    throw new Error(
+      "Bitte gib zuerst eine gültige Internetadresse ein.",
+    );
+  }
+
+  const response =
+    await authenticatedFetch(
+      "/api/import/candidates",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify({
+            url,
+            workspaceId:
+              input.workspaceId,
+          }),
+      },
+    );
+
+  return readGalaxyCandidates(
+    response,
+  );
 }
 
 export async function deleteDiscovery(
@@ -408,6 +457,101 @@ export async function importDiscoveryFile(
   };
 }
 
+export async function getDiscoveryFileGalaxyCandidates(
+  input: {
+    file: File;
+
+    captureType:
+      | "pdf"
+      | "image";
+
+    workspaceId:
+      WorkspaceId;
+
+    preferredLanguage?:
+      | "de"
+      | "en"
+      | "fr"
+      | "it"
+      | "es";
+  },
+): Promise<GalaxyCandidatePreview[]> {
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    input.file,
+  );
+
+  formData.append(
+    "captureType",
+    input.captureType,
+  );
+
+  formData.append(
+    "workspaceId",
+    input.workspaceId,
+  );
+
+  formData.append(
+    "preferredLanguage",
+    input.preferredLanguage ??
+      "de",
+  );
+
+  const response =
+    await authenticatedFetch(
+      "/api/capture/file/candidates",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+  return readGalaxyCandidates(
+    response,
+  );
+}
+
+async function readGalaxyCandidates(
+  response: Response,
+): Promise<GalaxyCandidatePreview[]> {
+  const body =
+    await readJson<{
+      candidates:
+        GalaxyCandidatePreview[];
+    } & ApiErrorResponse>(
+      response,
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      body.error ??
+      "Die passenden Galaxien konnten nicht ermittelt werden.",
+    );
+  }
+
+  return (
+    Array.isArray(body.candidates)
+      ? body.candidates
+      : []
+  )
+    .filter(
+      (candidate) =>
+        typeof candidate.galaxy ===
+          "string" &&
+        candidate.galaxy
+          .trim()
+          .length > 0,
+    )
+    .sort(
+      (left, right) =>
+        right.score - left.score,
+    )
+    .slice(0, 5);
+}
+
 function translateFileCaptureError(
   code: string | undefined,
   status: number,
@@ -505,4 +649,3 @@ function translateAttachmentError(
         : `Die Originaldatei konnte nicht geladen werden (${status}).`;
   }
 }
-

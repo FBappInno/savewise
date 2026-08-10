@@ -5,12 +5,21 @@ import {
 } from "react";
 
 import {
+  GalaxyCandidateSelector,
+} from "@/components/capture/galaxy-candidate-selector";
+
+import {
   useDiscoveries,
 } from "@/providers/discovery-provider";
 
 import {
   useWorkspace,
 } from "@/providers/workspace-provider";
+
+import {
+  getDiscoveryLinkGalaxyCandidates,
+  type GalaxyCandidatePreview,
+} from "@/services/discovery-client";
 
 export function LinkCaptureForm({
   onBack,
@@ -41,6 +50,28 @@ export function LinkCaptureForm({
     setKnowledgePath,
   ] =
     useState("");
+
+  const [
+    galaxyCandidates,
+    setGalaxyCandidates,
+  ] =
+    useState<
+      GalaxyCandidatePreview[]
+    >([]);
+
+  const [
+    selectedGalaxy,
+    setSelectedGalaxy,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
+    isLoadingCandidates,
+    setLoadingCandidates,
+  ] =
+    useState(false);
 
   const [
     error,
@@ -84,6 +115,53 @@ export function LinkCaptureForm({
     }
   }
 
+  async function loadCandidates() {
+    if (
+      !url.trim() ||
+      isLoadingCandidates
+    ) {
+      return;
+    }
+
+    setLoadingCandidates(true);
+    setError(null);
+
+    try {
+      const candidates =
+        await getDiscoveryLinkGalaxyCandidates({
+          rawUrl: url,
+          workspaceId:
+            activeWorkspaceId,
+        });
+
+      setGalaxyCandidates(
+        candidates,
+      );
+      setSelectedGalaxy(null);
+      setKnowledgePath("");
+    } catch (
+      candidateError
+    ) {
+      setGalaxyCandidates([]);
+      setError(
+        candidateError instanceof Error
+          ? candidateError.message
+          : "Galaxien konnten nicht vorgeschlagen werden.",
+      );
+    } finally {
+      setLoadingCandidates(false);
+    }
+  }
+
+  function selectGalaxy(
+    galaxy: string | null,
+  ) {
+    setSelectedGalaxy(galaxy);
+    setKnowledgePath(
+      galaxy ?? "",
+    );
+  }
+
   return (
     <div className="capture-form">
       <button
@@ -123,15 +201,43 @@ export function LinkCaptureForm({
             isImporting
           }
           onChange={(event) => {
+            if (selectedGalaxy) {
+              setKnowledgePath("");
+            }
+
             setUrl(
               event.target.value,
             );
+            setGalaxyCandidates([]);
+            setSelectedGalaxy(null);
           }}
           placeholder="https://..."
           type="url"
           value={url}
         />
       </label>
+
+      <GalaxyCandidateSelector
+        candidates={
+          galaxyCandidates
+        }
+        disabled={
+          !url.trim() ||
+          isImporting
+        }
+        isLoading={
+          isLoadingCandidates
+        }
+        onLoad={() => {
+          void loadCandidates();
+        }}
+        onSelect={
+          selectGalaxy
+        }
+        selectedGalaxy={
+          selectedGalaxy
+        }
+      />
 
       <label className="form-field">
         <span>
@@ -149,6 +255,7 @@ export function LinkCaptureForm({
             setKnowledgePath(
               event.target.value,
             );
+            setSelectedGalaxy(null);
           }}
           placeholder="Zum Beispiel: Technologie > KI > Agenten"
           value={knowledgePath}

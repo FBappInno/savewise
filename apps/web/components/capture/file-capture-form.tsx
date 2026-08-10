@@ -7,12 +7,26 @@ import {
 } from "react";
 
 import {
+  GalaxyCandidateSelector,
+} from "@/components/capture/galaxy-candidate-selector";
+
+import {
   useDiscoveries,
 } from "@/providers/discovery-provider";
 
 import {
   useWorkspace,
 } from "@/providers/workspace-provider";
+
+import {
+  getDiscoveryFileGalaxyCandidates,
+  type GalaxyCandidatePreview,
+} from "@/services/discovery-client";
+
+import {
+  loadWebSettings,
+  resolvePreferredLanguage,
+} from "@/services/web-settings";
 
 export function FileCaptureForm({
   captureType,
@@ -58,6 +72,28 @@ export function FileCaptureForm({
     useState("");
 
   const [
+    galaxyCandidates,
+    setGalaxyCandidates,
+  ] =
+    useState<
+      GalaxyCandidatePreview[]
+    >([]);
+
+  const [
+    selectedGalaxy,
+    setSelectedGalaxy,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
+    isLoadingCandidates,
+    setLoadingCandidates,
+  ] =
+    useState(false);
+
+  const [
     error,
     setError,
   ] =
@@ -79,6 +115,13 @@ export function FileCaptureForm({
       File | null,
   ) {
     setError(null);
+
+    if (selectedGalaxy) {
+      setKnowledgePath("");
+    }
+
+    setGalaxyCandidates([]);
+    setSelectedGalaxy(null);
 
     if (!selected) {
       setFile(null);
@@ -137,6 +180,61 @@ export function FileCaptureForm({
     }
 
     setFile(selected);
+  }
+
+  async function loadCandidates() {
+    if (
+      !file ||
+      isLoadingCandidates
+    ) {
+      return;
+    }
+
+    setLoadingCandidates(true);
+    setError(null);
+
+    try {
+      const settings =
+        loadWebSettings();
+
+      const candidates =
+        await getDiscoveryFileGalaxyCandidates({
+          file,
+          captureType,
+          workspaceId:
+            activeWorkspaceId,
+          preferredLanguage:
+            resolvePreferredLanguage(
+              settings,
+            ),
+        });
+
+      setGalaxyCandidates(
+        candidates,
+      );
+      setSelectedGalaxy(null);
+      setKnowledgePath("");
+    } catch (
+      candidateError
+    ) {
+      setGalaxyCandidates([]);
+      setError(
+        candidateError instanceof Error
+          ? candidateError.message
+          : "Die passenden Galaxien konnten nicht ermittelt werden.",
+      );
+    } finally {
+      setLoadingCandidates(false);
+    }
+  }
+
+  function selectGalaxy(
+    galaxy: string | null,
+  ) {
+    setSelectedGalaxy(galaxy);
+    setKnowledgePath(
+      galaxy ?? "",
+    );
   }
 
   async function handleSubmit() {
@@ -290,6 +388,28 @@ export function FileCaptureForm({
         )}
       </button>
 
+      <GalaxyCandidateSelector
+        candidates={
+          galaxyCandidates
+        }
+        disabled={
+          !file ||
+          isImporting
+        }
+        isLoading={
+          isLoadingCandidates
+        }
+        onLoad={() => {
+          void loadCandidates();
+        }}
+        onSelect={
+          selectGalaxy
+        }
+        selectedGalaxy={
+          selectedGalaxy
+        }
+      />
+
       <label className="form-field">
         <span>
           Gewünschter Wissenspfad
@@ -307,6 +427,7 @@ export function FileCaptureForm({
             setKnowledgePath(
               event.target.value,
             );
+            setSelectedGalaxy(null);
           }}
           placeholder="Zum Beispiel: Maschinenbau > Werkstoffe > Leichtbau"
           value={knowledgePath}
