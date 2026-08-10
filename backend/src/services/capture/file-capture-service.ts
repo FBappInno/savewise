@@ -23,7 +23,13 @@ import type {
 
 import {
   analyzeContent,
+  type ExistingKnowledgePath,
 } from "../ai/openai-content-analyzer";
+
+
+import {
+  selectGalaxyCandidates,
+} from "../ai/openai-galaxy-candidates";
 
 import {
   buildCurrentKnowledgeLibrary,
@@ -86,6 +92,249 @@ export type FileCaptureInput = {
   preferredKnowledgePath?:
     string[];
 };
+
+export async function previewFileGalaxyCandidates(
+  repository:
+    DiscoveryRepository,
+
+  input: {
+    workspaceId:
+      WorkspaceId;
+
+    captureType:
+      | "pdf"
+      | "image";
+
+    preferredLanguage:
+      | "de"
+      | "en"
+      | "fr"
+      | "it"
+      | "es";
+
+    file: {
+      originalName:
+        string;
+
+      mimeType:
+        string;
+
+      sizeBytes:
+        number;
+
+      bytes:
+        Buffer;
+    };
+  },
+): Promise<
+  {
+    galaxy: string;
+    score: number;
+  }[]
+> {
+  const safeFileName =
+    sanitizeFileName(
+      input.file.originalName,
+    );
+
+  const extracted:
+    ExtractedFileContent =
+    input.captureType ===
+      "pdf"
+      ? await extractPdf(
+          input.file.bytes,
+          safeFileName,
+        )
+      : await extractImage(
+          input.file.bytes,
+          input.file.mimeType,
+          safeFileName,
+          input.preferredLanguage,
+        );
+
+  const metadata:
+    PageMetadata = {
+    url:
+      `savewise-preview://${encodeURIComponent(
+        safeFileName,
+      )}`,
+
+    title:
+      extracted.title,
+
+    description:
+      input.captureType ===
+        "pdf"
+        ? "PDF-Vorschau für SaveWise Classification V3"
+        : "Bild-Vorschau für SaveWise Classification V3",
+
+    siteName:
+      "SaveWise Capture",
+
+    extractedText:
+      extracted.text.slice(
+        0,
+        MAX_ANALYSIS_TEXT,
+      ),
+
+    contentType:
+      input.captureType ===
+        "pdf"
+        ? "pdf"
+        : "html",
+
+    fetchStrategy:
+      "standard",
+  };
+
+  const library =
+    await buildCurrentKnowledgeLibrary(
+      repository,
+      input.workspaceId,
+    );
+
+  const galaxyMap =
+    new Map<
+      string,
+      {
+        count: number;
+        planets:
+          Map<
+            string,
+            number
+          >;
+      }
+    >();
+
+  for (
+    const discovery of
+    library.discoveries
+  ) {
+    const classification =
+      discovery.classification;
+
+    if (!classification) {
+      continue;
+    }
+
+    const galaxy =
+      classification
+        .secondaryCategory
+        ?.trim();
+
+    const planet =
+      classification
+        .topic
+        ?.trim();
+
+    if (!galaxy) {
+      continue;
+    }
+
+    const current =
+      galaxyMap.get(
+        galaxy,
+      ) ?? {
+        count:
+          0,
+
+        planets:
+          new Map<
+            string,
+            number
+          >(),
+      };
+
+    current.count +=
+      1;
+
+    if (planet) {
+      current.planets.set(
+        planet,
+        (
+          current.planets.get(
+            planet,
+          ) ??
+          0
+        ) + 1,
+      );
+    }
+
+    galaxyMap.set(
+      galaxy,
+      current,
+    );
+  }
+
+  const existingKnowledgePaths =
+    [
+      ...galaxyMap.entries(),
+    ]
+      .sort(
+        (
+          [, left],
+          [, right],
+        ) =>
+          right.count -
+          left.count,
+      )
+      .slice(
+        0,
+        50,
+      )
+      .map(
+        ([
+          galaxy,
+          data,
+        ]) => ({
+          galaxy,
+
+          planets:
+            [
+              ...data.planets
+                .entries(),
+            ]
+              .sort(
+                (
+                  [, left],
+                  [, right],
+                ) =>
+                  right -
+                  left,
+              )
+              .slice(
+                0,
+                8,
+              )
+              .map(
+                ([planet]) =>
+                  planet,
+              ),
+        }),
+      );
+
+  const candidates =
+    await selectGalaxyCandidates(
+      metadata,
+      existingKnowledgePaths,
+    );
+
+  console.log(
+    "[AI File Galaxy Candidates]",
+    JSON.stringify({
+      captureType:
+        input.captureType,
+
+      available:
+        existingKnowledgePaths.length,
+
+      candidates,
+    }),
+  );
+
+  return candidates;
+}
+
 
 export async function captureFile(
   repository:
@@ -177,10 +426,174 @@ export async function captureFile(
       "standard",
   };
 
+  /*
+   * CLASSIFICATION V3 / V3B
+   *
+   * Auch Dateiimporte verwenden ab hier
+   * dieselbe bestehende Taxonomie wie der
+   * Link-Import.
+   *
+   * Galaxy  = secondaryCategory
+   * Planet  = topic
+   */
+  const existingLibrary =
+    await buildCurrentKnowledgeLibrary(
+      repository,
+      input.workspaceId,
+    );
+
+  const galaxyMap =
+    new Map<
+      string,
+      {
+        count: number;
+        planets:
+          Map<
+            string,
+            number
+          >;
+      }
+    >();
+
+  for (
+    const discovery of
+    existingLibrary.discoveries
+  ) {
+    const classification =
+      discovery.classification;
+
+    if (!classification) {
+      continue;
+    }
+
+    const galaxy =
+      classification
+        .secondaryCategory
+        ?.trim();
+
+    const planet =
+      classification
+        .topic
+        ?.trim();
+
+    if (!galaxy) {
+      continue;
+    }
+
+    const existing =
+      galaxyMap.get(
+        galaxy,
+      ) ?? {
+        count: 0,
+
+        planets:
+          new Map<
+            string,
+            number
+          >(),
+      };
+
+    existing.count += 1;
+
+    if (planet) {
+      existing.planets.set(
+        planet,
+        (
+          existing.planets.get(
+            planet,
+          ) ??
+          0
+        ) + 1,
+      );
+    }
+
+    galaxyMap.set(
+      galaxy,
+      existing,
+    );
+  }
+
+  const existingKnowledgePaths:
+    ExistingKnowledgePath[] =
+    [
+      ...galaxyMap.entries(),
+    ]
+      .sort(
+        (
+          [, left],
+          [, right],
+        ) =>
+          right.count -
+          left.count,
+      )
+      .slice(
+        0,
+        50,
+      )
+      .map(
+        ([
+          galaxy,
+          data,
+        ]) => ({
+          galaxy,
+
+          planets:
+            [
+              ...data.planets
+                .entries(),
+            ]
+              .sort(
+                (
+                  [, left],
+                  [, right],
+                ) =>
+                  right -
+                  left,
+              )
+              .slice(
+                0,
+                8,
+              )
+              .map(
+                ([planet]) =>
+                  planet,
+              ),
+        }),
+      );
+
+  const preferredGalaxy =
+    input.preferredKnowledgePath
+      ?.[0]
+      ?.trim();
+
+  /*
+   * Wurde eine bestehende Galaxie
+   * ausgewählt, sieht V3B nur diese
+   * eine Galaxie und deren Planeten.
+   */
+  const effectiveKnowledgePaths =
+    preferredGalaxy
+      ? existingKnowledgePaths
+          .filter(
+            (path) =>
+              path.galaxy
+                .toLocaleLowerCase() ===
+              preferredGalaxy
+                .toLocaleLowerCase(),
+          )
+      : existingKnowledgePaths;
+
+  const lockedGalaxy =
+    preferredGalaxy
+      ? effectiveKnowledgePaths[0]
+          ?.galaxy
+      : undefined;
+
   const analysis =
     await analyzeContent(
       metadata,
       input.preferredLanguage,
+      effectiveKnowledgePaths,
     );
 
   const now =
@@ -188,9 +601,45 @@ export async function captureFile(
 
   const classification =
     applyPreferredKnowledgePath(
-      analysis.classification,
+      {
+        ...analysis.classification,
+
+        /*
+         * V3B Galaxy Lock:
+         * Eine ausgewählte bestehende
+         * Galaxie kann von der KI nicht
+         * überschrieben werden.
+         */
+        secondaryCategory:
+          lockedGalaxy ??
+          analysis.classification
+            .secondaryCategory,
+      },
+
       input.preferredKnowledgePath,
     );
+
+  if (lockedGalaxy) {
+    console.log(
+      "[Classification V3B File]",
+      JSON.stringify({
+        captureType:
+          input.captureType,
+
+        galaxy:
+          lockedGalaxy,
+
+        planet:
+          classification.topic,
+
+        availablePlanets:
+          effectiveKnowledgePaths[0]
+            ?.planets
+            .length ??
+          0,
+      }),
+    );
+  }
 
   const discovery:
     Discovery = {
@@ -508,7 +957,6 @@ function applyPreferredKnowledgePath(
 
     topic:
       normalized[1] ??
-      normalized[0] ??
       classification.topic,
 
     subtopics:

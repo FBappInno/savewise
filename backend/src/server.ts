@@ -128,6 +128,10 @@ function withTimeout<T>(
   });
 }
 
+import {
+  previewFileGalaxyCandidates,
+} from "./services/capture/file-capture-service";
+
 const app = express();
 
 const port = Number(
@@ -1230,6 +1234,176 @@ app.get(
 );
 
 app.post(
+  "/api/capture/file/candidates",
+
+  captureUpload.single(
+    "file",
+  ),
+
+  async (
+    request,
+    response,
+  ) => {
+    const account =
+      await authenticateRequestAccount(
+        request,
+      );
+
+    if (!account) {
+      response.status(
+        401,
+      ).json({
+        error:
+          "SESSION_INVALID",
+      });
+
+      return;
+    }
+
+    if (!request.file) {
+      response.status(
+        400,
+      ).json({
+        error:
+          "CAPTURE_FILE_REQUIRED",
+      });
+
+      return;
+    }
+
+    const fields =
+      z.object({
+        workspaceId:
+          WorkspaceIdSchema
+            .optional()
+            .default(
+              "private",
+            ),
+
+        captureType:
+          z.enum([
+            "pdf",
+            "image",
+          ]),
+
+        preferredLanguage:
+          z.enum([
+            "de",
+            "en",
+            "fr",
+            "it",
+            "es",
+          ])
+            .optional()
+            .default(
+              "de",
+            ),
+      })
+        .safeParse(
+          request.body,
+        );
+
+    if (!fields.success) {
+      response.status(
+        400,
+      ).json({
+        error:
+          "CAPTURE_INPUT_INVALID",
+
+        details:
+          fields.error.flatten(),
+      });
+
+      return;
+    }
+
+    const expectedType =
+      fields.data
+        .captureType ===
+      "pdf"
+        ? request.file
+            .mimetype ===
+          "application/pdf"
+        : request.file
+            .mimetype
+            .startsWith(
+              "image/",
+            );
+
+    if (!expectedType) {
+      response.status(
+        400,
+      ).json({
+        error:
+          "CAPTURE_TYPE_MISMATCH",
+      });
+
+      return;
+    }
+
+    try {
+      const candidates =
+        await withTimeout(
+          previewFileGalaxyCandidates(
+            discoveryRepository,
+            {
+              workspaceId:
+                fields.data
+                  .workspaceId,
+
+              captureType:
+                fields.data
+                  .captureType,
+
+              preferredLanguage:
+                fields.data
+                  .preferredLanguage,
+
+              file: {
+                originalName:
+                  request.file
+                    .originalname,
+
+                mimeType:
+                  request.file
+                    .mimetype,
+
+                sizeBytes:
+                  request.file
+                    .size,
+
+                bytes:
+                  request.file
+                    .buffer,
+              },
+            },
+          ),
+          120_000,
+        );
+
+      response.json({
+        candidates,
+      });
+    } catch (error) {
+      console.error(
+        "File Galaxy candidate preview failed:",
+        error,
+      );
+
+      response.status(
+        500,
+      ).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "FILE_GALAXY_CANDIDATE_PREVIEW_FAILED",
+      });
+    }
+  },
+);
+
+
+app.post(
   "/api/capture/file",
 
   captureUpload.single(
@@ -1858,8 +2032,72 @@ app.post(
           90_000,
         );
 
+      /*
+       * CLASSIFICATION V3B
+       *
+       * Wenn der Benutzer vor dem Import eine
+       * bestehende Galaxie ausgewählt hat, ist
+       * diese Entscheidung verbindlich.
+       *
+       * Die KI darf weiterhin den passenden
+       * Planeten innerhalb dieser Galaxie
+       * wiederverwenden oder dort einen neuen
+       * Planeten erzeugen.
+       *
+       * Sie darf die ausgewählte Galaxie aber
+       * nicht durch einen neuen/ähnlichen Namen
+       * ersetzen.
+       */
+      const lockedGalaxy =
+        preferredGalaxy
+          ? effectiveKnowledgePaths[0]
+              ?.galaxy
+          : undefined;
+
+      const finalImportDiscovery =
+        lockedGalaxy &&
+        importResult.discovery
+          .classification
+          ? {
+              ...importResult.discovery,
+
+              classification: {
+                ...importResult.discovery
+                  .classification,
+
+                secondaryCategory:
+                  lockedGalaxy,
+              },
+            }
+          : importResult.discovery;
+
+      if (lockedGalaxy) {
+        console.log(
+          "[Classification V3B]",
+          JSON.stringify({
+            mode:
+              "user-galaxy-lock",
+
+            galaxy:
+              lockedGalaxy,
+
+            planet:
+              finalImportDiscovery
+                .classification
+                ?.topic ??
+              null,
+
+            availablePlanets:
+              effectiveKnowledgePaths[0]
+                ?.planets
+                .length ??
+              0,
+          }),
+        );
+      }
+
       const workspaceDiscovery = {
-        ...importResult.discovery,
+        ...finalImportDiscovery,
 
         workspaceId:
           parsedRequest.data
