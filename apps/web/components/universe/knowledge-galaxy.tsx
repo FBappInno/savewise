@@ -28,11 +28,19 @@ import {
   rebuildKnowledgeLibrary,
 } from "@/services/knowledge-client";
 
+type StarSystem = {
+  id: string;
+  label: string;
+  count: number;
+  discoveries: Discovery[];
+};
+
 type TopicSystem = {
   id: string;
   label: string;
   count: number;
   discoveries: Discovery[];
+  stars: StarSystem[];
 };
 
 type DomainGalaxy = {
@@ -170,6 +178,7 @@ export function KnowledgeGalaxy({
   onOpenDiscovery:
     (discovery: Discovery) => void;
 }) {
+
   const {
     workspaceDiscoveries,
     isLoading,
@@ -283,6 +292,16 @@ export function KnowledgeGalaxy({
       null,
     );
 
+  const [
+    selectedStarId,
+    setSelectedStarId,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  
+
   const galaxies =
     useMemo(
       () =>
@@ -313,12 +332,22 @@ export function KnowledgeGalaxy({
       ) ??
     null;
 
+  const selectedStar =
+    selectedTopic && selectedStarId
+      ? selectedTopic.stars.find(
+          (star) =>
+            star.id === selectedStarId,
+        ) ?? null
+      : null;
+
   const inspectorDiscoveries =
-    selectedTopic
-      ? selectedTopic.discoveries
-      : selectedGalaxy
-        ? selectedGalaxy.discoveries
-        : [];
+    selectedStar
+      ? selectedStar.discoveries
+      : selectedTopic
+        ? selectedTopic.discoveries
+        : selectedGalaxy
+          ? selectedGalaxy.discoveries
+          : [];
 
   const overviewPositions =
     useMemo(
@@ -583,12 +612,20 @@ export function KnowledgeGalaxy({
     setSelectedTopicId(
       null,
     );
+
+    setSelectedStarId(
+      null,
+    );
   }
 
   function selectTopic(
     topic:
       TopicSystem,
   ): void {
+    setSelectedStarId(
+      null,
+    );
+
     setSelectedTopicId(
       (current) =>
         current ===
@@ -1107,6 +1144,16 @@ export function KnowledgeGalaxy({
                 onSelectTopic={
                   selectTopic
                 }
+                selectedStarId={
+                  selectedStarId
+                }
+                onSelectStar={(
+                  star,
+                ) => {
+                  setSelectedStarId(
+                    star.id,
+                  );
+                }}
               />
             )}
           </svg>
@@ -1123,15 +1170,19 @@ export function KnowledgeGalaxy({
         {selectedGalaxy ? (
           <>
             <div className="card-eyebrow">
-              {selectedTopic
-                ? "SONNENSYSTEM"
-                : "GALAXIE"}
+              {selectedStar
+                ? "STERN"
+                : selectedTopic
+                  ? "SONNENSYSTEM"
+                  : "GALAXIE"}
             </div>
 
             <h3>
-              {selectedTopic
-                ? selectedTopic.label
-                : selectedGalaxy.label}
+              {selectedStar
+                ? selectedStar.label
+                : selectedTopic
+                  ? selectedTopic.label
+                  : selectedGalaxy.label}
             </h3>
 
             <div className="galaxy-inspector-count">
@@ -1158,6 +1209,10 @@ export function KnowledgeGalaxy({
                     : "galaxy-topic-filter"
                 }
                 onClick={() => {
+                  setSelectedStarId(
+                    null,
+                  );
+
                   setSelectedTopicId(
                     null,
                   );
@@ -1298,7 +1353,9 @@ export function KnowledgeGalaxy({
 function FocusedDomainScene({
   galaxy,
   selectedTopicId,
+  selectedStarId,
   onSelectTopic,
+  onSelectStar,
 }: {
   galaxy:
     DomainGalaxy;
@@ -1306,9 +1363,16 @@ function FocusedDomainScene({
   selectedTopicId:
     string | null;
 
+  selectedStarId:
+    string | null;
+
   onSelectTopic:
     (topic: TopicSystem) => void;
+
+  onSelectStar:
+    (star: StarSystem) => void;
 }) {
+
   const topicPositions =
     createFocusedTopicPositions(
       galaxy.topics,
@@ -1508,31 +1572,133 @@ function FocusedDomainScene({
                 }
               />
 
-              {createDiscoverySatellites(
-                topic,
-                position,
-              ).map(
-                (
-                  satellite,
-                  satelliteIndex,
-                ) => (
-                  <circle
-                    className="topic-discovery-satellite"
-                    cx={
-                      satellite.x
-                    }
-                    cy={
-                      satellite.y
-                    }
-                    key={
-                      `${topic.id}:${satelliteIndex}`
-                    }
-                    r={
-                      satellite.radius
-                    }
-                  />
-                ),
-              )}
+              {selected
+                ? createStarSatellites(
+                    topic,
+                    position,
+                  ).map(
+                    (
+                      satellite,
+                      starIndex,
+                    ) => {
+                      const star =
+                        topic.stars[
+                          starIndex
+                        ];
+
+                      if (!star) {
+                        return null;
+                      }
+
+                      const starSelected =
+                        selectedStarId ===
+                        star.id;
+
+                      return (
+                        <g
+                          key={
+                            star.id
+                          }
+                          onClick={(event) => {
+                            event.stopPropagation();
+
+                            onSelectStar(
+                              star,
+                            );
+                          }}
+                          onKeyDown={(event) => {
+                            if (
+                              event.key ===
+                                "Enter" ||
+                              event.key ===
+                                " "
+                            ) {
+                              event.preventDefault();
+                              event.stopPropagation();
+
+                              onSelectStar(
+                                star,
+                              );
+                            }
+                          }}
+                          onPointerDown={(event) => {
+                            event.stopPropagation();
+                          }}
+                          role="button"
+                          style={{
+                            cursor:
+                              "pointer",
+                          }}
+                          tabIndex={0}
+                        >
+                          <circle
+                            cx={
+                              satellite.x
+                            }
+                            cy={
+                              satellite.y
+                            }
+                            fill="transparent"
+                            r="18"
+                          />
+
+                          <circle
+                            className={
+                              starSelected
+                                ? "topic-discovery-satellite topic-discovery-satellite-selected"
+                                : "topic-discovery-satellite"
+                            }
+                            cx={
+                              satellite.x
+                            }
+                            cy={
+                              satellite.y
+                            }
+                            r={
+                              starSelected
+                                ? satellite.radius + 1.8
+                                : satellite.radius
+                            }
+                          />
+
+                          {star.count > 1 ? (
+                            <text
+                              fontSize="9"
+                              fontWeight="700"
+                              pointerEvents="none"
+                              textAnchor="middle"
+                              x={
+                                satellite.x
+                              }
+                              y={
+                                satellite.y + 3
+                              }
+                            >
+                              {star.count}
+                            </text>
+                          ) : null}
+
+                          <text
+                            fontSize="11"
+                            pointerEvents="none"
+                            textAnchor="middle"
+                            x={
+                              satellite.x
+                            }
+                            y={
+                              satellite.y + 24
+                            }
+                          >
+                            {shortenLabel(
+                              star.label,
+                              18,
+                            )}
+                          </text>
+                        </g>
+                      );
+                    },
+                  )
+                : null}
 
               <text
                 className="topic-system-count"
@@ -1799,8 +1965,11 @@ function createRawTopicSystems(
 
     const current =
       topicMap.get(key) ?? {
-        label: topic,
-        discoveries: [],
+        label:
+          topic,
+
+        discoveries:
+          [],
       };
 
     current.discoveries.push(
@@ -1819,9 +1988,166 @@ function createRawTopicSystems(
         left,
         right,
       ) =>
-        right[1].discoveries
+        right[1]
+          .discoveries
           .length -
-        left[1].discoveries
+        left[1]
+          .discoveries
+          .length,
+    )
+    .slice(
+      0,
+      12,
+    )
+    .map(
+      (
+        [key, value],
+      ) => {
+        const sortedDiscoveries =
+          [...value.discoveries]
+            .sort(
+              (
+                left,
+                right,
+              ) =>
+                new Date(
+                  right.createdAt,
+                ).getTime() -
+                new Date(
+                  left.createdAt,
+                ).getTime(),
+            );
+
+        return {
+          id:
+            `${domainKey}:${key}`,
+
+          label:
+            value.label,
+
+          count:
+            sortedDiscoveries
+              .length,
+
+          discoveries:
+            sortedDiscoveries,
+
+          /*
+           * Echte Sternebene:
+           *
+           * Galaxie
+           *   → Planet
+           *      → Stern/Subtopic
+           *         → Discoveries
+           */
+          stars:
+            createRawStarSystems(
+              sortedDiscoveries,
+              `${domainKey}:${key}`,
+            ),
+        };
+      },
+    );
+}
+
+
+function createRawStarSystems(
+  discoveries: Discovery[],
+  topicKey: string,
+): StarSystem[] {
+  const starMap =
+    new Map<
+      string,
+      {
+        label: string;
+        discoveries:
+          Discovery[];
+      }
+    >();
+
+  for (
+    const discovery
+    of discoveries
+  ) {
+    const rawStars =
+      discovery.classification
+        ?.subtopics
+        ?.map(
+          (value) =>
+            value.trim(),
+        )
+        .filter(
+          (value) =>
+            value.length > 0,
+        ) ??
+      [];
+
+    /*
+     * Discovery ohne Subtopic nicht verlieren.
+     */
+    const stars =
+      rawStars.length > 0
+        ? rawStars
+        : [
+            "Weitere Inhalte",
+          ];
+
+    for (
+      const star
+      of stars
+    ) {
+      const key =
+        normalizeGalaxyKey(
+          star,
+        );
+
+      const current =
+        starMap.get(key) ?? {
+          label:
+            star,
+
+          discoveries:
+            [],
+        };
+
+      /*
+       * Dieselbe Discovery innerhalb
+       * desselben Sterns nur einmal.
+       */
+      if (
+        !current
+          .discoveries
+          .some(
+            (item) =>
+              item.id ===
+              discovery.id,
+          )
+      ) {
+        current
+          .discoveries
+          .push(
+            discovery,
+          );
+      }
+
+      starMap.set(
+        key,
+        current,
+      );
+    }
+  }
+
+  return [...starMap.entries()]
+    .sort(
+      (
+        left,
+        right,
+      ) =>
+        right[1]
+          .discoveries
+          .length -
+        left[1]
+          .discoveries
           .length,
     )
     .slice(
@@ -1833,7 +2159,7 @@ function createRawTopicSystems(
         [key, value],
       ) => ({
         id:
-          `${domainKey}:${key}`,
+          `${topicKey}:star:${key}`,
 
         label:
           value.label,
@@ -1843,21 +2169,23 @@ function createRawTopicSystems(
             .length,
 
         discoveries:
-          [...value.discoveries].sort(
-            (
-              left,
-              right,
-            ) =>
-              new Date(
-                right.createdAt,
-              ).getTime() -
-              new Date(
-                left.createdAt,
-              ).getTime(),
-          ),
+          [...value.discoveries]
+            .sort(
+              (
+                left,
+                right,
+              ) =>
+                new Date(
+                  right.createdAt,
+                ).getTime() -
+                new Date(
+                  left.createdAt,
+                ).getTime(),
+            ),
       }),
     );
 }
+
 
 function buildDomainClusterIds(
   graph: KnowledgeGraph,
@@ -2736,7 +3064,7 @@ function createFocusedTopicPositions(
   );
 }
 
-function createDiscoverySatellites(
+function createStarSatellites(
   topic:
     TopicSystem,
 
@@ -2752,8 +3080,8 @@ function createDiscoverySatellites(
 }> {
   const visibleCount =
     Math.min(
-      topic.count,
-      8,
+      topic.stars.length,
+      12,
     );
 
   return Array.from({
