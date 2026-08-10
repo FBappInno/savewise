@@ -1497,7 +1497,13 @@ function FocusedDomainScene({
               key={
                 topic.id
               }
-              onClick={() => {
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
+              onPointerUp={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
                 onSelectTopic(
                   topic,
                 );

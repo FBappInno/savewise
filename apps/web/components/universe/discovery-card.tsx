@@ -12,31 +12,9 @@ import {
   useDiscoveries,
 } from "@/providers/discovery-provider";
 
-const categoryLabels:
-Record<string, string> = {
-  technology:
-    "Technologie",
-  finance:
-    "Finanzen",
-  business:
-    "Business",
-  science:
-    "Wissenschaft",
-  health:
-    "Gesundheit",
-  education:
-    "Bildung",
-  productivity:
-    "Produktivität",
-  culture:
-    "Kultur",
-  news:
-    "Nachrichten",
-  lifestyle:
-    "Lifestyle",
-  other:
-    "Weitere",
-};
+import {
+  getDiscoveryTaxonomy,
+} from "@/components/universe/discovery-taxonomy";
 
 export function DiscoveryCard({
   discovery,
@@ -64,19 +42,10 @@ export function DiscoveryCard({
     discovery.title ||
     "Unbenannter Inhalt";
 
-  const category =
-    discovery.classification
-      ?.primaryCategory;
-
-  const topic =
-    discovery.classification
-      ?.topic ??
-    discovery.topics?.[0];
-
-  const subtopics =
-    discovery.classification
-      ?.subtopics ??
-    [];
+  const taxonomy =
+    getDiscoveryTaxonomy(
+      discovery,
+    );
 
   const hostname =
     getHostname(
@@ -165,11 +134,9 @@ export function DiscoveryCard({
               )}
           </span>
 
-          {category ? (
+          {taxonomy.galaxy ? (
             <span className="discovery-category">
-              {categoryLabels[
-                category
-              ] ?? category}
+              {taxonomy.galaxy}
             </span>
           ) : null}
         </div>
@@ -188,14 +155,11 @@ export function DiscoveryCard({
           </p>
         ) : null}
 
-        {topic ? (
+        {taxonomy.planet ? (
           <div className="knowledge-path">
             <span>
-              {category
-                ? categoryLabels[
-                    category
-                  ] ?? category
-                : "Wissen"}
+              {taxonomy.galaxy ||
+                "Wissen"}
             </span>
 
             <b>
@@ -203,17 +167,20 @@ export function DiscoveryCard({
             </b>
 
             <span>
-              {topic}
+              {taxonomy.planet}
             </span>
 
-            {subtopics[0] ? (
+            {taxonomy.stars.length >
+            0 ? (
               <>
                 <b>
                   ›
                 </b>
 
                 <span>
-                  {subtopics[0]}
+                  {taxonomy.stars.join(
+                    ", ",
+                  )}
                 </span>
               </>
             ) : null}

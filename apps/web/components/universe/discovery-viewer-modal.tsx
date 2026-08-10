@@ -16,6 +16,10 @@ import {
 } from "@/providers/discovery-provider";
 
 import {
+  getDiscoveryTaxonomy,
+} from "@/components/universe/discovery-taxonomy";
+
+import {
   useWorkspace,
 } from "@/providers/workspace-provider";
 
@@ -420,6 +424,11 @@ export function DiscoveryViewerModal({
   if (!currentDiscovery) {
     return null;
   }
+
+  const taxonomy =
+    getDiscoveryTaxonomy(
+      currentDiscovery,
+    );
 
   const originalUrl =
     currentDiscovery.url ??
@@ -1262,7 +1271,10 @@ export function DiscoveryViewerModal({
                   </section>
                 ) : null}
 
-                {currentDiscovery.classification ? (
+                {taxonomy.galaxy ||
+                taxonomy.planet ||
+                taxonomy.stars.length >
+                  0 ? (
                   <section>
                     <div className="card-eyebrow">
                       GALAXIE · PLANET · STERNE
@@ -1270,11 +1282,7 @@ export function DiscoveryViewerModal({
 
                     <div className="viewer-knowledge-path">
                       <span>
-                        {
-                          currentDiscovery
-                            .classification
-                            .secondaryCategory
-                        }
+                        {taxonomy.galaxy}
                       </span>
 
                       <b>
@@ -1282,23 +1290,14 @@ export function DiscoveryViewerModal({
                       </b>
 
                       <span>
-                        {
-                          currentDiscovery
-                            .classification
-                            .topic
-                        }
+                        {taxonomy.planet}
                       </span>
                     </div>
 
-                    {currentDiscovery
-                      .classification
-                      .subtopics.length >
+                    {taxonomy.stars.length >
                     0 ? (
                       <div className="discovery-keywords">
-                        {currentDiscovery
-                          .classification
-                          .subtopics
-                          .map(
+                        {taxonomy.stars.map(
                             (
                               subtopic,
                             ) => (
