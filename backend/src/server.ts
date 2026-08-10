@@ -32,6 +32,9 @@ import {
 import {
   migrateKnownPlanetLabelDuplicates,
 } from "./services/discoveries/planet-label-migration";
+import {
+  migrateExplicitTaxonomyCorrections,
+} from "./services/discoveries/explicit-taxonomy-corrections";
 import { importContent } from "./services/import/content-import-service";
 import {
   selectGalaxyCandidates,
@@ -3325,6 +3328,11 @@ async function runStartupMigrations() {
     );
 
     await migrateKnownPlanetLabelDuplicates(
+      discoveryRepository,
+      "private",
+    );
+
+    await migrateExplicitTaxonomyCorrections(
       discoveryRepository,
       "private",
     );
