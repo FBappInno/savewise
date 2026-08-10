@@ -35,6 +35,9 @@ import {
 import {
   migrateExplicitTaxonomyCorrections,
 } from "./services/discoveries/explicit-taxonomy-corrections";
+import {
+  migrateExplicitTaxonomyCorrectionsPhaseTwo,
+} from "./services/discoveries/explicit-taxonomy-corrections-phase-two";
 import { importContent } from "./services/import/content-import-service";
 import {
   selectGalaxyCandidates,
@@ -3333,6 +3336,11 @@ async function runStartupMigrations() {
     );
 
     await migrateExplicitTaxonomyCorrections(
+      discoveryRepository,
+      "private",
+    );
+
+    await migrateExplicitTaxonomyCorrectionsPhaseTwo(
       discoveryRepository,
       "private",
     );
