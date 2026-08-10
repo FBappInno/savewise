@@ -3,6 +3,7 @@
 import type {
   Discovery,
   KnowledgeGraph,
+  KnowledgeLibrary,
 } from "@savewise/shared";
 
 import {
@@ -11,10 +12,6 @@ import {
   useRef,
   useState,
 } from "react";
-
-import {
-  useDiscoveries,
-} from "@/providers/discovery-provider";
 
 import {
   useWorkspace,
@@ -180,12 +177,6 @@ export function KnowledgeGalaxy({
 }) {
 
   const {
-    workspaceDiscoveries,
-    isLoading,
-  } =
-    useDiscoveries();
-
-  const {
     activeWorkspaceId,
   } =
     useWorkspace();
@@ -227,18 +218,27 @@ export function KnowledgeGalaxy({
     camera.width;
 
   const [
-    knowledgeGraph,
-    setKnowledgeGraph,
+    knowledgeLibrary,
+    setKnowledgeLibrary,
   ] =
-    useState<KnowledgeGraph | null>(
+    useState<KnowledgeLibrary | null>(
       null,
     );
+
+  const [
+    isLoading,
+    setLoading,
+  ] =
+    useState(true);
 
   useEffect(() => {
     let active = true;
 
     async function loadGraph():
     Promise<void> {
+      setLoading(true);
+      setKnowledgeLibrary(null);
+
       try {
         const library =
           await getKnowledgeLibrary(
@@ -246,19 +246,17 @@ export function KnowledgeGalaxy({
           );
 
         if (active) {
-          setKnowledgeGraph(
-            library.graph,
+          setKnowledgeLibrary(
+            library,
           );
         }
       } catch {
-        /*
-         * Das Universum funktioniert
-         * weiterhin mit den Discoveries,
-         * falls der KI-Graph temporär
-         * nicht verfügbar ist.
-         */
         if (active) {
-          setKnowledgeGraph(null);
+          setKnowledgeLibrary(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
         }
       }
     }
@@ -306,14 +304,22 @@ export function KnowledgeGalaxy({
     useMemo(
       () =>
         createDomainGalaxies(
-          workspaceDiscoveries,
-          knowledgeGraph,
+          knowledgeLibrary
+            ?.discoveries ??
+            [],
+          knowledgeLibrary
+            ?.graph ??
+            null,
         ),
       [
-        knowledgeGraph,
-        workspaceDiscoveries,
+        knowledgeLibrary,
       ],
     );
+
+  const libraryDiscoveries =
+    knowledgeLibrary
+      ?.discoveries ??
+    [];
 
   const selectedGalaxy =
     galaxies.find(
@@ -669,7 +675,7 @@ export function KnowledgeGalaxy({
 
   if (
     isLoading &&
-    workspaceDiscoveries.length ===
+    libraryDiscoveries.length ===
       0
   ) {
     return (
@@ -684,7 +690,7 @@ export function KnowledgeGalaxy({
   }
 
   if (
-    workspaceDiscoveries.length ===
+    libraryDiscoveries.length ===
     0
   ) {
     return (
@@ -802,7 +808,7 @@ export function KnowledgeGalaxy({
               <div>
                 <strong>
                   {
-                    workspaceDiscoveries
+                    libraryDiscoveries
                       .length
                   }
                 </strong>
@@ -1667,39 +1673,6 @@ function FocusedDomainScene({
                             }
                           />
 
-                          {star.count > 1 ? (
-                            <text
-                              fontSize="9"
-                              fontWeight="700"
-                              pointerEvents="none"
-                              textAnchor="middle"
-                              x={
-                                satellite.x
-                              }
-                              y={
-                                satellite.y + 3
-                              }
-                            >
-                              {star.count}
-                            </text>
-                          ) : null}
-
-                          <text
-                            fontSize="11"
-                            pointerEvents="none"
-                            textAnchor="middle"
-                            x={
-                              satellite.x
-                            }
-                            y={
-                              satellite.y + 24
-                            }
-                          >
-                            {shortenLabel(
-                              star.label,
-                              18,
-                            )}
-                          </text>
                         </g>
                       );
                     },
@@ -1748,450 +1721,213 @@ function createDomainGalaxies(
   discoveries: Discovery[],
   graph: KnowledgeGraph | null,
 ): DomainGalaxy[] {
-  /*
-   * SOURCE OF TRUTH:
-   *
-   * Galaxie = classification.secondaryCategory
-   * Planet  = classification.topic
-   * Sterne  = classification.subtopics
-   *
-   * Der KI-Graph darf diese Hierarchie nicht ersetzen.
-   */
-  const galaxies =
-    createRawDomainGalaxies(
-      discoveries,
-    );
-
   if (!graph) {
-    return galaxies;
+    return [];
   }
 
-  /*
-   * Der Graph wird ausschließlich für
-   * die visuelle Cluster-Zuordnung benutzt.
-   */
-  const graphClusterIds =
+  const nodesById =
+    new Map(
+      graph.nodes.map(
+        (node) => [
+          node.id,
+          node,
+        ],
+      ),
+    );
+
+  const discoveriesById =
+    new Map(
+      discoveries.map(
+        (discovery) => [
+          discovery.id,
+          discovery,
+        ],
+      ),
+    );
+
+  const rootIds =
+    new Set(
+      graph.rootNodeIds,
+    );
+
+  const clusterIds =
     buildDomainClusterIds(
       graph,
     );
 
-  const graphDomains =
-    graph.nodes.filter(
+  return graph.nodes
+    .filter(
       (node) =>
-        node.kind === "domain",
-    );
-
-  const graphDomainByName =
-    new Map<
-      string,
-      KnowledgeGraph["nodes"][number]
-    >();
-
-  for (
-    const node
-    of graphDomains
-  ) {
-    graphDomainByName.set(
-      normalizeGalaxyKey(
-        node.title,
-      ),
-      node,
-    );
-
-    for (
-      const alias
-      of node.aliases
-    ) {
-      graphDomainByName.set(
-        normalizeGalaxyKey(
-          alias,
+        node.kind ===
+          "domain" &&
+        rootIds.has(
+          node.id,
         ),
-        node,
-      );
-    }
-  }
-
-  return galaxies.map(
-    (galaxy) => {
-      const graphNode =
-        graphDomainByName.get(
-          normalizeGalaxyKey(
-            galaxy.label,
-          ),
-        );
-
-      if (!graphNode) {
-        return galaxy;
-      }
-
-      return {
-        ...galaxy,
-
-        clusterId:
-          graphClusterIds.get(
-            graphNode.id,
-          ) ??
-          graphNode.id,
-      };
-    },
-  );
-}
-
-function createRawDomainGalaxies(
-  discoveries: Discovery[],
-): DomainGalaxy[] {
-  const grouped =
-    new Map<
-      string,
-      Discovery[]
-    >();
-
-  for (
-    const discovery
-    of discoveries
-  ) {
-    const domain =
-      discovery.classification
-        ?.secondaryCategory
-        ?.trim() ||
-      "Noch nicht eingeordnet";
-
-    const key =
-      normalizeGalaxyKey(
-        domain,
-      );
-
-    const current =
-      grouped.get(key) ??
-      [];
-
-    current.push(
-      discovery,
-    );
-
-    grouped.set(
-      key,
-      current,
-    );
-  }
-
-  return [...grouped.entries()]
-    .sort(
-      (
-        left,
-        right,
-      ) =>
-        right[1].length -
-        left[1].length,
     )
     .map(
-      (
-        [key, items],
-      ) => {
-        const label =
-          items[0]
-            ?.classification
-            ?.secondaryCategory
-            ?.trim() ||
-          "Noch nicht eingeordnet";
+      (domain) => {
+        const domainDiscoveries =
+          mapGraphDiscoveries(
+            collectGraphDiscoveryIds(
+              domain.id,
+              nodesById,
+            ),
+            discoveriesById,
+          );
 
-        return {
-          id:
-            `domain:${key}`,
-
-          key,
-
-          label,
-
-          count:
-            items.length,
-
-          discoveries:
-            [...items].sort(
+        const topics =
+          domain.childIds
+            .map(
+              (childId) =>
+                nodesById.get(
+                  childId,
+                ),
+            )
+            .filter(
               (
-                left,
-                right,
-              ) =>
-                new Date(
-                  right.createdAt,
-                ).getTime() -
-                new Date(
-                  left.createdAt,
-                ).getTime(),
-            ),
+                node,
+              ): node is KnowledgeGraph["nodes"][number] =>
+                Boolean(node) &&
+                node?.kind ===
+                  "topic",
+            )
+            .map(
+              (topic) => {
+                const topicDiscoveries =
+                  mapGraphDiscoveries(
+                    collectGraphDiscoveryIds(
+                      topic.id,
+                      nodesById,
+                    ),
+                    discoveriesById,
+                  );
 
-          topics:
-            createRawTopicSystems(
-              items,
-              key,
-            ),
+                const stars =
+                  topic.childIds
+                    .map(
+                      (childId) =>
+                        nodesById.get(
+                          childId,
+                        ),
+                    )
+                    .filter(
+                      (
+                        node,
+                      ): node is KnowledgeGraph["nodes"][number] =>
+                        Boolean(node) &&
+                        node?.kind ===
+                          "subtopic",
+                    )
+                    .map(
+                      (star) => {
+                        const starDiscoveries =
+                          mapGraphDiscoveries(
+                            collectGraphDiscoveryIds(
+                              star.id,
+                              nodesById,
+                            ),
+                            discoveriesById,
+                          );
 
-          /*
-           * Ohne Graph bildet jede
-           * Galaxie zunächst ihren
-           * eigenen Cluster.
-           */
-          clusterId:
-            `raw:${key}`,
-        };
-      },
-    );
-}
+                        return {
+                          id: star.id,
+                          label:
+                            star.title,
+                          count:
+                            starDiscoveries.length,
+                          discoveries:
+                            starDiscoveries,
+                        };
+                      },
+                    )
+                    .filter(
+                      (star) =>
+                        star.count > 0,
+                    );
 
-function createRawTopicSystems(
-  discoveries: Discovery[],
-  domainKey: string,
-): TopicSystem[] {
-  const topicMap =
-    new Map<
-      string,
-      {
-        label: string;
-        discoveries:
-          Discovery[];
-      }
-    >();
-
-  for (
-    const discovery
-    of discoveries
-  ) {
-    const topic =
-      discovery.classification
-        ?.topic
-        ?.trim() ||
-      discovery.topics?.[0]
-        ?.trim() ||
-      "Weitere Planeten";
-
-    const key =
-      normalizeGalaxyKey(
-        topic,
-      );
-
-    const current =
-      topicMap.get(key) ?? {
-        label:
-          topic,
-
-        discoveries:
-          [],
-      };
-
-    current.discoveries.push(
-      discovery,
-    );
-
-    topicMap.set(
-      key,
-      current,
-    );
-  }
-
-  return [...topicMap.entries()]
-    .sort(
-      (
-        left,
-        right,
-      ) =>
-        right[1]
-          .discoveries
-          .length -
-        left[1]
-          .discoveries
-          .length,
-    )
-    .slice(
-      0,
-      12,
-    )
-    .map(
-      (
-        [key, value],
-      ) => {
-        const sortedDiscoveries =
-          [...value.discoveries]
+                return {
+                  id: topic.id,
+                  label:
+                    topic.title,
+                  count:
+                    topicDiscoveries.length,
+                  discoveries:
+                    topicDiscoveries,
+                  stars,
+                };
+              },
+            )
+            .filter(
+              (topic) =>
+                topic.count > 0,
+            )
             .sort(
-              (
-                left,
-                right,
-              ) =>
-                new Date(
-                  right.createdAt,
-                ).getTime() -
-                new Date(
-                  left.createdAt,
-                ).getTime(),
+              (left, right) =>
+                right.count -
+                left.count,
             );
 
         return {
-          id:
-            `${domainKey}:${key}`,
-
-          label:
-            value.label,
-
-          count:
-            sortedDiscoveries
-              .length,
-
-          discoveries:
-            sortedDiscoveries,
-
-          /*
-           * Echte Sternebene:
-           *
-           * Galaxie
-           *   → Planet
-           *      → Stern/Subtopic
-           *         → Discoveries
-           */
-          stars:
-            createRawStarSystems(
-              sortedDiscoveries,
-              `${domainKey}:${key}`,
+          id: domain.id,
+          key:
+            normalizeGalaxyKey(
+              domain.title,
             ),
+          label:
+            domain.title,
+          count:
+            domainDiscoveries.length,
+          discoveries:
+            domainDiscoveries,
+          topics,
+          clusterId:
+            clusterIds.get(
+              domain.id,
+            ) ??
+            domain.id,
         };
       },
-    );
-}
-
-
-function createRawStarSystems(
-  discoveries: Discovery[],
-  topicKey: string,
-): StarSystem[] {
-  const starMap =
-    new Map<
-      string,
-      {
-        label: string;
-        discoveries:
-          Discovery[];
-      }
-    >();
-
-  for (
-    const discovery
-    of discoveries
-  ) {
-    const rawStars =
-      discovery.classification
-        ?.subtopics
-        ?.map(
-          (value) =>
-            value.trim(),
-        )
-        .filter(
-          (value) =>
-            value.length > 0,
-        ) ??
-      [];
-
-    /*
-     * Discovery ohne Subtopic nicht verlieren.
-     */
-    const stars =
-      rawStars.length > 0
-        ? rawStars
-        : [
-            "Weitere Inhalte",
-          ];
-
-    for (
-      const star
-      of stars
-    ) {
-      const key =
-        normalizeGalaxyKey(
-          star,
-        );
-
-      const current =
-        starMap.get(key) ?? {
-          label:
-            star,
-
-          discoveries:
-            [],
-        };
-
-      /*
-       * Dieselbe Discovery innerhalb
-       * desselben Sterns nur einmal.
-       */
-      if (
-        !current
-          .discoveries
-          .some(
-            (item) =>
-              item.id ===
-              discovery.id,
-          )
-      ) {
-        current
-          .discoveries
-          .push(
-            discovery,
-          );
-      }
-
-      starMap.set(
-        key,
-        current,
-      );
-    }
-  }
-
-  return [...starMap.entries()]
+    )
+    .filter(
+      (galaxy) =>
+        galaxy.count > 0,
+    )
     .sort(
-      (
-        left,
-        right,
-      ) =>
-        right[1]
-          .discoveries
-          .length -
-        left[1]
-          .discoveries
-          .length,
-    )
-    .slice(
-      0,
-      12,
-    )
-    .map(
-      (
-        [key, value],
-      ) => ({
-        id:
-          `${topicKey}:star:${key}`,
-
-        label:
-          value.label,
-
-        count:
-          value.discoveries
-            .length,
-
-        discoveries:
-          [...value.discoveries]
-            .sort(
-              (
-                left,
-                right,
-              ) =>
-                new Date(
-                  right.createdAt,
-                ).getTime() -
-                new Date(
-                  left.createdAt,
-                ).getTime(),
-            ),
-      }),
+      (left, right) =>
+        right.count -
+        left.count,
     );
 }
 
+function mapGraphDiscoveries(
+  discoveryIds:
+    Set<string>,
+  discoveriesById:
+    Map<string, Discovery>,
+): Discovery[] {
+  return [...discoveryIds]
+    .map(
+      (discoveryId) =>
+        discoveriesById.get(
+          discoveryId,
+        ),
+    )
+    .filter(
+      (
+        discovery,
+      ): discovery is Discovery =>
+        Boolean(discovery),
+    )
+    .sort(
+      (left, right) =>
+        new Date(
+          right.createdAt,
+        ).getTime() -
+        new Date(
+          left.createdAt,
+        ).getTime(),
+    );
+}
 
 function buildDomainClusterIds(
   graph: KnowledgeGraph,
