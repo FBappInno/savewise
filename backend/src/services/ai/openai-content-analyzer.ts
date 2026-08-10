@@ -727,14 +727,18 @@ export async function analyzeContent(
           ?.planets
           .find(
             (planet) =>
-              normalizeKnowledgeLabel(
+              arePlanetLabelsEquivalent(
                 planet,
-              ) ===
-              normalizeKnowledgeLabel(
                 requestedPlanet,
               ),
           )
       : undefined;
+
+  const planetReuseMode =
+    getPlanetReuseMode(
+      matchedPlanet,
+      requestedPlanet,
+    );
 
   const {
     taxonomyDecision,
@@ -800,6 +804,8 @@ export async function analyzeContent(
           matchedPlanet,
         ),
 
+      planetReuseMode,
+
       finalPlanet:
         matchedPlanet ??
         analysisResult
@@ -839,6 +845,299 @@ export async function analyzeContent(
 
   return result;
 }
+
+
+/*
+ * PLANET LABEL NORMALIZATION
+ *
+ * Wird ausschließlich innerhalb der bereits
+ * bestimmten Galaxie verwendet.
+ *
+ * Erkennt konservativ:
+ *
+ * 3D-Druck techniken
+ * 3D Druck Techniken
+ * 3D-Durck techniken
+ *
+ * als dieselbe Schreibvariante.
+ *
+ * Semantische Synonyme wie
+ * Paragliding / Gleitschirmfliegen
+ * werden NICHT automatisch gleichgesetzt.
+ */
+
+function normalizePlanetLabel(
+  value: string,
+): string {
+  return value
+    .normalize(
+      "NFKC",
+    )
+    .toLocaleLowerCase()
+    .replace(
+      /[‐-‒–—−_-]+/g,
+      " ",
+    )
+    .replace(
+      /[^\p{L}\p{N}]+/gu,
+      " ",
+    )
+    .replace(
+      /\s+/g,
+      " ",
+    )
+    .trim();
+}
+
+function compactPlanetLabel(
+  value: string,
+): string {
+  return normalizePlanetLabel(
+    value,
+  ).replace(
+    /\s+/g,
+    "",
+  );
+}
+
+function isSingleEditPlanetVariant(
+  leftValue: string,
+  rightValue: string,
+): boolean {
+  const left =
+    compactPlanetLabel(
+      leftValue,
+    );
+
+  const right =
+    compactPlanetLabel(
+      rightValue,
+    );
+
+  if (
+    left === right
+  ) {
+    return true;
+  }
+
+  /*
+   * Kurze Begriffe nicht fuzzy matchen.
+   * Damit vermeiden wir falsche Treffer.
+   */
+  if (
+    left.length < 5 ||
+    right.length < 5
+  ) {
+    return false;
+  }
+
+  if (
+    Math.abs(
+      left.length -
+      right.length,
+    ) > 1
+  ) {
+    return false;
+  }
+
+  /*
+   * Gleiche Länge:
+   * - ein falsches Zeichen
+   * - zwei vertauschte Nachbarzeichen
+   */
+  if (
+    left.length ===
+    right.length
+  ) {
+    const differences:
+      number[] = [];
+
+    for (
+      let index = 0;
+      index < left.length;
+      index += 1
+    ) {
+      if (
+        left[index] !==
+        right[index]
+      ) {
+        differences.push(
+          index,
+        );
+
+        if (
+          differences.length >
+          2
+        ) {
+          return false;
+        }
+      }
+    }
+
+    if (
+      differences.length ===
+      1
+    ) {
+      return true;
+    }
+
+    if (
+      differences.length ===
+      2
+    ) {
+      const first =
+        differences[0];
+
+      const second =
+        differences[1];
+
+      if (
+        first === undefined ||
+        second === undefined
+      ) {
+        return false;
+      }
+
+      return (
+        second ===
+          first + 1 &&
+        left[first] ===
+          right[second] &&
+        left[second] ===
+          right[first]
+      );
+    }
+
+    return false;
+  }
+
+  /*
+   * Unterschiedliche Länge:
+   * genau ein fehlendes oder zusätzliches
+   * Zeichen zulassen.
+   */
+  const shorter =
+    left.length <
+    right.length
+      ? left
+      : right;
+
+  const longer =
+    left.length <
+    right.length
+      ? right
+      : left;
+
+  let shortIndex =
+    0;
+
+  let longIndex =
+    0;
+
+  let skipped =
+    false;
+
+  while (
+    shortIndex <
+      shorter.length &&
+    longIndex <
+      longer.length
+  ) {
+    if (
+      shorter[shortIndex] ===
+      longer[longIndex]
+    ) {
+      shortIndex +=
+        1;
+
+      longIndex +=
+        1;
+
+      continue;
+    }
+
+    if (
+      skipped
+    ) {
+      return false;
+    }
+
+    skipped =
+      true;
+
+    longIndex +=
+      1;
+  }
+
+  return true;
+}
+
+function arePlanetLabelsEquivalent(
+  left: string,
+  right: string,
+): boolean {
+  if (
+    normalizePlanetLabel(
+      left,
+    ) ===
+    normalizePlanetLabel(
+      right,
+    )
+  ) {
+    return true;
+  }
+
+  return isSingleEditPlanetVariant(
+    left,
+    right,
+  );
+}
+
+function getPlanetReuseMode(
+  existingPlanet:
+    string | undefined,
+
+  requestedPlanet:
+    string,
+):
+  | "exact"
+  | "normalized"
+  | "typo"
+  | null {
+  if (!existingPlanet) {
+    return null;
+  }
+
+  if (
+    existingPlanet ===
+    requestedPlanet
+  ) {
+    return "exact";
+  }
+
+  if (
+    normalizePlanetLabel(
+      existingPlanet,
+    ) ===
+    normalizePlanetLabel(
+      requestedPlanet,
+    )
+  ) {
+    return "normalized";
+  }
+
+  if (
+    isSingleEditPlanetVariant(
+      existingPlanet,
+      requestedPlanet,
+    )
+  ) {
+    return "typo";
+  }
+
+  return null;
+}
+
 
 function languageName(language: "de" | "en" | "fr" | "it" | "es"): string {
   return {

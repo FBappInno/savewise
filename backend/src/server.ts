@@ -27,6 +27,11 @@ import {
 import {
   migrateKnownGalaxyLabelDuplicates,
 } from "./services/discoveries/galaxy-label-migration";
+
+
+import {
+  migrateKnownPlanetLabelDuplicates,
+} from "./services/discoveries/planet-label-migration";
 import { importContent } from "./services/import/content-import-service";
 import {
   selectGalaxyCandidates,
@@ -3397,6 +3402,11 @@ async function authenticateRequestAccount(
 async function runStartupMigrations() {
   try {
     await migrateKnownGalaxyLabelDuplicates(
+      discoveryRepository,
+      "private",
+    );
+
+    await migrateKnownPlanetLabelDuplicates(
       discoveryRepository,
       "private",
     );
