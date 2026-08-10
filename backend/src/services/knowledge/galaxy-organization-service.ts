@@ -136,15 +136,11 @@ export async function applyGalaxyOrganization(
          */
         if (
           assignment.action ===
-          "merge"
+            "merge"
         ) {
           if (
-            normalizeKey(
-              currentGalaxy,
-            ) ===
-            normalizeKey(
-              canonicalGalaxy,
-            )
+            currentGalaxy ===
+            canonicalGalaxy
           ) {
             return discovery;
           }

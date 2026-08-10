@@ -2007,24 +2007,6 @@ app.post(
             }),
           );
 
-      const preferredGalaxy =
-        parsedRequest.data
-          .preferredKnowledgePath
-          ?.[0]
-          ?.trim();
-
-      const effectiveKnowledgePaths =
-        preferredGalaxy
-          ? existingKnowledgePaths
-              .filter(
-                (path) =>
-                  path.galaxy
-                    .toLocaleLowerCase() ===
-                  preferredGalaxy
-                    .toLocaleLowerCase(),
-              )
-          : existingKnowledgePaths;
-
       const importResult =
         await withTimeout(
           importContent(
@@ -2036,78 +2018,14 @@ app.post(
                 parsedRequest.data.preferredKnowledgePath,
 
               existingKnowledgePaths:
-                effectiveKnowledgePaths,
+                existingKnowledgePaths,
             },
           ),
           90_000,
         );
 
-      /*
-       * CLASSIFICATION V3B
-       *
-       * Wenn der Benutzer vor dem Import eine
-       * bestehende Galaxie ausgewählt hat, ist
-       * diese Entscheidung verbindlich.
-       *
-       * Die KI darf weiterhin den passenden
-       * Planeten innerhalb dieser Galaxie
-       * wiederverwenden oder dort einen neuen
-       * Planeten erzeugen.
-       *
-       * Sie darf die ausgewählte Galaxie aber
-       * nicht durch einen neuen/ähnlichen Namen
-       * ersetzen.
-       */
-      const lockedGalaxy =
-        preferredGalaxy
-          ? effectiveKnowledgePaths[0]
-              ?.galaxy
-          : undefined;
-
-      const finalImportDiscovery =
-        lockedGalaxy &&
-        importResult.discovery
-          .classification
-          ? {
-              ...importResult.discovery,
-
-              classification: {
-                ...importResult.discovery
-                  .classification,
-
-                secondaryCategory:
-                  lockedGalaxy,
-              },
-            }
-          : importResult.discovery;
-
-      if (lockedGalaxy) {
-        console.log(
-          "[Classification V3B]",
-          JSON.stringify({
-            mode:
-              "user-galaxy-lock",
-
-            galaxy:
-              lockedGalaxy,
-
-            planet:
-              finalImportDiscovery
-                .classification
-                ?.topic ??
-              null,
-
-            availablePlanets:
-              effectiveKnowledgePaths[0]
-                ?.planets
-                .length ??
-              0,
-          }),
-        );
-      }
-
       const workspaceDiscovery = {
-        ...finalImportDiscovery,
+        ...importResult.discovery,
 
         workspaceId:
           parsedRequest.data

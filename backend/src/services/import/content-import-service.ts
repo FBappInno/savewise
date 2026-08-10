@@ -11,6 +11,10 @@ import {
   type ExistingKnowledgePath,
 } from "../ai/openai-content-analyzer";
 
+import {
+  resolveImportGalaxy,
+} from "../knowledge/galaxy-resolver";
+
 export type ContentImportResult = {
   metadata: {
     url: string;
@@ -109,6 +113,16 @@ export async function importContent(
     metadata.title,
   );
 
+  const galaxyResolution =
+    await resolveImportGalaxy({
+      metadata,
+      existingKnowledgePaths:
+        options.existingKnowledgePaths ??
+        [],
+      preferredKnowledgePath:
+        options.preferredKnowledgePath,
+    });
+
   const aiStartedAt =
     Date.now();
 
@@ -116,8 +130,8 @@ export async function importContent(
     await analyzeContent(
       metadata,
       options.preferredLanguage,
-      options.existingKnowledgePaths ??
-        [],
+      galaxyResolution
+        .knowledgePaths,
     );
 
   const aiDurationMs =
@@ -140,7 +154,8 @@ export async function importContent(
 
   const preferredPath =
     normalizeStringArray(
-      options.preferredKnowledgePath ??
+      galaxyResolution
+        .preferredKnowledgePath ??
         [],
     ).slice(0, 3);
 
@@ -279,6 +294,13 @@ export async function importContent(
       preferredPathUsed:
         preferredPath.length >
         0,
+
+      galaxyResolutionSource:
+        galaxyResolution.source,
+
+      galaxyResolutionScore:
+        galaxyResolution.score ??
+        null,
     }),
   );
 

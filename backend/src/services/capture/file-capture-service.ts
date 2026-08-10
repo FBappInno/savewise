@@ -37,6 +37,10 @@ import {
 } from "../discoveries/discovery-service";
 
 import {
+  resolveImportGalaxy,
+} from "../knowledge/galaxy-resolver";
+
+import {
   recordLearningCycle,
 } from "../intelligence/personal-intelligence-service";
 
@@ -561,39 +565,23 @@ export async function captureFile(
         }),
       );
 
-  const preferredGalaxy =
-    input.preferredKnowledgePath
-      ?.[0]
-      ?.trim();
-
-  /*
-   * Wurde eine bestehende Galaxie
-   * ausgewählt, sieht V3B nur diese
-   * eine Galaxie und deren Planeten.
-   */
-  const effectiveKnowledgePaths =
-    preferredGalaxy
-      ? existingKnowledgePaths
-          .filter(
-            (path) =>
-              path.galaxy
-                .toLocaleLowerCase() ===
-              preferredGalaxy
-                .toLocaleLowerCase(),
-          )
-      : existingKnowledgePaths;
+  const galaxyResolution =
+    await resolveImportGalaxy({
+      metadata,
+      existingKnowledgePaths,
+      preferredKnowledgePath:
+        input.preferredKnowledgePath,
+    });
 
   const lockedGalaxy =
-    preferredGalaxy
-      ? effectiveKnowledgePaths[0]
-          ?.galaxy
-      : undefined;
+    galaxyResolution.galaxyLock;
 
   const analysis =
     await analyzeContent(
       metadata,
       input.preferredLanguage,
-      effectiveKnowledgePaths,
+      galaxyResolution
+        .knowledgePaths,
     );
 
   const now =
@@ -616,7 +604,8 @@ export async function captureFile(
             .secondaryCategory,
       },
 
-      input.preferredKnowledgePath,
+      galaxyResolution
+        .preferredKnowledgePath,
     );
 
   if (lockedGalaxy) {
@@ -633,7 +622,8 @@ export async function captureFile(
           classification.topic,
 
         availablePlanets:
-          effectiveKnowledgePaths[0]
+          galaxyResolution
+            .knowledgePaths[0]
             ?.planets
             .length ??
           0,
