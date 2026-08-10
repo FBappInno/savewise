@@ -22,6 +22,11 @@ import {
   saveDiscovery,
   updateDiscovery,
 } from "./services/discoveries/discovery-service";
+
+
+import {
+  migrateKnownGalaxyLabelDuplicates,
+} from "./services/discoveries/galaxy-label-migration";
 import { importContent } from "./services/import/content-import-service";
 import {
   selectGalaxyCandidates,
@@ -3388,6 +3393,28 @@ async function authenticateRequestAccount(
       )
     : null;
 }
+
+async function runStartupMigrations() {
+  try {
+    await migrateKnownGalaxyLabelDuplicates(
+      discoveryRepository,
+      "private",
+    );
+  } catch (error) {
+    console.error(
+      "[Startup Migration] failed:",
+      error,
+    );
+
+    /*
+     * Ein fehlgeschlagener Cleanup soll
+     * den Backend-Start nicht blockieren.
+     */
+  }
+}
+
+void runStartupMigrations();
+
 
 app.listen(
   port,
