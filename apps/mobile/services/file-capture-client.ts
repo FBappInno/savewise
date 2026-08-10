@@ -34,6 +34,187 @@ type FileCaptureResponse = {
   };
 };
 
+export type MobileFileGalaxyCandidate = {
+  galaxy: string;
+  score: number;
+};
+
+export async function getMobileFileGalaxyCandidates(
+  input: {
+    file:
+      MobileCaptureFile;
+
+    captureType:
+      MobileCaptureType;
+  },
+): Promise<
+  MobileFileGalaxyCandidate[]
+> {
+  const apiUrl =
+    getApiUrl();
+
+  const token =
+    await SecureStore.getItemAsync(
+      SESSION_KEY,
+    );
+
+  if (!token) {
+    throw new Error(
+      "Bitte melde dich zuerst bei SaveWise an.",
+    );
+  }
+
+  const settings =
+    await loadAppSettings();
+
+  const workspaceId =
+    settings.workspace.activeId ===
+      "business"
+      ? "business"
+      : "private";
+
+  const preferredLanguage =
+    resolveAnalysisLanguage(
+      settings,
+    );
+
+  const formData =
+    new FormData();
+
+  formData.append(
+    "file",
+    {
+      uri:
+        input.file.uri,
+
+      name:
+        input.file.fileName,
+
+      type:
+        input.file.mimeType,
+    } as unknown as Blob,
+  );
+
+  formData.append(
+    "captureType",
+    input.captureType,
+  );
+
+  formData.append(
+    "workspaceId",
+    workspaceId,
+  );
+
+  formData.append(
+    "preferredLanguage",
+    preferredLanguage,
+  );
+
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(
+      () => {
+        controller.abort();
+      },
+      120_000,
+    );
+
+  try {
+    const response =
+      await fetch(
+        `${apiUrl}/api/capture/file/candidates`,
+        {
+          method:
+            "POST",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+
+          body:
+            formData,
+
+          signal:
+            controller.signal,
+        },
+      );
+
+    const body =
+      await response
+        .json()
+        .catch(
+          () => ({}),
+        ) as {
+          candidates?:
+            MobileFileGalaxyCandidate[];
+
+          error?:
+            string;
+        };
+
+    if (!response.ok) {
+      throw new Error(
+        translateCaptureError(
+          body.error,
+          response.status,
+        ),
+      );
+    }
+
+    return (
+      Array.isArray(
+        body.candidates,
+      )
+        ? body.candidates
+        : []
+    )
+      .filter(
+        (candidate) =>
+          typeof candidate.galaxy ===
+            "string" &&
+          candidate.galaxy
+            .trim()
+            .length >
+            0,
+      )
+      .sort(
+        (
+          left,
+          right,
+        ) =>
+          right.score -
+          left.score,
+      )
+      .slice(
+        0,
+        5,
+      );
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.name ===
+        "AbortError"
+    ) {
+      throw new Error(
+        "Die KI-Prüfung hat länger als 120 Sekunden gedauert.",
+      );
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(
+      timeout,
+    );
+  }
+}
+
+
 export async function importMobileFile(
   input: {
     file: MobileCaptureFile;

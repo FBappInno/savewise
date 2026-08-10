@@ -516,6 +516,7 @@ const styles =
       paddingHorizontal: 18,
       paddingTop: 5,
       width: "100%",
+      alignSelf: "stretch",
     },
 
     searchTrigger: {
@@ -533,6 +534,7 @@ const styles =
       minHeight: 48,
       paddingHorizontal: 13,
       width: "100%",
+      alignSelf: "stretch",
     },
 
     searchPlaceholder: {

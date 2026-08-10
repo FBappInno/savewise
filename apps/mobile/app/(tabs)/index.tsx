@@ -14,6 +14,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -101,6 +102,40 @@ export default function UniverseHomeScreen() {
 
   const domainCount =
     existingMainTopics.length;
+
+  const {
+    width: screenWidth,
+  } = useWindowDimensions();
+
+  const HORIZONTAL_PADDING = 18;
+  const GRID_GAP = 8;
+
+  const availableRowWidth =
+    screenWidth -
+    HORIZONTAL_PADDING * 2;
+
+  const metricCardWidth =
+    (
+      availableRowWidth -
+      GRID_GAP * 2
+    ) / 3;
+
+  /*
+   * Exakt:
+   * obere Karte 1
+   * + Zwischenraum
+   * + obere Karte 2
+   */
+  const searchRowSearchWidth =
+    metricCardWidth * 2 +
+    GRID_GAP;
+
+  /*
+   * Exakt so breit wie
+   * das obere KI-Feld.
+   */
+  const searchRowActionsWidth =
+    metricCardWidth;
 
   function openDiscovery(
     discovery: Discovery,
@@ -209,6 +244,12 @@ export default function UniverseHomeScreen() {
       >
         <View style={styles.metrics}>
           <MetricCard
+            icon="planet-outline"
+            label="Galaxien"
+            value={domainCount}
+          />
+
+<MetricCard
             icon="documents-outline"
             label="Discoveries"
             value={
@@ -217,11 +258,7 @@ export default function UniverseHomeScreen() {
           />
 
 
-          <MetricCard
-            icon="planet-outline"
-            label="Galaxien"
-            value={domainCount}
-          />
+          
 
           <MetricCard
             active={
@@ -240,7 +277,15 @@ export default function UniverseHomeScreen() {
         </View>
 
         <View style={styles.searchActionRow}>
-          <View style={styles.searchArea}>
+          <View
+            style={[
+              styles.searchArea,
+              {
+                width:
+                  searchRowSearchWidth,
+              },
+            ]}
+          >
             <UniverseSearch
               discoveries={
                 universeDiscoveries
@@ -251,75 +296,85 @@ export default function UniverseHomeScreen() {
             />
           </View>
 
-          <Pressable
+          <View
+            style={[
+              styles.searchActions,
+              {
+                width:
+                  searchRowActionsWidth,
+              },
+            ]}
+          >
+            <Pressable
             accessibilityLabel="Daten neu laden"
             accessibilityRole="button"
             disabled={isUpdating}
             onPress={() => {
-              void handleRefresh();
+            void handleRefresh();
             }}
             style={({ pressed }) => [
-              styles.actionButton,
+            styles.actionButton,
 
-              pressed &&
-                styles.pressed,
+            pressed &&
+            styles.pressed,
 
-              isUpdating &&
-                styles.disabled,
+            isUpdating &&
+            styles.disabled,
             ]}
-          >
+            >
             {isUpdating ? (
-              <ActivityIndicator
-                color={
-                  universeTheme.colors
-                    .primaryBright
-                }
-                size="small"
-              />
+            <ActivityIndicator
+            color={
+            universeTheme.colors
+            .primaryBright
+            }
+            size="small"
+            />
             ) : (
-              <Ionicons
-                color={
-                  universeTheme.colors
-                    .primaryBright
-                }
-                name="refresh-outline"
-                size={20}
-              />
+            <Ionicons
+            color={
+            universeTheme.colors
+            .primaryBright
+            }
+            name="refresh-outline"
+            size={20}
+            />
             )}
-          </Pressable>
+            </Pressable>
 
-          <Pressable
+            <Pressable
             accessibilityLabel="Neue Discovery"
             accessibilityRole="button"
             disabled={isImporting}
             onPress={() => {
-              setCaptureModalVisible(
-                true,
-              );
+            setCaptureModalVisible(
+            true,
+            );
             }}
             style={({ pressed }) => [
-              styles.addButton,
+            styles.addButton,
 
-              pressed &&
-                styles.pressed,
+            pressed &&
+            styles.pressed,
 
-              isImporting &&
-                styles.disabled,
+            isImporting &&
+            styles.disabled,
             ]}
-          >
+            >
             {isImporting ? (
-              <ActivityIndicator
-                color="#03111E"
-                size="small"
-              />
+            <ActivityIndicator
+            color="#03111E"
+            size="small"
+            />
             ) : (
-              <Ionicons
-                color="#03111E"
-                name="add"
-                size={23}
-              />
+            <Ionicons
+            color="#03111E"
+            name="add"
+            size={23}
+            />
             )}
-          </Pressable>
+            </Pressable>
+          </View>
         </View>
 
         {error ? (
@@ -501,20 +556,14 @@ function MetricCard({
   value,
 }: {
   active?: boolean;
-
-  icon:
-    keyof typeof Ionicons.glyphMap;
-
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
-
-  value:
-    number | string;
+  value: number | string;
 }) {
   return (
     <View
       style={[
         styles.metricCard,
-
         active &&
           styles.metricCardActive,
       ]}
@@ -522,7 +571,6 @@ function MetricCard({
       <View
         style={[
           styles.metricIcon,
-
           active &&
             styles.metricIconActive,
         ]}
@@ -530,31 +578,37 @@ function MetricCard({
         <Ionicons
           color={
             active
-              ? universeTheme.colors
-                  .green
-              : universeTheme.colors
-                  .primaryBright
+              ? "#22C55E"
+              : universeTheme.colors.primaryBright
           }
           name={icon}
           size={18}
         />
       </View>
 
-      <Text
+      <View
         style={
-          styles.metricValue
+          styles.metricCardTextBlock
         }
       >
-        {value}
-      </Text>
+        <Text
+          numberOfLines={1}
+          style={
+            styles.metricValue
+          }
+        >
+          {value}
+        </Text>
 
-      <Text
-        style={
-          styles.metricLabel
-        }
-      >
-        {label}
-      </Text>
+        <Text
+          numberOfLines={1}
+          style={
+            styles.metricLabel
+          }
+        >
+          {label}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -730,9 +784,10 @@ const styles =
           .borderStrong,
       borderRadius: 14,
       borderWidth: 1,
-      height: 43,
+      flex: 1,
+      height: 46,
       justifyContent: "center",
-      width: 43,
+      minWidth: 0,
     },
 
     addButton: {
@@ -741,46 +796,47 @@ const styles =
         universeTheme.colors
           .primaryBright,
       borderRadius: 14,
-      height: 43,
+      flex: 1,
+      height: 46,
       justifyContent: "center",
+      minWidth: 0,
       shadowColor:
         universeTheme.colors
-          .primary,
-      shadowOffset: {
-        height: 0,
-        width: 0,
-      },
-      shadowOpacity: 0.42,
-      shadowRadius: 11,
-      width: 43,
+          .primaryBright,
+      shadowOpacity: 0.30,
+      shadowRadius: 9,
     },
 
     metrics: {
       flexDirection: "row",
-      gap: 9,
-      paddingBottom: 2,
+      gap: 8,
+      paddingBottom: 0,
       paddingHorizontal: 18,
     },
 
- metricCard: {
-  alignItems: "center",
-  backgroundColor:
-    universeTheme.colors
-      .surface,
-  borderColor:
-    universeTheme.colors
-      .border,
-  borderRadius: 15,
-  borderWidth: 1,
-  flex: 1,
-  minHeight: 72,
-  paddingHorizontal: 6,
-  paddingVertical: 7,
-},
+    metricCard: {
+      alignItems: "center",
+      backgroundColor:
+        "rgba(3, 12, 24, 0.72)",
+      borderColor:
+        universeTheme.colors
+          .border,
+      borderRadius: 15,
+      borderWidth: 1,
+      flex: 1,
+      flexDirection: "row",
+      gap: 8,
+      height: 56,
+      paddingHorizontal: 10,
+    },
 
     metricCardActive: {
       borderColor:
-        "rgba(74, 222, 128, 0.34)",
+        "rgba(34, 197, 94, 0.72)",
+      shadowColor:
+        "#22C55E",
+      shadowOpacity: 0.14,
+      shadowRadius: 8,
     },
 
     metricIcon: {
@@ -788,9 +844,9 @@ const styles =
       backgroundColor:
         "rgba(56, 189, 248, 0.09)",
       borderRadius: 999,
-      height: 31,
+      height: 30,
       justifyContent: "center",
-      width: 31,
+      width: 30,
     },
 
     metricIconActive: {
@@ -798,13 +854,26 @@ const styles =
         "rgba(74, 222, 128, 0.10)",
     },
 
+    metricCardTextBlock: {
+      alignItems: "flex-start",
+      flex: 1,
+      justifyContent: "center",
+      minWidth: 0,
+    },
+
     metricValue: {
       color:
         universeTheme.colors
           .text,
-      fontSize: 15,
+      fontSize: 17,
       fontWeight: "900",
-      marginTop: 6,
+      lineHeight: 19,
+    },
+
+    metricValueActive: {
+      color:
+        universeTheme.colors
+          .text,
     },
 
     metricLabel: {
@@ -812,18 +881,32 @@ const styles =
         universeTheme.colors
           .textSecondary,
       fontSize: 9,
-      marginTop: 2,
+      fontWeight: "600",
+      lineHeight: 11,
+      marginTop: 1,
     },
 
     searchActionRow: {
       alignItems: "center",
       flexDirection: "row",
       gap: 8,
-      marginHorizontal: 16,
+      marginBottom: 22,
+      marginHorizontal: 18,
+      marginTop: 8,
     },
 
     searchArea: {
-      flex: 1,
+      flexGrow: 0,
+      flexShrink: 0,
+      minWidth: 0,
+    },
+
+    searchActions: {
+      alignItems: "stretch",
+      flexDirection: "row",
+      flexGrow: 0,
+      flexShrink: 0,
+      gap: 8,
       minWidth: 0,
     },
 

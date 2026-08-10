@@ -58,9 +58,18 @@ import {
   universeTheme,
 } from "@/theme/universe-theme";
 
+import {
+  getGalaxyCandidates,
+  type GalaxyCandidatePreview,
+} from "@/services/content-import-client";
+
 import type {
   CapturedItem,
 } from "@/types/captured-item";
+
+import {
+  getMobileFileGalaxyCandidates,
+} from "@/services/file-capture-client";
 
 type CaptureMode =
   | "menu"
@@ -243,6 +252,29 @@ export function CaptureModal({
   ] =
     useState("");
 
+
+  const [
+    galaxyCandidates,
+    setGalaxyCandidates,
+  ] =
+    useState<
+      GalaxyCandidatePreview[]
+    >([]);
+
+  const [
+    selectedGalaxy,
+    setSelectedGalaxy,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
+    isLoadingGalaxyCandidates,
+    setLoadingGalaxyCandidates,
+  ] =
+    useState(false);
+
   const [
     selectedFile,
     setSelectedFile,
@@ -328,6 +360,63 @@ export function CaptureModal({
       [existingMainTopics],
     );
 
+  async function loadGalaxyCandidates() {
+    if (
+      !validUrl ||
+      isLoadingGalaxyCandidates
+    ) {
+      return;
+    }
+
+    setLoadingGalaxyCandidates(
+      true,
+    );
+
+    setError(null);
+
+    try {
+      const candidates =
+        await getGalaxyCandidates(
+          normalizedUrl,
+        );
+
+      setGalaxyCandidates(
+        candidates,
+      );
+
+      setSelectedGalaxy(
+        null,
+      );
+
+      setKnowledgePath("");
+    } catch (
+      candidateError
+    ) {
+      setError(
+        candidateError instanceof Error
+          ? candidateError.message
+          : "Galaxien konnten nicht vorgeschlagen werden.",
+      );
+    } finally {
+      setLoadingGalaxyCandidates(
+        false,
+      );
+    }
+  }
+
+  function selectGalaxy(
+    galaxy:
+      string | null,
+  ) {
+    setSelectedGalaxy(
+      galaxy,
+    );
+
+    setKnowledgePath(
+      galaxy ?? "",
+    );
+  }
+
   function reset() {
     setMode(
       "menu",
@@ -335,6 +424,11 @@ export function CaptureModal({
 
     setUrl("");
     setKnowledgePath("");
+    setGalaxyCandidates([]);
+    setSelectedGalaxy(null);
+    setLoadingGalaxyCandidates(
+      false,
+    );
     setSelectedFile(null);
     setSelectedCaptureType(
       null,
@@ -759,6 +853,64 @@ export function CaptureModal({
     );
   }
 
+  async function loadSelectedFileGalaxyCandidates() {
+    if (
+      !selectedFile ||
+      !selectedCaptureType ||
+      isLoadingGalaxyCandidates
+    ) {
+      return;
+    }
+
+    setLoadingGalaxyCandidates(
+      true,
+    );
+
+    setError(
+      null,
+    );
+
+    try {
+      const candidates =
+        await getMobileFileGalaxyCandidates({
+          file:
+            selectedFile,
+
+          captureType:
+            selectedCaptureType,
+        });
+
+      setGalaxyCandidates(
+        candidates,
+      );
+
+      /*
+       * Standard bleibt:
+       * KI darf automatisch entscheiden.
+       */
+      setSelectedGalaxy(
+        null,
+      );
+
+      setKnowledgePath(
+        "",
+      );
+    } catch (
+      candidateError
+    ) {
+      setError(
+        getErrorMessage(
+          candidateError,
+          "Die passenden Galaxien konnten nicht ermittelt werden.",
+        ),
+      );
+    } finally {
+      setLoadingGalaxyCandidates(
+        false,
+      );
+    }
+  }
+
   async function importSelectedFile() {
     if (
       !selectedFile ||
@@ -1127,6 +1279,234 @@ export function CaptureModal({
                 </View>
               ) : null}
 
+              <View
+                style={
+                  styles.galaxySelectionCard
+                }
+              >
+                <View
+                  style={
+                    styles.galaxySelectionHeader
+                  }
+                >
+                  <View
+                    style={
+                      styles.flex
+                    }
+                  >
+                    <Text
+                      style={
+                        styles.galaxySelectionEyebrow
+                      }
+                    >
+                      CLASSIFICATION V3
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.galaxySelectionTitle
+                      }
+                    >
+                      Galaxie festlegen
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.galaxySelectionText
+                      }
+                    >
+                      SaveWise sucht passende
+                      bestehende Galaxien und
+                      vermeidet unnötige neue
+                      Kategorien.
+                    </Text>
+                  </View>
+
+                  <Pressable
+                    disabled={
+                      !validUrl ||
+                      isLoadingGalaxyCandidates
+                    }
+                    onPress={() => {
+                      void loadGalaxyCandidates();
+                    }}
+                    style={[
+                      styles.galaxyCheckButton,
+
+                      (
+                        !validUrl ||
+                        isLoadingGalaxyCandidates
+                      ) &&
+                        styles.buttonDisabled,
+                    ]}
+                  >
+                    {isLoadingGalaxyCandidates ? (
+                      <ActivityIndicator
+                        color={
+                          universeTheme
+                            .colors
+                            .primaryBright
+                        }
+                        size="small"
+                      />
+                    ) : (
+                      <Ionicons
+                        color={
+                          universeTheme
+                            .colors
+                            .primaryBright
+                        }
+                        name="sparkles-outline"
+                        size={16}
+                      />
+                    )}
+
+                    <Text
+                      style={
+                        styles.galaxyCheckButtonText
+                      }
+                    >
+                      Prüfen
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    selectGalaxy(
+                      null,
+                    );
+                  }}
+                  style={[
+                    styles.galaxyOption,
+
+                    selectedGalaxy ===
+                      null &&
+                      styles.galaxyOptionActive,
+                  ]}
+                >
+                  <Ionicons
+                    color={
+                      selectedGalaxy ===
+                        null
+                        ? universeTheme
+                            .colors
+                            .primaryBright
+                        : universeTheme
+                            .colors
+                            .textMuted
+                    }
+                    name={
+                      selectedGalaxy ===
+                        null
+                        ? "radio-button-on"
+                        : "radio-button-off"
+                    }
+                    size={19}
+                  />
+
+                  <View
+                    style={
+                      styles.flex
+                    }
+                  >
+                    <Text
+                      style={
+                        styles.galaxyOptionTitle
+                      }
+                    >
+                      Galaxie automatisch bestimmen
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.galaxyOptionMeta
+                      }
+                    >
+                      KI entscheidet anhand
+                      des Inhalts.
+                    </Text>
+                  </View>
+                </Pressable>
+
+                {galaxyCandidates.map(
+                  (
+                    candidate,
+                    index,
+                  ) => {
+                    const active =
+                      selectedGalaxy ===
+                      candidate.galaxy;
+
+                    return (
+                      <Pressable
+                        key={
+                          candidate.galaxy
+                        }
+                        onPress={() => {
+                          selectGalaxy(
+                            candidate.galaxy,
+                          );
+                        }}
+                        style={[
+                          styles.galaxyOption,
+
+                          active &&
+                            styles.galaxyOptionActive,
+                        ]}
+                      >
+                        <Ionicons
+                          color={
+                            active
+                              ? universeTheme
+                                  .colors
+                                  .primaryBright
+                              : universeTheme
+                                  .colors
+                                  .textMuted
+                          }
+                          name={
+                            active
+                              ? "radio-button-on"
+                              : "radio-button-off"
+                          }
+                          size={19}
+                        />
+
+                        <View
+                          style={
+                            styles.flex
+                          }
+                        >
+                          <Text
+                            style={
+                              styles.galaxyOptionTitle
+                            }
+                          >
+                            {candidate.galaxy}
+                          </Text>
+
+                          <Text
+                            style={
+                              styles.galaxyOptionMeta
+                            }
+                          >
+                            Vorschlag {
+                              index + 1
+                            } · {
+                              Math.round(
+                                candidate.score *
+                                100,
+                              )
+                            } %
+                          </Text>
+                        </View>
+                      </Pressable>
+                    );
+                  },
+                )}
+              </View>
+
               <KnowledgePathField
                 onChange={
                   setKnowledgePath
@@ -1330,6 +1710,233 @@ export function CaptureModal({
                   </Text>
                 </Pressable>
               )}
+
+              <View
+                style={
+                  styles.galaxySelectionCard
+                }
+              >
+                <View
+                  style={
+                    styles.galaxySelectionHeader
+                  }
+                >
+                  <View
+                    style={
+                      styles.flex
+                    }
+                  >
+                    <Text
+                      style={
+                        styles.galaxySelectionEyebrow
+                      }
+                    >
+                      CLASSIFICATION V3
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.galaxySelectionTitle
+                      }
+                    >
+                      Galaxie festlegen
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.galaxySelectionText
+                      }
+                    >
+                      SaveWise analysiert die
+                      Datei und schlägt passende
+                      bestehende Galaxien vor.
+                    </Text>
+                  </View>
+
+                  <Pressable
+                    disabled={
+                      isImporting ||
+                      isLoadingGalaxyCandidates
+                    }
+                    onPress={() => {
+                      void loadSelectedFileGalaxyCandidates();
+                    }}
+                    style={[
+                      styles.galaxyCheckButton,
+
+                      (
+                        isImporting ||
+                        isLoadingGalaxyCandidates
+                      ) &&
+                        styles.buttonDisabled,
+                    ]}
+                  >
+                    {isLoadingGalaxyCandidates ? (
+                      <ActivityIndicator
+                        color={
+                          universeTheme
+                            .colors
+                            .primaryBright
+                        }
+                        size="small"
+                      />
+                    ) : (
+                      <Ionicons
+                        color={
+                          universeTheme
+                            .colors
+                            .primaryBright
+                        }
+                        name="sparkles-outline"
+                        size={16}
+                      />
+                    )}
+
+                    <Text
+                      style={
+                        styles.galaxyCheckButtonText
+                      }
+                    >
+                      Datei mit KI prüfen
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    selectGalaxy(
+                      null,
+                    );
+                  }}
+                  style={[
+                    styles.galaxyOption,
+
+                    selectedGalaxy ===
+                      null &&
+                      styles.galaxyOptionActive,
+                  ]}
+                >
+                  <Ionicons
+                    color={
+                      selectedGalaxy ===
+                        null
+                        ? universeTheme
+                            .colors
+                            .primaryBright
+                        : universeTheme
+                            .colors
+                            .textMuted
+                    }
+                    name={
+                      selectedGalaxy ===
+                        null
+                        ? "radio-button-on"
+                        : "radio-button-off"
+                    }
+                    size={19}
+                  />
+
+                  <View
+                    style={
+                      styles.flex
+                    }
+                  >
+                    <Text
+                      style={
+                        styles.galaxyOptionTitle
+                      }
+                    >
+                      KI entscheiden lassen
+                    </Text>
+
+                    <Text
+                      style={
+                        styles.galaxyOptionMeta
+                      }
+                    >
+                      SaveWise ordnet die Datei
+                      automatisch ein.
+                    </Text>
+                  </View>
+                </Pressable>
+
+                {galaxyCandidates.map(
+                  (
+                    candidate,
+                    index,
+                  ) => {
+                    const active =
+                      selectedGalaxy ===
+                      candidate.galaxy;
+
+                    return (
+                      <Pressable
+                        key={
+                          candidate.galaxy
+                        }
+                        onPress={() => {
+                          selectGalaxy(
+                            candidate.galaxy,
+                          );
+                        }}
+                        style={[
+                          styles.galaxyOption,
+
+                          active &&
+                            styles.galaxyOptionActive,
+                        ]}
+                      >
+                        <Ionicons
+                          color={
+                            active
+                              ? universeTheme
+                                  .colors
+                                  .primaryBright
+                              : universeTheme
+                                  .colors
+                                  .textMuted
+                          }
+                          name={
+                            active
+                              ? "radio-button-on"
+                              : "radio-button-off"
+                          }
+                          size={19}
+                        />
+
+                        <View
+                          style={
+                            styles.flex
+                          }
+                        >
+                          <Text
+                            style={
+                              styles.galaxyOptionTitle
+                            }
+                          >
+                            {candidate.galaxy}
+                          </Text>
+
+                          <Text
+                            style={
+                              styles.galaxyOptionMeta
+                            }
+                          >
+                            Vorschlag {
+                              index + 1
+                            } · {
+                              Math.round(
+                                candidate.score *
+                                100,
+                              )
+                            } %
+                          </Text>
+                        </View>
+                      </Pressable>
+                    );
+                  },
+                )}
+              </View>
 
               <KnowledgePathField
                 onChange={
@@ -2566,4 +3173,107 @@ const styles =
       flex:
         1,
     },
-  });
+      galaxySelectionCard: {
+      backgroundColor:
+        "rgba(7, 17, 31, 0.76)",
+      borderColor:
+        universeTheme.colors
+          .border,
+      borderRadius: 16,
+      borderWidth: 1,
+      gap: 8,
+      padding: 12,
+    },
+
+    galaxySelectionHeader: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: 10,
+    },
+
+    galaxySelectionEyebrow: {
+      color:
+        universeTheme.colors
+          .primary,
+      fontSize: 8,
+      fontWeight: "900",
+      letterSpacing: 1,
+    },
+
+    galaxySelectionTitle: {
+      color:
+        universeTheme.colors
+          .text,
+      fontSize: 14,
+      fontWeight: "900",
+      marginTop: 2,
+    },
+
+    galaxySelectionText: {
+      color:
+        universeTheme.colors
+          .textSecondary,
+      fontSize: 10,
+      lineHeight: 14,
+      marginTop: 3,
+    },
+
+    galaxyCheckButton: {
+      alignItems: "center",
+      borderColor:
+        universeTheme.colors
+          .borderStrong,
+      borderRadius: 12,
+      borderWidth: 1,
+      flexDirection: "row",
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+    },
+
+    galaxyCheckButtonText: {
+      color:
+        universeTheme.colors
+          .primaryBright,
+      fontSize: 10,
+      fontWeight: "800",
+    },
+
+    galaxyOption: {
+      alignItems: "center",
+      borderColor:
+        universeTheme.colors
+          .border,
+      borderRadius: 12,
+      borderWidth: 1,
+      flexDirection: "row",
+      gap: 9,
+      paddingHorizontal: 10,
+      paddingVertical: 9,
+    },
+
+    galaxyOptionActive: {
+      backgroundColor:
+        "rgba(56, 189, 248, 0.08)",
+      borderColor:
+        universeTheme.colors
+          .primary,
+    },
+
+    galaxyOptionTitle: {
+      color:
+        universeTheme.colors
+          .text,
+      fontSize: 12,
+      fontWeight: "800",
+    },
+
+    galaxyOptionMeta: {
+      color:
+        universeTheme.colors
+          .textMuted,
+      fontSize: 9,
+      marginTop: 1,
+    },
+
+});
