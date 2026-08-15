@@ -25,6 +25,10 @@ import {
   rebuildKnowledgeLibrary,
 } from "@/services/knowledge-client";
 
+import {
+  KnowledgeUniverseWebGl,
+} from "@/components/universe/knowledge-universe-webgl";
+
 type StarSystem = {
   id: string;
   label: string;
@@ -74,16 +78,22 @@ const CENTER_Y =
   HEIGHT / 2;
 
 const INITIAL_VIEW_WIDTH =
-  1200;
+  WIDTH;
 
 const INITIAL_VIEW_HEIGHT =
-  720;
+  1080;
 
 const MIN_VIEW_WIDTH =
   430;
 
+const ZOOM_REFERENCE_WIDTH = 1200;
+
 const MAX_VIEW_WIDTH =
   WIDTH;
+
+const SPHERE_END_ZOOM = 0.78;
+const LANDSCAPE_START_ZOOM = 1;
+const LANDSCAPE_FULL_ZOOM = 1.08;
 
 type UniverseCamera = {
   x: number;
@@ -208,13 +218,16 @@ export function KnowledgeGalaxy({
       null,
     );
 
+  const previousUniverseLevel =
+    useRef(0);
+
   const svgRef =
     useRef<SVGSVGElement | null>(
       null,
     );
 
   const zoomLevel =
-    INITIAL_VIEW_WIDTH /
+    ZOOM_REFERENCE_WIDTH /
     camera.width;
 
   const [
@@ -269,9 +282,13 @@ export function KnowledgeGalaxy({
   }, [activeWorkspaceId]);
 
   useEffect(() => {
-    setCamera(
-      createInitialCamera(),
-    );
+    const reset = window.setTimeout(() => {
+      setCamera(
+        createInitialCamera(),
+      );
+    }, 0);
+
+    return () => window.clearTimeout(reset);
   }, [activeWorkspaceId]);
 
   const [
@@ -364,11 +381,58 @@ export function KnowledgeGalaxy({
       [galaxies],
     );
 
+  const universeLevel = selectedGalaxy
+    ? 3
+    : zoomLevel < SPHERE_END_ZOOM
+      ? 0
+      : zoomLevel < LANDSCAPE_START_ZOOM
+        ? 1
+        : 2;
+
+  const openingProgress = clamp01(
+    (zoomLevel - SPHERE_END_ZOOM) /
+    (LANDSCAPE_START_ZOOM - SPHERE_END_ZOOM),
+  );
+
+  const landscapeProgress = clamp01(
+    (zoomLevel - LANDSCAPE_START_ZOOM) /
+    (LANDSCAPE_FULL_ZOOM - LANDSCAPE_START_ZOOM),
+  );
+
+  useEffect(() => {
+    const previous = previousUniverseLevel.current;
+    previousUniverseLevel.current = universeLevel;
+
+    if (previous < 2 && universeLevel === 2 && !selectedGalaxy) {
+      const fit = window.setTimeout(() => {
+        setCamera((current) => clampCamera({
+          ...current,
+          x: CENTER_X - current.width / 2,
+          y: CENTER_Y - current.height / 2,
+        }));
+      }, 0);
+
+      return () => window.clearTimeout(fit);
+    }
+  }, [selectedGalaxy, universeLevel]);
+
+  const webGlDomains = useMemo(
+    () => galaxies.map((galaxy, index) => {
+      const position = overviewPositions[index];
+      const compactProgress = smoothStep(clamp01((openingProgress - 0.58) / 0.42));
+      const spread = mix(1.42, 1, compactProgress);
+      return {
+        id: galaxy.id,
+        x: CENTER_X + ((position?.x ?? CENTER_X) - CENTER_X) * spread,
+        y: CENTER_Y + ((position?.y ?? CENTER_Y) - CENTER_Y) * spread,
+      };
+    }),
+    [galaxies, openingProgress, overviewPositions],
+  );
+
   function handleUniverseWheel(
     event:
-      React.WheelEvent<
-        SVGSVGElement
-      >,
+      React.WheelEvent<Element>,
   ): void {
     event.preventDefault();
 
@@ -457,6 +521,15 @@ export function KnowledgeGalaxy({
         });
       },
     );
+  }
+
+  function zoomCamera(factor: number): void {
+    setCamera((current) => clampCamera({
+      x: current.x + current.width * (1 - factor) / 2,
+      y: current.y + current.height * (1 - factor) / 2,
+      width: current.width * factor,
+      height: current.height * factor,
+    }));
   }
 
   function handleUniversePointerDown(
@@ -714,9 +787,9 @@ export function KnowledgeGalaxy({
   }
 
   return (
-    <section className="galaxy-layout">
+    <section className={universeLevel < 2 ? "galaxy-layout galaxy-layout-universe" : "galaxy-layout"}>
       <div className="galaxy-stage">
-        <div className="galaxy-stage-header">
+        <div className={universeLevel < 2 ? "galaxy-stage-header galaxy-stage-header-hidden" : "galaxy-stage-header"}>
           <div>
             <div className="card-eyebrow">
               {selectedGalaxy
@@ -831,6 +904,16 @@ export function KnowledgeGalaxy({
         >
           <div className="galaxy-stars" />
 
+          {!selectedGalaxy ? (
+            <KnowledgeUniverseWebGl
+              domains={webGlDomains}
+              fingerprint={knowledgeLibrary?.graph?.sourceFingerprint ?? activeWorkspaceId}
+              morph={openingProgress}
+              onWheel={handleUniverseWheel}
+              opacity={1 - smoothStep(landscapeProgress)}
+            />
+          ) : null}
+
           <svg
             aria-label="Interaktives Wissensuniversum"
             className="galaxy-canvas"
@@ -855,13 +938,14 @@ export function KnowledgeGalaxy({
             }
             role="img"
             style={{
-              cursor:
-                dragState.current
-                  ? "grabbing"
-                  : "grab",
+              cursor: "grab",
 
               touchAction:
                 "none",
+
+              opacity: selectedGalaxy ? 1 : smoothStep(landscapeProgress),
+
+              pointerEvents: selectedGalaxy || landscapeProgress >= 0.55 ? "auto" : "none",
             }}
             viewBox={`${camera.x} ${camera.y} ${camera.width} ${camera.height}`}
           >
@@ -991,6 +1075,7 @@ export function KnowledgeGalaxy({
                       overviewPositions[
                         index
                       ];
+                    const labelLines = splitGalaxyLabel(galaxy.label);
 
                     if (!position) {
                       return null;
@@ -1029,6 +1114,15 @@ export function KnowledgeGalaxy({
                         role="button"
                         tabIndex={0}
                       >
+                        <title>{galaxy.label}</title>
+
+                        <circle
+                          cx={position.x}
+                          cy={position.y}
+                          fill="transparent"
+                          r={position.radius * 1.38}
+                        />
+
                         <circle
                           className="domain-galaxy-outer"
                           cx={
@@ -1039,7 +1133,7 @@ export function KnowledgeGalaxy({
                           }
                           r={
                             position.radius *
-                            1.62
+                            1.22
                           }
                         />
 
@@ -1053,7 +1147,7 @@ export function KnowledgeGalaxy({
                           }
                           rx={
                             position.radius *
-                            1.42
+                            1.12
                           }
                           ry={
                             position.radius *
@@ -1076,7 +1170,7 @@ export function KnowledgeGalaxy({
                           }
                           r={
                             position.radius *
-                            1.18
+                            1.08
                           }
                         />
 
@@ -1116,21 +1210,28 @@ export function KnowledgeGalaxy({
                             galaxy.count >=
                               3
                           ) ? (
-                            <text
-                              className="domain-galaxy-label"
+                        <text
+                          className="domain-galaxy-label"
                               textAnchor="middle"
                               x={
                                 position.x
                               }
                               y={
                                 position.y +
-                                position.radius +
-                                29
+                                position.radius *
+                                  1.22 +
+                                18
                               }
-                            >
-                              {
-                                galaxy.label
-                              }
+                          >
+                              {labelLines.map((line, lineIndex) => (
+                                <tspan
+                                  dy={lineIndex === 0 ? 0 : 16}
+                                  key={`${galaxy.id}:label:${lineIndex}`}
+                                  x={position.x}
+                                >
+                                  {line}
+                                </tspan>
+                              ))}
                             </text>
                           ) : null
                         }
@@ -1164,15 +1265,25 @@ export function KnowledgeGalaxy({
             )}
           </svg>
 
+          {!selectedGalaxy ? (
+            <div className="universe-zoom-controls" aria-label="Universumszoom">
+              <button aria-label="Hineinzoomen" onClick={() => zoomCamera(0.78)} type="button">+</button>
+              <button aria-label="Herauszoomen" onClick={() => zoomCamera(1.28)} type="button">−</button>
+              <button aria-label="Universum zurücksetzen" onClick={() => setCamera(createInitialCamera())} type="button">↺</button>
+            </div>
+          ) : null}
+
           <div className="galaxy-control-hint">
             {selectedGalaxy
               ? "Ziehen zum Verschieben · Scrollen/Trackpad zum Zoomen · Planet anklicken zum Erkunden"
-              : "Ziehen zum Verschieben · Scrollen/Trackpad zum Zoomen · Galaxie anklicken zum Erkunden"}
+              : universeLevel < 2
+                ? "Ziehen zum räumlichen Drehen · Scrollen/Trackpad zum Öffnen"
+                : "Ziehen zum Verschieben · Scrollen/Trackpad zum Zoomen · Galaxie anklicken zum Erkunden"}
           </div>
         </div>
       </div>
 
-      <aside className="galaxy-inspector">
+      <aside className={universeLevel < 2 ? "galaxy-inspector galaxy-inspector-hidden" : "galaxy-inspector"}>
         {selectedGalaxy ? (
           <>
             <div className="card-eyebrow">
@@ -2213,508 +2324,166 @@ function createOverviewPositions(
   galaxies:
     DomainGalaxy[],
 ): OverviewPosition[] {
-  if (
-    galaxies.length === 0
-  ) {
-    return [];
-  }
+  const bounds = {
+    left: 390,
+    right: 1410,
+    top: 280,
+    bottom: 870,
+  };
 
-  const clusterMap =
-    new Map<
-      string,
-      Array<{
-        galaxy:
-          DomainGalaxy;
-        index: number;
-      }>
-    >();
+  type LayoutNode = OverviewPosition & {
+    galaxy: DomainGalaxy;
+    index: number;
+    leftExtent: number;
+    rightExtent: number;
+    topExtent: number;
+    bottomExtent: number;
+    anchorX: number;
+    anchorY: number;
+  };
 
-  galaxies.forEach(
-    (
-      galaxy,
-      index,
-    ) => {
-      const group =
-        clusterMap.get(
-          galaxy.clusterId,
-        ) ?? [];
-
-      group.push({
-        galaxy,
-        index,
-      });
-
-      clusterMap.set(
-        galaxy.clusterId,
-        group,
-      );
-    },
-  );
-
-  const clusters =
-    [...clusterMap.entries()]
-      .map(
-        ([clusterId, members]) => ({
-          clusterId,
-          members,
-          totalCount:
-            members.reduce(
-              (
-                total,
-                member,
-              ) =>
-                total +
-                member.galaxy.count,
-              0,
-            ),
-        }),
-      )
-      .sort(
-        (
-          left,
-          right,
-        ) =>
-          right.totalCount -
-          left.totalCount,
-      );
-
-  const positions:
-    OverviewPosition[] =
-    new Array(
-      galaxies.length,
-    );
-
-  const clusterCenters =
-    createClusterScatterCenters(
-      clusters.map(
-        (cluster) => ({
-          id:
-            cluster.clusterId,
-          size:
-            cluster.members.length,
-          weight:
-            cluster.totalCount,
-        }),
-      ),
-    );
-
-  clusters.forEach(
-    (
-      cluster,
-      clusterIndex,
-    ) => {
-      const center =
-        clusterCenters[
-          clusterIndex
-        ];
-
-      const members =
-        cluster.members;
-
-      const clusterSeed =
-        seededNumber(
-          cluster.clusterId,
-        );
-
-      members.forEach(
-        (
-          member,
-          memberIndex,
-        ) => {
-          const galaxy =
-            member.galaxy;
-
-          const radius =
-            calculateGalaxyDisplayRadius(
-              galaxy.count,
-            );
-
-          if (
-            members.length === 1
-          ) {
-            positions[
-              member.index
-            ] = {
-              x:
-                clampPosition(
-                  center.x,
-                  radius,
-                  96,
-                ),
-              y:
-                clampPosition(
-                  center.y,
-                  radius,
-                  92,
-                ),
-              radius,
-            };
-
-            return;
-          }
-
-          /*
-           * Innerhalb eines Clusters:
-           * lockere, unregelmäßige Verteilung
-           * statt perfekter Kreisform.
-           */
-          const localSeed =
-            seededNumber(
-              `${cluster.clusterId}:${galaxy.id}:${memberIndex}`,
-            );
-
-          const angle =
-            localSeed *
-            Math.PI *
-            2;
-
-          const spiralFactor =
-            (memberIndex + 1) /
-            members.length;
-
-          const spreadBase =
-            members.length <= 3
-              ? 70
-              : members.length <= 6
-                ? 95
-                : members.length <= 10
-                  ? 120
-                  : 145;
-
-          const spread =
-            spreadBase *
-            (0.45 +
-              spiralFactor *
-                0.9);
-
-          const offsetX =
-            Math.cos(angle) *
-              spread +
-            Math.sin(
-              angle *
-                1.7 +
-                clusterSeed *
-                  2,
-            ) *
-              22;
-
-          const offsetY =
-            Math.sin(angle) *
-              spread *
-              0.82 +
-            Math.cos(
-              angle *
-                1.3 +
-                clusterSeed *
-                  3,
-            ) *
-              18;
-
-          positions[
-            member.index
-          ] = {
-            x:
-              clampPosition(
-                center.x +
-                  offsetX,
-                radius,
-                96,
-              ),
-            y:
-              clampPosition(
-                center.y +
-                  offsetY,
-                radius,
-                92,
-              ),
-            radius,
-          };
-        },
-      );
-    },
-  );
-
-  return relaxOverviewPositions(
-    positions,
-    18,
-  );
-}
-
-function createClusterScatterCenters(
-  clusters: Array<{
-    id: string;
-    size: number;
-    weight: number;
-  }>,
-): Array<{
-  x: number;
-  y: number;
-}> {
-  if (
-    clusters.length === 0
-  ) {
-    return [];
-  }
-
-  const usableWidth =
-    WIDTH - 220;
-
-  const usableHeight =
-    HEIGHT - 190;
-
-  const cols =
-    Math.max(
-      2,
-      Math.ceil(
-        Math.sqrt(
-          clusters.length,
-        ),
-      ),
-    );
-
-  const rows =
-    Math.max(
-      2,
-      Math.ceil(
-        clusters.length / cols,
-      ),
-    );
-
-  const cellWidth =
-    usableWidth / cols;
-
-  const cellHeight =
-    usableHeight / rows;
-
-  const cells:
-    Array<{
-      col: number;
-      row: number;
-      seed: number;
-    }> = [];
-
-  for (
-    let row = 0;
-    row < rows;
-    row += 1
-  ) {
-    for (
-      let col = 0;
-      col < cols;
-      col += 1
-    ) {
-      cells.push({
-        col,
-        row,
-        seed:
-          seededNumber(
-            `cell:${col}:${row}`,
-          ),
-      });
-    }
-  }
-
-  cells.sort(
-    (left, right) =>
-      left.seed - right.seed,
-  );
-
-  return clusters.map(
-    (
-      cluster,
-      index,
-    ) => {
-      const cell =
-        cells[
-          index % cells.length
-        ];
-
-      const seed =
-        seededNumber(
-          `cluster:${cluster.id}`,
-        );
-
-      const jitterX =
-        (seed - 0.5) *
-        cellWidth *
-        0.58;
-
-      const jitterY =
-        (
-          seededNumber(
-            `${cluster.id}:y`,
-          ) - 0.5
-        ) *
-        cellHeight *
-        0.58;
-
-      const x =
-        110 +
-        cell.col *
-          cellWidth +
-        cellWidth / 2 +
-        jitterX;
-
-      const y =
-        88 +
-        cell.row *
-          cellHeight +
-        cellHeight / 2 +
-        jitterY;
+  const nodes: LayoutNode[] = galaxies
+    .map((galaxy, index) => {
+      const radius = calculateGalaxyDisplayRadius(galaxy.count);
+      const labelLines = splitGalaxyLabel(galaxy.label);
+      const longestLine = Math.max(...labelLines.map((line) => line.length));
+      const labelHalfWidth = Math.min(112, Math.max(42, longestLine * 6.4));
+      const orbitExtent = radius * 1.22;
+      const clusterSeed = seededNumber(`cluster:${galaxy.clusterId}`);
+      const clusterAngle = clusterSeed * Math.PI * 2;
+      const clusterDistance = 75 + seededNumber(`${galaxy.clusterId}:distance`) * 150;
+      const anchorX = CENTER_X + Math.cos(clusterAngle) * clusterDistance * 1.75;
+      const anchorY = CENTER_Y + Math.sin(clusterAngle) * clusterDistance;
+      const seedAngle = seededNumber(`galaxy:${galaxy.id}:angle`) * Math.PI * 2;
+      const seedDistance = 30 + seededNumber(`galaxy:${galaxy.id}:distance`) * 115;
 
       return {
-        x,
-        y,
+        galaxy,
+        index,
+        radius,
+        x: anchorX + Math.cos(seedAngle) * seedDistance,
+        y: anchorY + Math.sin(seedAngle) * seedDistance,
+        leftExtent: Math.max(orbitExtent, labelHalfWidth) + 14,
+        rightExtent: Math.max(orbitExtent, labelHalfWidth) + 14,
+        topExtent: orbitExtent + 14,
+        bottomExtent: radius * 1.22 + 28 + labelLines.length * 16,
+        anchorX,
+        anchorY,
       };
-    },
-  );
+    })
+    .sort((left, right) =>
+      right.radius - left.radius || left.galaxy.id.localeCompare(right.galaxy.id),
+    );
+
+  const clampNode = (node: LayoutNode) => {
+    node.x = Math.max(
+      bounds.left + node.leftExtent,
+      Math.min(bounds.right - node.rightExtent, node.x),
+    );
+    node.y = Math.max(
+      bounds.top + node.topExtent,
+      Math.min(bounds.bottom - node.bottomExtent, node.y),
+    );
+  };
+
+  const separateNodes = (strength: number) => {
+    for (let leftIndex = 0; leftIndex < nodes.length; leftIndex += 1) {
+      const left = nodes[leftIndex]!;
+
+      for (let rightIndex = leftIndex + 1; rightIndex < nodes.length; rightIndex += 1) {
+        const right = nodes[rightIndex]!;
+        const overlapX = Math.min(
+          left.x + left.rightExtent,
+          right.x + right.rightExtent,
+        ) - Math.max(
+          left.x - left.leftExtent,
+          right.x - right.leftExtent,
+        );
+        const overlapY = Math.min(
+          left.y + left.bottomExtent,
+          right.y + right.bottomExtent,
+        ) - Math.max(
+          left.y - left.topExtent,
+          right.y - right.topExtent,
+        );
+
+        if (overlapX <= 0 || overlapY <= 0) continue;
+
+        const directionX = right.x === left.x
+          ? (seededNumber(`${left.galaxy.id}:${right.galaxy.id}:x`) < 0.5 ? -1 : 1)
+          : Math.sign(right.x - left.x);
+        const directionY = right.y === left.y
+          ? (seededNumber(`${left.galaxy.id}:${right.galaxy.id}:y`) < 0.5 ? -1 : 1)
+          : Math.sign(right.y - left.y);
+
+        if (overlapX / (left.leftExtent + right.rightExtent) < overlapY / (left.topExtent + right.bottomExtent)) {
+          const push = (overlapX / 2 + 1) * strength;
+          left.x -= directionX * push;
+          right.x += directionX * push;
+        } else {
+          const push = (overlapY / 2 + 1) * strength;
+          left.y -= directionY * push;
+          right.y += directionY * push;
+        }
+      }
+    }
+
+    nodes.forEach(clampNode);
+  };
+
+  nodes.forEach(clampNode);
+
+  for (let iteration = 0; iteration < 180; iteration += 1) {
+    nodes.forEach((node) => {
+      node.x += (node.anchorX - node.x) * 0.004;
+      node.y += (node.anchorY - node.y) * 0.004;
+    });
+    separateNodes(0.76);
+  }
+
+  for (let iteration = 0; iteration < 160; iteration += 1) {
+    separateNodes(1);
+  }
+
+  const positions: OverviewPosition[] = new Array(galaxies.length);
+  nodes.forEach((node) => {
+    positions[node.index] = {
+      x: node.x,
+      y: node.y,
+      radius: node.radius,
+    };
+  });
+
+  return positions;
 }
 
 function calculateGalaxyDisplayRadius(
   count: number,
 ): number {
-  const base =
-    calculateDomainRadius(
-      count,
-    );
-
-  /*
-   * Mehr Inhalte = sichtbar größere Galaxie.
-   * Trotzdem innerhalb sinnvoller Grenzen.
-   */
-  return Math.max(
-    28,
-    Math.min(
-      74,
-      base + Math.log2(count + 1) * 6,
-    ),
-  );
+  return Math.max(32, Math.min(50, 29 + Math.sqrt(Math.max(1, count)) * 5.2));
 }
 
-function relaxOverviewPositions(
-  positions:
-    OverviewPosition[],
-  padding: number,
-): OverviewPosition[] {
-  const next =
-    positions.map(
-      (position) => ({
-        ...position,
-      }),
-    );
+function splitGalaxyLabel(value: string): string[] {
+  const words = value.trim().split(/\s+/);
+  if (value.length <= 22 || words.length === 1) return [value];
 
-  for (
-    let iteration = 0;
-    iteration < 140;
-    iteration += 1
-  ) {
-    for (
-      let i = 0;
-      i < next.length;
-      i += 1
-    ) {
-      for (
-        let j = i + 1;
-        j < next.length;
-        j += 1
-      ) {
-        const left =
-          next[i];
-        const right =
-          next[j];
+  let bestIndex = 1;
+  let bestDifference = Number.POSITIVE_INFINITY;
 
-        const dx =
-          right.x - left.x;
-        const dy =
-          right.y - left.y;
-
-        const distance =
-          Math.max(
-            1,
-            Math.hypot(
-              dx,
-              dy,
-            ),
-          );
-
-        const minDistance =
-          left.radius +
-          right.radius +
-          padding;
-
-        if (
-          distance >=
-          minDistance
-        ) {
-          continue;
-        }
-
-        const push =
-          (minDistance -
-            distance) /
-          2;
-
-        const ux =
-          dx / distance;
-        const uy =
-          dy / distance;
-
-        left.x -=
-          ux * push;
-        left.y -=
-          uy * push;
-
-        right.x +=
-          ux * push;
-        right.y +=
-          uy * push;
-
-        left.x =
-          clampPosition(
-            left.x,
-            left.radius,
-            96,
-          );
-        left.y =
-          clampPosition(
-            left.y,
-            left.radius,
-            92,
-          );
-
-        right.x =
-          clampPosition(
-            right.x,
-            right.radius,
-            96,
-          );
-        right.y =
-          clampPosition(
-            right.y,
-            right.radius,
-            92,
-          );
-      }
+  for (let index = 1; index < words.length; index += 1) {
+    const first = words.slice(0, index).join(" ");
+    const second = words.slice(index).join(" ");
+    const difference = Math.abs(first.length - second.length);
+    if (difference < bestDifference) {
+      bestIndex = index;
+      bestDifference = difference;
     }
   }
 
-  return next;
-}
-
-function clampPosition(
-  value: number,
-  radius: number,
-  padding: number,
-): number {
-  return Math.max(
-    radius + padding,
-    Math.min(
-      WIDTH -
-        radius -
-        padding,
-      value,
-    ),
-  );
+  return [
+    words.slice(0, bestIndex).join(" "),
+    words.slice(bestIndex).join(" "),
+  ];
 }
 
 function seededNumber(
@@ -2869,19 +2638,6 @@ function createStarSatellites(
   );
 }
 
-function calculateDomainRadius(
-  count: number,
-): number {
-  return Math.min(
-    72,
-    28 +
-      Math.sqrt(
-        count,
-      ) *
-        9,
-  );
-}
-
 function shortenLabel(
   value: string,
   maximumLength: number,
@@ -2893,4 +2649,17 @@ function shortenLabel(
         maximumLength - 1,
       )}…`
     : value;
+}
+
+function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value));
+}
+
+function smoothStep(value: number): number {
+  const clamped = clamp01(value);
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
+function mix(from: number, to: number, progress: number): number {
+  return from + (to - from) * progress;
 }

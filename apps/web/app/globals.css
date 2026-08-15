@@ -2761,6 +2761,59 @@ body {
     hidden;
 }
 
+.galaxy-layout-universe {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.galaxy-stage-header-hidden,
+.galaxy-inspector-hidden {
+  display: none;
+}
+
+.universe-webgl-canvas {
+  cursor: grab;
+  height: 100%;
+  inset: 0;
+  min-height: 560px;
+  position: absolute;
+  touch-action: none;
+  transition: opacity 180ms linear;
+  width: 100%;
+  z-index: 2;
+}
+
+.universe-webgl-canvas:active {
+  cursor: grabbing;
+}
+
+.universe-zoom-controls {
+  display: flex;
+  gap: 7px;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  z-index: 5;
+}
+
+.universe-zoom-controls button {
+  align-items: center;
+  background: rgba(3, 19, 31, 0.88);
+  border: 1px solid rgba(115, 216, 255, 0.3);
+  border-radius: 10px;
+  color: var(--primary-bright);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 20px;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.universe-zoom-controls button:hover {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: var(--primary-bright);
+}
+
 .galaxy-stage-header {
   align-items:
     flex-end;
@@ -2879,6 +2932,8 @@ body {
     560px;
   position:
     relative;
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
   width:
     100%;
   z-index:
